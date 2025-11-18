@@ -25,7 +25,7 @@ async fn main() {
         .with_name("greenscoreweb_sessions")
         .with_same_site(tower_sessions::cookie::SameSite::Lax);
 
-    let app = router::create_router()
+    let app = router::create_router(pool)
                     .layer(_session_layer);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
