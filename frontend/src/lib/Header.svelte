@@ -2,7 +2,7 @@
 <script>
     import { onMount } from 'svelte';
 
-    let user = 10;
+    let user = null;
     let profileMenuOpen = false;
     let mobileMenuOpen = false;
 
