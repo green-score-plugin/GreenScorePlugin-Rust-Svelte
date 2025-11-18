@@ -6,12 +6,12 @@ pub async fn index() -> Html<&'static str> {
 }
 
 // Exemple d'utilisation de session
-// pub async fn test_session(session: Session) -> String {
-//     // Lire une valeur
-//     let count: usize = session.get("count").await.unwrap().unwrap_or(0);
-//
-//     // Modifier la session
-//     session.insert("count", count + 1).await.unwrap();
-//
-//     format!("Count: {}", count + 1)
-// }
+pub async fn test_session(session: Session) -> String {
+    // Lire une valeur
+    let count: usize = session.get("count").await.unwrap().unwrap_or(0);
+
+    // Modifier la session
+    session.insert("count", count + 1).await.unwrap();
+
+    format!("Count: {}", count + 1)
+}
