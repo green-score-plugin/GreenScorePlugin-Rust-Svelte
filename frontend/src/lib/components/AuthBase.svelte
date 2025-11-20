@@ -43,7 +43,7 @@
 
                 <input type="hidden" name="_csrf_token" value="">
 
-                <button type="submit" class="w-full h-fit rounded-lg bg-green-950 px-1 py-2 font-semibold font-outfit text-white">Connexion</button>
+                <button type="submit" class="w-full h-fit rounded-lg bg-gs-green-950 px-1 py-2 font-semibold font-outfit text-white">Connexion</button>
 
             </form>
         </div>
