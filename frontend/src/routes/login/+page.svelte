@@ -2,4 +2,4 @@
     import AuthBase from '$lib/components/AuthBase.svelte';
 </script>
 
-<AuthBase  />
+<AuthBase mode='login' />
