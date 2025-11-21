@@ -1,5 +1,10 @@
 
 <script lang="ts">
+    import Swiper from 'swiper';
+    import 'swiper/css';
+    import 'swiper/css/navigation';
+    import 'swiper/css/pagination';
+
     import firefoxLogo from '$lib/images/firefox.png';
     import backgroundImage from '$lib/images/background.png';
     import citationImage from '$lib/images/citation.svg';
@@ -46,11 +51,7 @@
     async function initializeSwiper() {
         if (swiper) swiper.destroy(true, true);
 
-        await waitForSwiper();
-
-        const SwiperLib = (window as any).Swiper;
-
-        swiper = new SwiperLib(".advice-swiper", {
+        swiper = new Swiper(".advice-swiper", {
             slidesPerView: 1,
             spaceBetween: 8,
             pagination: {
@@ -70,7 +71,6 @@
             rewind: true,
         });
     }
-
     onMount(async () => {
         await initializeSwiper();
     });
@@ -299,7 +299,7 @@
             </div>
 
             <div class="relative px-8 md:px-12">
-                <div class="swiper-container advice-swiper">
+                <div class="swiper advice-swiper">
                     <div class="swiper-wrapper">
                         {#each filteredAdvice as item}
                             <div class="swiper-slide h-full">
@@ -313,6 +313,8 @@
                                     </div>
                                 </div>
                             </div>
+                        {:else}
+                            <p>Aucun conseil à afficher</p>
                         {/each}
                     </div>
                 </div>
