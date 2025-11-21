@@ -2,7 +2,6 @@
     import imageFond from '$lib/images/register-image1.png';
     import logo from '$lib/images/greenscore-logo.png';
     import { BACKEND_URL } from '$lib/config';
-    import {error} from "@sveltejs/kit";
 
     export let mode: 'login' | 'register';
 
@@ -11,9 +10,22 @@
     let password = '';
     let loading = false;
     let erreurMessage = '';
+    let emailValid = true;
+    let passwordValid = true;
+
+
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    $: if (email) emailValid = true;
+    $: if (password) passwordValid = true;
 
     async function handleSubmit(event: Event): Promise<void> {
         event.preventDefault();
+
+        emailValid = (EMAIL_REGEX.test(email));
+        passwordValid = (password.length >= 8);
+
+        if(!emailValid || !passwordValid) return;
 
         loading = true;
         const endpoint = `${BACKEND_URL}${mode === 'register' ? '/register' : '/login'}`;
@@ -72,12 +84,18 @@
             <form  on:submit|preventDefault={handleSubmit} class="flex flex-col gap-4">
                 <div class="w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
                     <label for="inputEmail">Email</label>
-                    <input bind:value={email} type="email" name="email" id="inputEmail" class="form-control px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none" autocomplete="email" required autofocus>
+                    <input bind:value={email} type="email" name="email" id="inputEmail" class="form-control px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none { !emailValid ? 'border-red-700 bg-red-50' : 'border-gray-200' } " autocomplete="email">
+                    {#if !emailValid}
+                        <span class="text-red-500 text-sm">Email invalide</span>
+                    {/if}
                 </div>
 
                 <div class="w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
                     <label for="inputPassword">Mot de passe</label>
-                    <input bind:value={password} type="password" name="password" id="inputPassword" class="form-control px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none" autocomplete="current-password" required>
+                    <input bind:value={password} type="password" name="password" id="inputPassword" class="form-control px-4 py-2 border rounded-lg text-grey-700 w-full focus:outline-none { !passwordValid ? 'border-red-700 bg-red-50' : 'border-gray-200' } " autocomplete="current-password">
+                    {#if !passwordValid}
+                        <span class="text-red-500 text-sm">Le mot de passe doit contenir au moins 8 caractères</span>
+                    {/if}
                 </div>
 
                 <input type="hidden" name="_csrf_token" value="">
