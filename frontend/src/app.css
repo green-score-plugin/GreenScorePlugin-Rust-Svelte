@@ -1,3 +1,30 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@theme {
+    --color-gs-green-950: #233430;
+    --color-gs-green-800: #2E4D49;
+    --color-gs-green-700: #3B6A69;
+    --color-gs-green-600: #4F8B8A;
+    --color-gs-green-500: #5FBCBB;
+    --color-gs-green-400: #7DD9D8;
+    --color-gs-green-300: #A8E8E7;
+    --color-gs-green-200: #C7F5F4;
+    --color-gs-green-100: #E3FAFA;
+
+    --color-grey-950: #030712;
+    --color-grey-700: #424E62;
+    --color-grey-500: #667991;
+    --color-grey-400: #8595AB;
+    --color-grey-200: #D5DBE2;
+    --color-grey-100: #ECECEC;
+
+    --green-bg: #e7f4f9;
+    --red-900: #7E1709;
+    --gradient-purple: #8458A9;
+
+    --font-outfit: "Outfit", sans-serif;
+    --font-ovo: "Ovo", serif;
+
+}
