@@ -2,6 +2,7 @@
     import imageFond from '$lib/images/register-image1.png';
     import logo from '$lib/images/greenscore-logo.png';
     import { BACKEND_URL } from '$lib/config';
+    import {error} from "@sveltejs/kit";
 
     export let mode: 'login' | 'register';
 
@@ -9,6 +10,7 @@
     let email = '';
     let password = '';
     let loading = false;
+    let erreurMessage = '';
 
     async function handleSubmit(event: Event): Promise<void> {
         event.preventDefault();
@@ -31,9 +33,10 @@
             .then(data => {
                 if(data.success) {
                     window.location.href = '/';
+                } else {
+                    erreurMessage = data.message;
                 }
             })
-            .catch((error) => {})
             .finally(() => { loading = false; })
 
     }
@@ -59,6 +62,13 @@
                     </a>
                 </div>
             </div>
+
+            {#if erreurMessage !== ''}
+                <div class="w-full bg-red-50 text-red-700 text-sm font-outfit font-medium border border-red-700 rounded-lg px-6 py-6">
+                    {erreurMessage}
+                </div>
+            {/if}
+
             <form  on:submit|preventDefault={handleSubmit} class="flex flex-col gap-4">
                 <div class="w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
                     <label for="inputEmail">Email</label>
