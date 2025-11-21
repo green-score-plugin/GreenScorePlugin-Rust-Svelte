@@ -29,7 +29,10 @@ async fn main() {
         .with_same_site(tower_sessions::cookie::SameSite::Lax);
 
     let cors = CorsLayer::new()
-        .allow_origin(frontend_url.parse::<axum::http::HeaderValue>().unwrap())
+        .allow_origin(frontend_url.parse::<axum::http::HeaderValue>().expect(&format!(
+            "FRONTEND_URL ('{}') is not a valid HTTP header value. Please check your configuration.",
+            frontend_url
+        )))
         .allow_methods([axum::http::Method::GET, axum::http::Method::POST])
         .allow_headers([axum::http::header::CONTENT_TYPE, axum::http::header::AUTHORIZATION])
         .allow_credentials(true);
