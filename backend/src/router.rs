@@ -1,7 +1,6 @@
 use axum::Router;
 use crate::controllers::{home_controller, auth_controller};
-use axum::routing::{post};
-use axum::routing::{get};
+use axum::routing::{post, get};
 use sqlx::MySqlPool;
 
 pub fn create_router(pool: MySqlPool) -> Router {

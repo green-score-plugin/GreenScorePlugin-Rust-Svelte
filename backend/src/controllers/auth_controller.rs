@@ -2,8 +2,9 @@ use axum::extract::State;
 use axum::Json;
 use serde_json::{json, Value};
 use sqlx::MySqlPool;
+use tower_sessions::Session;
 
-pub async fn login(State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
+pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
     let row = match sqlx::query_as::<_, (i64, String, String)>(
         "SELECT id, email, password FROM user WHERE email = ?",
     )
@@ -32,12 +33,10 @@ pub async fn login(State(pool): State<MySqlPool>, Json(payload): Json<Value>) ->
             "message": "Adresse e-mail ou mot de passe invalide",
         }))
     } else {
+        session.insert("user_id", user_id).await.unwrap();
+        session.insert("email", email).await.unwrap();
         Json(json!({
-            "success": true,
-            "user": {
-                "id": user_id,
-                "email": email
-            }
+            "success": true
         }))
     }
 }
