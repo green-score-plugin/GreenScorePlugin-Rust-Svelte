@@ -1,0 +1,164 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint-and-format:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: backend/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Check formatting
+        run: cd backend && cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cd backend && cargo clippy --all-targets --all-features -- -D warnings
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_password
+          MYSQL_DATABASE: greenscore_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/target
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -P 3306 -u root -ptest_password --silent; do
+            echo 'Waiting for MySQL...'
+            sleep 2
+          done
+
+      - name: Run tests
+        run: cd backend && cargo test --all-features
+        env:
+          DATABASE_URL: mysql://root:test_password@127.0.0.1:3306/greenscore_test
+          RUST_BACKTRACE: 1
+
+  build:
+    name: Build & Size Check
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/target
+          key: ${{ runner.os }}-cargo-build-release-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Build release
+        run: cd backend && cargo build --release
+
+      - name: Strip binary
+        run: strip backend/target/release/greenscore-backend 2>/dev/null || strip backend/target/release/backend 2>/dev/null || echo "Binary name may vary"
+
+      - name: Check binary size
+        run: |
+          BINARY=$(find backend/target/release -maxdepth 1 -type f -executable | head -n 1)
+          if [ -z "$BINARY" ]; then
+            echo "❌ No binary found"
+            exit 1
+          fi
+          SIZE=$(stat -c%s "$BINARY" 2>/dev/null || stat -f%z "$BINARY")
+          SIZE_MB=$((SIZE / 1024 / 1024))
+          echo "📦 Binary size: ${SIZE_MB}MB"
+          echo "BINARY_SIZE_MB=${SIZE_MB}" >> $GITHUB_ENV
+          
+          if [ $SIZE_MB -gt 50 ]; then
+            echo "⚠️ Warning: Binary size (${SIZE_MB}MB) exceeds 50MB"
+          else
+            echo "✅ Binary size OK (${SIZE_MB}MB / 50MB)"
+          fi
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-binary
+          path: backend/target/release/
+          retention-days: 7
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run security audit
+        run: cd backend && cargo audit
+
+      - name: Check for vulnerabilities
+        run: cd backend && cargo audit --deny warnings
