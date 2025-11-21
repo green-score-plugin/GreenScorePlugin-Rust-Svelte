@@ -1,12 +1,41 @@
 <script lang="ts">
     import imageFond from '$lib/images/register-image1.png';
     import logo from '$lib/images/greenscore-logo.png';
+    import { BACKEND_URL } from '$lib/config';
 
     export let mode: 'login' | 'register';
 
+
+    let email = '';
+    let password = '';
+    let loading = false;
+
     async function handleSubmit(event: Event): Promise<void> {
         event.preventDefault();
-        console.log("test");
+
+        loading = true;
+        const endpoint = `${BACKEND_URL}${mode === 'register' ? '/register' : '/login'}`;
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                })
+            })
+            .then((response) => response.json())
+            .then(data => {
+                if(data.success) {
+                    window.location.href = '/';
+                }
+            })
+            .catch((error) => {})
+            .finally(() => { loading = false; })
+
     }
 
 </script>
@@ -33,12 +62,12 @@
             <form  on:submit|preventDefault={handleSubmit} class="flex flex-col gap-4">
                 <div class="w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
                     <label for="inputEmail">Email</label>
-                    <input type="email" value="" name="email" id="inputEmail" class="form-control px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none" autocomplete="email" required autofocus>
+                    <input bind:value={email} type="email" name="email" id="inputEmail" class="form-control px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none" autocomplete="email" required autofocus>
                 </div>
 
                 <div class="w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
                     <label for="inputPassword">Mot de passe</label>
-                    <input type="password" name="password" id="inputPassword" class="form-control px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none" autocomplete="current-password" required>
+                    <input bind:value={password} type="password" name="password" id="inputPassword" class="form-control px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none" autocomplete="current-password" required>
                 </div>
 
                 <input type="hidden" name="_csrf_token" value="">
