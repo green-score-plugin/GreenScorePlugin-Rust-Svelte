@@ -24,7 +24,6 @@
         confirmPassword.trim() !== '' &&
         confirmPassword === password &&
         organisationName.trim() !== '' &&
-        siret.trim() !== '' &&
         agreeTerms;
 </script>
 

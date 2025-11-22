@@ -8,6 +8,8 @@
     export let showModeSwitcher = false;
 </script>
 
+<title>{title}</title>
+
 <div class="flex items-center w-screen h-screen">
     <img src="{imageFond}" alt="GreenScore" class="hidden xl:flex w-1/2 h-full object-cover">
     <div class="w-full xl:w-1/2 h-full px-6 md:px-[120px] py-24 flex flex-col items-center justify-center">

@@ -10,11 +10,6 @@ export const actions = {
         const email = data.get('email');
         const password = data.get('password');
 
-        console.log('organisationName', organisationName);
-        console.log('siret', siret);
-        console.log('email', email);
-        console.log('password', password);
-
         if(!organisationName || !email || !password) {
             return fail(400, { message: "Tous les champs sont requis" })
         }
@@ -34,7 +29,7 @@ export const actions = {
             const result = await response.json();
 
             if(result.success) {
-                redirect(303,'/');
+                redirect(303,`/inscription-organisation/${result.code}`);
             }
 
             return fail(400, { message: result.message || 'Erreur de connexion' });

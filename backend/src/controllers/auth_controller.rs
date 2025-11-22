@@ -165,7 +165,8 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
             session.insert("email", &payload.email).await.unwrap();
 
             Json(json!({
-                "success": true
+                "success": true,
+                "code": organisation_code
             }))
         },
         Err(e) => Json(json!({
