@@ -42,12 +42,12 @@
 }} class="flex flex-col gap-3 max-w-full overflow-hidden">
 
     <div class="w-full text-grey-700 font-outfit font-semibold text-xs">
-        <label for="firstname" class="block mb-1">Nom de l'organisation</label>
+        <label for="organisationName" class="block mb-1">Nom de l'organisation</label>
         <input
                 bind:value={organisationName}
-                id="firstname"
+                id="organisationName"
                 type="text"
-                name="firstname"
+                name="organisationName"
                 class="px-3 py-1.5 text-sm border rounded-lg text-grey-700 w-full focus:outline-none {!organisationNameValid ? 'border-red-700 bg-red-50' : 'border-grey-200'}"
                 placeholder="Mon Organisation"
         >
@@ -57,12 +57,12 @@
     </div>
 
     <div class="w-full text-grey-700 font-outfit font-semibold text-xs">
-        <label for="lastname" class="block mb-1">Numéro SIRET (optionnel)</label>
+        <label for="siret" class="block mb-1">Numéro SIRET (optionnel)</label>
         <input
                 bind:value={siret}
-                id="lastname"
+                id="siret"
                 type="text"
-                name="lastname"
+                name="siret"
                 class="px-3 py-1.5 text-sm border rounded-lg text-grey-700 w-full focus:outline-none border-grey-200"
                 placeholder="123 456 789 00012"
         >

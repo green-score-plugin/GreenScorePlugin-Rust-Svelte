@@ -8,5 +8,6 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/", get(home_controller::index))
         .route("/login", post(auth_controller::login))
         .route("/inscription", post(auth_controller::inscription))
+        .route("/inscription-organisation", post(auth_controller::inscription_orga))
         .with_state(pool)
 }
