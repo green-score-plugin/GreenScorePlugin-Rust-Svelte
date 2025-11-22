@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 pub struct InscriptionRequest {
     pub email: String,
     pub password: String,
-    pub nom: String,
-    pub prenom: String,
+    pub lastname: String,
+    pub firstname: String,
 }
 
 #[derive(Serialize)]
@@ -73,8 +73,8 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
         .bind(&payload.email)
         .bind("[\"ROLE_USER\"]")
         .bind(&password_hash)
-        .bind(&payload.prenom)
-        .bind(&payload.nom)
+        .bind(&payload.firstname)
+        .bind(&payload.lastname)
         .execute(&pool)
         .await {
         Ok(result) => {

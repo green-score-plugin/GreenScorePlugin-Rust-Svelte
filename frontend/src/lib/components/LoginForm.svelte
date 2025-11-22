@@ -5,14 +5,23 @@
     let email = '';
     let password = '';
     let loading = false;
-    let emailValid = true;
-    let passwordValid = true;
+    let submitted = false;
 
-    $: email && (emailValid = validator.isEmail(email));
-    $: password && (passwordValid = password.length >= 8);
+    $: emailValid = !submitted || validator.isEmail(email);
+    $: passwordValid = !submitted || password.length >= 8;
+
+    // Validation complète
+    $: isFormValid = validator.isEmail(email) && password.length >= 8;
 </script>
 
 <form method="POST" use:enhance={() => {
+    submitted = true;
+
+    if (!isFormValid) {
+        loading = false;
+        return async () => {};
+    }
+
     loading = true;
     return async ({ update }) => {
         await update();

@@ -100,6 +100,7 @@ dependencies = [
  "axum",
  "bcrypt",
  "dotenvy",
+ "serde",
  "serde_json",
  "sqlx",
  "time",
