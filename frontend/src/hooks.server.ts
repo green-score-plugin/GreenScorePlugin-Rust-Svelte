@@ -5,7 +5,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const session = event.cookies.get('greenscoreweb_sessions');
 
     // Routes publiques
-    const publicRoutes = ['/login'];
+    const publicRoutes = ['/login', '/inscription'];
     const isPublicRoute = publicRoutes.some(route =>
         event.url.pathname === route || event.url.pathname.startsWith(route + '/')
     );
@@ -13,7 +13,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (!isPublicRoute && !session) {
         throw redirect(303, '/login');
     }
-    
+
     if (event.url.pathname === '/login' && session) {
         throw redirect(303, '/');
     }
