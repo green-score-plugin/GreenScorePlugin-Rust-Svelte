@@ -2,72 +2,19 @@
     import imageFond from '$lib/images/register-image1.png';
     import logo from '$lib/images/greenscore-logo.png';
     import validator from 'validator';
-    import { goto } from '$app/navigation';
-    import { BACKEND_URL } from '$lib/config';
+    import { enhance } from '$app/forms';
 
-    export let mode: 'login' | 'register';
-
+    export let mode: 'login' | 'inscription';
+    export let form: { message?: string } | null = null;
 
     let email = '';
     let password = '';
     let loading = false;
-    let errorMessage = '';
     let emailValid = true;
     let passwordValid = true;
 
     $: email && (emailValid = validator.isEmail(email));
     $: password && (passwordValid = password.length >= 8);
-
-    async function handleSubmit(event: Event): Promise<void> {
-        event.preventDefault();
-
-        emailValid = validator.isEmail(email);
-        passwordValid = password.length >= 8;
-
-        if(!emailValid || !passwordValid) return;
-
-        loading = true;
-
-        try {
-            const endpoint = `${BACKEND_URL}${mode === 'register' ? '/register' : '/login'}`;
-
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({ email, password })
-            });
-
-            if (!response.ok) {
-                errorMessage = `Erreur HTTP: ${response.status}`;
-                return;
-            }
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType?.includes('application/json')) {
-                errorMessage = 'Réponse invalide du serveur';
-                return;
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                await goto('/');
-            } else {
-                errorMessage = data.message || 'Une erreur est survenue';
-            }
-        } catch (error) {
-            console.error('Erreur lors de la connexion:', error);
-            errorMessage = error instanceof Error
-                ? error.message
-                : 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
-        } finally {
-            loading = false;
-        }
-    }
-
 </script>
 
 <div class="flex items-center w-screen h-screen">
@@ -84,19 +31,29 @@
                     <a href="/login" class=" rounded-full px-4 py-1  decoration-0 {mode === 'login' ? 'text-white bg-lime-600': 'text-[#979797]'}">
                         J'ai déjà un compte
                     </a>
-                    <a href="/register" class="rounded-full px-4 py-1 text-[#979797] decoration-0">
+                    <a href="/inscription" class="rounded-full px-4 py-1 text-[#979797] decoration-0 {mode === 'inscription' ? 'text-white bg-lime-600': 'text-[#979797]'}">
                         Inscription
                     </a>
                 </div>
             </div>
 
-            {#if errorMessage !== ''}
+            {#if form?.message}
                 <div class="w-full bg-red-50 text-red-700 text-sm font-outfit font-medium border border-red-700 rounded-lg px-6 py-6">
-                    {errorMessage}
+                    {form.message}
                 </div>
             {/if}
 
-            <form  on:submit|preventDefault={handleSubmit} class="flex flex-col gap-4">
+            <form
+                method="POST"
+                use:enhance={() => {
+                    loading = true;
+                    return async ({ update }) => {
+                        await update();
+                        loading = false;
+                    };
+                }}
+                class="flex flex-col gap-4"
+            >
                 <div class="w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
                     <label for="inputEmail">Email</label>
                     <input
