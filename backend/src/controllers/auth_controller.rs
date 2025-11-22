@@ -3,6 +3,23 @@ use axum::Json;
 use serde_json::{json, Value};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize)]
+pub struct InscriptionRequest {
+    pub email: String,
+    pub password: String,
+    pub nom: String,
+    pub prenom: String,
+}
+
+#[derive(Serialize)]
+pub struct InscriptionResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
 
 pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
     let row = match sqlx::query_as::<_, (i64, String, String)>(
@@ -38,5 +55,41 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
         Json(json!({
             "success": true
         }))
+    }
+}
+
+pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {
+    let password_hash = match bcrypt::hash(&payload.password, bcrypt::DEFAULT_COST) {
+        Ok(hash) => hash,
+        Err(e) => return Json(InscriptionResponse {
+            success: false,
+            message: Some(format!("Erreur de hashage: {}", e)),
+        }),
+    };
+
+    match sqlx::query(
+        "INSERT INTO user (email, roles, password, first_name, last_name) VALUES (?, ?, ?, ?, ?)"
+    )
+        .bind(&payload.email)
+        .bind("[\"ROLE_USER\"]")
+        .bind(&password_hash)
+        .bind(&payload.prenom)
+        .bind(&payload.nom)
+        .execute(&pool)
+        .await {
+        Ok(result) => {
+            let user_id = result.last_insert_id() as i64;
+            session.insert("user_id", user_id).await.unwrap();
+            session.insert("email", &payload.email).await.unwrap();
+
+            Json(InscriptionResponse {
+                success: true,
+                message: None,
+            })
+        },
+        Err(e) => Json(InscriptionResponse {
+            success: false,
+            message: Some(format!("Erreur d'inscription: {}", e)),
+        }),
     }
 }
