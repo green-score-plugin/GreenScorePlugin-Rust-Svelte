@@ -175,3 +175,11 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
         })),
     }
 }
+
+
+pub async fn logout(session: Session) -> Json<Value> {
+    session.delete().await.unwrap();
+    Json(json!({
+        "success": true,
+    }))
+}
