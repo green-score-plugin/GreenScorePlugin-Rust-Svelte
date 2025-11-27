@@ -29,6 +29,8 @@
     }
 
     export let advice: AdviceItem[] = [];
+
+    console.log("advice:", advice);
     export let isLoggedIn: boolean = false;
 
     let isDevMode: boolean = false;
@@ -37,6 +39,8 @@
     $: filteredAdvice = advice.filter(item =>
         isDevMode ? item.isDev : !item.isDev
     );
+
+
 
     function waitForSwiper(): Promise<void> {
         return new Promise((resolve) => {
