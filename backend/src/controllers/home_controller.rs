@@ -1,6 +1,23 @@
-use axum::response::Html;
-use tower_sessions::Session;
+use axum::extract::State;
+use axum::Json;
+use serde_json::{json, Value};
+use sqlx::MySqlPool;
 
-pub async fn index() -> Html<&'static str> {
-    Html("<h1>Welcome to Axum!</h1>")
+
+pub async fn get_advice(State(pool): State<MySqlPool>)->Json<Value> {
+    let row = match sqlx::query_as::<_, (String, String, String)>(
+        "SELECT advice, title, icon FROM advice",
+    )
+        .fetch_optional(&pool)
+        .await {
+        Ok(u) => u,
+        Err(e) => return Json(json!({
+            "status": "error",
+            "message": format!("Database error: {}", e)
+        })),
+    };
+    Json(json!({
+            "success": true,
+            "advice": row
+        }))
 }
