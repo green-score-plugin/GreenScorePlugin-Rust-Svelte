@@ -2,6 +2,7 @@ mod router;
 mod controllers;
 mod session_store;
 mod cleanup;
+pub mod models;
 
 use session_store::MySqlStore;
 use sqlx::MySqlPool;
