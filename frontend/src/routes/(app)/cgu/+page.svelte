@@ -179,8 +179,3 @@
         </section>
     </div>
 </div>
-
-<style>
-    /* Vous pouvez ajouter des styles spécifiques au composant ici si nécessaire */
-    /* Les classes Tailwind sont déjà utilisées dans le template */
-</style>
