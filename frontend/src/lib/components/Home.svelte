@@ -25,19 +25,18 @@
         title: string;
         advice: string;
         icon: string;
-        isDev: boolean;
+        is_dev: boolean;
     }
 
     export let advice: AdviceItem[] = [];
 
-    console.log("advice:", advice);
     export let isLoggedIn: boolean = false;
 
     let isDevMode: boolean = false;
     let swiper: any = null;
 
     $: filteredAdvice = advice.filter(item =>
-        isDevMode ? item.isDev : !item.isDev
+        isDevMode ? item.is_dev : !item.is_dev
     );
 
 

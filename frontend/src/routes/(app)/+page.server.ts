@@ -9,11 +9,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
         }
 
         const data = await response.json();
+        console.log("Fetched advice data:", data);
 
-        // Ajoutez isDev selon vos critères (ici, tous à false par défaut)
         const adviceWithDevFlag = data.advice.map((item: any) => ({
             ...item,
-            isDev: false // ou une logique pour déterminer si c'est un conseil dev
+            // isDev: false // ou une logique pour déterminer si c'est un conseil dev
         }));
 
         return {
