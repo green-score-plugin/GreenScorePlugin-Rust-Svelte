@@ -2,7 +2,7 @@
     // import Top from './dashboards/Top.svelte';
     import InfosGreenScore from '$lib/components/widgets/InfosGreenScore.svelte';
     import CountryCarbonIntensity from '$lib/components/widgets/CountryCarbonIntensity.svelte';
-    // import BadgeGreenScore from './widgets/BadgeGreenScore.svelte';
+    import BadgeGreenScore from '$lib/components/widgets/BadgeGreenScore.svelte';
     // import Equivalent from './widgets/Equivalent.svelte';
     // import TotalConsumption from './widgets/TotalConsumption.svelte';
     // import PageInNumbers from './widgets/PageInNumbers.svelte';
@@ -12,11 +12,11 @@
     export let description : string = 'Voici une analyse détaillée de votre dernière page consultée : ';
     export let link : string = 'https://exemple.com';
     export let noDatas : boolean = false;
-    export let letterGreenScore : string = 'G';
+    export let letterGreenScore : string = 'A';
     export let country : string = 'France';
     export let carbonIntensity = 56;
     export let flagUrl : string = 'https://flagcdn.com/fr.svg';
-    // export let envNomination;
+    export let envNomination : string = 'Très bon';
     // export let equivalent1;
     // export let totalConsu;
     // export let totalConsuUnit;
@@ -53,7 +53,7 @@
         <div class="grid grid-cols-1 gap-6 p-10 sm:grid-cols-2 lg:grid-cols-12">
             <InfosGreenScore {letterGreenScore} />
             <CountryCarbonIntensity {country} {carbonIntensity} {flagUrl} />
-<!--            <BadgeGreenScore {letterGreenScore} {envNomination} />-->
+            <BadgeGreenScore {letterGreenScore} {envNomination} />
 <!--            <Equivalent equivalent={equivalent1} order={1} />-->
 <!--            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />-->
 <!--            <Equivalent equivalent={equivalent2} order={2} />-->
