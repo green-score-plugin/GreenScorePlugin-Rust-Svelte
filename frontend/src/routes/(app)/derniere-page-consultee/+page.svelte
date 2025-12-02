@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
     // import Top from './dashboards/Top.svelte';
-    // import InfosGreenScore from './widgets/InfosGreenScore.svelte';
+    import InfosGreenScore from '$lib/components/widgets/InfosGreenScore.svelte';
     // import CountryCarbonIntensity from './widgets/CountryCarbonIntensity.svelte';
     // import BadgeGreenScore from './widgets/BadgeGreenScore.svelte';
     // import Equivalent from './widgets/Equivalent.svelte';
@@ -8,11 +8,11 @@
     // import PageInNumbers from './widgets/PageInNumbers.svelte';
     // import Advice from './widgets/Advice.svelte';
 
-    export let title = 'Dernière page consultée';
-    export let description = 'Voici une analyse détaillée de votre dernière page consultée : ';
-    export let link = 'https://exemple.com';
-    export let noDatas = false;
-    // export let letterGreenScore;
+    export let title : string = 'Dernière page consultée';
+    export let description : string = 'Voici une analyse détaillée de votre dernière page consultée : ';
+    export let link : string = 'https://exemple.com';
+    export let noDatas : boolean = false;
+    export let letterGreenScore : string = 'G';
     // export let country;
     // export let carbonIntensity;
     // export let flagUrl;
@@ -51,7 +51,7 @@
     {#if !noDatas}
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 gap-6 p-10 sm:grid-cols-2 lg:grid-cols-12">
-<!--            <InfosGreenScore {letterGreenScore} />-->
+            <InfosGreenScore {letterGreenScore} />
 <!--            <CountryCarbonIntensity {country} {carbonIntensity} {flagUrl} />-->
 <!--            <BadgeGreenScore {letterGreenScore} {envNomination} />-->
 <!--            <Equivalent equivalent={equivalent1} order={1} />-->
