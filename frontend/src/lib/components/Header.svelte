@@ -19,14 +19,14 @@
 <header class="flex w-full bg-white py-5 border-b border-grey-100 items-center h-24 relative">
     <div class="flex items-center w-full justify-between px-8">
         <!-- Logo -->
-        <a class="cursor-pointer" href="/">
+        <a class="cursor-pointer" href="/frontend/static">
             <img width="55" src="/images/greenscore-logo.png" alt="Logo" />
         </a>
 
         <!-- Menu desktop -->
         <div class="hidden lg:flex gap-8 items-center">
             <ul class="flex font-outfit text-grey-950 items-center gap-8 text-lg font-medium">
-                <li><a href="/">Accueil</a></li>
+                <li><a href="/frontend/static">Accueil</a></li>
                 <li><a href="/mes-donnees">Mes données</a></li>
                 <li><a href="/organisation">Mon organisation</a></li>
                 <li><a href="/derniere-page">Dernière page consultée</a></li>
@@ -73,7 +73,7 @@
     {#if mobileMenuOpen}
         <div class="absolute top-24 left-0 w-full bg-white py-5 z-10 lg:hidden">
             <ul class="flex flex-col font-outfit font-medium text-grey-950 items-center gap-4 text-lg">
-                <li><a href="/">Informations</a></li>
+                <li><a href="/frontend/static">Informations</a></li>
                 <li><a href="/mes-donnees">Mes données</a></li>
                 <li><a href="/organisation">Mon organisation</a></li>
                 <li><a href="/derniere-page">Dernière page consultée</a></li>
