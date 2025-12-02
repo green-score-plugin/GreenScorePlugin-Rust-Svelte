@@ -5,7 +5,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const session = event.cookies.get('greenscoreweb_sessions');
 
     // Routes publiques
-    const publicRoutes = ['/login', '/inscription', '/inscription-organisation', '/cgu'];
+    const publicRoutes = ['/login', '/inscription', '/inscription-organisation', '/cgu', '/confidentialite'];
     const isPublicRoute = publicRoutes.some(route =>
         event.url.pathname === route || event.url.pathname.startsWith(route + '/')
     );
