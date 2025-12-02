@@ -1,6 +1,6 @@
 
 <script lang="ts">
-    import Swiper from 'swiper';
+    // import Swiper from 'swiper';
     import 'swiper/css';
     import 'swiper/css/navigation';
     import 'swiper/css/pagination';
@@ -19,7 +19,8 @@
     import homeImageMobile2 from '$lib/images/home-image-mobile2.png';
     import homeImageMobile3 from '$lib/images/home-image-mobile3.png';
     import registerImage1 from '$lib/images/register-image1.png';
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
+
 
     interface AdviceItem {
         title: string;
@@ -52,11 +53,18 @@
     }
 
     async function initializeSwiper() {
-        if (swiper) swiper.destroy(true, true);
+        if (swiper) {
+            swiper.destroy(true, true);
+            swiper = null;
+        }
 
-        swiper = new Swiper(".advice-swiper", {
+        await tick();
+
+        swiper = new (window as any).Swiper(".advice-swiper", {
             slidesPerView: 1,
             spaceBetween: 8,
+            observer: true,  // Ajouter cette ligne
+            observeParents: true,  // Ajouter cette ligne
             pagination: {
                 el: ".swiper-pagination",
                 clickable: true,
@@ -74,17 +82,29 @@
             rewind: true,
         });
     }
+
     onMount(async () => {
         await initializeSwiper();
     });
 
-    function toggleDevMode() {
+    async function toggleDevMode() {
         isDevMode = !isDevMode;
 
-        setTimeout(() => {
-            initializeSwiper();
-        }, 80);
+        await tick();
+
+        // Détruire complètement l'instance Swiper
+        if (swiper) {
+            swiper.destroy(true, true);
+            swiper = null;
+        }
+
+        // Petite pause pour laisser le DOM se mettre à jour
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        // Réinitialiser complètement Swiper
+        await initializeSwiper();
     }
+
 </script>
 
 <svelte:head>
@@ -322,8 +342,8 @@
                     </div>
                 </div>
 
-                <div class="swiper-button-prev custom-nav-btn absolute left-0 top-1/2 transform z-10 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md"></div>
-                <div class="swiper-button-next custom-nav-btn absolute right-0 top-1/2 transform z-10 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md"></div>
+                <div class="swiper-button-prev custom-nav-btn p-3 absolute left-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
+                <div class="swiper-button-next custom-nav-btn p-3 absolute right-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
             </div>
 
             <div class="swiper-pagination mt-4"></div>
@@ -539,11 +559,14 @@
         border-radius: 9999px;
         width: 36px;
         height: 36px;
+        color: #6D874B;
+
     }
 
     .swiper-pagination {
         position: relative;
         bottom: 0;
+        color: #6D874B;
     }
 
     .swiper-pagination-bullet-active {
