@@ -4,7 +4,7 @@
     import CountryCarbonIntensity from '$lib/components/widgets/CountryCarbonIntensity.svelte';
     import BadgeGreenScore from '$lib/components/widgets/BadgeGreenScore.svelte';
     import Equivalent from '$lib/components/widgets/Equivalent.svelte';
-    // import TotalConsumption from './widgets/TotalConsumption.svelte';
+    import TotalConsumption from '$lib/components/widgets/TotalConsumption.svelte';
     // import PageInNumbers from './widgets/PageInNumbers.svelte';
     // import Advice from './widgets/Advice.svelte';
 
@@ -26,8 +26,8 @@
         value: equivalent1Value,
         icon: equivalent1Icon
     };
-    // export let totalConsu;
-    // export let totalConsuUnit;
+    export let totalConsu = 12.5;
+    export let totalConsuUnit = 'gCO2eq';
     // export let equivalent2;
     // export let pageSize;
     // export let loadingTime;
@@ -63,7 +63,7 @@
             <CountryCarbonIntensity {country} {carbonIntensity} {flagUrl} />
             <BadgeGreenScore {letterGreenScore} {envNomination} />
             <Equivalent equivalent={equivalent1} order={1} />
-<!--            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />-->
+            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />
 <!--            <Equivalent equivalent={equivalent2} order={2} />-->
 <!--            <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />-->
 <!--            <Advice type="lambda" {advice} />-->
