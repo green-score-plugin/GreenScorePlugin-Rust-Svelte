@@ -28,7 +28,15 @@
     };
     export let totalConsu = 12.5;
     export let totalConsuUnit = 'gCO2eq';
-    // export let equivalent2;
+    export let equivalent2Value: number = 12;
+    export let equivalent2Name: string = 'litres d\'eau potable';
+    export let equivalent2Icon: string | null = 'eau.svg';
+
+    $: equivalent2 = {
+        name: equivalent2Name,
+        value: equivalent2Value,
+        icon: equivalent2Icon
+    };
     // export let pageSize;
     // export let loadingTime;
     // export let queriesQuantity;
@@ -64,7 +72,7 @@
             <BadgeGreenScore {letterGreenScore} {envNomination} />
             <Equivalent equivalent={equivalent1} order={1} />
             <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />
-<!--            <Equivalent equivalent={equivalent2} order={2} />-->
+            <Equivalent equivalent={equivalent2} order={2} />
 <!--            <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />-->
 <!--            <Advice type="lambda" {advice} />-->
 <!--            <Advice type="dev" advice={adviceDev} />-->
