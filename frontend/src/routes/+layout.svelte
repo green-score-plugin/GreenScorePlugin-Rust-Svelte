@@ -1,10 +1,20 @@
-<script>
+<script lang="ts">
     import favicon from "$lib/assets/favicon.svg";
     import '../app.css';
+    import { account } from '$lib/stores/account';
+    import type { LayoutData } from './$types';
 
-    let {children} = $props();
+    let { children, data }: { children: any, data: LayoutData } = $props();
 
+    $effect(() => {
+        if (data.account) {
+            account.login(data.account);
+        } else {
+            account.logout();
+        }
+    });
 </script>
+
 
 <svelte:head>
     <link rel="icon" href={favicon}/>

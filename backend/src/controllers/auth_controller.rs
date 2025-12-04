@@ -93,10 +93,11 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
                 .await {
                 Ok(Some((first_name, last_name))) => {
                     let account = Account::User(User { id: user_id, email, nom: first_name, prenom: last_name});
-                    session.insert("account", account).await.unwrap();
+                    session.insert("account", account.clone()).await.unwrap();
 
                     return Json(json!({
-                        "success": true
+                        "success": true,
+                        "account": account
                     }));
                 },
                 Ok(None) => {
@@ -259,6 +260,21 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
     }
 }
 
+pub async fn get_current_account(session: Session) -> Json<Value> {
+    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    if let Some(account) = account {
+        Json(json!({
+            "success": true,
+            "account": account
+        }))
+    } else {
+        Json(json!({
+            "success": false,
+            "message": "Non authentifié"
+        }))
+    }
+}
 
 pub async fn logout(session: Session) -> Json<Value> {
     session.delete().await.unwrap();

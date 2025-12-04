@@ -7,6 +7,7 @@ pub mod models;
 use session_store::MySqlStore;
 use sqlx::MySqlPool;
 use std::env;
+use axum::http::{header, HeaderValue, Method};
 use tower_sessions::{SessionManagerLayer, Expiry};
 use time::Duration;
 use tower_http::cors::CorsLayer;
@@ -23,26 +24,34 @@ async fn main() {
     tokio::spawn(cleanup::cleanup_expired_sessions(pool.clone()));
 
     let store = MySqlStore::new(pool.clone());
-    let _session_layer = SessionManagerLayer::new(store)
-        .with_secure(false) //pour localhost
-        .with_expiry(Expiry::OnInactivity(Duration::seconds(3600)))
+    let session_layer = SessionManagerLayer::new(store)
+        .with_secure(false)
+        .with_http_only(true)
+        .with_same_site(tower_sessions::cookie::SameSite::Lax) // ✅ Change en Lax
         .with_name("greenscoreweb_sessions")
-        .with_same_site(tower_sessions::cookie::SameSite::Lax);
+        .with_expiry(Expiry::OnInactivity(Duration::seconds(3600)));
 
     let cors = CorsLayer::new()
-        .allow_origin(frontend_url.parse::<axum::http::HeaderValue>().expect(&format!(
-            "FRONTEND_URL ('{}') is not a valid HTTP header value. Please check your configuration.",
-            frontend_url
-        )))
-        .allow_methods([axum::http::Method::GET, axum::http::Method::POST])
-        .allow_headers([axum::http::header::CONTENT_TYPE, axum::http::header::AUTHORIZATION])
-        .allow_credentials(true);
+        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap()) // EXACTEMENT ton front
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::DELETE,
+            Method::OPTIONS
+        ])
+        .allow_headers([
+            header::CONTENT_TYPE,
+            header::AUTHORIZATION,
+            header::COOKIE,
+        ])
+        .allow_credentials(true); // obligatoire pour cookies cross-site
 
     let app = router::create_router(pool)
-        .layer(cors)
-        .layer(_session_layer);
+        .layer(session_layer)
+        .layer(cors);
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+
+    let listener = tokio::net::TcpListener::bind("localhost:3000")
         .await
         .unwrap();
 

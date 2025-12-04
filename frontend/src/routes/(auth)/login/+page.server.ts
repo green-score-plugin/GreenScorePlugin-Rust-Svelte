@@ -15,15 +15,17 @@ export const actions = {
         try {
             const response = await fetch(`${BACKEND_URL}/login`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
+
+            console.log(response);
 
             const result = await response.json();
 
             if (result.success) {
-                redirect(303, '/');
+                return redirect(303, '/');
             }
 
             return fail(400, { message: result.message || 'Erreur de connexion' });
