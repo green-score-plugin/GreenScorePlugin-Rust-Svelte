@@ -5,7 +5,7 @@
     import BadgeGreenScore from '$lib/components/widgets/BadgeGreenScore.svelte';
     import Equivalent from '$lib/components/widgets/Equivalent.svelte';
     import TotalConsumption from '$lib/components/widgets/TotalConsumption.svelte';
-    // import PageInNumbers from './widgets/PageInNumbers.svelte';
+    import PageInNumbers from '$lib/components/widgets/PageInNumbers.svelte';
     // import Advice from './widgets/Advice.svelte';
 
     export let title : string = 'Dernière page consultée';
@@ -37,10 +37,10 @@
         value: equivalent2Value,
         icon: equivalent2Icon
     };
-    // export let pageSize;
-    // export let loadingTime;
-    // export let queriesQuantity;
-    // export let pageSizeUnit;
+    export let pageSize: number = 350;
+    export let loadingTime: number = 3;
+    export let queriesQuantity: number = 45;
+    export let pageSizeUnit: string = 'Ko';
     // export let advice;
     // export let adviceDev;
 </script>
@@ -73,7 +73,7 @@
             <Equivalent equivalent={equivalent1} order={1} />
             <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />
             <Equivalent equivalent={equivalent2} order={2} />
-<!--            <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />-->
+            <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />
 <!--            <Advice type="lambda" {advice} />-->
 <!--            <Advice type="dev" advice={adviceDev} />-->
         </div>
