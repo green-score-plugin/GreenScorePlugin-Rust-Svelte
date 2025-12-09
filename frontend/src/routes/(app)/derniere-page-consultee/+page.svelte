@@ -6,7 +6,7 @@
     import Equivalent from '$lib/components/widgets/Equivalent.svelte';
     import TotalConsumption from '$lib/components/widgets/TotalConsumption.svelte';
     import PageInNumbers from '$lib/components/widgets/PageInNumbers.svelte';
-    // import Advice from './widgets/Advice.svelte';
+    import Advice from '$lib/components/widgets/Advice.svelte';
 
     export let title : string = 'Dernière page consultée';
     export let description : string = 'Voici une analyse détaillée de votre dernière page consultée : ';
@@ -41,8 +41,8 @@
     export let loadingTime: number = 3;
     export let queriesQuantity: number = 45;
     export let pageSizeUnit: string = 'Ko';
-    // export let advice;
-    // export let adviceDev;
+    export let advice: string = 'Fermez les onglets inutilisés pour réduire la consommation d\'énergie';
+    export let adviceDev: string = 'Minifiez vos fichiers CSS et JavaScript.'
 </script>
 
 <svelte:head>
@@ -71,11 +71,11 @@
             <CountryCarbonIntensity {country} {carbonIntensity} {flagUrl} />
             <BadgeGreenScore {letterGreenScore} {envNomination} />
             <Equivalent equivalent={equivalent1} order={1} />
-            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />
+            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission cacarbone de la page :" />
             <Equivalent equivalent={equivalent2} order={2} />
             <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />
-<!--            <Advice type="lambda" {advice} />-->
-<!--            <Advice type="dev" advice={adviceDev} />-->
+            <Advice type="nav" advice={advice} />
+            <Advice type="dev" advice={adviceDev} />
         </div>
     {:else}
         <div class="w-full h-screen flex items-center justify-center font-outfit">
