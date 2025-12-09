@@ -1,5 +1,5 @@
 use axum::Router;
-use crate::controllers::{home_controller, auth_controller};
+use crate::controllers::{home_controller, auth_controller, lpc_controller};
 use axum::routing::{post, get};
 use sqlx::MySqlPool;
 
@@ -9,5 +9,6 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/login", post(auth_controller::login))
         .route("/inscription", post(auth_controller::inscription))
         .route("/inscription-organisation", post(auth_controller::inscription_orga))
+        .route("/advice", get(lpc_controller::advice))
         .with_state(pool)
 }
