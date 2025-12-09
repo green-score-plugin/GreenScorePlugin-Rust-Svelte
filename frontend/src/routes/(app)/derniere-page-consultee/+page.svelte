@@ -41,8 +41,9 @@
     export let loadingTime: number = 3;
     export let queriesQuantity: number = 45;
     export let pageSizeUnit: string = 'Ko';
-    export let advice: string = 'Fermez les onglets inutilisés pour réduire la consommation d\'énergie';
-    export let adviceDev: string = 'Minifiez vos fichiers CSS et JavaScript.'
+
+    import type { PageData } from './$types';
+    export let data: PageData;
 </script>
 
 <svelte:head>
@@ -74,8 +75,8 @@
             <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission cacarbone de la page :" />
             <Equivalent equivalent={equivalent2} order={2} />
             <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />
-            <Advice type="nav" advice={advice} />
-            <Advice type="dev" advice={adviceDev} />
+            <Advice type="nav" advice={data.adviceUser} />
+            <Advice type="dev" advice={data.adviceDev} />
         </div>
     {:else}
         <div class="w-full h-screen flex items-center justify-center font-outfit">
