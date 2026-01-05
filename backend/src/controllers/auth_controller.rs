@@ -154,6 +154,19 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
 }
 
 pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {
+    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
+        .bind(&payload.email)
+        .fetch_optional(&pool)
+        .await
+        .unwrap_or(None);
+
+    if user_exists.is_some() {
+        return Json(InscriptionResponse {
+            success: false,
+            message: Some("Cet email est déjà utilisé".to_string()),
+        });
+    }
+
     let password_hash = match hash_password(&payload.password) {
         Ok(hash) => hash,
         Err(e) => return Json(InscriptionResponse {
@@ -197,6 +210,19 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 }
 
 pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Json<Value> {
+    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
+        .bind(&payload.email)
+        .fetch_optional(&pool)
+        .await
+        .unwrap_or(None);
+
+    if user_exists.is_some() {
+        return Json(json!({
+            "success": false,
+            "message": "Cet email est déjà utilisé"
+        }));
+    }
+
     let password_hash = match hash_password(&payload.password) {
         Ok(hash) => hash,
         Err(e) => return Json(json!({

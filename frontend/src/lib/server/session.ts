@@ -1,5 +1,6 @@
 import { BACKEND_URL } from '$lib/config';
 import type { Account } from '$lib/types/account';
+import type { Cookies } from '@sveltejs/kit';
 
 interface CacheEntry {
     account: Account;
@@ -45,4 +46,20 @@ export async function getAccount(sessionCookie: string | undefined): Promise<Acc
 
 export function invalidateCache(sessionCookie: string) {
     cache.delete(sessionCookie);
+}
+
+export function setSessionCookie(cookies: Cookies, response: Response) {
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader) {
+        const cookieMatch = setCookieHeader.match(/greenscoreweb_sessions=([^;]+)/);
+        if (cookieMatch) {
+            const sessionValue = cookieMatch[1];
+            cookies.set('greenscoreweb_sessions', sessionValue, {
+                path: '/',
+                httpOnly: true,
+                sameSite: 'lax',
+                maxAge: 60 * 60 // 1 heure
+            });
+        }
+    }
 }
