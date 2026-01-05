@@ -7,7 +7,7 @@ const CONFIG = {
       WEBSITE_URL: "http://localhost:5173", // URL du site Greenscore
       
       LOGIN_URL: "http://localhost:5173/login", // URL de la page de connexion
-      DETAILS_URL: "http://localhost:5173/derniere-page-web-consultee" // URL de la page de détails
+      DETAILS_URL: "http://localhost:5173/derniere-page" // URL de la page de détails
     }
   };
   

@@ -612,28 +612,30 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       try {
         const response = await fetch(
-          `${CONFIG.BACKEND.WEBSITE_URL}/api/equivalent?gCO2=${gCO2}&count=${count}`,
+          `${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/plugin/equivalent`,
           {
-            method: "GET",
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
+            body: JSON.stringify({ gCO2, count })
           }
         );
 
         if (!response.ok) {
-          console.log(`${CONFIG.BACKEND.WEBSITE_URL}/api/equivalent?gCO2=${gCO2}&count=${count}`)
-          throw new Error(`Erreur API Symfony : ${response.status}`);
+          console.log(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/plugin/equivalent`)
+          throw new Error(`Erreur API RUST : ${response.status}`);
         }
 
-        const equivalents = await response.json();
+        const jsonResponse = await response.json();
+        const equivalents = jsonResponse.data;
         return {
           success: true,
           equivalents: equivalents.map((eq) => ({
             image:
               "https://greenscoreweb.alwaysdata.net/public/equivalents/" +
-                eq.icon || "../assets/images/account.svg",
-            value: eq.value,
+                eq.icon_thumbnail || "../assets/images/account.svg",
+            value: eq.equivalent,
             name: eq.name,
           })),
         };
