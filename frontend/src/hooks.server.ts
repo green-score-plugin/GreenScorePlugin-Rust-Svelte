@@ -1,8 +1,18 @@
 import { redirect } from '@sveltejs/kit';
 import type { Handle } from '@sveltejs/kit';
+import { getAccount } from '$lib/server/session';
 
 export const handle: Handle = async ({ event, resolve }) => {
     const session = event.cookies.get('greenscoreweb_sessions');
+    console.log('Hooks - Session cookie:', session);
+
+    if (session) {
+        const account = await getAccount(session);
+        console.log('Hooks - Account retrieved:', account);
+        if (account) {
+            event.locals.user = account;
+        }
+    }
 
     // Routes publiques
     const publicRoutes = ['/login', '/inscription', '/inscription-organisation', '/cgu', '/confidentialite'];

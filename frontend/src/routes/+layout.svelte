@@ -1,18 +1,8 @@
 <script lang="ts">
     import favicon from "$lib/assets/favicon.svg";
     import '../app.css';
-    import { account } from '$lib/stores/account';
-    import type { LayoutData } from './$types';
 
-    let { children, data }: { children: any, data: LayoutData } = $props();
-
-    $effect(() => {
-        if (data.account) {
-            account.login(data.account);
-        } else {
-            account.logout();
-        }
-    });
+    let { children } = $props();
 </script>
 
 

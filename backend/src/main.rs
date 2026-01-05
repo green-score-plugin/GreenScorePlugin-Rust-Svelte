@@ -32,7 +32,10 @@ async fn main() {
         .with_expiry(Expiry::OnInactivity(Duration::seconds(3600)));
 
     let cors = CorsLayer::new()
-        .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap()) // EXACTEMENT ton front
+        .allow_origin([
+            "http://localhost:5173".parse::<HeaderValue>().unwrap(),
+            "http://127.0.0.1:5173".parse::<HeaderValue>().unwrap()
+        ])
         .allow_methods([
             Method::GET,
             Method::POST,
@@ -51,7 +54,7 @@ async fn main() {
         .layer(cors);
 
 
-    let listener = tokio::net::TcpListener::bind("localhost:3000")
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
         .unwrap();
 

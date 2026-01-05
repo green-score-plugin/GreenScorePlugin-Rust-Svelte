@@ -234,12 +234,14 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
         .await {
         Ok(result) => {
             let user_id = result.last_insert_id() as i64;
-            session.insert("user_id", user_id).await.unwrap();
-            session.insert("email", &payload.email).await.unwrap();
-            session.insert("role", &role).await.unwrap();
-            if let Some(siret) = &payload.siret {
-                session.insert("siret", siret).await.unwrap();
-            }
+
+            let account = Account::Organisation(Organisation {
+                id: user_id,
+                nom: payload.orga_name.clone(),
+                siret: payload.siret.clone(),
+                code: organisation_code.clone()
+            });
+            session.insert("account", account).await.unwrap();
 
 
             Json(json!({

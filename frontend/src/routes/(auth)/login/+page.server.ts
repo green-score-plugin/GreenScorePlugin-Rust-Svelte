@@ -3,7 +3,7 @@ import type { Actions } from './$types';
 import { BACKEND_URL } from '$lib/config';
 
 export const actions = {
-    default: async ({ request, fetch }) => {
+    default: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const email = data.get('email');
         const password = data.get('password');
@@ -25,6 +25,19 @@ export const actions = {
             const result = await response.json();
 
             if (result.success) {
+                const setCookieHeader = response.headers.get('set-cookie');
+                if (setCookieHeader) {
+                    const cookieMatch = setCookieHeader.match(/greenscoreweb_sessions=([^;]+)/);
+                    if (cookieMatch) {
+                        const sessionValue = cookieMatch[1];
+                        cookies.set('greenscoreweb_sessions', sessionValue, {
+                            path: '/',
+                            httpOnly: true,
+                            sameSite: 'lax',
+                            maxAge: 60 * 60 // 1 heure
+                        });
+                    }
+                }
                 return redirect(303, '/');
             }
 
