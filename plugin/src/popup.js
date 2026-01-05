@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <p class="text-3xl font-bold font-outfit">${message.message}</p>
           <a
             id="details-button"
-            href="${CONFIG.BACKEND.BASE_URL}/#"
+            href="${CONFIG.BACKEND.WEBSITE_URL}/#"
             class="flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg"
           >
             Plus d'informations
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (detailsButton) {
           detailsButton.addEventListener("click", (event) => {
             event.preventDefault(); // Empêche la navigation par défaut
-            browser.tabs.create({ url: `${CONFIG.BACKEND.BASE_URL}/#` });
+            browser.tabs.create({ url: `${CONFIG.BACKEND.WEBSITE_URL}/#` });
           });
         }
       }

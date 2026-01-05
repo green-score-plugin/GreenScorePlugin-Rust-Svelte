@@ -133,24 +133,25 @@ function shouldSendData(oldData, newData) {
   return true;
 }
 
-async function getSymfonyUserId() {
+async function getUserId() {
   try {
     const cookies = await browser.cookies.getAll({
       domain: CONFIG.BACKEND.DOMAIN,
     });
 
-    const sessionCookie = cookies.find((cookie) => cookie.name === "PHPSESSID");
+    const sessionCookie = cookies.find((cookie) => cookie.name === "greenscoreweb_sessions");
 
     if (!sessionCookie) {
       console.log("Pas de cookie de session trouvé");
       return null;
     }
 
-    const response = await fetch(`${CONFIG.BACKEND.WEBSITE_URL}/api/user-info`, {
+    const response = await fetch(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/get-account`, {
       credentials: "include",
+      method: "POST",
       headers: {
         Accept: "application/json",
-        Cookie: `PHPSESSID=${sessionCookie.value}`,
+        Cookie: `greenscoreweb_sessions=${sessionCookie.value}`,
       },
     });
 
@@ -159,7 +160,7 @@ async function getSymfonyUserId() {
     }
 
     const userData = await response.json();
-    return userData;
+    return userData.id;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID:", error);
     return null;
@@ -168,7 +169,7 @@ async function getSymfonyUserId() {
 
 async function getUserData() {
   try {
-    const userData = await getSymfonyUserId();
+    const userData = await getUserId();
     return {
       isLoggedIn: !!userData,
       userId: userData ? userData.id : null,
