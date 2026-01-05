@@ -3,7 +3,7 @@ import type { Actions } from './$types';
 import { BACKEND_URL } from '$lib/config';
 
 export const actions = {
-    default: async ({ request, fetch }) => {
+    default: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const organisationName = data.get('organisationName');
         const siret = data.get('siret');
@@ -29,6 +29,19 @@ export const actions = {
             const result = await response.json();
 
             if(result.success) {
+                const setCookieHeader = response.headers.get('set-cookie');
+                if (setCookieHeader) {
+                    const cookieMatch = setCookieHeader.match(/greenscoreweb_sessions=([^;]+)/);
+                    if (cookieMatch) {
+                        const sessionValue = cookieMatch[1];
+                        cookies.set('greenscoreweb_sessions', sessionValue, {
+                            path: '/',
+                            httpOnly: true,
+                            sameSite: 'lax',
+                            maxAge: 60 * 60 // 1 heure
+                        });
+                    }
+                }
                 redirect(303,`/inscription-organisation/${result.code}`);
             }
 

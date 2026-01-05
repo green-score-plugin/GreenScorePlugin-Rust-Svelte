@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ cookies, fetch }) => {
                 headers: { cookie: `greenscoreweb_sessions=${sessionCookie}` }
             });
         } catch (e) {
-            console.error('Erreur lors du logout backend:', e);
+
         }
 
         cookies.delete('greenscoreweb_sessions', { path: '/' });

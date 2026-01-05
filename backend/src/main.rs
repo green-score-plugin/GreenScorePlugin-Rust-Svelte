@@ -17,7 +17,6 @@ async fn main() {
     dotenvy::dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set");
-    let frontend_url = env::var("FRONTEND_URL").expect("FRONTEND_URL is not set");
 
     let pool = MySqlPool::connect(&database_url).await.unwrap();
 

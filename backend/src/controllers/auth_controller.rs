@@ -175,12 +175,14 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
         Ok(result) => {
             let user_id = result.last_insert_id() as i64;
 
+            let account = Account::User(User {
+                id: user_id,
+                email: payload.email.clone(),
+                nom: payload.firstname.clone(),
+                prenom: payload.lastname.clone(),
+            });
 
-
-            session.insert("user_id", user_id).await.unwrap();
-            session.insert("email", &payload.email).await.unwrap();
-            session.insert("firstname", &payload.firstname).await.unwrap();
-            session.insert("lastname", &payload.lastname).await.unwrap();
+            session.insert("account", account).await.unwrap();
 
             Json(InscriptionResponse {
                 success: true,

@@ -36,8 +36,8 @@ export async function getAccount(sessionCookie: string | undefined): Promise<Acc
                 return result.account;
             }
         }
-    } catch (error) {
-        console.error('Erreur session:', error);
+    } catch (_) {
+        console.error('Erreur session');
     }
 
     return null;
