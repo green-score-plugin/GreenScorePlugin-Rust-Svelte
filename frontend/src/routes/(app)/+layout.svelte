@@ -7,7 +7,7 @@
 </script>
 
 <Header />
-
+<main class="flex-grow">
 {@render children()}
-
+</main>
 <Footer />
