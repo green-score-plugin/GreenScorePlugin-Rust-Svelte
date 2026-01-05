@@ -175,3 +175,4 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
         })),
     }
 }
+

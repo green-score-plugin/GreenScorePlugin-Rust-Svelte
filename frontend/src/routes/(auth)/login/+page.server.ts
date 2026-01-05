@@ -22,6 +22,7 @@ export const actions = {
 
             const result = await response.json();
 
+
             if (result.success) {
                 redirect(303, '/');
             }
