@@ -21,17 +21,13 @@ export async function getAccount(sessionCookie: string | undefined): Promise<Acc
     }
 
     try {
-        console.log(`Fetching account from ${BACKEND_URL}/get-account with cookie: ${sessionCookie}`);
         const response = await fetch(`${BACKEND_URL}/get-account`, {
             method: 'POST',
             headers: { cookie: `greenscoreweb_sessions=${sessionCookie}` }
         });
 
-        console.log('Session response status:', response.status);
-
         if (response.ok) {
             const result = await response.json();
-            console.log('Session response body:', result);
             if (result.success && result.account) {
                 cache.set(sessionCookie, {
                     account: result.account,
@@ -39,9 +35,6 @@ export async function getAccount(sessionCookie: string | undefined): Promise<Acc
                 });
                 return result.account;
             }
-        } else {
-            const text = await response.text();
-            console.log('Session response error:', text);
         }
     } catch (error) {
         console.error('Erreur session:', error);
