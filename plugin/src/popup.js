@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const mainContainer = document.getElementById("main-container");
       if (mainContainer) {
         mainContainer.innerHTML = `
-        <div class="flex flex-col items-center justify-center h-full text-center flex flex-col gap-6 py-4 px-4">
+        <div class="flex flex-col items-center justify-center h-full text-center gap-6 py-4 px-4">
           <p class="text-3xl font-bold font-outfit">${message.message}</p>
           <a
             id="details-button"
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (loginSection) {
         if (userData.isLoggedIn) {
           loginSection.innerHTML =
-            '<span class="text-sm text-grey-950">Vous êtes connecté</span>';
+            '<span class="text-sm text-[#6D874B] font-bold">Vous êtes connecté !</span>';
         } else {
           loginSection.innerHTML = `
           <span class="text-sm text-grey-950">Vous souhaitez enregistrer ce résultat ?&nbsp;</span>
