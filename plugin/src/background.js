@@ -81,7 +81,7 @@ async function getLatestCarbonIntensity(countryCode) {
 async function sendDataToServer(data) {
   try {
     console.log("Sending data to server:", data);
-    const response = await fetch(CONFIG.BACKEND.PLUGIN_BACKEND_URL, {
+    const response = await fetch(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/plugin/save_monitored_website_data`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -126,11 +126,7 @@ function extractDomain(url) {
 function shouldSendData(oldData, newData) {
   if (!oldData) return true;
 
-  if (newData.lastDataSent && Date.now() - newData.lastDataSent < 10000) {
-    return false;
-  }
-
-  return true;
+  return !(newData.lastDataSent && Date.now() - newData.lastDataSent < 10000);
 }
 
 async function getUserId() {
@@ -160,7 +156,7 @@ async function getUserId() {
     }
 
     const userData = await response.json();
-    return userData.id;
+    return userData.account;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID:", error);
     return null;
