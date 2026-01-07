@@ -59,8 +59,8 @@
                 clickable: true,
             },
             navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
+                nextEl: ".custom-next-button",
+                prevEl: ".custom-prev-button",
             },
             breakpoints: {
                 640: { slidesPerView: 1, spaceBetween: 8 },
@@ -308,33 +308,39 @@
                 </button>
             </div>
 
-            <div class="relative px-8 md:px-12 flex justify-center">
+            <div class="relative px-4 md:px-16 flex flex-col justify-center w-full max-w-6xl mx-auto">
                 {#if filteredAdvice.length > 0}
-                    <div class="swiper advice-swiper">
+                    <div class="swiper advice-swiper w-full !pb-12">
                         <div class="swiper-wrapper">
                             {#each filteredAdvice as item}
-                                <div class="swiper-slide h-full">
-                                    <div class="bg-white rounded-xl shadow-md p-4 h-full flex items-center mx-1">
-                                        <div class="bg-[#F5F7FF] p-3 rounded-lg icon-square mr-4 flex-shrink-0">
-                                            <i class="{item.icon} text-black text-4xl"></i>
+                                <div class="swiper-slide h-auto">
+                                    <div class="bg-white rounded-xl shadow-md p-6 h-full flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 transition-transform hover:scale-[1.02]">
+                                        <div class="bg-[#F5F7FF] p-3 rounded-lg w-20 h-20 flex-shrink-0 flex items-center justify-center">
+                                            <i class="{item.icon} text-[#6D874B] text-3xl"></i>
                                         </div>
                                         <div>
-                                            <h3 class="font-outfit font-regular mb-1">{item.title}</h3>
-                                            <p class="text-sm font-extralight text-gray-600">{item.advice}</p>
+                                            <h3 class="font-outfit font-semibold text-lg mb-2 text-gray-900">{item.title}</h3>
+                                            <p class="text-sm leading-relaxed text-gray-600">{item.advice}</p>
                                         </div>
                                     </div>
                                 </div>
                             {/each}
                         </div>
+
+                        <!-- Pagination inside swiper container for proper positioning relative to slides -->
+                        <div class="swiper-pagination !bottom-0 [&_.swiper-pagination-bullet-active]:!bg-[#6D874B] [&_.swiper-pagination-bullet]:!bg-gray-300 [&_.swiper-pagination-bullet]:!opacity-100"></div>
                     </div>
 
-                    <div class="swiper-button-prev custom-nav-btn p-3 absolute left-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
-                    <div class="swiper-button-next custom-nav-btn p-3 absolute right-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
-
-                    <div class="swiper-pagination mt-4"></div>
+                    <!-- Navigation buttons outside swiper container -->
+                    <button class="custom-prev-button absolute left-0 md:-left-6 top-[calc(50%-1.5rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-left text-sm md:text-base"></i>
+                    </button>
+                    <button class="custom-next-button absolute right-0 md:-right-6 top-[calc(50%-1.5rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-right text-sm md:text-base"></i>
+                    </button>
                 {:else}
                     <div class="text-center py-8">
-                        <p>Aucun conseil à afficher</p>
+                        <p class="text-gray-500">Aucun conseil à afficher</p>
                     </div>
                 {/if}
             </div>
@@ -535,66 +541,5 @@
 
 <!-- Styles personnalisés Swiper -->
 <style>
-    .custom-nav-btn:after {
-        font-size: 18px;
-        color: #1E293B;
-    }
-
-    .swiper-button-prev.custom-nav-btn:after,
-    .swiper-button-next.custom-nav-btn:after {
-        font-weight: bold;
-        transform: scale(0.7);
-    }
-
-    .custom-nav-btn {
-        border-radius: 9999px;
-        width: 36px;
-        height: 36px;
-        color: #6D874B;
-
-    }
-
-    .swiper-pagination {
-        position: relative;
-        bottom: 0;
-        color: #6D874B;
-    }
-
-    :global(.swiper-pagination-bullet-active) {
-        background-color: #6D874B;
-    }
-
-    .advice-swiper {
-        overflow: hidden;
-        padding: 5px 0;
-        max-width: 100%;
-        margin: 0 auto;
-    }
-
-    .advice-swiper .swiper-slide {
-        opacity: 1;
-        visibility: visible;
-        width: 100%;
-    }
-
-    .advice-swiper .swiper-wrapper {
-        margin: 0;
-        padding: 0;
-    }
-
-    .swiper-button-prev.custom-nav-btn {
-        left: 5px;
-    }
-
-    .swiper-button-next.custom-nav-btn {
-        right: 5px;
-    }
-
-    .icon-square {
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+    /* Aucun style personnalisé nécessaire grâce à Tailwind CSS */
 </style>
