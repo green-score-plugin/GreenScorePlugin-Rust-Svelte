@@ -11,7 +11,6 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/inscription-organisation", post(auth_controller::inscription_orga))
         .route("/logout", post(auth_controller::logout))
         .route("/get-account", post(auth_controller::get_current_account))
-        .route("/advice", get(lpc_controller::advice))
-        .route("/last-link", get(lpc_controller::last_link))
+        .route("/derniere-page-consultee", get(lpc_controller::lpc))
         .with_state(pool)
 }

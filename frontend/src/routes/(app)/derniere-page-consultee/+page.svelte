@@ -11,10 +11,13 @@
     export let title : string = 'Dernière page consultée';
     export let description : string = 'Voici une analyse détaillée de votre dernière page consultée : ';
     export let noDatas : boolean = false;
+
+    export let link : string;
+
     export let letterGreenScore : string = 'A';
     export let country : string = 'France';
     export let carbonIntensity = 56;
-    export let flagUrl : string = 'https://flagcdn.com/fr.svg';
+    export let flagUrl : string;
     export let envNomination : string = 'Très bon';
     export let equivalent1Value: number = 5;
     export let equivalent1Name: string = 'km en voiture thermique';
@@ -40,9 +43,33 @@
     export let loadingTime: number = 3;
     export let queriesQuantity: number = 45;
     export let pageSizeUnit: string = 'Ko';
+    export let adviceUser: string;
+    export let adviceDev: string;
 
     import type { PageData } from './$types';
     export let data: PageData;
+
+    $: if (data.pageData) {
+        letterGreenScore = data.pageData.letterGreenScore || 'A';
+        link = data.pageData.link
+        country = data.pageData.country || 'France';
+        pageSize = data.pageData.pageSize || 0;
+        loadingTime = data.pageData.loadingTime || 0;
+        queriesQuantity = data.pageData.queriesQuantity || 0;
+        adviceUser = data.adviceUser || "Baissez la luminosité de vos écrans.";
+        adviceDev = data.adviceDev || "Optimisez vos requêtes SQL.";
+        fetch(`https://restcountries.com/v3.1/name/${country}`)
+            .then(res => res.json())
+            .then(countries => {
+                if (countries && countries[0]) {
+                    const countryCode = countries[0].cca2.toLowerCase();
+                    flagUrl = `https://flagcdn.com/${countryCode}.svg`;
+                }
+            })
+            .catch(() => {
+                flagUrl = 'https://flagcdn.com/fr.svg';
+            });
+    }
 </script>
 
 <svelte:head>
@@ -55,9 +82,9 @@
         {#if !noDatas}
         <p class="text-base w-fit">
             { description }
-            {#if data.link}
+            {#if link}
             <span class="text-base ml-1 w-52 truncate inline-block align-bottom text-left">
-                    { data.link }
+                    { link }
                 </span>
             {/if}
         </p>
@@ -71,11 +98,11 @@
             <CountryCarbonIntensity {country} {carbonIntensity} {flagUrl} />
             <BadgeGreenScore {letterGreenScore} {envNomination} />
             <Equivalent equivalent={equivalent1} order={1} />
-            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission cacarbone de la page :" />
+            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />
             <Equivalent equivalent={equivalent2} order={2} />
             <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />
-            <Advice type="nav" advice={data.adviceUser} />
-            <Advice type="dev" advice={data.adviceDev} />
+            <Advice type="nav" advice={adviceUser} />
+            <Advice type="dev" advice={adviceDev} />
         </div>
     {:else}
         <div class="w-full h-screen flex items-center justify-center font-outfit">
