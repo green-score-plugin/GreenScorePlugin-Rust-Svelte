@@ -10,7 +10,6 @@
 
     export let title : string = 'Dernière page consultée';
     export let description : string = 'Voici une analyse détaillée de votre dernière page consultée : ';
-    export let link : string = 'https://exemple.com';
     export let noDatas : boolean = false;
     export let letterGreenScore : string = 'A';
     export let country : string = 'France';
@@ -56,9 +55,9 @@
         {#if !noDatas}
         <p class="text-base w-fit">
             { description }
-            {#if link}
+            {#if data.link}
             <span class="text-base ml-1 w-52 truncate inline-block align-bottom text-left">
-                    { link }
+                    { data.link }
                 </span>
             {/if}
         </p>

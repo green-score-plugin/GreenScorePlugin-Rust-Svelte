@@ -32,9 +32,25 @@ export const load: PageServerLoad = async ({ fetch }) => {
         console.error('Erreur lors de la récupération du conseil pour les utilisateurs :', error);
     }
 
+    let link: string = '';
+    try {
+        const response = await fetch(`${BACKEND_URL}/last-link`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        const result = await response.json();
+        console.log(result);
+        if (result.success) {
+            link = result.link;
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération du dernier lien consulté :', error);
+    }
 
     return {
         adviceDev,
-        adviceUser
+        adviceUser,
+        link
     }
 }
