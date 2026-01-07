@@ -331,11 +331,11 @@
 
             <div class="relative px-4 md:px-16 flex flex-col justify-center w-full max-w-6xl mx-auto">
                 {#if filteredAdvice.length > 0}
-                    <div class="swiper advice-swiper w-full !pb-12">
+                    <div class="swiper advice-swiper w-full !pt-6 !pb-14 !px-4 -mx-4">
                         <div class="swiper-wrapper">
                             {#each filteredAdvice as item}
-                                <div class="swiper-slide h-auto">
-                                    <div class="bg-white rounded-xl shadow-md p-6 h-full flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 transition-transform hover:scale-[1.02]">
+                                <div class="swiper-slide !h-auto">
+                                    <div class="bg-white h-full w-full rounded-xl shadow-md p-6 flex flex-col sm:flex-row items-center justify-center text-center sm:text-left gap-4 transition-transform hover:scale-[1.02]">
                                         <div class="bg-[#F5F7FF] p-3 rounded-lg w-20 h-20 flex-shrink-0 flex items-center justify-center">
                                             <i class="{item.icon} text-[#6D874B] text-3xl"></i>
                                         </div>
@@ -353,10 +353,10 @@
                     </div>
 
                     <!-- Navigation buttons outside swiper container -->
-                    <button class="custom-prev-button absolute left-0 md:-left-6 top-[calc(50%-1.5rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button class="custom-prev-button absolute left-0 md:-left-6 top-[calc(50%-1rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Conseil précédent">
                         <i class="fa-solid fa-chevron-left text-sm md:text-base"></i>
                     </button>
-                    <button class="custom-next-button absolute right-0 md:-right-6 top-[calc(50%-1.5rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button class="custom-next-button absolute right-0 md:-right-6 top-[calc(50%-1rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Conseil suivant">
                         <i class="fa-solid fa-chevron-right text-sm md:text-base"></i>
                     </button>
                 {:else}
