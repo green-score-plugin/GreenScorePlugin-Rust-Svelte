@@ -16,7 +16,7 @@
 
     export let letterGreenScore : string = 'A';
     export let country : string = 'France';
-    export let carbonIntensity = 56;
+    export let carbonIntensity : number;
     export let flagUrl : string;
     export let envNomination : string = 'Très bon';
     export let equivalent1Value: number = 5;
@@ -28,7 +28,7 @@
         value: equivalent1Value,
         icon: equivalent1Icon
     };
-    export let totalConsu = 12.5;
+    export let totalConsu : number = 13;
     export let totalConsuUnit = 'gCO2eq';
     export let equivalent2Value: number = 12;
     export let equivalent2Name: string = 'litres d\'eau potable';
@@ -39,36 +39,30 @@
         value: equivalent2Value,
         icon: equivalent2Icon
     };
-    export let pageSize: number = 350;
-    export let loadingTime: number = 3;
-    export let queriesQuantity: number = 45;
+    export let pageSize: number;
+    export let loadingTime: number;
+    export let queriesQuantity: number;
     export let pageSizeUnit: string = 'Ko';
     export let adviceUser: string;
     export let adviceDev: string;
+
+    export let carbonFootprint: number = 12.5;
 
     import type { PageData } from './$types';
     export let data: PageData;
 
     $: if (data.pageData) {
         letterGreenScore = data.pageData.letterGreenScore || 'A';
-        link = data.pageData.link
+        link = data.pageData.link;
         country = data.pageData.country || 'France';
+        carbonFootprint = data.pageData.carbonFootprint || 0;
         pageSize = data.pageData.pageSize || 0;
         loadingTime = data.pageData.loadingTime || 0;
         queriesQuantity = data.pageData.queriesQuantity || 0;
+        flagUrl = data.pageData.flagUrl || 'https://flagcdn.com/fr.svg';
         adviceUser = data.adviceUser || "Baissez la luminosité de vos écrans.";
         adviceDev = data.adviceDev || "Optimisez vos requêtes SQL.";
-        fetch(`https://restcountries.com/v3.1/name/${country}`)
-            .then(res => res.json())
-            .then(countries => {
-                if (countries && countries[0]) {
-                    const countryCode = countries[0].cca2.toLowerCase();
-                    flagUrl = `https://flagcdn.com/${countryCode}.svg`;
-                }
-            })
-            .catch(() => {
-                flagUrl = 'https://flagcdn.com/fr.svg';
-            });
+        carbonIntensity = data.pageData.carbonIntensity || 0;
     }
 </script>
 
@@ -98,7 +92,7 @@
             <CountryCarbonIntensity {country} {carbonIntensity} {flagUrl} />
             <BadgeGreenScore {letterGreenScore} {envNomination} />
             <Equivalent equivalent={equivalent1} order={1} />
-            <TotalConsumption {totalConsu} {totalConsuUnit} label="Emission carbone de la page :" />
+            <TotalConsumption {carbonFootprint} {totalConsuUnit} label="Emission carbone de la page :" />
             <Equivalent equivalent={equivalent2} order={2} />
             <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />
             <Advice type="nav" advice={adviceUser} />
