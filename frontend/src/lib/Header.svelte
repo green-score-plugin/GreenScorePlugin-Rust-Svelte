@@ -33,7 +33,7 @@
 
                 {#if user}
                     <li class="relative">
-                        <button on:click={toggleProfileMenu} class="focus:outline-none" aria-label="Menu profil">
+                        <button onclick={toggleProfileMenu} class="focus:outline-none" aria-label="Menu profil">
                             <svg width="34" height="35" viewBox="0 0 34 35" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="0.5" y="1" width="33" height="33" rx="16.5" stroke="#030712" />
                                 <path d="M27 26.5C27 20.6665 23.3636 16.5001 17 16.5" stroke="#233430" />
@@ -61,7 +61,7 @@
 
         <!-- Menu burger -->
         <div class="lg:hidden flex items-center">
-            <button on:click={toggleMobileMenu} class="focus:outline-none" aria-label="Menu mobile">
+            <button onclick={toggleMobileMenu} class="focus:outline-none" aria-label="Menu mobile">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
                 </svg>
