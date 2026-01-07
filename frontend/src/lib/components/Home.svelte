@@ -1,6 +1,6 @@
-
 <script lang="ts">
-    // import Swiper from 'swiper';
+    import Swiper from 'swiper';
+    import { Navigation, Pagination } from 'swiper/modules';
     import 'swiper/css';
     import 'swiper/css/navigation';
     import 'swiper/css/pagination';
@@ -9,7 +9,7 @@
     import backgroundImage from '$lib/images/background.png';
     import citationImage from '$lib/images/citation.svg';
     import greenscoreImage from '$lib/images/greenscore-image.png';
-    import greenscoreLogo from '$lib/images/greenscore-logo.png';
+    // import greenscoreLogo from '$lib/images/greenscore-logo.png';
     import homeImage1 from '$lib/images/home-image1.png';
     import homeImage2 from '$lib/images/home-image2.png';
     import homeImage3 from '$lib/images/home-image3.png';
@@ -18,7 +18,7 @@
     import homeImageMobile1 from '$lib/images/home-image-mobile1.png';
     import homeImageMobile2 from '$lib/images/home-image-mobile2.png';
     import homeImageMobile3 from '$lib/images/home-image-mobile3.png';
-    import registerImage1 from '$lib/images/register-image1.png';
+    // import registerImage1 from '$lib/images/register-image1.png';
     import { onMount, tick } from "svelte";
 
 
@@ -34,23 +34,11 @@
     export let isLoggedIn: boolean = false;
 
     let isDevMode: boolean = false;
-    let swiper: any = null;
+    let swiper: Swiper | null = null;
 
     $: filteredAdvice = advice.filter(item =>
         isDevMode ? item.is_dev : !item.is_dev
     );
-
-
-
-    function waitForSwiper(): Promise<void> {
-        return new Promise((resolve) => {
-            const check = () => {
-                if ((window as any).Swiper) resolve();
-                else setTimeout(check, 50);
-            };
-            check();
-        });
-    }
 
     async function initializeSwiper() {
         if (swiper) {
@@ -60,11 +48,12 @@
 
         await tick();
 
-        swiper = new (window as any).Swiper(".advice-swiper", {
+        swiper = new Swiper(".advice-swiper", {
+            modules: [Navigation, Pagination],
             slidesPerView: 1,
             spaceBetween: 8,
-            observer: true,  // Ajouter cette ligne
-            observeParents: true,  // Ajouter cette ligne
+            observer: true,
+            observeParents: true,
             pagination: {
                 el: ".swiper-pagination",
                 clickable: true,
@@ -108,9 +97,7 @@
 </script>
 
 <svelte:head>
-    <link rel="stylesheet" href="https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css" integrity="sha384-+QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw==" crossorigin="anonymous"/>
-    <script src="https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js" integrity="sha384-+QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw==" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-papQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw==" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous"/>
 </svelte:head>
 
 <div class="min-h-screen bg-gs-green-950 text-white font-['Ovo']">
@@ -126,14 +113,14 @@
             </p>
 
             <div class="hidden lg:block">
-                <a href="#" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     Ajouter à Firefox
                 </a>
             </div>
 
             <div class="mt-8 lg:hidden flex justify-center">
-                <a href="#" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     Ajouter à Firefox
                 </a>
@@ -145,13 +132,13 @@
             <!-- Mobile Gallery -->
             <div class="flex justify-between space-x-2 md:hidden">
                 <div class="w-[106px] h-[300px] rounded-2xl overflow-hidden mt-3">
-                    <img src="{homeImageMobile1}" alt="image" class="w-full h-full">
+                    <img src="{homeImageMobile1}" alt="Interface mobile 1" class="w-full h-full">
                 </div>
                 <div class="w-[106px] h-[300px] rounded-2xl overflow-hidden">
-                    <img src="{homeImageMobile2}" alt="image" class="w-full h-full">
+                    <img src="{homeImageMobile2}" alt="Interface mobile 2" class="w-full h-full">
                 </div>
                 <div class="w-[106px] h-[300px] rounded-2xl overflow-hidden mt-3">
-                    <img src="{homeImageMobile3}" alt="image" class="w-full h-full">
+                    <img src="{homeImageMobile3}" alt="Interface mobile 3" class="w-full h-full">
                 </div>
             </div>
 
@@ -159,31 +146,31 @@
             <div class="hidden md:flex flex-wrap justify-center md:justify-between lg:justify-between gap-2 md:gap-3 lg:gap-4 max-w-7xl mx-auto px-2 mb-0">
                 <div class="hidden lg:block">
                     <div class="overflow-hidden rounded-2xl w-[180px] lg:w-[230px] h-[414px]">
-                        <img src="{homeImage1}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage1}" alt="Interface application 1" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="hidden md:block pt-8">
                     <div class="overflow-hidden rounded-2xl w-[180px] lg:w-[230px] h-[414px]">
-                        <img src="{homeImage2}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage2}" alt="Interface application 2" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="block">
                     <div class="overflow-hidden rounded-2xl w-[140px] md:w-[180px] lg:w-[230px] h-[270px] md:h-[414px]">
-                        <img src="{homeImage3}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage3}" alt="Interface application 3" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="block pt-8">
                     <div class="overflow-hidden rounded-2xl w-[140px] md:w-[180px] lg:w-[230px] h-[270px] md:h-[414px]">
-                        <img src="{homeImage4}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage4}" alt="Interface application 4" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="block mb-0 md:hidden lg:block">
                     <div class="overflow-hidden rounded-2xl w-[140px] md:w-[180px] lg:w-[230px] h-[270px] md:h-[414px]">
-                        <img src="{homeImage5}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage5}" alt="Interface application 5" class="w-full h-full object-fill">
                     </div>
                 </div>
             </div>
@@ -204,8 +191,8 @@
                             height="100%"
                             src="https://www.youtube.com/embed/lAYfNt7web8?autoplay=1&mute=1&controls=0&loop=1&playlist=lAYfNt7web8&modestbranding=1&showinfo=0&rel=0"
                             title="GreenScore Web Vidéo"
-                            frameborder="0"
-                            allow="autoplay; encrypted-media"
+                            style="border:0;"
+                            allow="autoplay; encrypted-media; picture-in-picture"
                             allowfullscreen
                             class="object-cover"
                     ></iframe>
@@ -321,32 +308,36 @@
                 </button>
             </div>
 
-            <div class="relative px-8 md:px-12">
-                <div class="swiper advice-swiper">
-                    <div class="swiper-wrapper">
-                        {#each filteredAdvice as item}
-                            <div class="swiper-slide h-full">
-                                <div class="bg-white rounded-xl shadow-md p-4 h-full flex items-center mx-1">
-                                    <div class="bg-[#F5F7FF] p-3 rounded-lg icon-square mr-4 flex-shrink-0">
-                                        <i class="{item.icon} text-black text-4xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-outfit font-regular mb-1">{item.title}</h3>
-                                        <p class="text-sm font-extralight text-gray-600">{item.advice}</p>
+            <div class="relative px-8 md:px-12 flex justify-center">
+                {#if filteredAdvice.length > 0}
+                    <div class="swiper advice-swiper">
+                        <div class="swiper-wrapper">
+                            {#each filteredAdvice as item}
+                                <div class="swiper-slide h-full">
+                                    <div class="bg-white rounded-xl shadow-md p-4 h-full flex items-center mx-1">
+                                        <div class="bg-[#F5F7FF] p-3 rounded-lg icon-square mr-4 flex-shrink-0">
+                                            <i class="{item.icon} text-black text-4xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-outfit font-regular mb-1">{item.title}</h3>
+                                            <p class="text-sm font-extralight text-gray-600">{item.advice}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        {:else}
-                            <p>Aucun conseil à afficher</p>
-                        {/each}
+                            {/each}
+                        </div>
                     </div>
-                </div>
 
-                <div class="swiper-button-prev custom-nav-btn p-3 absolute left-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
-                <div class="swiper-button-next custom-nav-btn p-3 absolute right-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
+                    <div class="swiper-button-prev custom-nav-btn p-3 absolute left-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
+                    <div class="swiper-button-next custom-nav-btn p-3 absolute right-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
+
+                    <div class="swiper-pagination mt-4"></div>
+                {:else}
+                    <div class="text-center py-8">
+                        <p>Aucun conseil à afficher</p>
+                    </div>
+                {/if}
             </div>
-
-            <div class="swiper-pagination mt-4"></div>
         </div>
     </section>
 
@@ -569,7 +560,7 @@
         color: #6D874B;
     }
 
-    .swiper-pagination-bullet-active {
+    :global(.swiper-pagination-bullet-active) {
         background-color: #6D874B;
     }
 
@@ -599,11 +590,6 @@
         right: 5px;
     }
 
-    .relative.px-8\:md\:px-12 {
-        display: flex;
-        justify-content: center;
-    }
-
     .icon-square {
         width: 80px;
         height: 80px;
@@ -612,4 +598,3 @@
         justify-content: center;
     }
 </style>
-
