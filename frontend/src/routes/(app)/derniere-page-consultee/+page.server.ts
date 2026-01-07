@@ -10,7 +10,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
             credentials: 'include'
         });
         const result = await response.json();
-        console.log(result);
 
         if (!result.success) {
             return {
@@ -52,7 +51,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
                 if (carbonData && carbonData.carbonIntensity) {
                     carbonIntensity = carbonData.carbonIntensity;
-                    console.log(`Intensité carbone pour ${country}: ${carbonIntensity} gCO2eq/kWh`);
                 }
             } catch (error) {
                 console.error('Erreur lors de la récupération de l\'intensité carbone :', error);
