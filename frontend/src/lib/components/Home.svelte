@@ -34,6 +34,7 @@
     export let isLoggedIn: boolean = false;
 
     let isDevMode: boolean = false;
+    let showVideo: boolean = false;
     let swiper: Swiper | null = null;
 
     $: filteredAdvice = advice.filter(item =>
@@ -97,7 +98,7 @@
 </script>
 
 <svelte:head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </svelte:head>
 
 <div class="min-h-screen bg-gs-green-950 text-white font-['Ovo']">
@@ -180,22 +181,42 @@
     <!-- Video Section -->
     <div class="container mx-auto px-4 md:px-16 py-12">
         <div class="grid lg:grid-cols-2 gap-8">
-            <div class="bg-white rounded-lg overflow-hidden hidden lg:block">
+            <div class="bg-white rounded-lg overflow-hidden block">
                 <div class="text-black font-outfit font-regular px-4 py-2 flex items-center gap-2">
                     <div class="w-4 h-4 bg-[#6D874B] rounded-full"></div>
                     <span class="text-xs font-bold">Web</span>
                 </div>
-                <div class="h-[200px] lg:h-[400px] flex items-center justify-center overflow-hidden">
-                    <iframe
-                            width="100%"
-                            height="100%"
-                            src="https://www.youtube.com/embed/lAYfNt7web8?autoplay=1&mute=1&controls=0&loop=1&playlist=lAYfNt7web8&modestbranding=1&showinfo=0&rel=0"
-                            title="GreenScore Web Vidéo"
-                            style="border:0;"
-                            allow="autoplay; encrypted-media; picture-in-picture"
-                            allowfullscreen
-                            class="object-cover"
-                    ></iframe>
+                <div class="h-[200px] lg:h-[400px] flex items-center justify-center overflow-hidden bg-black relative">
+                    {#if showVideo}
+                        <iframe
+                                width="100%"
+                                height="100%"
+                                src="https://www.youtube-nocookie.com/embed/lAYfNt7web8?autoplay=1&mute=1&controls=0&loop=1&playlist=lAYfNt7web8&modestbranding=1&showinfo=0&rel=0&iv_load_policy=3"
+                                title="GreenScore Web Vidéo"
+                                style="border:0;"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allowfullscreen
+                                class="w-full h-full"
+                        ></iframe>
+                    {:else}
+                        <button
+                                class="w-full h-full relative group cursor-pointer focus:outline-none"
+                                on:click={() => showVideo = true}
+                                aria-label="Lancer la vidéo"
+                        >
+                            <img
+                                    src="https://img.youtube.com/vi/lAYfNt7web8/hqdefault.jpg"
+                                    alt="Aperçu vidéo"
+                                    class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                            />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-16 h-16 bg-[#6D874B] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-play text-white text-2xl ml-1"></i>
+                                </div>
+                            </div>
+                        </button>
+                    {/if}
                 </div>
             </div>
 
@@ -538,8 +559,3 @@
         </div>
     </div>
 </div>
-
-<!-- Styles personnalisés Swiper -->
-<style>
-    /* Aucun style personnalisé nécessaire grâce à Tailwind CSS */
-</style>
