@@ -5,6 +5,7 @@ use sqlx::MySqlPool;
 use tower_sessions::Session;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
+use crate::models::{User, Organisation, Account};
 
 #[derive(Deserialize)]
 pub struct InscriptionRequest {
@@ -19,6 +20,8 @@ pub struct InscriptionResponse {
     pub success: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
+    // #[serde(skip_serializing_if = "Option::is_none")]
+    // pub account: Option<Account>,
 }
 
 #[derive(Deserialize)]
@@ -51,16 +54,17 @@ fn generate_organisation_code() -> String {
 }
 
 pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
-    let row = match sqlx::query_as::<_, (i64, String, String)>(
-        "SELECT id, email, password FROM user WHERE email = ?",
+
+    let row = match sqlx::query_as::<_, (i64, String, String, String)>(
+        "SELECT id, email, CAST(password AS CHAR) as password, CAST(roles AS CHAR) as roles  FROM user WHERE email = ?",
     )
         .bind(payload["email"].as_str().unwrap_or(""))
         .fetch_optional(&pool)
         .await {
         Ok(u) => u,
-        Err(e) => return Json(json!({
-            "status": "error",
-            "message": format!("Database error: {}", e)
+        Err(_) => return Json(json!({
+        "success": false,
+        "message": "Une erreur est survenue lors de la connexion"
         })),
     };
 
@@ -71,7 +75,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
         }));
     }
 
-    let (user_id, email, password_hash) = row.unwrap();
+    let (user_id, email, password_hash, roles) = row.unwrap();
     let password = payload["password"].as_str().unwrap_or("");
     if !bcrypt::verify(password, &password_hash).unwrap_or(false) {
         Json(json!({
@@ -79,15 +83,90 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
             "message": "Adresse e-mail ou mot de passe invalide",
         }))
     } else {
-        session.insert("user_id", user_id).await.unwrap();
-        session.insert("email", email).await.unwrap();
+
+        if roles == "[\"ROLE_USER\"]" {
+            match sqlx::query_as::<_, (String, String)>(
+                "SELECT first_name, last_name FROM user WHERE email = ?"
+            )
+                .bind(&email)
+                .fetch_optional(&pool)
+                .await {
+                Ok(Some((first_name, last_name))) => {
+                    let account = Account::User(User { id: user_id, email, nom: first_name, prenom: last_name});
+                    session.insert("account", account.clone()).await.unwrap();
+
+                    return Json(json!({
+                        "success": true,
+                        "account": account
+                    }));
+                },
+                Ok(None) => {
+
+                },
+                Err(e) => {
+                    return Json(json!({
+                "success": false,
+                "message": format!("Erreur récupération utilisateur: {}", e)
+            }));
+                }
+            }
+        }
+
+        if roles == "[\"ROLE_ORGANISATION\"]" {
+            match sqlx::query_as::<_, (String, String, Option<String>)>(
+                "SELECT o.organisation_name, o.organisation_code, o.siret FROM user u
+             JOIN organisation o ON u.is_admin_of_id = o.id
+             WHERE email = ?"
+            )
+                .bind(&email)
+                .fetch_optional(&pool)
+                .await {
+                Ok(Some((organisation_name, organisation_code, siret))) => {
+                    let account = Account::Organisation(Organisation {
+                        id: user_id,
+                        nom: organisation_name,
+                        siret,
+                        code: organisation_code
+                    });
+                    session.insert("account", account).await.unwrap();
+
+                    return Json(json!({
+                    "success" : true
+                }))
+                },
+                Ok(None) => {
+
+                },
+                Err(_) => {
+                    return Json(json!({
+                "success": false,
+                "message": "Une erreur est survenue lors de la connexion"
+            }));
+                }
+            }
+        }
+
         Json(json!({
-            "success": true
+            "success": false,
+            "message": "Email ou mot de passe invalide"
         }))
     }
 }
 
 pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {
+    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
+        .bind(&payload.email)
+        .fetch_optional(&pool)
+        .await
+        .unwrap_or(None);
+
+    if user_exists.is_some() {
+        return Json(InscriptionResponse {
+            success: false,
+            message: Some("Cet email est déjà utilisé".to_string()),
+        });
+    }
+
     let password_hash = match hash_password(&payload.password) {
         Ok(hash) => hash,
         Err(e) => return Json(InscriptionResponse {
@@ -108,8 +187,15 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
         .await {
         Ok(result) => {
             let user_id = result.last_insert_id() as i64;
-            session.insert("user_id", user_id).await.unwrap();
-            session.insert("email", &payload.email).await.unwrap();
+
+            let account = Account::User(User {
+                id: user_id,
+                email: payload.email.clone(),
+                nom: payload.firstname.clone(),
+                prenom: payload.lastname.clone(),
+            });
+
+            session.insert("account", account).await.unwrap();
 
             Json(InscriptionResponse {
                 success: true,
@@ -124,6 +210,19 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 }
 
 pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Json<Value> {
+    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
+        .bind(&payload.email)
+        .fetch_optional(&pool)
+        .await
+        .unwrap_or(None);
+
+    if user_exists.is_some() {
+        return Json(json!({
+            "success": false,
+            "message": "Cet email est déjà utilisé"
+        }));
+    }
+
     let password_hash = match hash_password(&payload.password) {
         Ok(hash) => hash,
         Err(e) => return Json(json!({
@@ -140,7 +239,7 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
         .bind(&payload.orga_name)
         .bind(&organisation_code)
         .bind("France")
-        .bind(payload.siret)
+        .bind(&payload.siret)
         .execute(&pool)
         .await {
         Ok(result) => result.last_insert_id() as i64,
@@ -150,23 +249,38 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
         })),
     };
 
+    let role : &str = "[\"ROLE_ORGANISATION\"]";
+
     match sqlx::query(
         "INSERT INTO user (is_admin_of_id, email, roles, password) VALUES (?, ?, ?, ?)"
     )
         .bind(&orga_id)
         .bind(&payload.email)
-        .bind("[\"ROLE_ORGANISATION\"]")
+        .bind(&role)
         .bind(&password_hash)
         .execute(&pool)
         .await {
         Ok(result) => {
             let user_id = result.last_insert_id() as i64;
-            session.insert("user_id", user_id).await.unwrap();
-            session.insert("email", &payload.email).await.unwrap();
+
+            let account = Account::Organisation(Organisation {
+                id: user_id,
+                nom: payload.orga_name.clone(),
+                siret: payload.siret.clone(),
+                code: organisation_code.clone()
+            });
+            session.insert("account", account).await.unwrap();
+
 
             Json(json!({
                 "success": true,
-                "code": organisation_code
+                "code": organisation_code,
+                "organisation" : {
+                    "user_id" : user_id,
+                    "email" : &payload.email,
+                    "role": &role,
+                    "siret": payload.siret.as_deref()
+                }
             }))
         },
         Err(e) => Json(json!({
@@ -174,4 +288,27 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
             "message": format!("Erreur création utilisateur: {}", e)
         })),
     }
+}
+
+pub async fn get_current_account(session: Session) -> Json<Value> {
+    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    if let Some(account) = account {
+        Json(json!({
+            "success": true,
+            "account": account
+        }))
+    } else {
+        Json(json!({
+            "success": false,
+            "message": "Non authentifié"
+        }))
+    }
+}
+
+pub async fn logout(session: Session) -> Json<Value> {
+    session.delete().await.unwrap();
+    Json(json!({
+        "success": true,
+    }))
 }

@@ -1,9 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { BACKEND_URL } from '$lib/config';
+import { setSessionCookie } from '$lib/server/session';
 
 export const actions = {
-    default: async ({ request, fetch }) => {
+    default: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const firstname = data.get('firstname');
         const lastname = data.get('lastname');
@@ -25,6 +26,7 @@ export const actions = {
             const result = await response.json();
 
             if(result.success) {
+                setSessionCookie(cookies, response);
                 redirect(303,'/');
             }
 
