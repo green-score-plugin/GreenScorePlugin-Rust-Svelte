@@ -8,25 +8,21 @@
     // import Advice from '$lib/widgets/Advice.svelte';
     // import Top from '$lib/dashboards/Top.svelte';
 
-    export let data;
+    import type { PageData } from './$types';
+    let myAverageDailyCarbonFootprint: number;
+    let averageDailyCarbonFootprint: number;
+    let messageAverageFootprint: string;
 
-    const {
-        title,
-        description,
-        noDatas,
+    export let title : string = 'Mes données';
+    export let description : string = 'Voici une analyse détaillée de vos données de navigation : ';
+    export let noDatas : boolean = false;
+    export let data: PageData;
+    $: ({
         myAverageDailyCarbonFootprint,
         averageDailyCarbonFootprint,
-        messageAverageFootprint,
-        usersIdsCharts,
-        letterGreenScore,
-        envNomination,
-        equivalent1,
-        totalConsu,
-        totalConsuUnit,
-        equivalent2,
-        advice,
-        adviceDev
-    } = data;
+        messageAverageFootprint
+    } = data);
+    console.log("data in page.svelte:", data);
 </script>
 
 <svelte:head>
