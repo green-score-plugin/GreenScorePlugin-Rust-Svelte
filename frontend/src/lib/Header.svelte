@@ -30,7 +30,7 @@
                 <li><a href="/">Accueil</a></li>
                 <li><a href="/mes-donnees">Mes données</a></li>
                 <li><a href="/organisation">Mon organisation</a></li>
-                <li><a href="/derniere-page">Dernière page consultée</a></li>
+                <li><a href="/derniere-page-consultee">Dernière page consultée</a></li>
 
                 {#if user}
                     <li class="relative">
