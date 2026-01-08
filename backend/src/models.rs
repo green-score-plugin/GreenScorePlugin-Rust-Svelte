@@ -34,7 +34,6 @@ pub enum Account {
     User(User),
     Organisation(Organisation),
 }
-
 impl Account {
     pub fn id(&self) -> i64 {
         match self {
