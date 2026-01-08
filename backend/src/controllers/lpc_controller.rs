@@ -89,7 +89,7 @@ async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Ve
     let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
     let equivalents = sqlx::query_as::<_, Equivalent>(
-        "SELECT name, (? * equivalent) as value, icon_thumbnail as icon
+        "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
          FROM equivalent
          WHERE (? * equivalent) >= 1.0
          ORDER BY RAND()
