@@ -1,6 +1,8 @@
 <script lang="ts">
     import { page } from '$app/state';
 
+    import greenScoreLogo from '$lib/images/greenscore-logo.png';
+    import firefoxLogo from "$lib/images/firefox.png";
     let user = $derived(page.data.user);
 
     let profileMenuOpen = $state(false);
@@ -20,7 +22,7 @@
     <div class="flex items-center w-full justify-between px-8">
         <!-- Logo -->
         <a class="cursor-pointer" href="/frontend/static">
-            <img width="55" src="/images/greenscore-logo.png" alt="Logo" />
+            <img width="55" src="{greenScoreLogo}" alt="Logo" />
         </a>
 
         <!-- Menu desktop -->
