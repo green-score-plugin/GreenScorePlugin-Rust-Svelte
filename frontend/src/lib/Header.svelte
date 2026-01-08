@@ -1,6 +1,7 @@
 <script lang="ts">
     import { page } from '$app/state';
-    import logo from '$lib/images/greenscore-logo.png'
+
+    import greenScoreLogo from '$lib/images/greenscore-logo.png';
 
     let user = $derived(page.data.user);
 
@@ -21,7 +22,7 @@
     <div class="flex items-center w-full justify-between px-8">
         <!-- Logo -->
         <a class="cursor-pointer" href="/">
-            <img width="55" src="{logo}" alt="Logo" />
+            <img width="55" src="{greenScoreLogo}" alt="Logo" />
         </a>
 
         <!-- Menu desktop -->
