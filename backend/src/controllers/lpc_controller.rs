@@ -22,6 +22,7 @@ pub struct LastPageConsultedResponse {
     advices: Vec<String>,
     letter: Option<String>,
     env_nomination: Option<String>,
+    equivalents: Option<Vec<(String, String, String)>>,
 }
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
@@ -76,16 +77,53 @@ async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
         ],
     }
 }
+
+async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<(String, String, String)> {
+    let equivalents = sqlx::query_as::<_, (String, f64, String)>(
+        "SELECT name, equivalent, icon_thumbnail FROM equivalent ORDER BY RAND() LIMIT 10",
+    )
+        .fetch_all(&pool)
+        .await;
+
+    let carbon_footprint_in_kg = carbon_footprint / 1000.0;
+
+    match equivalents {
+        Ok(rows) => {
+            rows.into_iter()
+                .map(|(name, equivalent, icon_thumbnail)| {
+                    let equivalent_value = carbon_footprint_in_kg * equivalent;
+                    (name, equivalent_value, icon_thumbnail)
+                })
+                .filter(|(_, value, _)| *value >= 0.1) // Garder seulement si >= 0.1
+                .take(2) // Prendre les 2 premiers
+                .map(|(name, value, icon)| {
+                    (name, format!("{:.2}", value), icon)
+                })
+                .collect()
+        },
+        Err(e) => {
+            eprintln!("Erreur SQL : {:?}", e);
+            vec![]
+        },
+    }
+}
+
+
 pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPageConsultedResponse> {
     let last_search_informations: Option<LastPageConsultedInfos> = last_search_informations(State(pool.clone()), session).await;
 
     let advices: Vec<String> = advices(State(pool.clone())).await;
 
-    let (letter, env_nomination) = if let Some(ref infos) = last_search_informations {
+    let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
         let (l, n) = calculate_green_score(infos.carbon_footprint);
-        (Some(l), Some(n))
+
+        // Appeler equivalents avec .await
+        let eq = equivalents(State(pool.clone()), infos.carbon_footprint).await;
+        eprintln!("Équivalents carbone : {:?}", eq);
+
+        (Some(l), Some(n), Some(eq))
     } else {
-        (None, None)
+        (None, None, None)
     };
 
     Json(LastPageConsultedResponse {
@@ -94,5 +132,6 @@ pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPa
         advices,
         letter,
         env_nomination,
+        equivalents,
     })
 }
