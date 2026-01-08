@@ -1,8 +1,13 @@
 <script lang="ts">
-    export let activePage: 'my_info' | 'organisation' = 'my_info';
+    import { enhance } from '$app/forms';
 
+    export let activePage = "my_info";
     let showDeleteModal = false;
+    let submitted = false;
+
 </script>
+
+
 
 <div class="flex flex-col gap-2 p-2">
     <button
@@ -18,8 +23,6 @@
         </svg>
         Mon compte
     </button>
-
-    <!-- Mon organisation -->
 
     <button
             class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
@@ -49,7 +52,6 @@
     </button>
 
 
-    <!-- Supprimer le compte -->
     <button
             class="flex items-center gap-x-2 px-8 py-4 text-red-600 hover:bg-red-50 transition-colors w-full justify-center cursor-pointer"
             on:click={() => showDeleteModal = true}
@@ -77,13 +79,21 @@
                     Annuler
                 </button>
 
+                <form
+                        method="POST"
+                        action="?/supprimer"
+                        use:enhance={() => {
+                            submitted = true;
+                        }}
+                        class="flex flex-col gap-4">
+
                 <button
-                        type="button"
+                        type="submit"
                         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer transition"
-                        on:click={deleteAccount}
                 >
                     Supprimer
                 </button>
+                </form>
             </div>
         </div>
     </div>
