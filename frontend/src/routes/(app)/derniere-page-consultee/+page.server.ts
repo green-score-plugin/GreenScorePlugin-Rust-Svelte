@@ -11,8 +11,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
         });
         const result = await response.json();
 
-        // console.log(result);
-
         if (!result.success) {
             return {
                 pageData: null,

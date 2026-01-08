@@ -69,9 +69,6 @@
         equivalent1 = data.equivalents[0]
         equivalent2 = data.equivalents[1]
     }
-
-    console.log(equivalent1);
-    console.log(equivalent2);
 </script>
 
 <svelte:head>
