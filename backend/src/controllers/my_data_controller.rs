@@ -22,14 +22,16 @@ async fn get_average_daily_carbon_footprint(
     if let Some(account) = account {
         let user_id = account.id();
         let result = sqlx::query_as::<_, (String, f64)>(
-            "SELECT DATE(creation_date) as day, AVG(carbon_footprint) as daily_average
-         FROM monitored_website
-         WHERE user_id = ?
-         GROUP BY day"
+            "SELECT CAST(DATE(creation_date) AS CHAR) as day, AVG(carbon_footprint) as daily_average
+     FROM monitored_website
+     WHERE user_id = ?
+     GROUP BY day"
         )
             .bind(user_id)
             .fetch_all(pool)
             .await;
+
+        println!("Daily averages result: {:?}", result);
 
         match result {
             Ok(daily_averages) if !daily_averages.is_empty() => {
@@ -44,13 +46,16 @@ async fn get_average_daily_carbon_footprint(
     }
 }
 
+
+
+
 pub async fn my_data(
     State(pool): State<MySqlPool>,
     session: Session,
 )-> Json<MyDataResponse> {
 
     let my_average_daily_carbon_footprint = get_average_daily_carbon_footprint(&pool, session).await;
-
+    println!("My average daily carbon footprint: {:?}", my_average_daily_carbon_footprint);
     let average_daily_carbon_footprint = match sqlx::query_as::<_, (f64,)>(
         "SELECT AVG(carbon_footprint) as overall_average
          FROM monitored_website"

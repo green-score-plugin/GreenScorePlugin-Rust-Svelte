@@ -19,8 +19,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
             };
         }
 
-        console.log("result mes-donnees:", result);
-
         return {
             myAverageDailyCarbonFootprint: result.my_average_daily_carbon_footprint,
             averageDailyCarbonFootprint: result.average_daily_carbon_footprint,
