@@ -98,5 +98,76 @@ export const actions = {
         }
 
         throw redirect(303, '/logout');
+    },
+
+    join_orga: async({ request, fetch, cookies }) => {
+        const data = await request.formData();
+        const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
+
+        if (!codeOrganisation) {
+            return fail(400, { message: "Le code de l'organisation est requis" });
+        }
+
+        try {
+            const payload = { code: codeOrganisation };
+
+            const response = await fetch(`${BACKEND_URL}/join_organization`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorMessage = errorText;
+                try {
+                    const jsonError = JSON.parse(errorText);
+                    errorMessage = jsonError.message || errorText;
+                } catch {}
+
+                return fail(response.status, {
+                    message: errorMessage || "Code invalide"
+                });
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    const sessionValue = (result.token ?? result.session ?? result.sessionValue) as string | undefined | null;
+                    if (sessionValue) {
+                        const fakeRes = new Response(null, {
+                            headers: { 'set-cookie': `greenscoreweb_sessions=${sessionValue}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600` }
+                        });
+                        setSessionCookie(cookies, fakeRes);
+                    }
+                } catch (cookieError) {
+                    console.error('Erreur lors du rafraîchissement du cookie:', cookieError);
+                }
+
+                return {
+                    success: true,
+                    message: "Vous avez rejoint l'organisation avec succès."
+                };
+            } else {
+                return fail(400, { message: result.message || "Erreur lors de l'opération" });
+            }
+
+        } catch (error) {
+            console.error("Erreur join_orga:", error);
+            return fail(500, { message: "Erreur serveur lors de la connexion à l'organisation" });
+        }
     }
+
+
+
 } satisfies Actions;

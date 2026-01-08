@@ -6,6 +6,8 @@ use serde_json::json;
 use tower_sessions::Session;
 use crate::models::{Account, User};
 use bcrypt;
+use sqlx::Row;
+
 
 
 #[derive(Deserialize)]
@@ -21,6 +23,11 @@ pub struct UpdateAccountRequest {
 
     #[serde(default)]
     pub password: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct JoinOrgaRequest {
+    pub code: String,
 }
 
 pub async fn update_account(
@@ -174,3 +181,62 @@ pub async fn delete_account(
     }));
 }
 
+
+
+
+
+
+pub async fn join_organization(
+    session: Session,
+    State(pool): State<MySqlPool>,
+    Json(payload): Json<JoinOrgaRequest>,
+) -> Json<serde_json::Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let user = match account_opt {
+        Some(Account::User(u)) => u,
+        _ => {
+            return Json(json!({
+                "success": false,
+                "message": "Non authentifié"
+            }));
+        }
+    };
+
+    let row_opt = match sqlx::query("SELECT id FROM organization WHERE code = ?")
+        .bind(&payload.code)
+        .fetch_optional(&pool)
+        .await
+    {
+        Ok(r) => r,
+        Err(e) => return Json(json!({
+            "success": false,
+            "message": format!("Erreur lors de la recherche de l'organisation: {}", e)
+        }))
+    };
+
+    let org_id: i32 = match row_opt {
+        Some(row) => row.try_get("id").unwrap_or(0),
+        None => return Json(json!({
+            "success": false,
+            "message": "Code invalide, aucune organisation trouvée."
+        }))
+    };
+
+    if let Err(e) = sqlx::query("UPDATE user SET organization_id = ? WHERE id = ?")
+        .bind(org_id)
+        .bind(user.id)
+        .execute(&pool)
+        .await
+    {
+        return Json(json!({
+            "success": false,
+            "message": format!("Erreur lors de la jonction à l'organisation: {}", e)
+        }));
+    }
+
+    return Json(json!({
+        "success": true,
+        "message": "Organisation rejointe avec succès"
+    }));
+}
