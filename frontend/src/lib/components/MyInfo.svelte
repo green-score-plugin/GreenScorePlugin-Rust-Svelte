@@ -74,6 +74,7 @@
                     bind:value={user.prenom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre prénom"
+                    autocomplete="off"
             />
         </div>
     </div>
@@ -88,6 +89,7 @@
                     bind:value={user.nom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre nom"
+                    autocomplete="off"
             />
         </div>
     </div>
@@ -102,6 +104,7 @@
                     bind:value={user.email}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre email"
+                    autocomplete="off"
             />
         </div>
     </div>
