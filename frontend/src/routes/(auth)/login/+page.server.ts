@@ -1,9 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { BACKEND_URL } from '$lib/config';
+import { setSessionCookie } from '$lib/server/session';
 
 export const actions = {
-    default: async ({ request, fetch }) => {
+    default: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const email = data.get('email');
         const password = data.get('password');
@@ -15,15 +16,16 @@ export const actions = {
         try {
             const response = await fetch(`${BACKEND_URL}/login`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
 
             const result = await response.json();
 
             if (result.success) {
-                redirect(303, '/');
+                setSessionCookie(cookies, response);
+                return redirect(303, '/');
             }
 
             return fail(400, { message: result.message || 'Erreur de connexion' });
