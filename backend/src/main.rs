@@ -39,6 +39,7 @@ async fn main() {
             Method::GET,
             Method::POST,
             Method::DELETE,
+            Method::PATCH,
             Method::OPTIONS
         ])
         .allow_headers([
