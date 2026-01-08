@@ -1,5 +1,4 @@
 <script lang="ts">
-    // import Top from './dashboards/Top.svelte';
     import InfosGreenScore from '$lib/components/widgets/InfosGreenScore.svelte';
     import CountryCarbonIntensity from '$lib/components/widgets/CountryCarbonIntensity.svelte';
     import BadgeGreenScore from '$lib/components/widgets/BadgeGreenScore.svelte';
@@ -11,47 +10,26 @@
     export let title : string = 'Dernière page consultée';
     export let description : string = 'Voici une analyse détaillée de votre dernière page consultée : ';
     export let noDatas : boolean = false;
-    export let link : string;
-
-    export let letterGreenScore : string;
-    export let country : string = 'France';
-    export let carbonIntensity : number;
-    export let flagUrl : string;
-    export let envNomination : string;
-    export let equivalent1Value: number = 5;
-    export let equivalent1Name: string = 'km en voiture thermique';
-    export let equivalent1Icon: string | null = 'co2.svg';
-
-    $: equivalent1 = {
-        name: equivalent1Name,
-        value: equivalent1Value,
-        icon: equivalent1Icon
-    };
-    export let totalConsu : number = 13;
-    export let totalConsuUnit = 'gCO2eq';
-    export let equivalent2Value: number = 12;
-    export let equivalent2Name: string = 'litres d\'eau potable';
-    export let equivalent2Icon: string | null = 'eau.svg';
-
-    $: equivalent2 = {
-        name: equivalent2Name,
-        value: equivalent2Value,
-        icon: equivalent2Icon
-    };
-    export let pageSize: number;
-    export let loadingTime: number;
-    export let queriesQuantity: number;
+    export let letterGreenScore: string = 'A';
+    export let link: string | null = null;
+    export let country: string = 'France';
+    export let carbonFootprint: number = 0;
+    export let totalConsuUnit: string = 'gCO2eq';
+    export let pageSize: number = 0;
     export let pageSizeUnit: string = 'Ko';
-    export let adviceUser: string;
-    export let adviceDev: string;
-    export let equivalents: Array<[string, string, string]> = [];
-
-    export let carbonFootprint: number;
+    export let loadingTime: number = 0;
+    export let queriesQuantity: number = 0;
+    export let flagUrl: string = 'https://flagcdn.com/fr.svg';
+    export let adviceUser: string = "Baissez la luminosité de vos écrans.";
+    export let adviceDev: string = "Optimisez vos requêtes SQL.";
+    export let carbonIntensity: number = 0;
+    export let envNomination: string = 'Maître des Forêts';
+    export let equivalent1: { label: string; value: number; unit: string } = { label: '', value: 0, unit: '' };
+    export let equivalent2: { label: string; value: number; unit: string } = { label: '', value: 0, unit: '' };
 
     import type { PageData } from './$types';
     export let data: PageData;
 
-    console.log(data.equivalents[0]);
     $: if (data.pageData) {
         letterGreenScore = data.pageData.letterGreenScore || 'A';
         link = data.pageData.link;
