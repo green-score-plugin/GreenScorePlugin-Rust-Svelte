@@ -18,9 +18,9 @@
                 <div class="flex flex-col items-center">
                     <div class="relative text-center">
                         <svg class="w-20 h-20 rotate-[-90deg]" viewBox="0 0 36 36">
-                            <circle cx="18" cy="18" r="15.9155" class="text-gradient-purple" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="0 100" stroke-linecap="round"></circle>
+                            <circle cx="18" cy="18" r="15.9155" class="text-gradient-purple" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="100 0" stroke-linecap="round"></circle>
                         </svg>
-                        <p class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gradient-purple animate-counter" data-value="{myAverageDailyCarbonFootprint}">{myAverageDailyCarbonFootprint}</p>
+                        <p class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gradient-purple" data-value="{myAverageDailyCarbonFootprint}">{myAverageDailyCarbonFootprint}</p>
                     </div>
                     <p class="text-sm text-gray-500">Vous</p>
                 </div>
@@ -29,9 +29,9 @@
                 <div class="flex flex-col items-center">
                     <div class="relative text-center">
                         <svg class="w-20 h-20 rotate-[-90deg]" viewBox="0 0 36 36">
-                            <circle cx="18" cy="18" r="15.9155" class="text-gradient-purple" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="0 100" stroke-linecap="round"></circle>
+                            <circle cx="18" cy="18" r="15.9155" class="text-gradient-purple" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="100 0" stroke-linecap="round"></circle>
                         </svg>
-                        <p class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gradient-purple animate-counter" data-value="{averageDailyCarbonFootprint}">{averageDailyCarbonFootprint}</p>
+                        <p class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gradient-purple" data-value="{averageDailyCarbonFootprint}">{averageDailyCarbonFootprint}</p>
                     </div>
                     <p class="text-sm text-gray-500">Les autres utilisateurs</p>
                 </div>
