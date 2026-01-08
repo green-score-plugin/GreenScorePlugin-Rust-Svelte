@@ -4,6 +4,7 @@ use serde::{Serialize};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::models::Account;
+use crate::green_score::calculate_green_score;
 
 #[derive(Serialize)]
 pub struct LastPageConsultedInfos {
@@ -19,6 +20,8 @@ pub struct LastPageConsultedResponse {
     success: bool,
     lpc_infos: Option<LastPageConsultedInfos>,
     advices: Vec<String>,
+    letter: Option<String>,
+    env_nomination: Option<String>,
 }
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
@@ -78,9 +81,18 @@ pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPa
 
     let advices: Vec<String> = advices(State(pool.clone())).await;
 
+    let (letter, env_nomination) = if let Some(ref infos) = last_search_informations {
+        let (l, n) = calculate_green_score(infos.carbon_footprint);
+        (Some(l), Some(n))
+    } else {
+        (None, None)
+    };
+
     Json(LastPageConsultedResponse {
         success: true,
         lpc_infos: last_search_informations,
         advices,
+        letter,
+        env_nomination,
     })
 }
