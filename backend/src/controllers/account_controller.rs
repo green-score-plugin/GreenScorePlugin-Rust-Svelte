@@ -193,47 +193,35 @@ pub async fn join_organization(
 ) -> Json<serde_json::Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    let user = match account_opt {
+    let mut user = match account_opt {
         Some(Account::User(u)) => u,
-        _ => {
-            return Json(json!({
-                "success": false,
-                "message": "Non authentifié"
-            }));
-        }
+        _ => return Json(json!({ "success": false, "message": "Non authentifié" })),
     };
 
-    let row_opt = match sqlx::query("SELECT id FROM organization WHERE code = ?")
+
+    let row_opt = match sqlx::query("SELECT id FROM organisation WHERE organisation_code = ?")
         .bind(&payload.code)
         .fetch_optional(&pool)
         .await
     {
         Ok(r) => r,
-        Err(e) => return Json(json!({
-            "success": false,
-            "message": format!("Erreur lors de la recherche de l'organisation: {}", e)
-        }))
+        Err(e) => return Json(json!({ "success": false, "message": format!("Erreur technique recherche: {}", e) }))
     };
 
     let org_id: i32 = match row_opt {
         Some(row) => row.try_get("id").unwrap_or(0),
-        None => return Json(json!({
-            "success": false,
-            "message": "Code invalide, aucune organisation trouvée."
-        }))
+        None => return Json(json!({ "success": false, "message": format!("Code invalide: '{}'. Aucune organisation trouvée.", payload.code) }))
     };
 
-    if let Err(e) = sqlx::query("UPDATE user SET organization_id = ? WHERE id = ?")
+    if let Err(e) = sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
         .bind(org_id)
         .bind(user.id)
         .execute(&pool)
         .await
     {
-        return Json(json!({
-            "success": false,
-            "message": format!("Erreur lors de la jonction à l'organisation: {}", e)
-        }));
+        return Json(json!({ "success": false, "message": format!("Erreur jonction: {}", e) }));
     }
+
 
     return Json(json!({
         "success": true,

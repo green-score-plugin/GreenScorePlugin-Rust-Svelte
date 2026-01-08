@@ -112,7 +112,7 @@ export const actions = {
             const payload = { code: codeOrganisation };
 
             const response = await fetch(`${BACKEND_URL}/join_organization`, {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
@@ -149,6 +149,9 @@ export const actions = {
                             headers: { 'set-cookie': `greenscoreweb_sessions=${sessionValue}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600` }
                         });
                         setSessionCookie(cookies, fakeRes);
+                    } else {
+                        // Fallback : Si le token n'est pas dans le JSON, on propage les headers de la réponse (Set-Cookie)
+                        setSessionCookie(cookies, response);
                     }
                 } catch (cookieError) {
                     console.error('Erreur lors du rafraîchissement du cookie:', cookieError);
