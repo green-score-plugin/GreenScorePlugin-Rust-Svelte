@@ -17,7 +17,5 @@ pub fn calculate_green_score(carbon_footprint: f64) -> (String, String) {
         ("G", "Destructeur des Écosystèmes")
     };
 
-    eprintln!("Carbon footprint: {}, Green Score: {}, Nomination: {}", carbon_footprint, letter_green_score, env_nomination);
-
     (letter_green_score.to_string(), env_nomination.to_string())
 }
