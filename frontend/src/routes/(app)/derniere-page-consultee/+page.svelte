@@ -66,16 +66,8 @@
         carbonIntensity = data.pageData.carbonIntensity || 0;
         letterGreenScore = data.letterGreenScore || 'A';
         envNomination = data.envNomination || 'Maître des Forêts';
-        equivalent1 = {
-            name: data.equivalents[0][0],
-            value: data.equivalents[0][1].toFixed(2),
-            icon: data.equivalents[0][2]
-        }
-        equivalent2 = {
-            name: data.equivalents[1][0],
-            value: data.equivalents[1][1].toFixed(2),
-            icon: data.equivalents[1][2]
-        }
+        equivalent1 = data.equivalents[0]
+        equivalent2 = data.equivalents[1]
     }
 
     console.log(equivalent1);

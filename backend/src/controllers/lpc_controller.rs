@@ -15,6 +15,14 @@ pub struct LastPageConsultedInfos {
     loading_time: f64,
     country: String,
 }
+
+#[derive(Serialize, sqlx::FromRow)]
+pub struct Equivalent {
+    name: String,
+    value: f64,
+    icon: String,
+}
+
 #[derive(Serialize)]
 pub struct LastPageConsultedResponse {
     success: bool,
@@ -22,7 +30,7 @@ pub struct LastPageConsultedResponse {
     advices: Vec<String>,
     letter: Option<String>,
     env_nomination: Option<String>,
-    equivalents: Option<Vec<(String, f64, String)>>,
+    equivalents: Option<Vec<Equivalent>>,
 }
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
@@ -77,12 +85,11 @@ async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
         ],
     }
 }
-
-async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<(String, f64, String)> {
+async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
     let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
-    let equivalents = sqlx::query_as::<_, (String, f64, String)>(
-        "SELECT name, (? * equivalent) as calculated_value, icon_thumbnail
+    let equivalents = sqlx::query_as::<_, Equivalent>(
+        "SELECT name, (? * equivalent) as value, icon_thumbnail as icon
          FROM equivalent
          WHERE (? * equivalent) >= 1.0
          ORDER BY RAND()
@@ -101,7 +108,6 @@ async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Ve
         },
     }
 }
-
 
 pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPageConsultedResponse> {
     let last_search_informations: Option<LastPageConsultedInfos> = last_search_informations(State(pool.clone()), session).await;
