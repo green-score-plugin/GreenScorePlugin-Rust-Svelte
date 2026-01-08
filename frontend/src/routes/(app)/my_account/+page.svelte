@@ -10,7 +10,7 @@
 
 </script>
 
-<div class="xl:px-52 flex flex-col">
+<div class="xl:px-52 flex flex-col h-full">
     <div class="px-4 lg:px-16 py-8 flex justify-center lg:justify-start items-center gap-x-4">
         <img class="w-[54px] h-auto" src={salutation} alt="Salutation">
         <h1 class="text-2xl font-bold">Bonjour {user.nom}!</h1>
