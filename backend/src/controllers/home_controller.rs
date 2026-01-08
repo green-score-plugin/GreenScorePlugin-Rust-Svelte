@@ -1,4 +1,3 @@
-use axum::response::Html;
 use axum::extract::State;
 use axum::Json;
 use serde_json::{json, Value};

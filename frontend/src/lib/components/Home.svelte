@@ -1,6 +1,6 @@
-
 <script lang="ts">
-    // import Swiper from 'swiper';
+    import Swiper from 'swiper';
+    import { Navigation, Pagination } from 'swiper/modules';
     import 'swiper/css';
     import 'swiper/css/navigation';
     import 'swiper/css/pagination';
@@ -9,7 +9,7 @@
     import backgroundImage from '$lib/images/background.png';
     import citationImage from '$lib/images/citation.svg';
     import greenscoreImage from '$lib/images/greenscore-image.png';
-    import greenscoreLogo from '$lib/images/greenscore-logo.png';
+    // import greenscoreLogo from '$lib/images/greenscore-logo.png';
     import homeImage1 from '$lib/images/home-image1.png';
     import homeImage2 from '$lib/images/home-image2.png';
     import homeImage3 from '$lib/images/home-image3.png';
@@ -18,7 +18,7 @@
     import homeImageMobile1 from '$lib/images/home-image-mobile1.png';
     import homeImageMobile2 from '$lib/images/home-image-mobile2.png';
     import homeImageMobile3 from '$lib/images/home-image-mobile3.png';
-    import registerImage1 from '$lib/images/register-image1.png';
+    // import registerImage1 from '$lib/images/register-image1.png';
     import { onMount, tick } from "svelte";
 
 
@@ -34,23 +34,12 @@
     export let isLoggedIn: boolean = false;
 
     let isDevMode: boolean = false;
-    let swiper: any = null;
+    let showVideo: boolean = false;
+    let swiper: Swiper | null = null;
 
     $: filteredAdvice = advice.filter(item =>
         isDevMode ? item.is_dev : !item.is_dev
     );
-
-
-
-    function waitForSwiper(): Promise<void> {
-        return new Promise((resolve) => {
-            const check = () => {
-                if ((window as any).Swiper) resolve();
-                else setTimeout(check, 50);
-            };
-            check();
-        });
-    }
 
     async function initializeSwiper() {
         if (swiper) {
@@ -60,18 +49,19 @@
 
         await tick();
 
-        swiper = new (window as any).Swiper(".advice-swiper", {
+        swiper = new Swiper(".advice-swiper", {
+            modules: [Navigation, Pagination],
             slidesPerView: 1,
             spaceBetween: 8,
-            observer: true,  // Ajouter cette ligne
-            observeParents: true,  // Ajouter cette ligne
+            observer: true,
+            observeParents: true,
             pagination: {
                 el: ".swiper-pagination",
                 clickable: true,
             },
             navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
+                nextEl: ".custom-next-button",
+                prevEl: ".custom-prev-button",
             },
             breakpoints: {
                 640: { slidesPerView: 1, spaceBetween: 8 },
@@ -108,9 +98,7 @@
 </script>
 
 <svelte:head>
-    <link rel="stylesheet" href="https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css" integrity="sha384-+QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw==" crossorigin="anonymous"/>
-    <script src="https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js" integrity="sha384-+QwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw==" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-papQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw==" crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </svelte:head>
 
 <div class="min-h-screen bg-gs-green-950 text-white font-['Ovo']">
@@ -126,14 +114,14 @@
             </p>
 
             <div class="hidden lg:block">
-                <a href="#" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     Ajouter à Firefox
                 </a>
             </div>
 
             <div class="mt-8 lg:hidden flex justify-center">
-                <a href="#" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     Ajouter à Firefox
                 </a>
@@ -145,13 +133,13 @@
             <!-- Mobile Gallery -->
             <div class="flex justify-between space-x-2 md:hidden">
                 <div class="w-[106px] h-[300px] rounded-2xl overflow-hidden mt-3">
-                    <img src="{homeImageMobile1}" alt="image" class="w-full h-full">
+                    <img src="{homeImageMobile1}" alt="Interface mobile 1" class="w-full h-full">
                 </div>
                 <div class="w-[106px] h-[300px] rounded-2xl overflow-hidden">
-                    <img src="{homeImageMobile2}" alt="image" class="w-full h-full">
+                    <img src="{homeImageMobile2}" alt="Interface mobile 2" class="w-full h-full">
                 </div>
                 <div class="w-[106px] h-[300px] rounded-2xl overflow-hidden mt-3">
-                    <img src="{homeImageMobile3}" alt="image" class="w-full h-full">
+                    <img src="{homeImageMobile3}" alt="Interface mobile 3" class="w-full h-full">
                 </div>
             </div>
 
@@ -159,31 +147,31 @@
             <div class="hidden md:flex flex-wrap justify-center md:justify-between lg:justify-between gap-2 md:gap-3 lg:gap-4 max-w-7xl mx-auto px-2 mb-0">
                 <div class="hidden lg:block">
                     <div class="overflow-hidden rounded-2xl w-[180px] lg:w-[230px] h-[414px]">
-                        <img src="{homeImage1}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage1}" alt="Interface application 1" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="hidden md:block pt-8">
                     <div class="overflow-hidden rounded-2xl w-[180px] lg:w-[230px] h-[414px]">
-                        <img src="{homeImage2}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage2}" alt="Interface application 2" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="block">
                     <div class="overflow-hidden rounded-2xl w-[140px] md:w-[180px] lg:w-[230px] h-[270px] md:h-[414px]">
-                        <img src="{homeImage3}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage3}" alt="Interface application 3" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="block pt-8">
                     <div class="overflow-hidden rounded-2xl w-[140px] md:w-[180px] lg:w-[230px] h-[270px] md:h-[414px]">
-                        <img src="{homeImage4}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage4}" alt="Interface application 4" class="w-full h-full object-fill">
                     </div>
                 </div>
 
                 <div class="block mb-0 md:hidden lg:block">
                     <div class="overflow-hidden rounded-2xl w-[140px] md:w-[180px] lg:w-[230px] h-[270px] md:h-[414px]">
-                        <img src="{homeImage5}" alt="image" class="w-full h-full object-fill">
+                        <img src="{homeImage5}" alt="Interface application 5" class="w-full h-full object-fill">
                     </div>
                 </div>
             </div>
@@ -193,22 +181,42 @@
     <!-- Video Section -->
     <div class="container mx-auto px-4 md:px-16 py-12">
         <div class="grid lg:grid-cols-2 gap-8">
-            <div class="bg-white rounded-lg overflow-hidden hidden lg:block">
+            <div class="bg-white rounded-lg overflow-hidden block">
                 <div class="text-black font-outfit font-regular px-4 py-2 flex items-center gap-2">
                     <div class="w-4 h-4 bg-[#6D874B] rounded-full"></div>
                     <span class="text-xs font-bold">Web</span>
                 </div>
-                <div class="h-[200px] lg:h-[400px] flex items-center justify-center overflow-hidden">
-                    <iframe
-                            width="100%"
-                            height="100%"
-                            src="https://www.youtube.com/embed/lAYfNt7web8?autoplay=1&mute=1&controls=0&loop=1&playlist=lAYfNt7web8&modestbranding=1&showinfo=0&rel=0"
-                            title="GreenScore Web Vidéo"
-                            frameborder="0"
-                            allow="autoplay; encrypted-media"
-                            allowfullscreen
-                            class="object-cover"
-                    ></iframe>
+                <div class="h-[200px] lg:h-[400px] flex items-center justify-center overflow-hidden bg-black relative">
+                    {#if showVideo}
+                        <iframe
+                                width="100%"
+                                height="100%"
+                                src="https://www.youtube-nocookie.com/embed/lAYfNt7web8?autoplay=1&mute=1&controls=0&loop=1&playlist=lAYfNt7web8&modestbranding=1&showinfo=0&rel=0&iv_load_policy=3"
+                                title="GreenScore Web Vidéo"
+                                style="border:0;"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                                allowfullscreen
+                                class="w-full h-full"
+                        ></iframe>
+                    {:else}
+                        <button
+                                class="w-full h-full relative group cursor-pointer focus:outline-none"
+                                on:click={() => showVideo = true}
+                                aria-label="Lancer la vidéo"
+                        >
+                            <img
+                                    src="https://img.youtube.com/vi/lAYfNt7web8/hqdefault.jpg"
+                                    alt="Aperçu vidéo"
+                                    class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                            />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-16 h-16 bg-[#6D874B] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-play text-white text-2xl ml-1"></i>
+                                </div>
+                            </div>
+                        </button>
+                    {/if}
                 </div>
             </div>
 
@@ -321,32 +329,42 @@
                 </button>
             </div>
 
-            <div class="relative px-8 md:px-12">
-                <div class="swiper advice-swiper">
-                    <div class="swiper-wrapper">
-                        {#each filteredAdvice as item}
-                            <div class="swiper-slide h-full">
-                                <div class="bg-white rounded-xl shadow-md p-4 h-full flex items-center mx-1">
-                                    <div class="bg-[#F5F7FF] p-3 rounded-lg icon-square mr-4 flex-shrink-0">
-                                        <i class="{item.icon} text-black text-4xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-outfit font-regular mb-1">{item.title}</h3>
-                                        <p class="text-sm font-extralight text-gray-600">{item.advice}</p>
+            <div class="relative px-4 md:px-16 flex flex-col justify-center w-full max-w-6xl mx-auto">
+                {#if filteredAdvice.length > 0}
+                    <div class="swiper advice-swiper w-full !pt-6 !pb-14 !px-4 -mx-4">
+                        <div class="swiper-wrapper">
+                            {#each filteredAdvice as item}
+                                <div class="swiper-slide !h-auto">
+                                    <div class="bg-white h-full w-full rounded-xl shadow-md p-6 flex flex-col sm:flex-row items-center justify-center text-center sm:text-left gap-4 transition-transform hover:scale-[1.02]">
+                                        <div class="bg-[#F5F7FF] p-3 rounded-lg w-20 h-20 flex-shrink-0 flex items-center justify-center">
+                                            <i class="{item.icon} text-[#6D874B] text-3xl"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-outfit font-semibold text-lg mb-2 text-gray-900">{item.title}</h3>
+                                            <p class="text-sm leading-relaxed text-gray-600">{item.advice}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        {:else}
-                            <p>Aucun conseil à afficher</p>
-                        {/each}
+                            {/each}
+                        </div>
+
+                        <!-- Pagination inside swiper container for proper positioning relative to slides -->
+                        <div class="swiper-pagination !bottom-0 [&_.swiper-pagination-bullet-active]:!bg-[#6D874B] [&_.swiper-pagination-bullet]:!bg-gray-300 [&_.swiper-pagination-bullet]:!opacity-100"></div>
                     </div>
-                </div>
 
-                <div class="swiper-button-prev custom-nav-btn p-3 absolute left-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
-                <div class="swiper-button-next custom-nav-btn p-3 absolute right-0 top-1/2 transform z-10 bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-md"></div>
+                    <!-- Navigation buttons outside swiper container -->
+                    <button class="custom-prev-button absolute left-0 md:-left-6 top-[calc(50%-1rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Conseil précédent">
+                        <i class="fa-solid fa-chevron-left text-sm md:text-base"></i>
+                    </button>
+                    <button class="custom-next-button absolute right-0 md:-right-6 top-[calc(50%-1rem)] -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white text-[#6D874B] rounded-full shadow-lg hover:bg-[#6D874B] hover:text-white transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Conseil suivant">
+                        <i class="fa-solid fa-chevron-right text-sm md:text-base"></i>
+                    </button>
+                {:else}
+                    <div class="text-center py-8">
+                        <p class="text-gray-500">Aucun conseil à afficher</p>
+                    </div>
+                {/if}
             </div>
-
-            <div class="swiper-pagination mt-4"></div>
         </div>
     </section>
 
@@ -541,75 +559,3 @@
         </div>
     </div>
 </div>
-
-<!-- Styles personnalisés Swiper -->
-<style>
-    .custom-nav-btn:after {
-        font-size: 18px;
-        color: #1E293B;
-    }
-
-    .swiper-button-prev.custom-nav-btn:after,
-    .swiper-button-next.custom-nav-btn:after {
-        font-weight: bold;
-        transform: scale(0.7);
-    }
-
-    .custom-nav-btn {
-        border-radius: 9999px;
-        width: 36px;
-        height: 36px;
-        color: #6D874B;
-
-    }
-
-    .swiper-pagination {
-        position: relative;
-        bottom: 0;
-        color: #6D874B;
-    }
-
-    .swiper-pagination-bullet-active {
-        background-color: #6D874B;
-    }
-
-    .advice-swiper {
-        overflow: hidden;
-        padding: 5px 0;
-        max-width: 100%;
-        margin: 0 auto;
-    }
-
-    .advice-swiper .swiper-slide {
-        opacity: 1;
-        visibility: visible;
-        width: 100%;
-    }
-
-    .advice-swiper .swiper-wrapper {
-        margin: 0;
-        padding: 0;
-    }
-
-    .swiper-button-prev.custom-nav-btn {
-        left: 5px;
-    }
-
-    .swiper-button-next.custom-nav-btn {
-        right: 5px;
-    }
-
-    .relative.px-8\:md\:px-12 {
-        display: flex;
-        justify-content: center;
-    }
-
-    .icon-square {
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-</style>
-
