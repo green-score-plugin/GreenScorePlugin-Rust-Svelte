@@ -16,7 +16,7 @@
     }
 </script>
 
-<div class="bg-white flex flex-col justify-between gap-4 p-6 rounded-lg shadow-md col-span-1 sm:col-span-2 order-2 sm:order-3 lg:col-span-4 lg:order-2">
+<div class="bg-white flex flex-col gap-4 p-6 rounded-lg shadow-md col-span-1 sm:col-span-2 order-2 sm:order-3 lg:col-span-4 lg:order-2">
     {#if country && carbonIntensity}
     <div class="flex items-center gap-4">
         {#if flagUrl}
@@ -26,7 +26,7 @@
         {/if}
         <h2 class="text-lg font-bold font-outfit text-grey-950">Vous faites votre recherche depuis ce pays : { country }.</h2>
     </div>
-    <div class="flex justify-center flex-wrap items-center gap-4">
+    <div class="flex justify-center flex-wrap items-center gap-4 h-full">
         <picture class="flex items-center justify-center mt-4 flex-1">
             <img src="{empreinteCarboneUrl}" class="w-32 h-auto min-w-[100px]" alt="Empreinte Carbone" loading="lazy">
         </picture>
