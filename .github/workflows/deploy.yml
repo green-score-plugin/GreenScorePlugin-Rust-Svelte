@@ -30,7 +30,7 @@ jobs:
       - name: Prepare artifacts for deployment
         run: |
           mkdir deploy_folder
-          cp frontend/frontend_deploy.tar.gz deploy_folder/
+          cp frontend_deploy.tar.gz deploy_folder/
           cp backend/target/release/backend deploy_folder/
 
       - name: Deploy to AlwaysData via SSH
