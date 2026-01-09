@@ -16,7 +16,7 @@ use tower_http::cors::CorsLayer;
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let backend_url = env::var("BACKEND_URL").unwrap_or("http://localhost:3000".to_string());
+    let backend_url = env::var("BACKEND_URL").unwrap_or("localhost:3000".to_string());
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set");
 
     let pool = MySqlPool::connect(&database_url).await.unwrap();
@@ -33,6 +33,7 @@ async fn main() {
 
     let cors = CorsLayer::new()
         .allow_origin([
+            "https://testgreenscore.alwaysdata.net".parse::<HeaderValue>().unwrap(),
             "http://localhost:5173".parse::<HeaderValue>().unwrap(),
             "http://127.0.0.1:5173".parse::<HeaderValue>().unwrap()
         ])
