@@ -56,9 +56,9 @@ jobs:
             # 1. Gestion du FRONTEND
             mv /home/testgreenscore/www/app/frontend_deploy.tar.gz /home/testgreenscore/www/app/frontend/
             cd /home/testgreenscore/www/app/frontend/
-            tar -xzf frontend_deploy.tar.gz --strip-components=1
+            tar -xzf frontend_deploy.tar.gz
             npm install --omit=dev
-            rm frontend_deploy.tar.gz
+            #rm frontend_deploy.tar.gz
 
             # 2. Gestion du BACKEND
             mv /home/testgreenscore/www/app/backend_binary /home/testgreenscore/www/app/backend/backend
