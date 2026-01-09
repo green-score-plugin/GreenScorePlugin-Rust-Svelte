@@ -2,6 +2,15 @@
     export let equivalent: { name: string; value: number; icon: string | null } | null = null;
     export let order: number = 1;
 
+    const modules = import.meta.glob('/src/lib/images/equivalents/*.{png,jpg,jpeg,webp,svg}', { eager: true }) as Record<string, any>;
+    const iconMap: Record<string, string> = {};
+    for (const p in modules) {
+        const name = p.split('/').pop()!;
+        iconMap[name] = modules[p].default ?? modules[p];
+    }
+
+    $: iconUrl = equivalent?.icon ? iconMap[equivalent.icon] ?? null : null;
+
     $: orderClasses = order === 1
         ? 'order-4 sm:order-5 lg:order-4'
         : 'order-5 sm:order-6 lg:order-6';
@@ -18,7 +27,7 @@
         {#if equivalent.icon}
             <picture class="w-24 h-24 flex items-center justify-center mt-4">
                 <img
-                        src="/images/equivalents/{equivalent.icon}"
+                        src="{iconUrl}"
                         alt={equivalent.name}
                         class="w-full h-auto object-contain"
                         loading="lazy"
