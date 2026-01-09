@@ -13,6 +13,7 @@ jobs:
       - name: Build Rust (Release)
         working-directory: ./backend
         run: |
+          cargo install sqlx-cli
           cargo sqlx prepare
           cargo build --release
           cp target/release/backend ../backend
