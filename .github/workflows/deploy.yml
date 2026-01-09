@@ -29,9 +29,11 @@ jobs:
       # --- DÉPLOIEMENT ---
       - name: Prepare artifacts for deployment
         run: |
-          mkdir deploy_folder
-          cp frontend_deploy.tar.gz deploy_folder/
-          cp backend/target/release/backend deploy_folder/
+          mkdir -p deploy_folder/frontend
+          mkdir -p deploy_folder/backend
+          
+          cp frontend_deploy.tar.gz deploy_folder/frontend/
+          cp backend/target/release/backend deploy_folder/backend/backend
 
       - name: Deploy to AlwaysData via SSH
         uses: easingthemes/ssh-deploy@main
