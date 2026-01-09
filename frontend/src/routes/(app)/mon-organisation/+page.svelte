@@ -1,7 +1,13 @@
 <script lang="ts">
+    import OrganizationAverageDailyCarbonFootprint from "$lib/components/widgets/OrganizationAverageDailyCarbonFootprint.svelte";
     export let title : string = 'Mon Organisation';
     export let description : string = 'Toutes les données sur les membres de : ORGANISATION A RÉCUPÉRER';
     export let noDatas : boolean = false;
+
+
+    export let averageFootprint: number = 10;
+    export let equivalentAverage: { name: string; value: number; icon: string } = { name: 'km en voiture', value: 5, icon: 'car.png' };
+
 </script>
 
 <svelte:head>
@@ -19,7 +25,6 @@
     </div>
 
     {#if !noDatas}
-    <!-- Main Content Grid -->
     <div class="grid grid-cols-1 gap-6 p-10 sm:grid-cols-2 lg:grid-cols-12">
         <!--{% include 'widgets/_organisation_average_daily_carbon_footprint.html.twig' with {averageFootprint: averageFootprint, equivalentAverage: equivalentAverage} %}-->
         <!--{% include 'widgets/_chart_consumption_filtered.html.twig' with {usersIdsCharts: usersIdsCharts} %}-->
@@ -30,6 +35,8 @@
         <!--{% include 'widgets/_chart_top5_polluting_sites.html.twig' with {usersIdsCharts: usersIdsCharts} %}-->
         <!--{% include 'widgets/_advice.html.twig' with {type: "lambda", advice: advice} %}-->
         <!--{% include 'widgets/_advice.html.twig' with {type: "dev", advice: adviceDev} %}-->
+
+        <OrganizationAverageDailyCarbonFootprint {averageFootprint} {equivalentAverage}/>
     </div>
     {:else}
     <div class="w-full h-screen flex items-center justify-center font-outfit">
