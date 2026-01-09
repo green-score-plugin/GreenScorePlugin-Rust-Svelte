@@ -15,7 +15,10 @@ export const load: PageServerLoad = async ({ fetch }) => {
             return {
                 pageData: null,
                 adviceUser: '',
-                adviceDev: ''
+                adviceDev: '',
+                letterGreenScore: '',
+                envNomination: '',
+                equivalents: []
             };
         }
 
@@ -70,14 +73,20 @@ export const load: PageServerLoad = async ({ fetch }) => {
                 carbonIntensity
             },
             adviceUser: result.advices?.[1] || '',
-            adviceDev: result.advices?.[0] || ''
+            adviceDev: result.advices?.[0] || '',
+            letterGreenScore: result.letter || 'A',
+            envNomination: result.env_nomination || 'Maître des Forêts',
+            equivalents: result.equivalents || []
         };
     } catch (error) {
         console.error('Erreur lors de la récupération des données :', error);
         return {
             pageData: null,
             adviceUser: '',
-            adviceDev: ''
+            adviceDev: '',
+            letterGreenScore: '',
+            envNomination: '',
+            equivalents: []
         };
     }
 }

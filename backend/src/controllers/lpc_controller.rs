@@ -4,6 +4,7 @@ use serde::{Serialize};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::models::Account;
+use crate::green_score::calculate_green_score;
 
 #[derive(Serialize)]
 pub struct LastPageConsultedInfos {
@@ -14,11 +15,22 @@ pub struct LastPageConsultedInfos {
     loading_time: f64,
     country: String,
 }
+
+#[derive(Serialize, sqlx::FromRow)]
+pub struct Equivalent {
+    name: String,
+    value: f64,
+    icon: String,
+}
+
 #[derive(Serialize)]
 pub struct LastPageConsultedResponse {
     success: bool,
     lpc_infos: Option<LastPageConsultedInfos>,
     advices: Vec<String>,
+    letter: Option<String>,
+    env_nomination: Option<String>,
+    equivalents: Option<Vec<Equivalent>>,
 }
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
@@ -73,14 +85,51 @@ async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
         ],
     }
 }
+async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
+    let carbon_footprint_in_kg = carbon_footprint / 1000.0;
+
+    let equivalents = sqlx::query_as::<_, Equivalent>(
+        "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
+         FROM equivalent
+         WHERE (? * equivalent) >= 1.0
+         ORDER BY RAND()
+         LIMIT 2",
+    )
+        .bind(carbon_footprint_in_kg)
+        .bind(carbon_footprint_in_kg)
+        .fetch_all(&pool)
+        .await;
+
+    match equivalents {
+        Ok(rows) => rows,
+        Err(e) => {
+            eprintln!("Erreur SQL : {:?}", e);
+            vec![]
+        },
+    }
+}
+
 pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPageConsultedResponse> {
     let last_search_informations: Option<LastPageConsultedInfos> = last_search_informations(State(pool.clone()), session).await;
 
     let advices: Vec<String> = advices(State(pool.clone())).await;
 
+    let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
+        let (l, n) = calculate_green_score(infos.carbon_footprint);
+
+        let eq = equivalents(State(pool.clone()), infos.carbon_footprint).await;
+
+        (Some(l), Some(n), Some(eq))
+    } else {
+        (None, None, None)
+    };
+
     Json(LastPageConsultedResponse {
         success: true,
         lpc_infos: last_search_informations,
         advices,
+        letter,
+        env_nomination,
+        equivalents,
     })
 }
