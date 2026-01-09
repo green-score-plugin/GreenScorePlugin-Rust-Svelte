@@ -54,12 +54,15 @@ jobs:
           key: ${{ secrets.ALWAYS_SSH_KEY }}
           script: |
             # 1. Gestion du FRONTEND
+            rm -r /home/testgreenscore/www/app/frontend
+            mkdir -p /home/testgreenscore/www/app/frontend
             mv /home/testgreenscore/www/app/frontend_deploy.tar.gz /home/testgreenscore/www/app/frontend/
             cd /home/testgreenscore/www/app/frontend/
             tar -xzf frontend_deploy.tar.gz
             npm install --omit=dev
-            #rm frontend_deploy.tar.gz
+            rm frontend_deploy.tar.gz
 
             # 2. Gestion du BACKEND
-            mv /home/testgreenscore/www/app/backend_binary /home/testgreenscore/www/app/backend/backend
+            rm /home/testgreenscore/www/app/backend/backend
+            mv /home/testgreenscore/www/app/backend /home/testgreenscore/www/app/backend/backend
             chmod +x /home/testgreenscore/www/app/backend/backend
