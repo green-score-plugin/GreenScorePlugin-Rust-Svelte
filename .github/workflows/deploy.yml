@@ -27,15 +27,21 @@ jobs:
           tar -czf ../frontend_deploy.tar.gz build/ package.json package-lock.json
 
       # --- DÉPLOIEMENT ---
+      - name: Prepare artifacts for deployment
+        run: |
+          mkdir deploy_folder
+          cp frontend/frontend_deploy.tar.gz deploy_folder/
+          cp backend/target/release/backend deploy_folder/
+
       - name: Deploy to AlwaysData via SSH
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.ALWAYS_SSH_KEY }}
-          ARGS: "-rlgoDzvc -i"
           REMOTE_HOST: "ssh-testgreenscore.alwaysdata.net"
           REMOTE_USER: "testgreenscore"
           TARGET: "/home/testgreenscore/www/app/"
-          SOURCE: "frontend_deploy.tar.gz,backend"
+          SOURCE: "deploy_folder/"
+          ARGS: "-rlgoDzvc -i"
 
       # --- REDÉMARRAGE ---
       - name: Restart Services
