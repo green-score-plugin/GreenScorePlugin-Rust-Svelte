@@ -17,6 +17,8 @@ jobs:
           cargo sqlx prepare
           cargo build --release
           cp target/release/backend ../backend
+        env:
+          SQLX_OFFLINE: true
 
       # --- PARTIE SVELTE ---
       - name: Install & Build Svelte
