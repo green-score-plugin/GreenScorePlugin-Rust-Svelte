@@ -24,8 +24,8 @@
     export let adviceDev: string = "Optimisez vos requêtes SQL.";
     export let carbonIntensity: number = 0;
     export let envNomination: string = 'Maître des Forêts';
-    export let equivalent1: { label: string; value: number; unit: string } = { label: '', value: 0, unit: '' };
-    export let equivalent2: { label: string; value: number; unit: string } = { label: '', value: 0, unit: '' };
+    export let equivalent1: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
+    export let equivalent2: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
 
     import type { PageData } from './$types';
     export let data: PageData;
