@@ -35,7 +35,7 @@ jobs:
           REMOTE_HOST: "ssh-testgreenscore.alwaysdata.net"
           REMOTE_USER: "testgreenscore"
           TARGET: "/home/testgreenscore/www/app/"
-          SOURCE: "frontend_deploy.tar.gz,backend_binary"
+          SOURCE: "frontend_deploy.tar.gz,backend"
 
       # --- REDÉMARRAGE ---
       - name: Restart Services
