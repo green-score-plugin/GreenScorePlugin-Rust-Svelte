@@ -1,3 +1,2 @@
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
-
-export const BACKEND_URL = PUBLIC_BACKEND_URL ?? 'http://localhost:3000';
+import { env } from '$env/dynamic/public';
+export const BACKEND_URL = env.PUBLIC_BACKEND_URL ?? 'http://localhost:3000';
