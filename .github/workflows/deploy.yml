@@ -1,0 +1,55 @@
+name: Deploy to AlwaysData
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- PARTIE RUST ---
+      - name: Build Rust (Release)
+        working-directory: ./backend
+        run: |
+          cargo build --release
+          cp target/release/backend ../backend
+
+      # --- PARTIE SVELTE ---
+      - name: Install & Build Svelte
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+          tar -czf ../frontend_deploy.tar.gz build/ package.json package-lock.json
+
+      # --- DÉPLOIEMENT ---
+      - name: Deploy to AlwaysData via SSH
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.ALWAYS_SSH_KEY }}
+          ARGS: "-rlgoDzvc -i"
+          REMOTE_HOST: "ssh-testgreenscore.alwaysdata.net"
+          REMOTE_USER: "testgreenscore"
+          TARGET: "/home/testgreenscore/www/app/"
+          SOURCE: "frontend_deploy.tar.gz,backend_binary"
+
+      # --- REDÉMARRAGE ---
+      - name: Restart Services
+        uses: appleboy/ssh-action@master
+        with:
+          host: "ssh-testgreenscore.alwaysdata.net"
+          username: "testgreenscore"
+          key: ${{ secrets.ALWAYS_SSH_KEY }}
+          script: |
+            # 1. Gestion du FRONTEND
+            mv /home/testgreenscore/www/app/frontend_deploy.tar.gz /home/testgreenscore/www/app/frontend/
+            cd /home/testgreenscore/www/app/frontend/
+            tar -xzf frontend_deploy.tar.gz --strip-components=1
+            npm install --omit=dev
+            rm frontend_deploy.tar.gz
+
+            # 2. Gestion du BACKEND
+            mv /home/testgreenscore/www/app/backend_binary /home/testgreenscore/www/app/backend/backend
+            chmod +x /home/testgreenscore/www/app/backend/backend
