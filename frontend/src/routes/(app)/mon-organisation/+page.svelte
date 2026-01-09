@@ -1,5 +1,7 @@
 <script lang="ts">
     import OrganizationAverageDailyCarbonFootprint from "$lib/components/widgets/OrganizationAverageDailyCarbonFootprint.svelte";
+    import ChartConsumptionFiltered from "$lib/components/widgets/ChartConsumptionFiltered.svelte";
+
     export let title : string = 'Mon Organisation';
     export let description : string = 'Toutes les données sur les membres de : ORGANISATION A RÉCUPÉRER';
     export let noDatas : boolean = false;
@@ -7,6 +9,8 @@
 
     export let averageFootprint: number = 10;
     export let equivalentAverage: { name: string; value: number; icon: string } = { name: 'km en voiture', value: 5, icon: 'car.png' };
+    export let usersIdsCharts: string = '1,2,3,4,5';
+
 
 </script>
 
@@ -37,6 +41,7 @@
         <!--{% include 'widgets/_advice.html.twig' with {type: "dev", advice: adviceDev} %}-->
 
         <OrganizationAverageDailyCarbonFootprint {averageFootprint} {equivalentAverage}/>
+        <ChartConsumptionFiltered {usersIdsCharts}/>
     </div>
     {:else}
     <div class="w-full h-screen flex items-center justify-center font-outfit">
