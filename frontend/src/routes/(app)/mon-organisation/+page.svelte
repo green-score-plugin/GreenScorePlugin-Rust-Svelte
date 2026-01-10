@@ -4,6 +4,7 @@
     import BadgeGreenScore from "$lib/components/widgets/BadgeGreenScore.svelte";
     import Equivalent from "$lib/components/widgets/Equivalent.svelte";
     import TotalConsumption from "$lib/components/widgets/TotalConsumption.svelte";
+    import ChartTop5PollutingSites from "$lib/components/widgets/ChartTop5PollutingSites.svelte";
 
     export let title : string = 'Mon Organisation';
     export let description : string = 'Toutes les données sur les membres de : ORGANISATION A RÉCUPÉRER';
@@ -55,6 +56,7 @@
         <Equivalent equivalent={equivalent1} order={1} />
         <TotalConsumption {carbonFootprint} {totalConsuUnit} {label} />
         <Equivalent equivalent={equivalent2} order={2} />
+        <ChartTop5PollutingSites {usersIdsCharts} />
     </div>
     {:else}
     <div class="w-full h-screen flex items-center justify-center font-outfit">
