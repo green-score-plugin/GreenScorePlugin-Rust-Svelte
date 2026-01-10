@@ -37,9 +37,13 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
         };
 
         let result = sqlx::query_as::<_, (f64,)>(
-            "SELECT ROUND(AVG(mw.carbon_footprint), 2) AS average_daily_carbon_footprint
+            "SELECT ROUND(
+                    COALESCE(
+                        SUM(mw.carbon_footprint) / NULLIF(DATEDIFF(CURDATE(), MIN(DATE(mw.creation_date))) + 1, 0)
+                    , 0)
+                , 2) AS average_daily_carbon_footprint
             FROM monitored_website mw
-            JOIN user u on u.id = mw.user_id
+            JOIN user u ON u.id = mw.user_id
             WHERE u.organisation_id = ?"
         )
             .bind(org_id)
