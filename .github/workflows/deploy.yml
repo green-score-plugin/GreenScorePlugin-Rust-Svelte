@@ -54,8 +54,10 @@ jobs:
           key: ${{ secrets.ALWAYS_SSH_KEY }}
           script: |
             # 1. Gestion du FRONTEND
-            rm -r /home/testgreenscore/www/app/frontend
-            mkdir -p /home/testgreenscore/www/app/frontend
+            rm -r /home/testgreenscore/www/app/frontend/build
+            rm -r /home/testgreenscore/www/app/frontend/node_modules
+            rm /home/testgreenscore/www/app/frontend/package.json
+            rm /home/testgreenscore/www/app/frontend/package-lock.json
             mv /home/testgreenscore/www/app/frontend_deploy.tar.gz /home/testgreenscore/www/app/frontend/
             cd /home/testgreenscore/www/app/frontend/
             tar -xzf frontend_deploy.tar.gz
