@@ -1,22 +1,20 @@
 use axum::extract::State;
 use axum::Json;
 use serde::Serialize;
-use serde_json::Value;
 use sqlx::MySqlPool;
 use tower_sessions::Session;
+use crate::controllers::helpers::{advice, equivalent};
+use crate::controllers::helpers::Equivalent;
+use crate::green_score::calculate_green_score;
+use crate::models::Account;
 
 #[derive(Serialize)]
 pub struct MyOrganizationInfos {
-    carbon_footprint: f64,
+    average_daily_carbon_footprint: f64,
+    equivalent: Option<Equivalent>,
     members: Vec<i32>,
 }
 
-#[derive(Serialize, sqlx::FromRow)]
-pub struct Equivalent {
-    name: String,
-    value: f64,
-    icon: String,
-}
 
 #[derive(Serialize)]
 pub struct MyOrganizationResponse {
@@ -28,51 +26,87 @@ pub struct MyOrganizationResponse {
     equivalents: Option<Vec<Equivalent>>,
 }
 
-async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
-    use tokio::try_join;
+async fn organization_informations(State(pool): State<MySqlPool>, session: Session) -> Option<MyOrganizationInfos> {
+    let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    let dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 1 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(&pool);
+    if let Some(account) = account {
+        let org_id: i64 = match account.organization_id(&pool).await {
+            Ok(Some(id)) => id,
+            Ok(None) => return None,
+            Err(_) => return None,
+        };
 
-    let non_dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 0 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(&pool);
+        let result = sqlx::query_as::<_, (f64,)>(
+            "SELECT ROUND(AVG(mw.carbon_footprint), 2) AS average_daily_carbon_footprint
+            FROM monitored_website mw
+            JOIN user u on u.id = mw.user_id
+            WHERE u.organization_id = ?"
+        )
+            .bind(org_id)
+            .fetch_one(&pool)
+            .await;
 
-    match try_join!(dev_query, non_dev_query) {
-        Ok(((dev_advice,), (non_dev_advice,))) => vec![dev_advice, non_dev_advice],
-        Err(_) => vec![
-            "Utilisez des requêtes SQL optimisées pour réduire la charge serveur.".to_string(),
-            "Fermez les onglets inutilisés pour réduire la consommation d'énergie.".to_string(),
-        ],
+        match result {
+            Ok((average_daily_carbon_footprint,)) => {
+                let equivalent = equivalent(&pool, average_daily_carbon_footprint).await;
+
+                let members_result = sqlx::query_as::<_, (i32,)>(
+                    "SELECT id FROM user WHERE organization_id = ?",
+                )
+                    .bind(org_id)
+                    .fetch_all(&pool)
+                    .await;
+
+                let members = match members_result {
+                    Ok(rows) => rows.into_iter().map(|(id,)| id).collect(),
+                    Err(_) => vec![],
+                };
+
+                Some(MyOrganizationInfos {
+                    average_daily_carbon_footprint,
+                    equivalent,
+                    members,
+                })
+            }
+            Err(_) => None,
+        }
+    } else {
+        None
     }
 }
-async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
-    let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
-    let equivalents = sqlx::query_as::<_, Equivalent>(
-        "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
-         FROM equivalent
-         WHERE (? * equivalent) >= 1.0
-         ORDER BY RAND()
-         LIMIT 2",
-    )
-        .bind(carbon_footprint_in_kg)
-        .bind(carbon_footprint_in_kg)
-        .fetch_all(&pool)
-        .await;
+pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrganizationResponse> {
+    let organization_informations: Option<MyOrganizationInfos> = organization_informations(State(pool.clone()), session).await;
 
-    match equivalents {
-        Ok(rows) => rows,
-        Err(e) => {
-            eprintln!("Erreur SQL : {:?}", e);
-            vec![]
-        },
-    }
-}
+    let advices: Vec<String> = {
+        let mut v = Vec::new();
+        v.push(advice(&pool, false).await);
+        v.push(advice(&pool, true).await);
+        v
+    };
 
-pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<Value> {
+    let (letter, env_nomination, equivalents) = if let Some(ref infos) = organization_informations {
+        let (l, n) = calculate_green_score(infos.average_daily_carbon_footprint);
 
+        let mut collected: Vec<Equivalent> = Vec::new();
+        for _ in 0..2 {
+            if let Some(e) = equivalent(&pool, infos.average_daily_carbon_footprint).await {
+                collected.push(e);
+            }
+        }
+        let eqs = if collected.is_empty() { None } else { Some(collected) };
+
+        (Some(l), Some(n), eqs)
+    } else {
+        (None, None, None)
+    };
+
+    Json(MyOrganizationResponse {
+        success: true,
+        mo_infos: organization_informations,
+        advices,
+        letter,
+        env_nomination,
+        equivalents,
+    })
 }
