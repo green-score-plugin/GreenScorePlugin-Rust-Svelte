@@ -5,6 +5,7 @@
     import Equivalent from "$lib/components/widgets/Equivalent.svelte";
     import TotalConsumption from "$lib/components/widgets/TotalConsumption.svelte";
     import ChartTop5PollutingSites from "$lib/components/widgets/ChartTop5PollutingSites.svelte";
+    import Advice from "$lib/components/widgets/Advice.svelte";
 
     export let title : string = 'Mon Organisation';
     export let description : string = 'Toutes les données sur les membres de : ORGANISATION A RÉCUPÉRER';
@@ -21,7 +22,8 @@
     export let carbonFootprint: number = 5000;
     export let totalConsuUnit: string = 'gCO2eq';
     export let label: string = 'Total de la consommation de votre organisation depuis la création du compte :';
-
+    export let advice: string = "Réduisez la résolution des images sur votre site web.";
+    export let adviceDev: string = "Mettez en place un système de mise en cache efficace.";
 </script>
 
 <svelte:head>
@@ -57,6 +59,8 @@
         <TotalConsumption {carbonFootprint} {totalConsuUnit} {label} />
         <Equivalent equivalent={equivalent2} order={2} />
         <ChartTop5PollutingSites {usersIdsCharts} />
+        <Advice type="nav" advice={advice}/>
+        <Advice type="dev" advice={adviceDev} />
     </div>
     {:else}
     <div class="w-full h-screen flex items-center justify-center font-outfit">
