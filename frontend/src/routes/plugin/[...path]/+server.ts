@@ -4,7 +4,7 @@ import type {RequestHandler} from './$types';
 
 export const fallback: RequestHandler = async ({ params, request }) => {
     const route = params.path;
-    const backendUrl = `${BACKEND_URL}/${route}`;
+    const backendUrl = `${BACKEND_URL}/plugin/${route}`;
 
     console.log(backendUrl);
 

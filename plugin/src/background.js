@@ -81,7 +81,7 @@ async function getLatestCarbonIntensity(countryCode) {
 async function sendDataToServer(data) {
   try {
     console.log("Sending data to server:", data);
-    const response = await fetch(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/plugin/save_monitored_website_data`, {
+    const response = await fetch(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/save_monitored_website_data`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -609,7 +609,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       try {
         const response = await fetch(
-          `${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/plugin/equivalent`,
+          `${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/equivalent`,
           {
             method: "POST",
             headers: {
@@ -620,7 +620,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         );
 
         if (!response.ok) {
-          console.log(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/plugin/equivalent`)
+          console.log(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/equivalent`)
           throw new Error(`Erreur API RUST : ${response.status}`);
         }
 
