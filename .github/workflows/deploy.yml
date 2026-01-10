@@ -39,9 +39,9 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.ALWAYS_SSH_KEY }}
-          REMOTE_HOST: "ssh-testgreenscore.alwaysdata.net"
-          REMOTE_USER: "testgreenscore"
-          TARGET: "/home/testgreenscore/www/app/"
+          REMOTE_HOST: "ssh-greenscore.alwaysdata.net"
+          REMOTE_USER: "greenscore"
+          TARGET: "/home/greenscore/www/app/"
           SOURCE: "deploy_folder/"
           ARGS: "-rlgoDzvc -i"
 
@@ -49,11 +49,11 @@ jobs:
       - name: Restart Services
         uses: appleboy/ssh-action@master
         with:
-          host: "ssh-testgreenscore.alwaysdata.net"
-          username: "testgreenscore"
+          host: "ssh-greenscore.alwaysdata.net"
+          username: "greenscore"
           key: ${{ secrets.ALWAYS_SSH_KEY }}
           script: |
-            APP_DIR="/home/testgreenscore/www/app"
+            APP_DIR="/home/greenscore/www/app"
             
             # 1. Gestion du FRONTEND
             # Remove old build files
