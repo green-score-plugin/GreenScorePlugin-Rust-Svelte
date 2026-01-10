@@ -29,6 +29,31 @@ pub async fn advices(pool: &MySqlPool) -> Vec<String> {
         ],
     }
 }
+
+pub async fn advice(pool: &MySqlPool, is_dev: bool) -> String {
+    let is_dev_val: i32 = if is_dev { 1 } else { 0 };
+
+    let result = sqlx::query_as::<_, (String,)>(
+        "SELECT advice FROM advice WHERE is_dev = ? ORDER BY RAND() LIMIT 1",
+    )
+        .bind(is_dev_val)
+        .fetch_one(pool)
+        .await;
+
+    match result {
+        Ok((advice, )) => advice,
+        Err(e) => {
+            eprintln!("Erreur SQL (advice) : {:?}", e);
+            if is_dev {
+                "Priorisez des outils et workflows durables pour réduire l'empreinte des développeurs.".to_string()
+            } else {
+                "Adoptez des usages numériques responsables pour diminuer la consommation énergétique.".to_string()
+            }
+        }
+    }
+}
+
+
 pub async fn equivalents(pool: &MySqlPool, carbon_footprint: f64) -> Vec<Equivalent> {
     let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
