@@ -8,7 +8,7 @@ use crate::controllers::helpers::Equivalent;
 use crate::green_score::calculate_green_score;
 use crate::models::Account;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 pub struct MyOrganizationInfos {
     average_daily_carbon_footprint: f64,
     equivalent: Option<Equivalent>,
