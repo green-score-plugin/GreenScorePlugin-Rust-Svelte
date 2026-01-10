@@ -33,7 +33,7 @@ jobs:
           mkdir -p deploy_folder/backend
           
           cp frontend_deploy.tar.gz deploy_folder/frontend/
-          cp backend/target/release/backend deploy_folder/backend/backend
+          cp backend/target/release/backend deploy_folder/backend/backend_binary
 
       - name: Deploy to AlwaysData via SSH
         uses: easingthemes/ssh-deploy@main
@@ -65,6 +65,6 @@ jobs:
             rm frontend_deploy.tar.gz
 
             # 2. Gestion du BACKEND
-            rm /home/testgreenscore/www/app/backend/backend
-            mv /home/testgreenscore/www/app/backend /home/testgreenscore/www/app/backend/backend
-            chmod +x /home/testgreenscore/www/app/backend/backend
+            rm /home/testgreenscore/www/app/backend/backend_binary
+            mv /home/testgreenscore/www/app/backend_binary /home/testgreenscore/www/app/backend/
+            chmod +x /home/testgreenscore/www/app/backend/backend_binary
