@@ -5,7 +5,7 @@ use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::models::Account;
 use crate::green_score::calculate_green_score;
-use crate::controllers::helpers::{equivalents, advice, equivalent};
+use crate::controllers::helpers::{advice, equivalent};
 use crate::controllers::helpers::Equivalent;
 
 #[derive(Serialize)]

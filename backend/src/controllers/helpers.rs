@@ -31,31 +31,6 @@ pub async fn advice(pool: &MySqlPool, is_dev: bool) -> String {
     }
 }
 
-
-pub async fn equivalents(pool: &MySqlPool, carbon_footprint: f64) -> Vec<Equivalent> {
-    let carbon_footprint_in_kg = carbon_footprint / 1000.0;
-
-    let equivalents = sqlx::query_as::<_, Equivalent>(
-        "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
-         FROM equivalent
-         WHERE (? * equivalent) >= 1.0
-         ORDER BY RAND()
-         LIMIT 2",
-    )
-        .bind(carbon_footprint_in_kg)
-        .bind(carbon_footprint_in_kg)
-        .fetch_all(pool)
-        .await;
-
-    match equivalents {
-        Ok(rows) => rows,
-        Err(e) => {
-            eprintln!("Erreur SQL : {:?}", e);
-            vec![]
-        },
-    }
-}
-
 pub async fn equivalent(pool: &MySqlPool, carbon_footprint: f64) -> Option<Equivalent> {
     let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
