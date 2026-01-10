@@ -3,6 +3,7 @@
     import ChartConsumptionFiltered from "$lib/components/widgets/ChartConsumptionFiltered.svelte";
     import BadgeGreenScore from "$lib/components/widgets/BadgeGreenScore.svelte";
     import Equivalent from "$lib/components/widgets/Equivalent.svelte";
+    import TotalConsumption from "$lib/components/widgets/TotalConsumption.svelte";
 
     export let title : string = 'Mon Organisation';
     export let description : string = 'Toutes les données sur les membres de : ORGANISATION A RÉCUPÉRER';
@@ -16,6 +17,9 @@
     export let envNomination = 'Maître des Forêts';
     export let equivalent1: { name: string; value: number; icon: string } = { name: 'douches', value: 20, icon: 'shower.png' };
     export let equivalent2: { name: string; value: number; icon: string } = { name: 'km en vélo', value: 100, icon: 'bike.png' };
+    export let carbonFootprint: number = 5000;
+    export let totalConsuUnit: string = 'gCO2eq';
+    export let label: string = 'Total de la consommation de votre organisation depuis la création du compte :';
 
 </script>
 
@@ -49,6 +53,7 @@
         <ChartConsumptionFiltered {usersIdsCharts}/>
         <BadgeGreenScore {letterGreenScore} {envNomination}/>
         <Equivalent equivalent={equivalent1} order={1} />
+        <TotalConsumption {carbonFootprint} {totalConsuUnit} {label} />
         <Equivalent equivalent={equivalent2} order={2} />
     </div>
     {:else}
