@@ -60,12 +60,14 @@ jobs:
             rm -rf $APP_DIR/frontend/build
             rm -rf $APP_DIR/frontend/node_modules
             
-            # The tar.gz is inside the frontend subfolder because of how it was uploaded
             cd $APP_DIR/frontend/
             tar -xzf frontend_deploy.tar.gz
             npm install --omit=dev
             rm frontend_deploy.tar.gz
             
             # 2. Gestion du BACKEND
-            # The binary is inside the backend subfolder
             chmod +x $APP_DIR/backend/backend_binary
+            
+            # 3. Restart les serveurs
+            curl -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }} account=greenscore:" https://api.alwaysdata.com/v1/site/1007299/restart/
+            curl -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }} account=greenscore:" https://api.alwaysdata.com/v1/service/19361/restart/
