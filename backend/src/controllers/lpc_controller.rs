@@ -5,7 +5,7 @@ use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::models::Account;
 use crate::green_score::calculate_green_score;
-use crate::controllers::helpers::{equivalents, advice};
+use crate::controllers::helpers::{equivalents, advice, equivalent};
 use crate::controllers::helpers::Equivalent;
 
 #[derive(Serialize)]
@@ -72,9 +72,15 @@ pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPa
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
         let (l, n) = calculate_green_score(infos.carbon_footprint);
 
-        let eq = equivalents(&State(pool.clone()), infos.carbon_footprint).await;
+        let mut collected: Vec<Equivalent> = Vec::new();
+        for _ in 0..2 {
+            if let Some(e) = equivalent(&pool, infos.carbon_footprint).await {
+                collected.push(e);
+            }
+        }
+        let eqs = if collected.is_empty() { None } else { Some(collected) };
 
-        (Some(l), Some(n), Some(eq))
+        (Some(l), Some(n), eqs)
     } else {
         (None, None, None)
     };
