@@ -46,25 +46,26 @@ jobs:
           ARGS: "-rlgoDzvc -i"
 
       # --- REDÉMARRAGE ---
-      - name: Restart Services
-        uses: appleboy/ssh-action@master
-        with:
-          host: "ssh-testgreenscore.alwaysdata.net"
-          username: "testgreenscore"
-          key: ${{ secrets.ALWAYS_SSH_KEY }}
-          script: |
-            # 1. Gestion du FRONTEND
-            rm -r /home/testgreenscore/www/app/frontend/build
-            rm -r /home/testgreenscore/www/app/frontend/node_modules
-            rm /home/testgreenscore/www/app/frontend/package.json
-            rm /home/testgreenscore/www/app/frontend/package-lock.json
-            mv /home/testgreenscore/www/app/frontend_deploy.tar.gz /home/testgreenscore/www/app/frontend/
-            cd /home/testgreenscore/www/app/frontend/
-            tar -xzf frontend_deploy.tar.gz
-            npm install --omit=dev
-            rm frontend_deploy.tar.gz
-
-            # 2. Gestion du BACKEND
-            rm /home/testgreenscore/www/app/backend/backend_binary
-            mv /home/testgreenscore/www/app/backend_binary /home/testgreenscore/www/app/backend/
-            chmod +x /home/testgreenscore/www/app/backend/backend_binary
+      name: Restart Services
+      uses: appleboy/ssh-action@master
+      with:
+        host: "ssh-testgreenscore.alwaysdata.net"
+        username: "testgreenscore"
+        key: ${{ secrets.ALWAYS_SSH_KEY }}
+        script: |
+          APP_DIR="/home/testgreenscore/www/app"
+          
+          # 1. Gestion du FRONTEND
+          # Remove old build files
+          rm -rf $APP_DIR/frontend/build
+          rm -rf $APP_DIR/frontend/node_modules
+          
+          # The tar.gz is inside the frontend subfolder because of how it was uploaded
+          cd $APP_DIR/frontend/
+          tar -xzf frontend_deploy.tar.gz
+          npm install --omit=dev
+          rm frontend_deploy.tar.gz
+          
+          # 2. Gestion du BACKEND
+          # The binary is inside the backend subfolder
+          chmod +x $APP_DIR/backend/backend_binary
