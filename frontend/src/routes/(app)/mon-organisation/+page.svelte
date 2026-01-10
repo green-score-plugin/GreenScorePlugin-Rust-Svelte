@@ -1,6 +1,7 @@
 <script lang="ts">
     import OrganizationAverageDailyCarbonFootprint from "$lib/components/widgets/OrganizationAverageDailyCarbonFootprint.svelte";
     import ChartConsumptionFiltered from "$lib/components/widgets/ChartConsumptionFiltered.svelte";
+    import BadgeGreenScore from "$lib/components/widgets/BadgeGreenScore.svelte";
 
     export let title : string = 'Mon Organisation';
     export let description : string = 'Toutes les données sur les membres de : ORGANISATION A RÉCUPÉRER';
@@ -10,7 +11,8 @@
     export let averageFootprint: number = 10;
     export let equivalentAverage: { name: string; value: number; icon: string } = { name: 'km en voiture', value: 5, icon: 'car.png' };
     export let usersIdsCharts: string = '1,2,3,4,5';
-
+    export let letterGreenScore = 'A';
+    export let envNomination = 'Maître des Forêts';
 
 </script>
 
@@ -42,6 +44,7 @@
 
         <OrganizationAverageDailyCarbonFootprint {averageFootprint} {equivalentAverage}/>
         <ChartConsumptionFiltered {usersIdsCharts}/>
+        <BadgeGreenScore {letterGreenScore} {envNomination}/>
     </div>
     {:else}
     <div class="w-full h-screen flex items-center justify-center font-outfit">
