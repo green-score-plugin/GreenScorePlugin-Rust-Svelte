@@ -60,7 +60,6 @@ async fn main() {
         .await
         .unwrap();
 
-    println!("Le serveur a bien restart2");
     println!("Server running at {}", backend_url);
 
     axum::serve(listener, app).await.unwrap();

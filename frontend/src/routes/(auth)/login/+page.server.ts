@@ -13,8 +13,6 @@ export const actions = {
             return fail(400, { message: 'Email et mot de passe requis' });
         }
 
-        console.log("Le serveur à bien restart2");
-
         try {
             const response = await fetch(`${BACKEND_URL}/login`, {
                 method: 'POST',
