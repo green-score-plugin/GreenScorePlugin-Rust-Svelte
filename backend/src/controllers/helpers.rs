@@ -8,28 +8,6 @@ pub struct Equivalent {
     icon: String,
 }
 
-pub async fn advices(pool: &MySqlPool) -> Vec<String> {
-    use tokio::try_join;
-
-    let dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 1 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(pool);
-
-    let non_dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 0 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(pool);
-
-    match try_join!(dev_query, non_dev_query) {
-        Ok(((dev_advice,), (non_dev_advice,))) => vec![dev_advice, non_dev_advice],
-        Err(_) => vec![
-            "Utilisez des requêtes SQL optimisées pour réduire la charge serveur.".to_string(),
-            "Fermez les onglets inutilisés pour réduire la consommation d'énergie.".to_string(),
-        ],
-    }
-}
-
 pub async fn advice(pool: &MySqlPool, is_dev: bool) -> String {
     let is_dev_val: i32 = if is_dev { 1 } else { 0 };
 
