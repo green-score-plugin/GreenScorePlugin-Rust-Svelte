@@ -19,15 +19,17 @@
     }
 
     $: {
-        if ($page.form?.success) {
-            successMessage = $page.form.message || 'Informations mises à jour avec succès';
-            errorMessage = '';
-            password = '';
-            passwordConfirm = '';
-            submitted = false;
-        } else if ($page.form?.message) {
-            errorMessage = $page.form.message;
-            successMessage = '';
+        if ($page.form?.actionType === 'update_info') {
+            if ($page.form?.success) {
+                successMessage = $page.form.message || 'Informations mises à jour avec succès';
+                errorMessage = '';
+                password = '';
+                passwordConfirm = '';
+                submitted = false;
+            } else if ($page.form?.message) {
+                errorMessage = $page.form.message;
+                successMessage = '';
+            }
         }
     }
     $: passwordValid = !submitted || (password === passwordConfirm && (password.length === 0 || password.length >= 8));

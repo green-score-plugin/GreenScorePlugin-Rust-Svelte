@@ -10,13 +10,15 @@
     let codeOrganisation = '';
 
     $: {
-        if ($page.form?.success) {
-            successMessage = $page.form.message || 'Succès';
-            errorMessage = '';
-            codeOrganisation = ''; // On vide le champ après succès
-        } else if ($page.form?.message) {
-            errorMessage = $page.form.message;
-            successMessage = '';
+        if ($page.form?.actionType === 'join_orga') {
+            if ($page.form?.success) {
+                successMessage = $page.form.message || 'Succès';
+                errorMessage = '';
+                codeOrganisation = ''; // On vide le champ après succès
+            } else if ($page.form?.message) {
+                errorMessage = $page.form.message;
+                successMessage = '';
+            }
         }
     }
 </script>
