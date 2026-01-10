@@ -13,7 +13,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
 
     // Routes publiques
-    const publicRoutes = ['/login', '/inscription', '/inscription-organisation', '/cgu', '/confidentialite', '/'];
+    const publicRoutes = ['/login', '/inscription', '/inscription-organisation', '/cgu', '/confidentialite', '/', 'derniere-page'];
     const isPublicRoute = publicRoutes.some(route =>
         event.url.pathname === route || event.url.pathname.startsWith(route + '/')
     );
