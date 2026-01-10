@@ -8,7 +8,7 @@ use crate::controllers::helpers::Equivalent;
 use crate::green_score::calculate_green_score;
 use crate::models::Account;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct MyOrganizationInfos {
     average_daily_carbon_footprint: f64,
     equivalent: Option<Equivalent>,
@@ -40,7 +40,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
             "SELECT ROUND(AVG(mw.carbon_footprint), 2) AS average_daily_carbon_footprint
             FROM monitored_website mw
             JOIN user u on u.id = mw.user_id
-            WHERE u.organization_id = ?"
+            WHERE u.organisation_id = ?"
         )
             .bind(org_id)
             .fetch_one(&pool)
