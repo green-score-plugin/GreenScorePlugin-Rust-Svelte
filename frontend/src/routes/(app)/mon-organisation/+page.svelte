@@ -42,16 +42,6 @@
 
     {#if !noDatas}
     <div class="grid grid-cols-1 gap-6 p-10 sm:grid-cols-2 lg:grid-cols-12">
-        <!--{% include 'widgets/_organisation_average_daily_carbon_footprint.html.twig' with {averageFootprint: averageFootprint, equivalentAverage: equivalentAverage} %}-->
-        <!--{% include 'widgets/_chart_consumption_filtered.html.twig' with {usersIdsCharts: usersIdsCharts} %}-->
-        <!--{% include 'widgets/_badge_green_score.html.twig' with {letterGreenScore: letterGreenScore, envNomination: envNomination} %}-->
-        <!--{% include 'widgets/_equivalent.html.twig' with {equivalent: equivalent1, order: 1} %}-->
-        <!--{% include 'widgets/_total_consumption.html.twig' with {totalConsu: totalConsu, totalConsuUnit: totalConsuUnit, label:'Total de la consommation de votre organisation depuis la création du compte :'} %}-->
-        <!--{% include 'widgets/_equivalent.html.twig' with {equivalent: equivalent2, order: 2} %}-->
-        <!--{% include 'widgets/_chart_top5_polluting_sites.html.twig' with {usersIdsCharts: usersIdsCharts} %}-->
-        <!--{% include 'widgets/_advice.html.twig' with {type: "lambda", advice: advice} %}-->
-        <!--{% include 'widgets/_advice.html.twig' with {type: "dev", advice: adviceDev} %}-->
-
         <OrganizationAverageDailyCarbonFootprint {averageFootprint} {equivalentAverage}/>
         <ChartConsumptionFiltered {usersIdsCharts}/>
         <BadgeGreenScore {letterGreenScore} {envNomination}/>
