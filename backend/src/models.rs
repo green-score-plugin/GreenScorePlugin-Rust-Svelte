@@ -34,3 +34,12 @@ pub enum Account {
     User(User),
     Organisation(Organisation),
 }
+
+impl Account {
+    pub fn id(&self) -> i64 {
+        match self {
+            Account::User(u) => u.id,
+            Account::Organisation(o) => o.id,
+        }
+    }
+}

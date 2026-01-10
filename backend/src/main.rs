@@ -3,6 +3,7 @@ mod controllers;
 mod session_store;
 mod cleanup;
 pub mod models;
+mod green_score;
 
 use session_store::MySqlStore;
 use sqlx::MySqlPool;
