@@ -1,7 +1,7 @@
 use axum::extract::State;
 use axum::Json;
 use sqlx::MySqlPool;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::json;
 use tower_sessions::Session;
 use crate::models::{Account, User};
@@ -193,7 +193,7 @@ pub async fn join_organization(
 ) -> Json<serde_json::Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    let mut user = match account_opt {
+    let user = match account_opt {
         Some(Account::User(u)) => u,
         _ => return Json(json!({ "success": false, "message": "Non authentifié" })),
     };

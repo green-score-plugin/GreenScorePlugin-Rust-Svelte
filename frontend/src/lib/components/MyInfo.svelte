@@ -31,11 +31,15 @@
         }
     }
     $: passwordValid = !submitted || (password === passwordConfirm && (password.length === 0 || password.length >= 8));
+
+    // Force une valeur invalide pour contourner l'autocomplétion des navigateurs et le type checking strict de Svelte
+    const noAutofill = { autocomplete: 'nop' } as any;
 </script>
 
 <form
         method="POST"
         action="?/modifier"
+        autocomplete="off"
         use:enhance={() => {
         submitted = true;
         if (!passwordValid) return async () => {};
@@ -51,6 +55,12 @@
         class="flex flex-col gap-4"
 >
     <h1 class="text-2xl font-bold py-2">Mes informations</h1>
+
+    <!-- Inputs cachés pour leurrer le navigateur -->
+    <div style="opacity: 0; position: absolute; top: 0; left: 0; height: 0; width: 0; z-index: -1;">
+        <input type="text" name="fake_email_prevent_autofill" tabindex="-1" />
+        <input type="password" name="fake_password_prevent_autofill" tabindex="-1" />
+    </div>
 
     {#if successMessage}
         <div class="px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
@@ -74,7 +84,7 @@
                     bind:value={user.prenom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre prénom"
-                    autocomplete="off"
+                    {...noAutofill}
             />
         </div>
     </div>
@@ -89,7 +99,7 @@
                     bind:value={user.nom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre nom"
-                    autocomplete="off"
+                    {...noAutofill}
             />
         </div>
     </div>
@@ -104,7 +114,7 @@
                     bind:value={user.email}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre email"
-                    autocomplete="off"
+                    {...noAutofill}
             />
         </div>
     </div>
@@ -119,6 +129,7 @@
                     bind:value={password}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre mot de passe"
+                    autocomplete="new-password"
             />
         </div>
 
@@ -130,6 +141,7 @@
                     bind:value={passwordConfirm}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Confirmez votre mot de passe"
+                    autocomplete="new-password"
             />
         </div>
     </div>
