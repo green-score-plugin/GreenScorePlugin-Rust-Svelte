@@ -77,7 +77,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           });
         }
       }
-      return;
     }
   });
 
@@ -132,6 +131,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function updateAverageConsumption(gCO2e) {
       const AVERAGE_CONSUMPTION = 0.74; // Valeur obtenue sur un calcul de moyenne sur plus de 100 sites
+
+      if (gCO2e <= 0) {
+        document.getElementById("average-consumption").textContent = "négligeable comparé";
+        return;
+      }
+
       let multiplier = gCO2e / AVERAGE_CONSUMPTION;
 
       if (multiplier > 1) {
@@ -143,6 +148,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           1 / multiplier
         ).toFixed(2)}x inférieur`;
       }
+    }
+
+    try {
+      const response = await browser.runtime.sendMessage({ type: "getgCO2e" });
+      if (response && response.gCO2e !== undefined) {
+        gCO2eValue = parseFloat(response.gCO2e).toFixed(2);
+        updateColors(gCO2eValue);
+        updateAverageConsumption(gCO2eValue);
+      } else {
+        console.warn("Pas de valeur gCO2e reçue");
+        updateColors(0);
+      }
+    } catch (error) {
+      console.error("Erreur récupération gCO2e:", error);
     }
 
     // Vérification du statut de connexion
@@ -227,7 +246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
           // Ouvrir l'URL dans un nouvel onglet
-          window.open(url, "_blank");
+          browser.tabs.create({ url: url });
         });
       }
     } catch (error) {
