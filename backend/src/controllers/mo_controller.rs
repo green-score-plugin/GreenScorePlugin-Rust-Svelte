@@ -26,6 +26,41 @@ pub struct MyOrganizationResponse {
     equivalents: Option<Vec<Equivalent>>,
 }
 
+async fn average_daily_carbon_footprint(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
+    let result = sqlx::query_as::<_, (f64,)>(
+        "SELECT ROUND(
+                COALESCE(
+                    SUM(mw.carbon_footprint) / NULLIF(DATEDIFF(CURDATE(), MIN(DATE(mw.creation_date))) + 1, 0)
+                , 0)
+            , 2) AS average_daily_carbon_footprint
+        FROM monitored_website mw
+        JOIN user u ON u.id = mw.user_id
+        WHERE u.organisation_id = ?"
+    )
+        .bind(org_id)
+        .fetch_one(&pool)
+        .await;
+
+    match result {
+        Ok((average_daily_carbon_footprint,)) => Some(average_daily_carbon_footprint),
+        Err(_) => None,
+    }
+}
+
+async fn organization_members(State(pool): State<MySqlPool>, org_id: i64) -> Vec<i32> {
+    let result = sqlx::query_as::<_, (i32,)>(
+        "SELECT id FROM user WHERE organisation_id = ?",
+    )
+        .bind(org_id)
+        .fetch_all(&pool)
+        .await;
+
+    match result {
+        Ok(rows) => rows.into_iter().map(|(id,)| id).collect(),
+        Err(_) => vec![],
+    }
+}
+
 async fn organization_informations(State(pool): State<MySqlPool>, session: Session) -> Option<MyOrganizationInfos> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
@@ -36,35 +71,15 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
             Err(_) => return None,
         };
 
-        let result = sqlx::query_as::<_, (f64,)>(
-            "SELECT ROUND(
-                    COALESCE(
-                        SUM(mw.carbon_footprint) / NULLIF(DATEDIFF(CURDATE(), MIN(DATE(mw.creation_date))) + 1, 0)
-                    , 0)
-                , 2) AS average_daily_carbon_footprint
-            FROM monitored_website mw
-            JOIN user u ON u.id = mw.user_id
-            WHERE u.organisation_id = ?"
-        )
-            .bind(org_id)
-            .fetch_one(&pool)
-            .await;
+        eprint!("Organization id : {:?}", org_id);
 
-        match result {
-            Ok((average_daily_carbon_footprint,)) => {
+        let average_daily_carbon_footprint_result = average_daily_carbon_footprint(State(pool.clone()), org_id).await;
+
+        match average_daily_carbon_footprint_result {
+            Some(average_daily_carbon_footprint) => {
                 let equivalent = equivalent(&pool, average_daily_carbon_footprint).await;
 
-                let members_result = sqlx::query_as::<_, (i32,)>(
-                    "SELECT id FROM user WHERE organization_id = ?",
-                )
-                    .bind(org_id)
-                    .fetch_all(&pool)
-                    .await;
-
-                let members = match members_result {
-                    Ok(rows) => rows.into_iter().map(|(id,)| id).collect(),
-                    Err(_) => vec![],
-                };
+                let members = organization_members(State(pool.clone()), org_id).await;
 
                 Some(MyOrganizationInfos {
                     average_daily_carbon_footprint,
@@ -72,7 +87,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
                     members,
                 })
             }
-            Err(_) => None,
+            None => None,
         }
     } else {
         None
