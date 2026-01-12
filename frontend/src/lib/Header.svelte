@@ -15,6 +15,23 @@
     function toggleMobileMenu() {
         mobileMenuOpen = !mobileMenuOpen;
     }
+
+    function clickOutside(node: HTMLElement) {
+        const handle = (event: MouseEvent) => {
+            if (!node.contains(event.target as Node)) {
+                profileMenuOpen = false;
+                mobileMenuOpen = false;
+            }
+        };
+
+        document.addEventListener('click', handle, true);
+
+        return {
+            destroy() {
+                document.removeEventListener('click', handle, true);
+            }
+        };
+    }
 </script>
 
 
@@ -35,7 +52,8 @@
 
                 {#if user}
                     <li class="relative">
-                        <button onclick={toggleProfileMenu} class="focus:outline-none" aria-label="Menu profil">
+                        <!-- Empêcher la propagation du clic pour que l'action clickOutside ne ferme pas immédiatement le menu -->
+                        <button on:click|stopPropagation={toggleProfileMenu} class="focus:outline-none" aria-label="Menu profil">
                             <svg width="34" height="35" viewBox="0 0 34 35" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="0.5" y="1" width="33" height="33" rx="16.5" stroke="#030712" />
                                 <path d="M27 26.5C27 20.6665 23.3636 16.5001 17 16.5" stroke="#233430" />
@@ -45,7 +63,8 @@
                         </button>
 
                         {#if profileMenuOpen}
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
+                            <!-- Utilisation de l'action pour fermer le menu quand on clique à l'extérieur -->
+                            <div use:clickOutside class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
                                 {#if user.role === 'organisation'}
                                     <a href="/gerer-organisation" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon organisation</a>
                                 {:else}
@@ -63,7 +82,8 @@
 
         <!-- Menu burger -->
         <div class="lg:hidden flex items-center">
-            <button onclick={toggleMobileMenu} class="focus:outline-none" aria-label="Menu mobile">
+            <!-- Empêcher la propagation du clic pour éviter la fermeture immédiate via clickOutside -->
+            <button on:click|stopPropagation={toggleMobileMenu} class="focus:outline-none" aria-label="Menu mobile">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 7.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
                 </svg>
@@ -73,7 +93,8 @@
 
     <!-- Mobile menu -->
     {#if mobileMenuOpen}
-        <div class="absolute top-24 left-0 w-full bg-white py-5 z-10 lg:hidden">
+        <!-- Ajouter l'action pour fermer le menu mobile quand on clique à l'extérieur -->
+        <div use:clickOutside class="absolute top-24 left-0 w-full bg-white py-5 z-10 lg:hidden">
             <ul class="flex flex-col font-outfit font-medium text-grey-950 items-center gap-4 text-lg">
                 <li><a href="/">Informations</a></li>
                 <li><a href="/mes-donnees">Mes données</a></li>
