@@ -1,5 +1,5 @@
 <script lang="ts">
-    import LeftMenu from '$lib/components/LeftMenu.svelte';
+    import LeftMenu from '$lib/components/myaccount/LeftMenu.svelte';
     import MyInfo from '$lib/components/MyInfo.svelte';
     import Organisation from '$lib/components/Organisation.svelte';
     import salutation from '$lib/images/salutation.png';
@@ -7,6 +7,8 @@
 
     let activePage = $state("my_info");
     let user = $derived(page.data.user);
+
+    console.log("User data:", user);
 
 </script>
 
