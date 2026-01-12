@@ -6,6 +6,6 @@
             <span>|</span>
             <a href="/cgu" class="hover:text-blue-400">Conditions Générales d'Utilisation</a>
         </div>
-        <p class="mt-4">Contactez-nous : <a href="mailto:greenscore.plugin@gmail.com" class="hover:text-blue-400">greenscore.plugin@gmail.com</a></p>
+        <p class="mt-4">Contactez-nous : <a href="mailto:greenscoreweb@gmail.com" class="hover:text-blue-400">greenscore.plugin@gmail.com</a></p>
     </div>
 </footer>
