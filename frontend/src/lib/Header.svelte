@@ -47,7 +47,7 @@
                         {#if profileMenuOpen}
                             <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
                                 {#if user.role === 'organisation'}
-                                    <a href="/gerer-organisation" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon organisation</a>
+                                    <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon organisation</a>
                                 {:else}
                                     <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon compte</a>
                                 {/if}
@@ -81,7 +81,7 @@
                 <li><a href="/derniere-page">Dernière page consultée</a></li>
 
                 {#if user}
-                    <li><a href="/my_account" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon compte</a></li>
+                    <li><a href="/mon_compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon compte</a></li>
                     <li><a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Se déconnecter</a></li>
                 {:else}
                     <li><a href="/login">Se connecter</a></li>

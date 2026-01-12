@@ -1,9 +1,14 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
+    import {page} from "$app/state";
 
-    export let activePage = "my_info";
-    let showDeleteModal = false;
-    let submitted = false;
+
+    let { activePage = $bindable() } = $props();
+    let showDeleteModal = $state(false);
+    let submitted = $state(false);
+
+    const user = $derived(page.data?.user);
+
 
 </script>
 
@@ -13,7 +18,7 @@
     <button
             class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
                {activePage === 'my_info' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
-            on:click={() => activePage = 'my_info'}
+            onclick={() => activePage = 'my_info'}
     >
         <svg width="24" height="24" viewBox="0 0 25 24" fill="none">
             <circle cx="12.5" cy="12" r="11.5" stroke={activePage === 'my_info' ? 'white' : 'black'} />
@@ -27,7 +32,7 @@
     <button
             class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
                {activePage === 'organisation' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
-            on:click={() => activePage = 'organisation'}
+            onclick={() => activePage = 'organisation'}
     >
         <svg width="23" height="26" viewBox="0 0 23 26" fill="none" xmlns="http://www.w3.org/2000/svg">
         <mask id="path-1-inside-1_180_1116" fill="white">
@@ -48,18 +53,18 @@
         <rect x="17.4941" y="20.2788" width="2.66274" height="2.66274" rx="0.5" fill="white" stroke="black"/>
         <rect x="9.43652" y="2.69775" width="2.66274" height="2.66274" rx="0.5" fill="white" stroke="black"/>
         </svg>
-        Mon organisation
+        {#if user.role === 'user' }Mon organisation {:else if user.role === 'organisation'} Gérer mon organisation {/if}
     </button>
 
 
     <button
             class="flex items-center gap-x-2 px-8 py-4 text-red-600 hover:bg-red-50 transition-colors w-full justify-center cursor-pointer"
-            on:click={() => showDeleteModal = true}
+            onclick={() => showDeleteModal = true}
     >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
         </svg>
-        <span class="text-base whitespace-nowrap">Supprimer le compte</span>
+        <span class="text-base whitespace-nowrap">{#if user.role === 'user' }Supprimer le compte{:else if user.role === 'organisation'}Supprimer l'organisation{/if}</span>
     </button>
 </div>
 
@@ -74,7 +79,7 @@
                 <button
                         type="button"
                         class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer transition"
-                        on:click={() => showDeleteModal = false}
+                        onclick={() => showDeleteModal = false}
                 >
                     Annuler
                 </button>
