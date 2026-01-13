@@ -352,7 +352,7 @@ INSERT INTO `user` (`id`, `organisation_id`, `email`, `roles`, `password`, `firs
 -- Contraintes pour la table `monitored_website`
 --
 ALTER TABLE `monitored_website`
-  ADD CONSTRAINT `FK_7458B0D5A76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
+  ADD CONSTRAINT `FK_7458B0D5A76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL;
 
 
 --

@@ -115,75 +115,41 @@ pub async fn update_account(
 
     session.insert("account", updated_account.clone()).await.unwrap();
 
-    return Json(json!({
+    Json(json!({
                         "success": true,
                         "account": updated_account
-                    }));
+                    }))
 
 }
 
 
-pub async fn delete_account(
-    session: Session,
-    State(pool): State<MySqlPool>,
-) -> Json<serde_json::Value> {
+pub async fn delete_account( session: Session, State(pool): State<MySqlPool>) -> Json<serde_json::Value> {
+
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    let user = match account_opt {
-        Some(Account::User(u)) => u,
-        _ => {
-            return Json(json!({
-                "success": false,
-                "message": "Non authentifié"
-            }));
+    let account = match account_opt {
+        Some(acc) => acc,
+        None => return Json(json!({"success": false, "message": "Non authentifié"})),
+    };
+
+    let id_to_delete = match &account {
+        Account::User(u) => u.id,
+        Account::Organisation(o) => o.admin_id,
+    };
+
+    match sqlx::query("DELETE FROM user WHERE id = ?")
+        .bind(id_to_delete)
+        .execute(&pool)
+        .await
+    {
+        Ok(_) => {
+            session.delete().await.unwrap();
+            Json(json!({"success": true}))
         }
-    };
-
-    let mut tx = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => return Json(json!({
-            "success": false,
-            "message": format!("Erreur de connexion BDD: {}", e)
-        }))
-    };
-
-    if let Err(e) = sqlx::query("DELETE FROM monitored_website WHERE user_id = ?")
-        .bind(user.id)
-        .execute(&mut *tx)
-        .await
-    {
-        return Json(json!({
-            "success": false,
-            "message": format!("Erreur suppression sites web: {}", e)
-        }));
+        Err(e) => Json(json!({"success": false, "message": format!("Erreur suppression compte: {}", e)})),
     }
 
-    if let Err(e) = sqlx::query("DELETE FROM user WHERE id = ?")
-        .bind(user.id)
-        .execute(&mut *tx)
-        .await
-    {
-        return Json(json!({
-            "success": false,
-            "message": format!("Erreur suppression compte: {}", e)
-        }));
-    }
-
-    if let Err(e) = tx.commit().await {
-        return Json(json!({
-            "success": false,
-            "message": format!("Erreur validation transaction: {}", e)
-        }));
-    }
-
-    return Json(json!({
-        "success": true,
-    }));
 }
-
-
-
-
 
 
 pub async fn join_organization(
@@ -223,8 +189,8 @@ pub async fn join_organization(
     }
 
 
-    return Json(json!({
+    Json(json!({
         "success": true,
         "message": "Organisation rejointe avec succès"
-    }));
+    }))
 }
