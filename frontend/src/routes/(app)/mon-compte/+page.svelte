@@ -9,8 +9,6 @@
     let activePage = $state("my_info");
     let user = $derived(page.data.user);
 
-    console.log("User data:", user);
-
 </script>
 
 <div class="xl:px-52 flex flex-col h-full">

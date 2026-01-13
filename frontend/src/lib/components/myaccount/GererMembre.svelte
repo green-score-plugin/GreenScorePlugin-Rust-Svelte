@@ -4,6 +4,7 @@
     import type { Organisation } from "$lib/types/account";
 
     let user = $derived(page.data.user as Organisation);
+    let members = $derived(page.data.members);
 
 </script>
 

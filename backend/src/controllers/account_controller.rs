@@ -2,7 +2,7 @@ use axum::extract::State;
 use axum::Json;
 use sqlx::MySqlPool;
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{json, Value};
 use tower_sessions::Session;
 use crate::models::{Account, User};
 use bcrypt;
@@ -34,7 +34,7 @@ pub async fn update_account(
     session: Session,
     State(pool): State<MySqlPool>,
     Json(payload): Json<UpdateAccountRequest>,
-) -> Json<serde_json::Value> {
+) -> Json<Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let mut user = match account_opt {
@@ -123,7 +123,7 @@ pub async fn update_account(
 }
 
 
-pub async fn delete_account( session: Session, State(pool): State<MySqlPool>) -> Json<serde_json::Value> {
+pub async fn delete_account( session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
 
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
@@ -156,7 +156,7 @@ pub async fn join_organization(
     session: Session,
     State(pool): State<MySqlPool>,
     Json(payload): Json<JoinOrgaRequest>,
-) -> Json<serde_json::Value> {
+) -> Json<Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let user = match account_opt {
@@ -192,5 +192,30 @@ pub async fn join_organization(
     Json(json!({
         "success": true,
         "message": "Organisation rejointe avec succès"
+    }))
+}
+
+pub async fn get_organisation_member(session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let organisation = match account_opt {
+        Some(Account::Organisation(o)) => o,
+        _ => return Json(json!({ "success": false, "message": "Non authentifié en tant qu'organisation" })),
+    };
+
+    let members = match sqlx::query_as::<_, User>(
+        "SELECT id, email, first_name AS prenom, last_name AS nom FROM user WHERE organisation_id = ?"
+    )
+        .bind(organisation.id)
+        .fetch_all(&pool)
+        .await
+    {
+        Ok(r) => r,
+        Err(e) => return Json(json!({ "success": false, "message": format!("Erreur récupération membres: {}", e) })),
+    };
+
+    Json(json!({
+        "success": true,
+        "members": members
     }))
 }
