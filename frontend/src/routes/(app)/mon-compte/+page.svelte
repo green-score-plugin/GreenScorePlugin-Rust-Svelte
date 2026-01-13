@@ -2,6 +2,7 @@
     import LeftMenu from '$lib/components/myaccount/LeftMenu.svelte';
     import MyInfo from '$lib/components/myaccount/MyInfo.svelte';
     import Organisation from '$lib/components/myaccount/Organisation.svelte';
+    import GererMembre from '$lib/components/myaccount/GererMembre.svelte';
     import salutation from '$lib/images/salutation.png';
     import {page} from "$app/state";
 
@@ -27,7 +28,11 @@
             {#if activePage === 'my_info'}
                 <MyInfo />
             {:else if activePage === 'organisation'}
-                <Organisation />
+                {#if user.role === 'user' }
+                    <Organisation />
+                {:else if user.role === 'organisation'}
+                    <GererMembre />
+                {/if}
             {/if}
         </div>
     </div>
