@@ -3,6 +3,15 @@ import type { Actions } from './$types';
 import { BACKEND_URL } from '$lib/config';
 import {setSessionCookie, invalidateCache} from "$lib/server/session.ts";
 
+export const load = async ({ fetch }) => {
+    const res = await fetch(`${BACKEND_URL}/get_organisation_members`, {method: "POST"});
+    const data = await res.json();
+
+    return {
+        members: data.success ? data.members : []
+    };
+};
+
 export const actions = {
     supprimer: async ({ request, fetch, cookies }) => {
         try {
@@ -177,7 +186,4 @@ export const actions = {
             return fail(500, { actionType: 'join_orga', message: "Erreur serveur lors de la connexion à l'organisation" });
         }
     }
-
-
-
 } satisfies Actions;
