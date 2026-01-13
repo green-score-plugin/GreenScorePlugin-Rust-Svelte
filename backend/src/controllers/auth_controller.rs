@@ -113,20 +113,21 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
         }
 
         if roles == "[\"ROLE_ORGANISATION\"]" {
-            match sqlx::query_as::<_, (String, String, Option<String>)>(
-                "SELECT o.organisation_name, o.organisation_code, o.siret FROM user u
+            match sqlx::query_as::<_, (i64, String, String, Option<String>)>(
+                "SELECT o.id, o.organisation_name, o.organisation_code, o.siret FROM user u
              JOIN organisation o ON o.admin_id = u.id
              WHERE email = ?"
             )
                 .bind(&email)
                 .fetch_optional(&pool)
                 .await {
-                Ok(Some((organisation_name, organisation_code, siret))) => {
+                Ok(Some((organisation_id, organisation_name, organisation_code, siret))) => {
                     let account = Account::Organisation(Organisation {
-                        id: user_id,
+                        id: organisation_id,
                         nom: organisation_name,
                         siret,
-                        code: organisation_code
+                        code: organisation_code,
+                        admin_id: user_id
                     });
                     session.insert("account", account).await.unwrap();
 
@@ -232,6 +233,7 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
     };
 
     let organisation_code = generate_organisation_code();
+    let organisation_id: i64;
 
     let role : &str = "[\"ROLE_ORGANISATION\"]";
 
@@ -256,7 +258,7 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
                 .bind(user_id)
                 .execute(&pool)
                 .await {
-                Ok(_res) => {},
+                Ok(_res) => { organisation_id = _res.last_insert_id() as i64;},
                 Err(e) => {
                     let _ = sqlx::query("DELETE FROM user WHERE id = ?").bind(user_id).execute(&pool).await;
                     return Json(json!({
@@ -267,10 +269,11 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
             };
 
             let account = Account::Organisation(Organisation {
-                id: user_id,
+                id: organisation_id,
                 nom: payload.orga_name.clone(),
                 siret: payload.siret.clone(),
-                code: organisation_code.clone()
+                code: organisation_code.clone(),
+                admin_id : user_id
             });
             session.insert("account", account.clone()).await.unwrap();
 
