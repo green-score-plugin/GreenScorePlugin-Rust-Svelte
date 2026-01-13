@@ -4,6 +4,7 @@ use serde::Serialize;
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::controllers::lpc_controller::LastPageConsultedResponse;
+use crate::green_score::calculate_green_score;
 use crate::models::Account;
 
 #[derive(Serialize)]
@@ -12,6 +13,9 @@ pub struct MyDataResponse {
     my_average_daily_carbon_footprint: Option<f64>,
     average_daily_carbon_footprint: Option<f64>,
     message_average_footprint: Option<String>,
+    total_consumption: Option<f64>,
+    letter_green_score: Option<String>,
+    env_nomination: Option<String>,
 }
 
 async fn get_my_average_daily_carbon_footprint(
@@ -71,7 +75,28 @@ async fn get_average_daily_carbon_footprint(
     }
 }
 
+async fn get_total_consumption(
+    pool: &MySqlPool,
+    session: Session
+) -> Option<f64> {
+    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+    if let Some(account) = account {
+        let user_id = account.id();
+        let result = sqlx::query_scalar::<_, f64>(
+            "SELECT SUM(carbon_footprint) FROM monitored_website WHERE user_id = ?"
+        )
+            .bind(user_id)
+            .fetch_one(pool)
+            .await;
 
+        match result {
+            Ok(total) => Some((total * 100.0).round() / 100.0),
+            Err(_) => None,
+        }
+    } else {
+        None
+    }
+}
 
 
 pub async fn my_data(
@@ -79,7 +104,7 @@ pub async fn my_data(
     session: Session,
 )-> Json<MyDataResponse> {
 
-    let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, session).await;
+    let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, session.clone()).await;
     println!("My average daily carbon footprint: {:?}", my_average_daily_carbon_footprint);
     let average_daily_carbon_footprint = get_average_daily_carbon_footprint(&pool).await;
     println!("Average daily carbon footprint: {:?}", average_daily_carbon_footprint);
@@ -96,10 +121,25 @@ pub async fn my_data(
         _ => None,
     };
 
+    let (letter_green_score, env_nomination) = if let Some(avg) = my_average_daily_carbon_footprint {
+        let (l, n) = calculate_green_score(avg);
+        (Some(l), Some(n))
+    } else {
+        (None, None)
+    };
+
+
+    let total_consumption = get_total_consumption(&pool, session).await;
+
+    // CALCULER LA LETTRE ET LA NOMINATION
+
     Json(MyDataResponse {
         success: true,
         my_average_daily_carbon_footprint,
         average_daily_carbon_footprint,
         message_average_footprint,
+        total_consumption,
+        letter_green_score,
+        env_nomination,
     })
 }

@@ -85,7 +85,7 @@ async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
         ],
     }
 }
-async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
+pub(crate) async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
     let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
     let equivalents = sqlx::query_as::<_, Equivalent>(

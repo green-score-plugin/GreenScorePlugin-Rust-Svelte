@@ -1,7 +1,8 @@
 <script lang="ts">
     import UserAverageDailyCarbonFootprint from '$lib/components/widgets/UserAverageDailyCarbonFootprint.svelte';
+    import TotalConsumption from '$lib/components/widgets/TotalConsumption.svelte';
     // import ChartConsumptionFiltered from '$lib/widgets/ChartConsumptionFiltered.svelte';
-    // import BadgeGreenScore from '$lib/widgets/BadgeGreenScore.svelte';
+    import BadgeGreenScore from '$lib/components/widgets/BadgeGreenScore.svelte';
     // import Equivalent from '$lib/widgets/Equivalent.svelte';
     // import TotalConsumption from '$lib/widgets/TotalConsumption.svelte';
     // import ChartTop5PollutingSites from '$lib/widgets/ChartTop5PollutingSites.svelte';
@@ -12,17 +13,28 @@
     let myAverageDailyCarbonFootprint: number;
     let averageDailyCarbonFootprint: number;
     let messageAverageFootprint: string;
+    let totalConsumption: number;
 
+    export let totalConsuUnit = 'gCO2eq';
     export let title : string = 'Mes données';
     export let description : string = 'Voici une analyse détaillée de vos données de navigation : ';
     export let noDatas : boolean = false;
+
+    export let envNomination: string = 'Maître des Forêts';
+    export let letterGreenScore: string = 'A';
     export let data: PageData;
     $: ({
         myAverageDailyCarbonFootprint,
         averageDailyCarbonFootprint,
-        messageAverageFootprint
+        messageAverageFootprint,
+        totalConsumption,
+        letterGreenScore,
+        envNomination
     } = data);
     console.log("data in page.svelte:", data);
+    console.log("totalConso : ", data.totalConsumption)
+    let carbonFootprint = data.totalConsumption;
+    console.log("carbon : ", carbonFootprint)
 </script>
 
 <svelte:head>
@@ -42,14 +54,14 @@
                     {messageAverageFootprint}
             />
 <!--            <ChartConsumptionFiltered {usersIdsCharts} />-->
-<!--            <BadgeGreenScore {letterGreenScore} {envNomination} />-->
-<!--            <Equivalent equivalent={equivalent1} order={1} />-->
-<!--            <TotalConsumption-->
-<!--                    {totalConsu}-->
-<!--                    {totalConsuUnit}-->
-<!--                    label="Total de votre consommation depuis la création du compte :"-->
-<!--            />-->
-<!--            <Equivalent equivalent={equivalent2} order={2} />-->
+            <BadgeGreenScore {letterGreenScore} {envNomination} />
+            <Equivalent equivalent={equivalent1} order={1} />
+            <TotalConsumption
+                    {carbonFootprint}
+                    {totalConsuUnit}
+                    label="Total de votre consommation depuis la création du compte :"
+            />
+            <Equivalent equivalent={equivalent2} order={2} />
 <!--            <ChartTop5PollutingSites {usersIdsCharts} />-->
 <!--            <Advice type="lambda" {advice} />-->
 <!--            <Advice type="dev" advice={adviceDev} />-->

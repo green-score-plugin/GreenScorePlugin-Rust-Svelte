@@ -15,14 +15,22 @@ export const load: PageServerLoad = async ({ fetch }) => {
             return {
                 myAverageDailyCarbonFootprint: null,
                 averageDailyCarbonFootprint: null,
-                messageAverageFootprint: null
+                messageAverageFootprint: null,
+                totalConsumption: null,
+                letterGreenScore: null,
+                envNomination: null,
+                equivalents: []
             };
         }
 
         return {
             myAverageDailyCarbonFootprint: result.my_average_daily_carbon_footprint,
             averageDailyCarbonFootprint: result.average_daily_carbon_footprint,
-            messageAverageFootprint: result.message_average_footprint
+            messageAverageFootprint: result.message_average_footprint,
+            totalConsumption: result.total_consumption,
+            letterGreenScore: result.letter_green_score || 'A',
+            envNomination: result.env_nomination || 'Maître des Forêts',
+            equivalents: result.equivalents
         };
 
     } catch (error) {
@@ -30,7 +38,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
         return {
             myAverageDailyCarbonFootprint: null,
             averageDailyCarbonFootprint: null,
-            messageAverageFootprint: null
+            messageAverageFootprint: null,
+            totalConsumption: null
         };
     }
 };
