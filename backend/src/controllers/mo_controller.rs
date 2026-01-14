@@ -61,6 +61,22 @@ async fn organization_members(State(pool): State<MySqlPool>, org_id: i64) -> Vec
     }
 }
 
+async fn total_organization_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
+    let result = sqlx::query_as::<_, (f64,)>(
+        "SELECT SUM(carbonFootprint) as total_consumption
+        FROM monitored_website
+        WHERE organisation_id = ?",
+    )
+        .bind(org_id)
+        .fetch_one(&pool)
+        .await;
+
+    match result {
+        Ok((total_consumption,)) => Some(total_consumption),
+        Err(_) => None,
+    }
+}
+
 async fn organization_informations(State(pool): State<MySqlPool>, session: Session) -> Option<MyOrganizationInfos> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
@@ -71,14 +87,12 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
             Err(_) => return None,
         };
 
-        eprint!("Organization id : {:?}", org_id);
-
         let average_daily_carbon_footprint_result = average_daily_carbon_footprint(State(pool.clone()), org_id).await;
+        let total_consumption = total_organization_consumption(State(pool.clone()), org_id).await;
 
         match average_daily_carbon_footprint_result {
             Some(average_daily_carbon_footprint) => {
                 let equivalent = equivalent(&pool, average_daily_carbon_footprint).await;
-
                 let members = organization_members(State(pool.clone()), org_id).await;
 
                 Some(MyOrganizationInfos {
@@ -105,7 +119,7 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
     };
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = organization_informations {
-        let (l, n) = calculate_green_score(infos.average_daily_carbon_footprint);
+        let (l, n) = calculate_green_score(&State(pool.clone()), infos.average_daily_carbon_footprint, "mo".to_string()).await;
 
         let mut collected: Vec<Equivalent> = Vec::new();
         for _ in 0..2 {
