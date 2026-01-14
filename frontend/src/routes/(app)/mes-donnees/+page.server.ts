@@ -19,7 +19,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
                 totalConsumption: null,
                 letterGreenScore: null,
                 envNomination: null,
-                equivalents: []
+                equivalents: [],
+                usersIdsCharts: []
             };
         }
 
@@ -30,7 +31,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
             totalConsumption: result.total_consumption,
             letterGreenScore: result.letter_green_score || 'A',
             envNomination: result.env_nomination || 'Maître des Forêts',
-            equivalents: result.equivalents
+            equivalents: result.equivalents || [],
+            usersIdsCharts: result.users_ids_charts || []
         };
 
     } catch (error) {
@@ -39,7 +41,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
             myAverageDailyCarbonFootprint: null,
             averageDailyCarbonFootprint: null,
             messageAverageFootprint: null,
-            totalConsumption: null
+            totalConsumption: null,
+            letterGreenScore: null,
+            envNomination: null,
+            equivalents: [],
+            usersIdsCharts: []
         };
     }
 };

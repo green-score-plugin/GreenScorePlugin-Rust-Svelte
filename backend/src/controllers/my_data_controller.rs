@@ -3,7 +3,7 @@ use axum::Json;
 use serde::Serialize;
 use sqlx::MySqlPool;
 use tower_sessions::Session;
-use crate::controllers::lpc_controller::LastPageConsultedResponse;
+use crate::controllers::lpc_controller::{Equivalent, LastPageConsultedResponse};
 use crate::green_score::calculate_green_score;
 use crate::models::Account;
 
@@ -16,6 +16,7 @@ pub struct MyDataResponse {
     total_consumption: Option<f64>,
     letter_green_score: Option<String>,
     env_nomination: Option<String>,
+    equivalents: Option<Vec<Equivalent>>
 }
 
 async fn get_my_average_daily_carbon_footprint(
@@ -49,6 +50,9 @@ async fn get_my_average_daily_carbon_footprint(
         None
     }
 }
+
+
+
 
 async fn get_average_daily_carbon_footprint(
     pool: &MySqlPool,
@@ -98,6 +102,31 @@ async fn get_total_consumption(
     }
 }
 
+pub(crate) async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
+    let carbon_footprint_in_kg = carbon_footprint / 1000.0;
+
+    let equivalents = sqlx::query_as::<_, Equivalent>(
+        "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
+         FROM equivalent
+         WHERE (? * equivalent) >= 1.0
+         ORDER BY RAND()
+         LIMIT 2",
+    )
+        .bind(carbon_footprint_in_kg)
+        .bind(carbon_footprint_in_kg)
+        .fetch_all(&pool)
+        .await;
+
+    match equivalents {
+        Ok(rows) => rows,
+        Err(e) => {
+            eprintln!("Erreur SQL : {:?}", e);
+            vec![]
+        },
+    }
+}
+
+
 
 pub async fn my_data(
     State(pool): State<MySqlPool>,
@@ -121,17 +150,15 @@ pub async fn my_data(
         _ => None,
     };
 
-    let (letter_green_score, env_nomination) = if let Some(avg) = my_average_daily_carbon_footprint {
+    let (letter_green_score, env_nomination, equivalents) = if let Some(avg) = my_average_daily_carbon_footprint {
         let (l, n) = calculate_green_score(avg);
-        (Some(l), Some(n))
+        let eq = crate::controllers::lpc_controller::equivalents(State(pool.clone()), avg).await;
+        (Some(l), Some(n), Some(eq))
     } else {
-        (None, None)
+        (None, None, None)
     };
 
-
-    let total_consumption = get_total_consumption(&pool, session).await;
-
-    // CALCULER LA LETTRE ET LA NOMINATION
+    let total_consumption = get_total_consumption(&pool, session.clone()).await;
 
     Json(MyDataResponse {
         success: true,
@@ -141,5 +168,6 @@ pub async fn my_data(
         total_consumption,
         letter_green_score,
         env_nomination,
+        equivalents,
     })
 }

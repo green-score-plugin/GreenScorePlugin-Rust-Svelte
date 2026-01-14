@@ -1,10 +1,9 @@
 <script lang="ts">
     import UserAverageDailyCarbonFootprint from '$lib/components/widgets/UserAverageDailyCarbonFootprint.svelte';
     import TotalConsumption from '$lib/components/widgets/TotalConsumption.svelte';
-    // import ChartConsumptionFiltered from '$lib/widgets/ChartConsumptionFiltered.svelte';
+    import ChartConsumptionFiltered from '$lib/components/widgets/ChartConsumptionFiltered.svelte';
     import BadgeGreenScore from '$lib/components/widgets/BadgeGreenScore.svelte';
-    // import Equivalent from '$lib/widgets/Equivalent.svelte';
-    // import TotalConsumption from '$lib/widgets/TotalConsumption.svelte';
+    import Equivalent from '$lib/components/widgets/Equivalent.svelte';
     // import ChartTop5PollutingSites from '$lib/widgets/ChartTop5PollutingSites.svelte';
     // import Advice from '$lib/widgets/Advice.svelte';
     // import Top from '$lib/dashboards/Top.svelte';
@@ -19,9 +18,12 @@
     export let title : string = 'Mes données';
     export let description : string = 'Voici une analyse détaillée de vos données de navigation : ';
     export let noDatas : boolean = false;
-
     export let envNomination: string = 'Maître des Forêts';
     export let letterGreenScore: string = 'A';
+    export let equivalent1: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
+    export let equivalent2: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
+
+
     export let data: PageData;
     $: ({
         myAverageDailyCarbonFootprint,
@@ -29,12 +31,15 @@
         messageAverageFootprint,
         totalConsumption,
         letterGreenScore,
-        envNomination
+        envNomination,
+        equivalents,
     } = data);
-    console.log("data in page.svelte:", data);
-    console.log("totalConso : ", data.totalConsumption)
+    $: equivalent1 = equivalents?.[0] || { name: '', value: 0, icon: '' };
+    $: equivalent2 = equivalents?.[1] || { name: '', value: 0, icon: '' };
     let carbonFootprint = data.totalConsumption;
-    console.log("carbon : ", carbonFootprint)
+    console.log("equivalent1 : ", equivalent1);
+    console.log("equivalent2 : ", equivalent2);
+
 </script>
 
 <svelte:head>
