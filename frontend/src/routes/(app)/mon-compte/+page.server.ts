@@ -7,6 +7,8 @@ export const load = async ({ fetch }) => {
     const res = await fetch(`${BACKEND_URL}/get_organisation_members`, {method: "POST"});
     const data = await res.json();
 
+    console.log(data);
+
     return {
         members: data.success ? data.members : []
     };
