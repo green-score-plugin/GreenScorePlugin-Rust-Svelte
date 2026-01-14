@@ -16,3 +16,4 @@ bcrypt = "0.17.1"
 tower-http = { version = "0.6.6", features = ["cors"] }
 serde = { version = "1.0.228", features = ["derive"] }
 rand = "0.8.5"
+chrono = "0.4.42"

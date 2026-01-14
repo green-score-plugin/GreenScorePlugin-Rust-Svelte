@@ -2,6 +2,31 @@ import type { PageServerLoad } from './$types';
 import { BACKEND_URL } from "$lib/config.ts";
 import { ELECTRICITY_MAP_API_KEY } from '$env/static/private';
 
+function formatMonthlyData(data: Array<{ label: string; value: number }>) {
+    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const now = new Date();
+    const result: Array<{ label: string; value: number }> = [];
+
+    // Créer les 12 derniers mois
+    for (let i = 11; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthIndex = date.getMonth();
+        const year = date.getFullYear();
+        const formattedLabel = `${monthNames[monthIndex]} ${year}`;
+
+        // Chercher si des données existent pour ce mois
+        const monthKey = `${String(monthIndex + 1).padStart(2, '0')}/${year}`;
+        const existingData = data.find(d => d.label === monthKey);
+
+        result.push({
+            label: formattedLabel,
+            value: existingData?.value || 0
+        });
+    }
+
+    return result;
+}
+
 export const load: PageServerLoad = async ({ fetch }) => {
     try {
         const response = await fetch(`${BACKEND_URL}/mes-donnees`, {
@@ -20,7 +45,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
                 letterGreenScore: null,
                 envNomination: null,
                 equivalents: [],
-                usersIdsCharts: []
+                dailyConsumption: [],
+                weeklyConsumption: [],
+                monthlyConsumption: formatMonthlyData([])
             };
         }
 
@@ -32,7 +59,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
             letterGreenScore: result.letter_green_score || 'A',
             envNomination: result.env_nomination || 'Maître des Forêts',
             equivalents: result.equivalents || [],
-            usersIdsCharts: result.users_ids_charts || []
+            dailyConsumption: result.daily_consumption || [],
+            weeklyConsumption: result.weekly_consumption || [],
+            monthlyConsumption: formatMonthlyData(result.monthly_consumption || [])
         };
 
     } catch (error) {
@@ -45,7 +74,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
             letterGreenScore: null,
             envNomination: null,
             equivalents: [],
-            usersIdsCharts: []
+            dailyConsumption: [],
+            weeklyConsumption: [],
+            monthlyConsumption: formatMonthlyData([])
         };
     }
 };

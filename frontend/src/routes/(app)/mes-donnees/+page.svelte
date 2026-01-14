@@ -23,7 +23,11 @@
     export let equivalent1: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
     export let equivalent2: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
 
-
+    export let dailyConsumption: Array<{ label: string; value: number }> = [];
+    export let weeklyConsumption: Array<{ label: string; value: number }> = [];
+    export let monthlyConsumption: Array<{ label: string; value: number }> = [];
+    // Choix de la période (par défaut : mensuel)
+    let selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'monthly';
     export let data: PageData;
     $: ({
         myAverageDailyCarbonFootprint,
@@ -33,6 +37,9 @@
         letterGreenScore,
         envNomination,
         equivalents,
+        dailyConsumption,
+        weeklyConsumption,
+        monthlyConsumption
     } = data);
     $: equivalent1 = equivalents?.[0] || { name: '', value: 0, icon: '' };
     $: equivalent2 = equivalents?.[1] || { name: '', value: 0, icon: '' };
@@ -40,6 +47,10 @@
     console.log("equivalent1 : ", equivalent1);
     console.log("equivalent2 : ", equivalent2);
 
+
+    $: consumptionData = selectedPeriod === 'daily' ? dailyConsumption
+        : selectedPeriod === 'weekly' ? weeklyConsumption
+            : monthlyConsumption;
 </script>
 
 <svelte:head>
@@ -58,7 +69,7 @@
                     {averageDailyCarbonFootprint}
                     {messageAverageFootprint}
             />
-<!--            <ChartConsumptionFiltered {usersIdsCharts} />-->
+            <ChartConsumptionFiltered {consumptionData} bind:selectedPeriod />
             <BadgeGreenScore {letterGreenScore} {envNomination} />
             <Equivalent equivalent={equivalent1} order={1} />
             <TotalConsumption

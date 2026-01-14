@@ -1,6 +1,7 @@
 use axum::extract::State;
 use axum::Json;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use chrono::{DateTime, Utc, Datelike};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::controllers::lpc_controller::{Equivalent, LastPageConsultedResponse};
@@ -16,8 +17,110 @@ pub struct MyDataResponse {
     total_consumption: Option<f64>,
     letter_green_score: Option<String>,
     env_nomination: Option<String>,
-    equivalents: Option<Vec<Equivalent>>
+    equivalents: Option<Vec<Equivalent>>,
+    daily_consumption: Vec<ConsumptionDataPoint>,
+    weekly_consumption: Vec<ConsumptionDataPoint>,
+    monthly_consumption: Vec<ConsumptionDataPoint>,
 }
+
+#[derive(Deserialize)]
+pub struct ConsumptionPeriod {
+    period: String, // "daily", "weekly", "monthly"
+}
+
+#[derive(Serialize, Debug)]
+pub struct ConsumptionDataPoint {
+    label: String,
+    value: f64,
+}
+
+#[derive(Serialize)]
+pub struct ConsumptionGraphResponse {
+    success: bool,
+    data: Vec<ConsumptionDataPoint>,
+}
+
+
+
+async fn get_daily_consumption(
+    pool: &MySqlPool,
+    user_id: i32,
+) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (String, f64)>(
+        "SELECT
+            DATE_FORMAT(creation_date, '%d/%m') as day,
+            SUM(carbon_footprint) as total
+         FROM monitored_website
+         WHERE user_id = ?
+         AND creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+         GROUP BY DATE(creation_date)
+         ORDER BY DATE(creation_date) ASC"
+    )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(label, value)| ConsumptionDataPoint {
+            label,
+            value: (value * 100.0).round() / 100.0
+        })
+        .collect())
+}
+
+async fn get_weekly_consumption(
+    pool: &MySqlPool,
+    user_id: i32,
+) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (i32, i32, f64)>(
+        "SELECT
+            YEAR(creation_date) as year,
+            WEEK(creation_date, 1) as week,
+            SUM(carbon_footprint) as total
+         FROM monitored_website
+         WHERE user_id = ?
+         AND creation_date >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
+         GROUP BY year, week
+         ORDER BY year, week ASC"
+    )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(year, week, value)| ConsumptionDataPoint {
+            label: format!("S{}", week),
+            value: (value * 100.0).round() / 100.0
+        })
+        .collect())
+}
+
+async fn get_monthly_consumption(
+    pool: &MySqlPool,
+    user_id: i32,
+) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (String, f64)>(
+        "SELECT
+            DATE_FORMAT(creation_date, '%m/%Y') as month,
+            SUM(carbon_footprint) as total
+         FROM monitored_website
+         WHERE user_id = ?
+         AND creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+         GROUP BY YEAR(creation_date), MONTH(creation_date)
+         ORDER BY YEAR(creation_date), MONTH(creation_date) ASC"
+    )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(label, value)| ConsumptionDataPoint {
+            label,
+            value: (value * 100.0).round() / 100.0
+        })
+        .collect())
+}
+
 
 async fn get_my_average_daily_carbon_footprint(
     pool: &MySqlPool,
@@ -157,9 +260,22 @@ pub async fn my_data(
     } else {
         (None, None, None)
     };
-
     let total_consumption = get_total_consumption(&pool, session.clone()).await;
 
+    let (daily_consumption, weekly_consumption, monthly_consumption) =
+        if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
+            let user_id = account.id();
+            let daily = get_daily_consumption(&pool, user_id as i32).await.unwrap_or_default();
+            let weekly = get_weekly_consumption(&pool, user_id as i32).await.unwrap_or_default();
+            let monthly = get_monthly_consumption(&pool, user_id as i32).await.unwrap_or_default();
+            (daily, weekly, monthly)
+        } else {
+            (vec![], vec![], vec![])
+        };
+
+    println!("Daily: {:?}", daily_consumption);
+    println!("Weekly: {:?}", weekly_consumption);
+    println!("Monthly: {:?}", monthly_consumption);
     Json(MyDataResponse {
         success: true,
         my_average_daily_carbon_footprint,
@@ -169,5 +285,8 @@ pub async fn my_data(
         letter_green_score,
         env_nomination,
         equivalents,
+        daily_consumption,
+        weekly_consumption,
+        monthly_consumption,
     })
 }
