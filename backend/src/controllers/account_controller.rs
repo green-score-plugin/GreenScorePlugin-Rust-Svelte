@@ -111,6 +111,7 @@ pub async fn update_account(
         email: user.email.clone(),
         prenom: user.prenom.clone(),
         nom: user.nom.clone(),
+        id_orga: user.id_orga,
     });
 
     session.insert("account", updated_account.clone()).await.unwrap();
@@ -193,7 +194,7 @@ pub async fn join_organization(
 ) -> Json<serde_json::Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    let user = match account_opt {
+    let mut user = match account_opt {
         Some(Account::User(u)) => u,
         _ => return Json(json!({ "success": false, "message": "Non authentifié" })),
     };
@@ -208,7 +209,7 @@ pub async fn join_organization(
         Err(e) => return Json(json!({ "success": false, "message": format!("Erreur technique recherche: {}", e) }))
     };
 
-    let org_id: i32 = match row_opt {
+    let org_id: i64 = match row_opt {
         Some(row) => row.try_get("id").unwrap_or(0),
         None => return Json(json!({ "success": false, "message": format!("Code invalide: '{}'. Aucune organisation trouvée.", payload.code) }))
     };
@@ -222,9 +223,82 @@ pub async fn join_organization(
         return Json(json!({ "success": false, "message": format!("Erreur jonction: {}", e) }));
     }
 
+    // Update session
+    user.id_orga = Some(org_id);
+    session.insert("account", Account::User(user)).await.unwrap();
 
     return Json(json!({
         "success": true,
         "message": "Organisation rejointe avec succès"
+    }));
+}
+
+pub async fn leave_organization(
+    session: Session,
+    State(pool): State<MySqlPool>,
+) -> Json<serde_json::Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let mut user = match account_opt {
+        Some(Account::User(u)) => u,
+        _ => return Json(json!({ "success": false, "message": "Non authentifié" })),
+    };
+
+    if let Err(e) = sqlx::query("UPDATE user SET organisation_id = NULL WHERE id = ?")
+        .bind(user.id)
+        .execute(&pool)
+        .await
+    {
+        return Json(json!({ "success": false, "message": format!("Erreur lors de la sortie de l'organisation: {}", e) }));
+    }
+
+    user.id_orga = None;
+    session.insert("account", Account::User(user)).await.unwrap();
+
+    return Json(json!({
+        "success": true,
+        "message": "Vous avez quitté l'organisation avec succès."
+    }));
+}
+
+pub async fn get_my_organization(
+    session: Session,
+    State(pool): State<MySqlPool>,
+) -> Json<serde_json::Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let user = match account_opt {
+        Some(Account::User(u)) => u,
+        _ => return Json(json!({ "success": false, "message": "Non authentifié" })),
+    };
+
+    if let Some(org_id) = user.id_orga {
+        let row_opt = sqlx::query_as::<_, (i64, String, Option<String>, String)>(
+            "SELECT id, organisation_name, siret, organisation_code FROM organisation WHERE id = ?"
+        )
+            .bind(org_id)
+            .fetch_optional(&pool)
+            .await;
+
+        match row_opt {
+            Ok(Some((id, nom, siret, code))) => {
+                 return Json(json!({
+                     "success": true,
+                     "organisation": {
+                         "id": id,
+                         "name": nom,
+                         "siret": siret,
+                         "code": code
+                     }
+                 }));
+            },
+            Ok(None) => return Json(json!({ "success": false, "message": "Organisation introuvable" })),
+            Err(e) => return Json(json!({ "success": false, "message": format!("Erreur DB: {}", e) })),
+        }
+    }
+
+    return Json(json!({
+        "success": true,
+        "organisation": null
     }));
 }

@@ -6,11 +6,13 @@ pub struct User {
     pub email: String,
     pub nom: String,
     pub prenom: String,
+    #[serde(default)]
+    pub id_orga: Option<i64>,
 }
 
 impl User {
-    pub fn new(id: i64, email: String, nom: String, prenom: String) -> Self {
-        User { id, email, nom, prenom }
+    pub fn new(id: i64, email: String, nom: String, prenom: String, id_orga: Option<i64>) -> Self {
+        User { id, email, nom, prenom, id_orga }
     }
 }
 

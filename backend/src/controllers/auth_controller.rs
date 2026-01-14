@@ -85,14 +85,14 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
     } else {
 
         if roles == "[\"ROLE_USER\"]" {
-            match sqlx::query_as::<_, (String, String)>(
-                "SELECT first_name, last_name FROM user WHERE email = ?"
+            match sqlx::query_as::<_, (String, String, Option<i64>)>(
+                "SELECT first_name, last_name, organisation_id FROM user WHERE email = ?"
             )
                 .bind(&email)
                 .fetch_optional(&pool)
                 .await {
-                Ok(Some((first_name, last_name))) => {
-                    let account = Account::User(User { id: user_id, email, nom: first_name, prenom: last_name});
+                Ok(Some((first_name, last_name, organisation_id))) => {
+                    let account = Account::User(User { id: user_id, email, nom: first_name, prenom: last_name, id_orga: organisation_id});
                     session.insert("account", account.clone()).await.unwrap();
 
                     return Json(json!({
@@ -193,6 +193,7 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
                 email: payload.email.clone(),
                 nom: payload.firstname.clone(),
                 prenom: payload.lastname.clone(),
+                id_orga: None,
             });
 
             session.insert("account", account).await.unwrap();
@@ -290,10 +291,28 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
     }
 }
 
-pub async fn get_current_account(session: Session) -> Json<Value> {
-    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    if let Some(account) = account {
+    if let Some(mut account) = account_opt {
+        if let Account::User(ref mut u) = account {
+            let row_opt = sqlx::query_as::<_, (String, String, String, Option<i64>)>(
+                "SELECT email, first_name, last_name, organisation_id FROM user WHERE id = ?"
+            )
+            .bind(u.id)
+            .fetch_optional(&pool)
+            .await;
+
+            if let Ok(Some((email, first_name, last_name, org_id))) = row_opt {
+                 u.email = email;
+                 u.nom = first_name;
+                 u.prenom = last_name;
+                 u.id_orga = org_id;
+
+                 let _ = session.insert("account", account.clone()).await;
+            }
+        }
+
         Json(json!({
             "success": true,
             "account": account

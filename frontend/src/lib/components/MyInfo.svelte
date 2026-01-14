@@ -34,7 +34,6 @@
     }
     $: passwordValid = !submitted || (password === passwordConfirm && (password.length === 0 || password.length >= 8));
 
-    // Force une valeur invalide pour contourner l'autocomplétion des navigateurs et le type checking strict de Svelte
     const noAutofill = { autocomplete: 'nop' } as any;
 </script>
 
@@ -58,7 +57,6 @@
 >
     <h1 class="text-2xl font-bold py-2">Mes informations</h1>
 
-    <!-- Inputs cachés pour leurrer le navigateur -->
     <div style="opacity: 0; position: absolute; top: 0; left: 0; height: 0; width: 0; z-index: -1;">
         <input type="text" name="fake_email_prevent_autofill" tabindex="-1" />
         <input type="password" name="fake_password_prevent_autofill" tabindex="-1" />

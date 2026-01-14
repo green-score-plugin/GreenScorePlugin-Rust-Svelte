@@ -2,17 +2,16 @@
     import { enhance } from '$app/forms';
 
     export let activePage = "my_info";
+
     let showDeleteModal = false;
     let submitted = false;
-
 </script>
-
-
 
 <div class="flex flex-col gap-2 p-2">
     <button
+            type="button"
             class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
-               {activePage === 'my_info' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
+               {activePage === 'my_info' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200 text-black'}"
             on:click={() => activePage = 'my_info'}
     >
         <svg width="24" height="24" viewBox="0 0 25 24" fill="none">
@@ -25,8 +24,9 @@
     </button>
 
     <button
+            type="button"
             class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
-               {activePage === 'organisation' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
+               {activePage === 'organisation' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200 text-black'}"
             on:click={() => activePage = 'organisation'}
     >
         <svg width="23" height="26" viewBox="0 0 23 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -53,6 +53,7 @@
 
 
     <button
+            type="button"
             class="flex items-center gap-x-2 px-8 py-4 text-red-600 hover:bg-red-50 transition-colors w-full justify-center cursor-pointer"
             on:click={() => showDeleteModal = true}
     >
@@ -98,5 +99,4 @@
         </div>
     </div>
 {/if}
-
 

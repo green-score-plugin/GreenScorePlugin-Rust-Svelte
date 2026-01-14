@@ -1,7 +1,77 @@
 import {fail, redirect} from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { BACKEND_URL } from '$lib/config';
 import {setSessionCookie, invalidateCache} from "$lib/server/session.ts";
+
+export const load: PageServerLoad = async ({ fetch, request }) => {
+    try {
+        const response = await fetch(`${BACKEND_URL}/get-my-organization`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': request.headers.get('cookie') || ''
+            },
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.organisation) {
+                return {
+                    organisation: result.organisation
+                };
+            }
+        }
+    } catch {}
+
+    return {
+        organisation: null
+    };
+};
+
+async function leaveOrganizationAction({ request, fetch, cookies }: { request: Request, fetch: any, cookies: any }) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/leave_organization`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': request.headers.get('cookie') || ''
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            return fail(response.status, {
+                actionType: 'leave_orga',
+                message: `Erreur: ${errorText}`
+            });
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            const currentToken = cookies.get('greenscoreweb_sessions');
+            if (currentToken) {
+                invalidateCache(currentToken);
+            }
+
+            try {
+                setSessionCookie(cookies, response);
+            } catch (cookieError) {}
+
+            return {
+                actionType: 'leave_orga',
+                success: true,
+                message: "Vous avez quitté l'organisation."
+            };
+        } else {
+            return fail(400, { actionType: 'leave_orga', message: result.message || "Erreur" });
+        }
+
+    } catch (error) {
+        return fail(500, { actionType: 'leave_orga', message: "Erreur serveur" });
+    }
+}
 
 export const actions = {
     supprimer: async ({ request, fetch, cookies }) => {
@@ -86,9 +156,7 @@ export const actions = {
                     } else {
                         setSessionCookie(cookies, res);
                     }
-                } catch (cookieError) {
-                    console.error('Erreur cookie:', cookieError);
-                }
+                } catch (cookieError) {}
                 return {
                     actionType: 'update_info',
                     success: true,
@@ -156,12 +224,9 @@ export const actions = {
                         });
                         setSessionCookie(cookies, fakeRes);
                     } else {
-                        // Fallback : Si le token n'est pas dans le JSON, on propage les headers de la réponse (Set-Cookie)
                         setSessionCookie(cookies, response);
                     }
-                } catch (cookieError) {
-                    console.error('Erreur lors du rafraîchissement du cookie:', cookieError);
-                }
+                } catch (cookieError) {}
 
                 return {
                     actionType: 'join_orga',
@@ -173,11 +238,16 @@ export const actions = {
             }
 
         } catch (error) {
-            console.error("Erreur join_orga:", error);
             return fail(500, { actionType: 'join_orga', message: "Erreur serveur lors de la connexion à l'organisation" });
         }
+    },
+
+    leave_orga: async(event) => {
+        return leaveOrganizationAction(event);
+    },
+
+    change_orga: async(event) => {
+        return leaveOrganizationAction(event);
     }
-
-
 
 } satisfies Actions;
