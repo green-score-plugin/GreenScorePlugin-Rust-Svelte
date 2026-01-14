@@ -13,6 +13,7 @@ pub struct MyOrganizationInfos {
     average_daily_carbon_footprint: f64,
     equivalent: Option<Equivalent>,
     members: Vec<i32>,
+    total_consumption: f64,
 }
 
 
@@ -63,9 +64,11 @@ async fn organization_members(State(pool): State<MySqlPool>, org_id: i64) -> Vec
 
 async fn total_organization_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
     let result = sqlx::query_as::<_, (f64,)>(
-        "SELECT SUM(carbonFootprint) as total_consumption
-        FROM monitored_website
-        WHERE organisation_id = ?",
+        "SELECT SUM(mw.carbon_footprint) as total_consumption
+        FROM monitored_website mw
+        JOIN user u
+       	ON mw.user_id = u.id
+        WHERE u.organisation_id = ?",
     )
         .bind(org_id)
         .fetch_one(&pool)
@@ -88,7 +91,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
         };
 
         let average_daily_carbon_footprint_result = average_daily_carbon_footprint(State(pool.clone()), org_id).await;
-        let total_consumption = total_organization_consumption(State(pool.clone()), org_id).await;
+        let total_consumption = total_organization_consumption(State(pool.clone()), org_id).await.unwrap_or(0.0);
 
         match average_daily_carbon_footprint_result {
             Some(average_daily_carbon_footprint) => {
@@ -99,6 +102,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
                     average_daily_carbon_footprint,
                     equivalent,
                     members,
+                    total_consumption
                 })
             }
             None => None,
