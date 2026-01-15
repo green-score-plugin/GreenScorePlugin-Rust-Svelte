@@ -1,7 +1,6 @@
 use axum::extract::State;
 use axum::Json;
 use serde::{Deserialize, Serialize};
-use chrono::{DateTime, Utc, Datelike};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::controllers::lpc_controller::{Equivalent, LastPageConsultedResponse};
@@ -21,7 +20,8 @@ pub struct MyDataResponse {
     daily_consumption: Vec<ConsumptionDataPoint>,
     weekly_consumption: Vec<ConsumptionDataPoint>,
     monthly_consumption: Vec<ConsumptionDataPoint>,
-    top_polluting_sites: Vec<TopPollutingSite>
+    top_polluting_sites: Vec<TopPollutingSite>,
+    advices: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -45,6 +45,29 @@ pub struct ConsumptionGraphResponse {
 pub struct TopPollutingSite {
     url_domain: String,
     total_footprint: f64,
+}
+
+
+async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
+    use tokio::try_join;
+
+    let dev_query = sqlx::query_as::<_, (String,)>(
+        "SELECT advice FROM advice WHERE is_dev = 1 ORDER BY RAND() LIMIT 1",
+    )
+        .fetch_one(&pool);
+
+    let non_dev_query = sqlx::query_as::<_, (String,)>(
+        "SELECT advice FROM advice WHERE is_dev = 0 ORDER BY RAND() LIMIT 1",
+    )
+        .fetch_one(&pool);
+
+    match try_join!(dev_query, non_dev_query) {
+        Ok(((dev_advice,), (non_dev_advice,))) => vec![dev_advice, non_dev_advice],
+        Err(_) => vec![
+            "Utilisez des requêtes SQL optimisées pour réduire la charge serveur.".to_string(),
+            "Fermez les onglets inutilisés pour réduire la consommation d'énergie.".to_string(),
+        ],
+    }
 }
 
 
@@ -107,7 +130,7 @@ async fn get_weekly_consumption(
     pool: &MySqlPool,
     user_id: i32,
 ) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
-    let results = sqlx::query_as::<_, (i32, i32, f64)>(
+    let results = sqlx::query_as::<_, (i32, f64)>(
         "SELECT
             YEAR(creation_date) as year,
             WEEK(creation_date, 1) as week,
@@ -123,7 +146,7 @@ async fn get_weekly_consumption(
         .await?;
 
     Ok(results.into_iter()
-        .map(|(year, week, value)| ConsumptionDataPoint {
+        .map(|(week, value)| ConsumptionDataPoint {
             label: format!("S{}", week),
             value: (value * 100.0).round() / 100.0
         })
@@ -308,14 +331,19 @@ pub async fn my_data(
             (vec![], vec![], vec![])
         };
 
-    println!("Daily: {:?}", daily_consumption);
-    println!("Weekly: {:?}", weekly_consumption);
-    println!("Monthly: {:?}", monthly_consumption);
+
+    let advices: Vec<String> = advices(State(pool.clone())).await;
+
+    // println!("Daily: {:?}", daily_consumption);
+    // println!("Weekly: {:?}", weekly_consumption);
+    // println!("Monthly: {:?}", monthly_consumption);
     let top_polluting_sites = if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
         get_top5_polluting_sites(&pool, account.id() as i32).await.unwrap_or_default()
     } else {
         vec![]
     };
+
+    println!("advices: {:?}", advices);
     Json(MyDataResponse {
         success: true,
         my_average_daily_carbon_footprint,
@@ -328,6 +356,7 @@ pub async fn my_data(
         daily_consumption,
         weekly_consumption,
         monthly_consumption,
-        top_polluting_sites
+        top_polluting_sites,
+        advices,
     })
 }

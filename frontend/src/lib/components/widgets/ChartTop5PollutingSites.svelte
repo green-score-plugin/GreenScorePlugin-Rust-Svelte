@@ -19,7 +19,13 @@
                     datasets: [{
                         label: 'Empreinte carbone (gCO2e)',
                         data: topPollutingSites.map(site => site.total_footprint),
-                        backgroundColor: '#9333EA',
+                        backgroundColor: [
+                            '#9333EA', // Violet
+                            '#EC4899', // Rose
+                            '#F59E0B', // Ambre
+                            '#10B981', // Vert
+                            '#3B82F6'  // Bleu
+                        ],
                         borderRadius: 4,
                         maxBarThickness: 60
                     }]

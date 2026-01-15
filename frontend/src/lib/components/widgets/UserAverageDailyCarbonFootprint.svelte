@@ -8,7 +8,7 @@
     console.log("messageAverageFootprint:", messageAverageFootprint);
 </script>
 
-<div class="bg-white flex flex-col justify-between gap-2 p-6 rounded-lg shadow-md col-span-1 order-1 lg:col-span-4 text-grey-950">
+<div class="h-full bg-white flex flex-col justify-between gap-2 p-6 rounded-lg shadow-md col-span-1 order-1 lg:col-span-4 text-grey-950">
     {#if myAverageDailyCarbonFootprint === null && averageDailyCarbonFootprint === null}
         <p class="text-center text-gray-500 flex items-center justify-center h-full">pas de données</p>
     {:else}

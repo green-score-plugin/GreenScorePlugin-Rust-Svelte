@@ -48,9 +48,13 @@ export const load: PageServerLoad = async ({ fetch }) => {
                 dailyConsumption: [],
                 weeklyConsumption: [],
                 monthlyConsumption: formatMonthlyData([]),
-                topPollutingSites: []
+                topPollutingSites: [],
+                adviceUser: '',
+                adviceDev: '',
             };
         }
+
+
 
         return {
             myAverageDailyCarbonFootprint: result.my_average_daily_carbon_footprint,
@@ -63,7 +67,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
             dailyConsumption: result.daily_consumption || [],
             weeklyConsumption: result.weekly_consumption || [],
             monthlyConsumption: formatMonthlyData(result.monthly_consumption || []),
-            topPollutingSites: result.top_polluting_sites || []
+            topPollutingSites: result.top_polluting_sites || [],
+            adviceUser: result.advices?.[1] || '',
+            adviceDev: result.advices?.[0] || '',
         };
 
     } catch (error) {
@@ -79,7 +85,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
             dailyConsumption: [],
             weeklyConsumption: [],
             monthlyConsumption: formatMonthlyData([]),
-            topPollutingSites: []
+            topPollutingSites: [],
+            adviceUser: '',
+            adviceDev: '',
         };
     }
 };
