@@ -17,10 +17,9 @@
 
     let selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'monthly';
 
-    $: myAverageDailyCarbonFootprint = data.myAverageDailyCarbonFootprint;
-    $: averageDailyCarbonFootprint = data.averageDailyCarbonFootprint;
-    $: messageAverageFootprint = data.messageAverageFootprint;
-    $: totalConsumption = data.totalConsumption;
+    $: myAverageDailyCarbonFootprint = data.myAverageDailyCarbonFootprint || 0;
+    $: averageDailyCarbonFootprint = data.averageDailyCarbonFootprint || 0;
+    $: messageAverageFootprint = data.messageAverageFootprint || '';
     $: letterGreenScore = data.letterGreenScore || 'A';
     $: envNomination = data.envNomination || 'Maître des Forêts';
     $: dailyConsumption = data.dailyConsumption || [];
