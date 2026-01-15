@@ -10,6 +10,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
         });
         const result = await response.json();
 
+        console.log(result);
+
         if (!result.success) {
             return {
                 organisationData: null,
@@ -20,6 +22,21 @@ export const load: PageServerLoad = async ({ fetch }) => {
                 equivalents: []
             };
         }
+        
+        return {
+            organisationData: {
+                name: result.mo_infos?.name || '',
+                averageDailyCarbonFootprint: result.mo_infos?.average_daily_carbon_footprint || 0,
+                equivalent: result.mo_infos?.equivalent || '',
+                members: result.mo_infos?.members || 0,
+                totalCarbonFootprint: result.mo_infos?.total_consumption || 0,
+            },
+            adviceUser: result.advices?.[0] || '',
+            adviceDev: result.advices?.[1] || '',
+            letterGreenScore: result.letter || 'A',
+            envNomination: result.anv_nomination || 'Gardien des Écosystèmes',
+            equivalents: result.equivalents || []
+        };
 
     } catch (error) {
         console.error('Erreur lors de la récupération des données de l\'organisation :', error);
