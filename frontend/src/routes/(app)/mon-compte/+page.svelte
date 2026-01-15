@@ -1,6 +1,7 @@
 <script lang="ts">
     import LeftMenu from '$lib/components/myaccount/LeftMenu.svelte';
     import MyInfo from '$lib/components/myaccount/MyInfo.svelte';
+    import MyInfoOrganisation from "$lib/components/myaccount/MyInfoOrganisation.svelte";
     import Organisation from '$lib/components/myaccount/Organisation.svelte';
     import GererMembre from '$lib/components/myaccount/GererMembre.svelte';
     import salutation from '$lib/images/salutation.png';
@@ -24,7 +25,11 @@
         </div>
         <div class="flex-1 shadow-lg bg-white py-4 px-6">
             {#if activePage === 'my_info'}
-                <MyInfo />
+                {#if user.role === 'user' }
+                    <MyInfo />
+                {:else if user.role === 'organisation'}
+                    <MyInfoOrganisation />
+                {/if}
             {:else if activePage === 'organisation'}
                 {#if user.role === 'user' }
                     <Organisation />

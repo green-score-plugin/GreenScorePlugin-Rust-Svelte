@@ -16,6 +16,7 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/join_organization", patch(account_controller::join_organization))
         .route("/get_organisation_members", post(account_controller::get_organisation_member))
         .route("/remove_organisation_member", post(account_controller::remove_organisation_member))
+        .route("/update_organisation", patch(account_controller::update_organisation))
         .route("/derniere-page-consultee", get(lpc_controller::lpc))
         .route("/plugin/get-account", post(auth_controller::get_current_account))
         .route("/plugin/equivalent", post(plugin_controller::get_equivalent))
