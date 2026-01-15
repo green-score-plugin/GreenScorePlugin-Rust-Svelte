@@ -1,5 +1,5 @@
 use axum::Router;
-use crate::controllers::{home_controller, auth_controller, plugin_controller, lpc_controller,account_controller}
+use crate::controllers::{home_controller, auth_controller, account_controller, plugin_controller, lpc_controller};
 use axum::routing::{post, get, patch, delete};
 use sqlx::MySqlPool;
 
