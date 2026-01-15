@@ -183,6 +183,30 @@ async fn get_weekly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> R
     )
 }
 
+async fn get_monthly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (String, f64)>(
+        "SELECT DATE_FORMAT(mw.creation_date, '%m/%Y') as month,
+                SUM(mw.carbon_footprint) as total
+         FROM monitored_website mw
+         JOIN user u ON u.id = mw.user_id
+         WHERE u.organisation_id = ?
+           AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+         GROUP BY MONTH(mw.creation_date), YEAR(mw.creation_date)
+         ORDER BY YEAR(mw.creation_date), MONTH(mw.creation_date) ASC"
+    )
+        .bind(org_id)
+        .fetch_all(&pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(label, value)| ConsumptionDataPoint {
+            label,
+            value: (value * 100.0).round() / 100.0
+        })
+        .collect()
+    )
+}
+
 pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrganizationResponse> {
     let organization_informations: Option<MyOrganizationInfos> = organization_informations(State(pool.clone()), session).await;
 
