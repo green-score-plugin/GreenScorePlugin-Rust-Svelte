@@ -10,10 +10,16 @@ export const actions = {
         const siret = data.get('siret');
         const email = data.get('email');
         const password = data.get('password');
+        const confirmPassword = data.get('confirmPassword');
 
         if(!organisationName || !email || !password) {
             return fail(400, { message: "Tous les champs sont requis" })
         }
+
+        if(password !== confirmPassword) {
+            return fail(400, { message: "Les mots de passe ne correspondent pas" })
+        }
+
 
         try{
             const response = await fetch(`${BACKEND_URL}/inscription-organisation`, {
