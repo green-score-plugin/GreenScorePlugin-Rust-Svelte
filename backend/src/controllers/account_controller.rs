@@ -148,16 +148,17 @@ pub async fn delete_account(
         }))
     };
 
-    if let Err(e) = sqlx::query("DELETE FROM monitored_website WHERE user_id = ?")
+    if let Err(e) = sqlx::query("UPDATE monitored_website SET user_id = NULL WHERE user_id = ?")
         .bind(user.id)
         .execute(&mut *tx)
         .await
     {
         return Json(json!({
             "success": false,
-            "message": format!("Erreur suppression sites web: {}", e)
+            "message": format!("Erreur dissociation sites web: {}", e)
         }));
     }
+
 
     if let Err(e) = sqlx::query("DELETE FROM user WHERE id = ?")
         .bind(user.id)
@@ -223,7 +224,6 @@ pub async fn join_organization(
         return Json(json!({ "success": false, "message": format!("Erreur jonction: {}", e) }));
     }
 
-    // Update session
     user.id_orga = Some(org_id);
     session.insert("account", Account::User(user)).await.unwrap();
 
