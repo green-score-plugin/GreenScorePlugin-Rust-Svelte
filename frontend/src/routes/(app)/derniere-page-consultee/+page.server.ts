@@ -1,6 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { BACKEND_URL } from "$lib/config.ts";
-import { ELECTRICITY_MAP_API_KEY } from '$env/static/private';
+import { BACKEND_URL, ELECTRICITY_MAP_API_KEY } from "$lib/config.ts";
 
 export const load: PageServerLoad = async ({ fetch }) => {
     try {
