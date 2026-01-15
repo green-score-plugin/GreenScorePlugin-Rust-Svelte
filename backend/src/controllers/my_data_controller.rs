@@ -21,6 +21,7 @@ pub struct MyDataResponse {
     daily_consumption: Vec<ConsumptionDataPoint>,
     weekly_consumption: Vec<ConsumptionDataPoint>,
     monthly_consumption: Vec<ConsumptionDataPoint>,
+    top_polluting_sites: Vec<TopPollutingSite>
 }
 
 #[derive(Deserialize)]
@@ -38,6 +39,40 @@ pub struct ConsumptionDataPoint {
 pub struct ConsumptionGraphResponse {
     success: bool,
     data: Vec<ConsumptionDataPoint>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct TopPollutingSite {
+    url_domain: String,
+    total_footprint: f64,
+}
+
+
+async fn get_top5_polluting_sites(
+    pool: &MySqlPool,
+    user_id: i32,
+) -> Result<Vec<TopPollutingSite>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (String, f64)>(
+        "SELECT
+            url_domain,
+            SUM(carbon_footprint) as total_footprint
+         FROM monitored_website
+         WHERE user_id = ?
+         AND url_domain IS NOT NULL
+         GROUP BY url_domain
+         ORDER BY total_footprint DESC
+         LIMIT 5"
+    )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(url_domain, total_footprint)| TopPollutingSite {
+            url_domain,
+            total_footprint: (total_footprint * 100.0).round() / 100.0
+        })
+        .collect())
 }
 
 
@@ -276,6 +311,11 @@ pub async fn my_data(
     println!("Daily: {:?}", daily_consumption);
     println!("Weekly: {:?}", weekly_consumption);
     println!("Monthly: {:?}", monthly_consumption);
+    let top_polluting_sites = if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
+        get_top5_polluting_sites(&pool, account.id() as i32).await.unwrap_or_default()
+    } else {
+        vec![]
+    };
     Json(MyDataResponse {
         success: true,
         my_average_daily_carbon_footprint,
@@ -288,5 +328,6 @@ pub async fn my_data(
         daily_consumption,
         weekly_consumption,
         monthly_consumption,
+        top_polluting_sites
     })
 }

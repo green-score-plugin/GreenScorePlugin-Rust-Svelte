@@ -4,6 +4,7 @@
     import ChartConsumptionFiltered from '$lib/components/widgets/ChartConsumptionFiltered.svelte';
     import BadgeGreenScore from '$lib/components/widgets/BadgeGreenScore.svelte';
     import Equivalent from '$lib/components/widgets/Equivalent.svelte';
+    import ChartTop5PollutingSites from '$lib/components/widgets/ChartTop5PollutingSites.svelte';
     // import ChartTop5PollutingSites from '$lib/widgets/ChartTop5PollutingSites.svelte';
     // import Advice from '$lib/widgets/Advice.svelte';
     // import Top from '$lib/dashboards/Top.svelte';
@@ -26,6 +27,8 @@
     export let dailyConsumption: Array<{ label: string; value: number }> = [];
     export let weeklyConsumption: Array<{ label: string; value: number }> = [];
     export let monthlyConsumption: Array<{ label: string; value: number }> = [];
+
+    export let topPollutingSites: Array<{ url_domain: string; total_footprint: number }> = [];
     // Choix de la période (par défaut : mensuel)
     let selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'monthly';
     export let data: PageData;
@@ -43,6 +46,7 @@
     } = data);
     $: equivalent1 = equivalents?.[0] || { name: '', value: 0, icon: '' };
     $: equivalent2 = equivalents?.[1] || { name: '', value: 0, icon: '' };
+    $: ({ topPollutingSites } = data);
     let carbonFootprint = data.totalConsumption;
     console.log("equivalent1 : ", equivalent1);
     console.log("equivalent2 : ", equivalent2);
@@ -78,6 +82,7 @@
                     label="Total de votre consommation depuis la création du compte :"
             />
             <Equivalent equivalent={equivalent2} order={2} />
+            <ChartTop5PollutingSites {topPollutingSites} />
 <!--            <ChartTop5PollutingSites {usersIdsCharts} />-->
 <!--            <Advice type="lambda" {advice} />-->
 <!--            <Advice type="dev" advice={adviceDev} />-->
