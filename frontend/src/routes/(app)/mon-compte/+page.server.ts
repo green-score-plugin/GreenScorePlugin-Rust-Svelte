@@ -7,15 +7,13 @@ export const load = async ({ fetch }) => {
     const res = await fetch(`${BACKEND_URL}/get_organisation_members`, {method: "POST"});
     const data = await res.json();
 
-    console.log(data);
-
     return {
         members: data.success ? data.members : []
     };
 };
 
 export const actions = {
-    supprimer: async ({ request, fetch, cookies }) => {
+    supprimer: async ({ request, fetch }) => {
         try {
             const response = await fetch(`${BACKEND_URL}/delete_account`, {
                 method: 'DELETE',
@@ -36,6 +34,35 @@ export const actions = {
             if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
                 throw error;
             }
+            return fail(500, { message: 'Erreur serveur' });
+        }
+    },
+    supprimer_membre: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const memberId = data.get('deleteMemberId');
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/remove_organisation_member`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                body: JSON.stringify({ "userId" : memberId })
+            });
+
+            const result = await response.json();
+
+
+            if (result.success) {
+                return {
+                    success: true,
+                    message: 'Membre supprimé avec succès'
+                };
+            } else {
+                return fail(400, { message: result.message || 'Erreur lors de la suppression du membre' });
+            }
+        } catch (error) {
             return fail(500, { message: 'Erreur serveur' });
         }
     },

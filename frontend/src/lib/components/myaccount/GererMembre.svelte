@@ -2,6 +2,11 @@
     import { page } from "$app/state";
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
     import type { Organisation } from "$lib/types/account";
+    import { enhance } from '$app/forms';
+    import type { SubmitFunction } from '@sveltejs/kit';
+
+    let showDeleteModal = $state(false);
+    let deletingMemberId: number | null = $state(null);
 
     let user = $derived(page.data.user as Organisation);
     let members = $derived(page.data.members || []);
@@ -9,6 +14,16 @@
     let query = $state('');
     let limit = $state(6);
     let scrollContainer: HTMLElement | undefined = $state();
+
+    const handleDeleteResult: SubmitFunction = () => {
+        return async ({ result }) => {
+            if (result.type === 'success') {
+                members = members.filter((m: any) => m.id !== deletingMemberId);
+                showDeleteModal = false;
+                deletingMemberId = null;
+            }
+        };
+    };
 
     let filteredMembers = $derived(
         Array.isArray(members)
@@ -73,6 +88,7 @@
                         <button
                                 class="hover:scale-110 transition-transform duration-200 text-red-600 p-1 cursor-pointer"
                                 aria-label="Delete"
+                                onclick={() => { showDeleteModal = true; deletingMemberId = member.id; }}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
                                 <path fill="currentColor" d="M18 12.998H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2"/>
@@ -95,3 +111,38 @@
         </div>
     {/if}
 </div>
+
+{#if showDeleteModal}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
+            <h2 class="text-xl font-semibold mb-4">Confirmer la suppression</h2>
+            <p class="text-gray-600 mb-6">
+                Êtes-vous sûr de vouloir supprimer votre compte utilisateur ?
+            </p>
+            <div class="flex justify-end gap-4">
+                <button
+                        type="button"
+                        class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer transition"
+                        onclick={() => showDeleteModal = false}
+                >
+                    Annuler
+                </button>
+
+                <form
+                        method="POST"
+                        action="?/supprimer_membre"
+                        use:enhance={handleDeleteResult}
+                        class="flex flex-col gap-4"
+                >
+                    <input type="hidden" name="deleteMemberId" value={deletingMemberId} />
+                    <button
+                            type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer transition"
+                    >
+                        Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{/if}
