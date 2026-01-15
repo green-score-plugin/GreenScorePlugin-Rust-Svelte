@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "\n            INSERT INTO sessions (id, data, expires_at)\n            VALUES (?, ?, ?)\n            ON DUPLICATE KEY UPDATE data = VALUES(data), expires_at = VALUES(expires_at)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "28a100f95660fa0b79e16c322ca3bf0c4bba428d81d1b837fa6c3b0da2d716a8"
+}

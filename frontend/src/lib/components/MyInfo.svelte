@@ -155,8 +155,8 @@
     <button
             type="submit"
             disabled={loading || !passwordValid}
-            class="mt-4 w-full h-fit rounded-lg bg-gs-green-950 px-1 py-2 font-semibold font-outfit text-white
-               cursor-pointer hover:bg-gs-green-800 active:bg-gs-green-700
+            class="mt-4 w-full h-fit rounded-lg bg-blue-600 px-4 py-2 font-semibold font-outfit text-white
+               cursor-pointer hover:bg-blue-700 active:bg-blue-800
                transition-colors duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
     >
         {#if loading}

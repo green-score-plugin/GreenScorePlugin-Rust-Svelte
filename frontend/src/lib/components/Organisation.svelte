@@ -185,7 +185,7 @@
                                             showChangeModal = false;
                                             codeOrganisation = '';
                                         }}
-                                        class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer transition"
+                                        class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 cursor-pointer transition"
                                 >
                                     Annuler
                                 </button>
