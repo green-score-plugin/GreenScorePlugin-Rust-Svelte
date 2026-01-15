@@ -11,6 +11,7 @@
 
     let hasLeftOrga = false;
     let showConfirmModal = false;
+    let showChangeModal = false;
 
     $: user = $page.data.user;
     $: hasOrga = (!!user?.id_orga && !hasLeftOrga);
@@ -18,7 +19,7 @@
     $: orgaDetails = $page.data.organisation || null;
 
     $: {
-        if ($page.form?.actionType === 'join_orga' || $page.form?.actionType === 'leave_orga') {
+        if ($page.form?.actionType === 'join_orga' || $page.form?.actionType === 'leave_orga' || $page.form?.actionType === 'change_orga') {
             if ($page.form?.success) {
                 successMessage = $page.form.message || 'Opération réussie';
                 errorMessage = '';
@@ -27,7 +28,7 @@
                 if ($page.form.actionType === 'leave_orga') {
                     hasLeftOrga = true;
                     orgaDetails = null;
-                } else if ($page.form.actionType === 'join_orga') {
+                } else if ($page.form.actionType === 'join_orga' || $page.form.actionType === 'change_orga') {
                     hasLeftOrga = false;
                 }
 
@@ -100,23 +101,13 @@
                         Quitter
                     </button>
 
-                    <form
-                            action="?/change_orga"
-                            method="POST"
-                            use:enhance={() => {
-                            return async ({ update }) => {
-                                await update();
-                            };
-                        }}
-                            class="flex-1"
+                    <button
+                            type="button"
+                            on:click={() => showChangeModal = true}
+                            class="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-colors cursor-pointer"
                     >
-                        <button
-                                type="submit"
-                                class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-colors cursor-pointer"
-                        >
-                            Changer d'organisation
-                        </button>
-                    </form>
+                        Changer d'organisation
+                    </button>
                 </div>
             </div>
 
@@ -158,8 +149,60 @@
                 </div>
             {/if}
 
+            {#if showChangeModal}
+                <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
+                        <h2 class="text-xl font-semibold mb-4">Veuillez entrer le code qui vous a été envoyé par l'administrateur de votre organisation</h2>
+                        <form
+                                action="?/change_orga"
+                                method="POST"
+                                use:enhance={() => {
+                                    submitted = true;
+                                    return async ({ update }) => {
+                                        await update();
+                                        submitted = false;
+                                        showChangeModal = false;
+                                    };
+                                }}
+                                class="flex flex-col gap-4"
+                        >
+                            <div class="flex flex-col gap-2">
+                                <label for="newCodeOrganisation" class="text-sm font-semibold text-grey-700">Code Organisation</label>
+                                <input
+                                        id="newCodeOrganisation"
+                                        name="codeOrganisation"
+                                        type="text"
+                                        bind:value={codeOrganisation}
+                                        placeholder="Entrez le nouveau code"
+                                        class="px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none"
+                                />
+                                <p class="text-xs text-gray-500">Merci d'entrer le code à 8 caractères de la nouvelle organisation</p>
+                            </div>
+                            <div class="flex justify-end gap-4">
+                                <button
+                                        type="button"
+                                        on:click={() => {
+                                            showChangeModal = false;
+                                            codeOrganisation = '';
+                                        }}
+                                        class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer transition"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                        type="submit"
+                                        disabled={submitted}
+                                        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer transition disabled:opacity-50"
+                                >
+                                    {#if submitted}Chargement...{:else}Confirmer{/if}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {/if}
+
     {:else}
-        <!-- VUE: Formulaire pour rejoindre -->
         <form
                 method="POST"
                 action="?/join_orga"
