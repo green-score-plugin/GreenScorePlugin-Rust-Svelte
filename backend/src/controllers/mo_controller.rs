@@ -10,6 +10,7 @@ use crate::models::Account;
 
 #[derive(Serialize)]
 pub struct MyOrganizationInfos {
+    name: String,
     average_daily_carbon_footprint: f64,
     equivalent: Option<Equivalent>,
     members: Vec<i32>,
@@ -80,6 +81,20 @@ async fn total_organization_consumption(State(pool): State<MySqlPool>, org_id: i
     }
 }
 
+async fn organization_name(State(pool): State<MySqlPool>, org_id: i64) -> Option<String> {
+    let result = sqlx::query_as::<_, (String,)>(
+        "SELECT organisation_name FROM organisation WHERE id = ? LIMIT 1",
+    )
+        .bind(org_id)
+        .fetch_one(&pool)
+        .await;
+
+    match result {
+        Ok((name,)) => Some(name),
+        Err(_) => None,
+    }
+}
+
 async fn organization_informations(State(pool): State<MySqlPool>, session: Session) -> Option<MyOrganizationInfos> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
@@ -90,6 +105,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
             Err(_) => return None,
         };
 
+        let name = organization_name(State(pool.clone()), org_id).await?;
         let average_daily_carbon_footprint_result = average_daily_carbon_footprint(State(pool.clone()), org_id).await;
         let total_consumption = total_organization_consumption(State(pool.clone()), org_id).await.unwrap_or(0.0);
 
@@ -99,6 +115,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
                 let members = organization_members(State(pool.clone()), org_id).await;
 
                 Some(MyOrganizationInfos {
+                    name,
                     average_daily_carbon_footprint,
                     equivalent,
                     members,
