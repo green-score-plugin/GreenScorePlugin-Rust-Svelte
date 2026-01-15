@@ -1,9 +1,9 @@
 use axum::extract::State;
 use axum::Json;
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
-use crate::controllers::lpc_controller::{Equivalent, LastPageConsultedResponse};
+use crate::controllers::lpc_controller::{Equivalent};
 use crate::green_score::calculate_green_score;
 use crate::models::Account;
 
@@ -23,24 +23,11 @@ pub struct MyDataResponse {
     top_polluting_sites: Vec<TopPollutingSite>,
     advices: Vec<String>,
 }
-
-#[derive(Deserialize)]
-pub struct ConsumptionPeriod {
-    period: String, // "daily", "weekly", "monthly"
-}
-
 #[derive(Serialize, Debug)]
 pub struct ConsumptionDataPoint {
     label: String,
     value: f64,
 }
-
-#[derive(Serialize)]
-pub struct ConsumptionGraphResponse {
-    success: bool,
-    data: Vec<ConsumptionDataPoint>,
-}
-
 #[derive(Serialize, Debug)]
 pub struct TopPollutingSite {
     url_domain: String,
@@ -197,8 +184,6 @@ async fn get_my_average_daily_carbon_footprint(
             .fetch_all(pool)
             .await;
 
-        println!("Daily averages result: {:?}", result);
-
         match result {
             Ok(daily_averages) if !daily_averages.is_empty() => {
                 let sum: f64 = daily_averages.iter().map(|(_, avg)| avg).sum();
@@ -212,9 +197,6 @@ async fn get_my_average_daily_carbon_footprint(
     }
 }
 
-
-
-
 async fn get_average_daily_carbon_footprint(
     pool: &MySqlPool,
 ) -> Option<f64> {
@@ -227,8 +209,6 @@ async fn get_average_daily_carbon_footprint(
     )
         .fetch_all(pool)
         .await;
-
-    println!("Global daily averages result: {:?}", result);
 
     match result {
         Ok(daily_averages) if !daily_averages.is_empty() => {
@@ -263,29 +243,29 @@ async fn get_total_consumption(
     }
 }
 
-pub(crate) async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
-    let carbon_footprint_in_kg = carbon_footprint / 1000.0;
-
-    let equivalents = sqlx::query_as::<_, Equivalent>(
-        "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
-         FROM equivalent
-         WHERE (? * equivalent) >= 1.0
-         ORDER BY RAND()
-         LIMIT 2",
-    )
-        .bind(carbon_footprint_in_kg)
-        .bind(carbon_footprint_in_kg)
-        .fetch_all(&pool)
-        .await;
-
-    match equivalents {
-        Ok(rows) => rows,
-        Err(e) => {
-            eprintln!("Erreur SQL : {:?}", e);
-            vec![]
-        },
-    }
-}
+// pub(crate) async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
+//     let carbon_footprint_in_kg = carbon_footprint / 1000.0;
+//
+//     let equivalents = sqlx::query_as::<_, Equivalent>(
+//         "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
+//          FROM equivalent
+//          WHERE (? * equivalent) >= 1.0
+//          ORDER BY RAND()
+//          LIMIT 2",
+//     )
+//         .bind(carbon_footprint_in_kg)
+//         .bind(carbon_footprint_in_kg)
+//         .fetch_all(&pool)
+//         .await;
+//
+//     match equivalents {
+//         Ok(rows) => rows,
+//         Err(e) => {
+//             eprintln!("Erreur SQL : {:?}", e);
+//             vec![]
+//         },
+//     }
+// }
 
 
 
@@ -295,9 +275,7 @@ pub async fn my_data(
 )-> Json<MyDataResponse> {
 
     let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, session.clone()).await;
-    println!("My average daily carbon footprint: {:?}", my_average_daily_carbon_footprint);
     let average_daily_carbon_footprint = get_average_daily_carbon_footprint(&pool).await;
-    println!("Average daily carbon footprint: {:?}", average_daily_carbon_footprint);
     let message_average_footprint = match (my_average_daily_carbon_footprint, average_daily_carbon_footprint) {
         (Some(user_avg), Some(global_avg)) => {
             if user_avg < global_avg * 0.8 {
@@ -330,20 +308,12 @@ pub async fn my_data(
         } else {
             (vec![], vec![], vec![])
         };
-
-
     let advices: Vec<String> = advices(State(pool.clone())).await;
-
-    // println!("Daily: {:?}", daily_consumption);
-    // println!("Weekly: {:?}", weekly_consumption);
-    // println!("Monthly: {:?}", monthly_consumption);
     let top_polluting_sites = if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
         get_top5_polluting_sites(&pool, account.id() as i32).await.unwrap_or_default()
     } else {
         vec![]
     };
-
-    println!("advices: {:?}", advices);
     Json(MyDataResponse {
         success: true,
         my_average_daily_carbon_footprint,

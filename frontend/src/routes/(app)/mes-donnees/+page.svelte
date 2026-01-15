@@ -37,10 +37,7 @@
     $: consumptionData = selectedPeriod === 'daily' ? dailyConsumption
         : selectedPeriod === 'weekly' ? weeklyConsumption
             : monthlyConsumption;
-
-    console.log("advice : ", adviceUser, adviceDev);
 </script>
-
 
 <svelte:head>
     <title>{title} | GreenScore Web</title>

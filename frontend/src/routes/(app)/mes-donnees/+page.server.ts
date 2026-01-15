@@ -1,12 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { BACKEND_URL } from "$lib/config.ts";
-import { ELECTRICITY_MAP_API_KEY } from '$env/static/private';
 
 function formatMonthlyData(data: Array<{ label: string; value: number }>) {
     const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
     const now = new Date();
     const result: Array<{ label: string; value: number }> = [];
-
     // Créer les 12 derniers mois
     for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -23,10 +21,8 @@ function formatMonthlyData(data: Array<{ label: string; value: number }>) {
             value: existingData?.value || 0
         });
     }
-
     return result;
 }
-
 export const load: PageServerLoad = async ({ fetch }) => {
     try {
         const response = await fetch(`${BACKEND_URL}/mes-donnees`, {
@@ -53,8 +49,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
                 adviceDev: '',
             };
         }
-
-
 
         return {
             myAverageDailyCarbonFootprint: result.my_average_daily_carbon_footprint,
