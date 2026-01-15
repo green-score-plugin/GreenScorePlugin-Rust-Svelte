@@ -219,3 +219,16 @@ pub async fn get_organisation_member(session: Session, State(pool): State<MySqlP
         "members": members
     }))
 }
+
+pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Json(payload) : Json<Value>) -> Json<Value> {
+
+    match sqlx::query("UPDATE user SET organisation_id = NULL WHERE id = ?")
+        .bind(payload["userId"].as_str().unwrap())
+        .execute(&pool)
+        .await
+    {
+        Ok(_) => Json(json!({ "success": true })),
+        Err(e) => Json(json!({ "success": false, "message": format!("Erreur suppression membre: {}", e) })),
+    }
+
+}
