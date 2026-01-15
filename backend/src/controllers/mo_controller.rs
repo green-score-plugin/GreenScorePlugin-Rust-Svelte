@@ -28,6 +28,12 @@ pub struct MyOrganizationResponse {
     equivalents: Option<Vec<Equivalent>>,
 }
 
+#[derive(Serialize, Debug)]
+pub struct ConsumptionDataPoint {
+    label: String,
+    value: f64,
+}
+
 async fn average_daily_carbon_footprint(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
     let result = sqlx::query_as::<_, (f64,)>(
         "SELECT ROUND(
@@ -127,6 +133,30 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
     } else {
         None
     }
+}
+
+async fn get_daily_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (String, f64)>(
+        "SELECT DATE_FORMAT(mw.creation_date, '%d/%m') as day,
+                SUM(mw.carbon_footprint) as total
+         FROM monitored_website mw
+         JOIN user u ON u.id = mw.user_id
+         WHERE u.organisation_id = ?
+           AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+         GROUP BY DATE(mw.creation_date)
+         ORDER BY DATE(mw.creation_date) ASC"
+    )
+        .bind(org_id)
+        .fetch_all(&pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(label, value)| ConsumptionDataPoint {
+            label,
+            value: (value * 100.0).round() / 100.0
+        })
+        .collect()
+    )
 }
 
 pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrganizationResponse> {
