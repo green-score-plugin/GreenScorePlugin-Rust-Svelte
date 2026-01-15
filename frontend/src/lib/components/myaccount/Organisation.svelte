@@ -2,7 +2,7 @@
     import { enhance } from '$app/forms';
     import { page } from '$app/stores';
 
-    export let form: { message?: string, success?: boolean } | null = null;
+    export const form: { message?: string, success?: boolean } | null = null;
 
     let successMessage = '';
     let errorMessage = '';
