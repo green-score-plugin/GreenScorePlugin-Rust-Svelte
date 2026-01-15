@@ -232,3 +232,74 @@ pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Json(payl
     }
 
 }
+
+pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>, Json(payload) : Json<Value>) -> Json<Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let organisation = match account_opt {
+        Some(Account::Organisation(o)) => o,
+        _ => return Json(json!({ "success": false, "message": "Non authentifié en tant qu'organisation" })),
+    };
+
+    let new_name = payload["name"].as_str().unwrap();
+
+    if new_name != organisation.nom {
+        let row_opt = match sqlx::query("SELECT id FROM organisation WHERE organisation_name = ?")
+            .bind(new_name)
+            .fetch_optional(&pool)
+            .await
+        {
+            Ok(r) => r,
+            Err(e) => return Json(json!({ "success": false, "message": format!("Erreur technique recherche: {}", e) }))
+        };
+
+        if row_opt.is_some() {
+            return Json(json!({ "success": false, "message": format!("Le nom '{}' est déjà utilisé par une autre organisation.", new_name) }));
+        }
+    }
+
+    let new_siret = payload["siret"].as_str();
+
+    if new_siret != organisation.siret.as_deref() {
+        if let Some(siret) = new_siret {
+            let row_opt = match sqlx::query("SELECT id FROM organisation WHERE siret = ?")
+                .bind(siret)
+                .fetch_optional(&pool)
+                .await
+            {
+                Ok(r) => r,
+                Err(e) => return Json(json!({ "success": false, "message": format!("Erreur technique recherche: {}", e) }))
+            };
+
+            if row_opt.is_some() {
+                return Json(json!({ "success": false, "message": format!("Le SIRET '{}' est déjà utilisé par une autre organisation.", siret) }));
+            }
+        }
+    }
+
+    match sqlx::query("UPDATE organisation SET organisation_name = ?, siret = ? WHERE id = ?")
+        .bind(payload["name"].as_str().unwrap())
+        .bind(payload["siret"].as_str().unwrap())
+        .bind(organisation.id)
+        .execute(&pool)
+        .await
+    {
+        Ok(_) => {
+            let updated_organisation = Account::Organisation(crate::models::Organisation {
+                id: organisation.id,
+                nom: payload["name"].as_str().unwrap().to_string(),
+                siret: payload["siret"].as_str().map(|s| s.to_string()),
+                code: organisation.code.clone(),
+                admin_id: organisation.admin_id,
+            });
+
+            session.insert("account", updated_organisation.clone()).await.unwrap();
+
+            Json(json!({
+                "success": true,
+                "organisation": updated_organisation
+            }))
+        }
+        Err(e) => Json(json!({ "success": false, "message": format!("Erreur mise à jour organisation: {}", e) })),
+    }
+}

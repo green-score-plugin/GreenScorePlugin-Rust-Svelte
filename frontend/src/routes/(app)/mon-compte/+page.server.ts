@@ -26,7 +26,7 @@ export const actions = {
             const result = await response.json();
 
             if (result.success) {
-                throw redirect(303, '/logout?account_deleted=true');
+                 redirect(303, '/logout?account_deleted=true');
             } else {
                 return fail(400, { message: result.message || 'Erreur lors de la suppression' });
             }
@@ -117,12 +117,9 @@ export const actions = {
                 try {
                     const sessionValue = (result.token ?? result.session ?? result.sessionValue) as string | undefined | null;
                     if (sessionValue) {
-                        const fakeRes = new Response(null, {
-                            headers: { 'set-cookie': `greenscoreweb_sessions=${sessionValue}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600` }
-                        });
-                        setSessionCookie(cookies, fakeRes);
+                        await setSessionCookie(cookies, sessionValue);
                     } else {
-                        setSessionCookie(cookies, res);
+                        await setSessionCookie(cookies, res);
                     }
                 } catch (cookieError) {
                     console.error('Erreur cookie:', cookieError);
@@ -189,13 +186,9 @@ export const actions = {
                 try {
                     const sessionValue = (result.token ?? result.session ?? result.sessionValue) as string | undefined | null;
                     if (sessionValue) {
-                        const fakeRes = new Response(null, {
-                            headers: { 'set-cookie': `greenscoreweb_sessions=${sessionValue}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600` }
-                        });
-                        setSessionCookie(cookies, fakeRes);
+                        await setSessionCookie(cookies, sessionValue);
                     } else {
-                        // Fallback : Si le token n'est pas dans le JSON, on propage les headers de la réponse (Set-Cookie)
-                        setSessionCookie(cookies, response);
+                        await setSessionCookie(cookies, response);
                     }
                 } catch (cookieError) {
                     console.error('Erreur lors du rafraîchissement du cookie:', cookieError);
@@ -213,6 +206,69 @@ export const actions = {
         } catch (error) {
             console.error("Erreur join_orga:", error);
             return fail(500, { actionType: 'join_orga', message: "Erreur serveur lors de la connexion à l'organisation" });
+        }
+    },
+
+    modifier_orga: async ({ request, fetch, cookies }) => {
+        const data = await request.formData();
+        const organisationName = data.get('organisationName')?.toString();
+        const siret = data.get('siret')?.toString();
+
+        if (!organisationName) {
+            return fail(400, { actionType: 'update_orga', message: "Le nom de l'organisation est requis" });
+        }
+
+        if(siret && siret.length > 0 && !/^\d{14}$/.test(siret)) {
+            return fail(400, { actionType: 'update_orga', message: "Le SIRET doit contenir exactement 14 chiffres" });
+        }
+
+        try{
+            let result = await fetch(`${BACKEND_URL}/update_organisation`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: organisationName,
+                    siret: siret
+                })
+            });
+
+            const resJson = await result.json();
+
+            if (resJson.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+                try {
+                    const sessionValue = (resJson.token ?? resJson.session ?? resJson.sessionValue) as string | undefined | null;
+                    if (sessionValue) {
+                        await setSessionCookie(cookies, sessionValue);
+                    } else {
+                        await setSessionCookie(cookies, result);
+                    }
+
+                } catch (cookieError) {
+                    console.error('Erreur lors de la mise à jour du cookie:', cookieError);
+                }
+
+                return {
+                    actionType: 'update_orga',
+                    success: true,
+                    message: "Les informations de l'organisation ont été mises à jour avec succès"
+                };
+            } else {
+                return fail(400, { actionType: 'update_orga', message: resJson.message || 'Erreur lors de la mise à jour' });
+            }
+
+        } catch (err) {
+            return fail(500, {
+                actionType: 'update_orga',
+                message: `Erreur serveur: ${err instanceof Error ? err.message : 'Erreur inconnue'}`
+            });
         }
     }
 } satisfies Actions;
