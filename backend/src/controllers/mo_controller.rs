@@ -127,7 +127,7 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
 
         let mut collected: Vec<Equivalent> = Vec::new();
         for _ in 0..2 {
-            if let Some(e) = equivalent(&pool, infos.average_daily_carbon_footprint).await {
+            if let Some(e) = equivalent(&pool, infos.total_consumption).await {
                 collected.push(e);
             }
         }
