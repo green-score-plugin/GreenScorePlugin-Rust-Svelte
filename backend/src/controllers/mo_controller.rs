@@ -159,6 +159,30 @@ async fn get_daily_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Re
     )
 }
 
+async fn get_weekly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (String, f64)>(
+        "SELECT CONCAT('Semaine ', WEEK(mw.creation_date, 1)) as week,
+                SUM(mw.carbon_footprint) as total
+         FROM monitored_website mw
+         JOIN user u ON u.id = mw.user_id
+         WHERE u.organisation_id = ?
+           AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
+         GROUP BY WEEK(mw.creation_date, 1)
+         ORDER BY WEEK(mw.creation_date, 1) ASC"
+    )
+        .bind(org_id)
+        .fetch_all(&pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(label, value)| ConsumptionDataPoint {
+            label,
+            value: (value * 100.0).round() / 100.0
+        })
+        .collect()
+    )
+}
+
 pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrganizationResponse> {
     let organization_informations: Option<MyOrganizationInfos> = organization_informations(State(pool.clone()), session).await;
 
