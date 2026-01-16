@@ -313,7 +313,7 @@
                 </h2>
                 <button
                         on:click={toggleDevMode}
-                        class="bg-black text-white text-xs rounded-full px-4 py-2 flex items-center"
+                        class="bg-black text-white text-xs rounded-full px-4 py-2 flex items-center hover:cursor-pointer hover:scale-105 transition-all ease_in_out duration-200"
                 >
                     {#if isDevMode}
             <span class="mr-2">
