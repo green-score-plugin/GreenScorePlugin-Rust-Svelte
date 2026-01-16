@@ -32,10 +32,11 @@
         </picture>
         <div class="flex flex-col justify-center items-center flex-1 font-outfit">
             <p class="text-6xl font-bold text-[#92bfff] animate-counter" data-value="{carbonIntensity}">{Math.round($animatedValue)}</p>
-            <p class="text-xl font-bold">gCO2eq/kWh</p>
+            <p class="text-xl font-bold">gCO2eq/kWh*</p>
             <p class="text-sm text-center pt-5">Votre empreinte carbone dépend aussi de l’intensité carbone du pays.</p>
         </div>
     </div>
+        <p class="text-sm text-gray-600 text-right font-outfit">* : Données récupérées depuis <a href="https://app.electricitymaps.com/map/live/fifteen_minutes">electricitymap.com</a></p>
     {:else}
     <p class="text-center text-gray-500 flex items-center justify-center h-full">pas de données</p>
     {/if}
