@@ -43,29 +43,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       isLocalhost = true;
       const mainContainer = document.getElementById("main-container");
       if (mainContainer) {
-        mainContainer.innerHTML = `
-        <div class="flex flex-col items-center justify-center h-full text-center gap-6 py-4 px-4">
-          <p class="text-3xl font-bold font-outfit">${message.message}</p>
-          <a
-            id="details-button"
-            href="${CONFIG.BACKEND.WEBSITE_URL}/#"
-            class="flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg"
-          >
-            Plus d'informations
-          </a>
-        </div>
-`;
+        const wrapper = document.createElement("div");
+        wrapper.className = "flex flex-col items-center justify-center h-full text-center gap-6 py-4 px-4";
 
-        // Ajouter un gestionnaire d'événement pour ouvrir dans un nouvel onglet
-        const detailsButton = document.getElementById("details-button");
+        const title = document.createElement("p");
+        title.className = "text-3xl font-bold font-outfit";
+        title.textContent = message.message || ""; // usage de textContent pour éviter l'injection
+
+        const detailsButton = document.createElement("a");
+        detailsButton.id = "details-button";
+        detailsButton.className = "flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg";
+        detailsButton.textContent = "Plus d'informations";
+
+        const rawUrl = `${CONFIG.BACKEND.WEBSITE_URL}/#`;
+        try {
+          const parsed = new URL(rawUrl);
+          detailsButton.href = parsed.toString();
+        } catch (e) {
+          detailsButton.href = "#";
+          detailsButton.setAttribute("aria-disabled", "true");
+        }
+
+        wrapper.appendChild(title);
+        wrapper.appendChild(detailsButton);
+        mainContainer.appendChild(wrapper);
+
         if (detailsButton) {
           detailsButton.addEventListener("click", (event) => {
-            event.preventDefault(); // Empêche la navigation par défaut
-            browser.tabs.create({ url: `${CONFIG.BACKEND.WEBSITE_URL}/#` });
+            event.preventDefault();
+            if (detailsButton.href && detailsButton.href !== "#") {
+              browser.tabs.create({ url: detailsButton.href });
+            }
           });
         }
       }
-      return;
     }
   });
 
@@ -120,6 +131,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function updateAverageConsumption(gCO2e) {
       const AVERAGE_CONSUMPTION = 0.74; // Valeur obtenue sur un calcul de moyenne sur plus de 100 sites
+
+      if (gCO2e <= 0) {
+        document.getElementById("average-consumption").textContent = "négligeable comparé";
+        return;
+      }
+
       let multiplier = gCO2e / AVERAGE_CONSUMPTION;
 
       if (multiplier > 1) {
@@ -133,6 +150,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
+    try {
+      const response = await browser.runtime.sendMessage({ type: "getgCO2e" });
+      if (response && response.gCO2e !== undefined) {
+        gCO2eValue = parseFloat(response.gCO2e).toFixed(2);
+        updateColors(gCO2eValue);
+        updateAverageConsumption(gCO2eValue);
+      } else {
+        console.warn("Pas de valeur gCO2e reçue");
+        updateColors(0);
+      }
+    } catch (error) {
+      console.error("Erreur récupération gCO2e:", error);
+    }
+
     // Vérification du statut de connexion
     try {
       const userData = await browser.runtime.sendMessage({
@@ -144,29 +175,43 @@ document.addEventListener("DOMContentLoaded", async () => {
       const detailsButton = document.getElementById("details-button");
 
       if (loginSection) {
-        if (userData.isLoggedIn) {
-          loginSection.innerHTML =
-            '<span class="text-sm text-[#6D874B] font-bold">Vous êtes connecté !</span>';
-        } else {
-          loginSection.innerHTML = `
-          <span class="text-sm text-grey-950">Vous souhaitez enregistrer ce résultat ?&nbsp;</span>
-          <a href="${CONFIG.BACKEND.LOGIN_URL}" class="text-[#6D874B] font-bold underline">Se connecter</a>
-        `;
-        }
-      }
 
-      // Mise à jour des couleurs en fonction de gCO2e
-      try {
-        const response = await browser.runtime.sendMessage({
-          type: "getgCO2e",
-        });
-        if (response && typeof response.gCO2e === "number") {
-          updateColors(response.gCO2e);
-          updateAverageConsumption(response.gCO2e);
-          gCO2eValue = response.gCO2e;
+        while (loginSection.firstChild) {
+          loginSection.removeChild(loginSection.firstChild);
         }
-      } catch (error) {
-        console.error("Erreur lors de la récupération du gCO2e:", error);
+
+        if (userData.isLoggedIn) {
+          const connectedSpan = document.createElement("span");
+          connectedSpan.className = "text-sm text-[#6D874B] font-bold";
+          connectedSpan.textContent = "Vous êtes connecté !";
+          loginSection.appendChild(connectedSpan);
+        } else {
+          const promptSpan = document.createElement("span");
+          promptSpan.className = "text-sm text-grey-950";
+          promptSpan.textContent = "Vous souhaitez enregistrer ce résultat ?\u00A0";
+
+          const loginLink = document.createElement("a");
+          loginLink.className = "text-[#6D874B] font-bold underline";
+          loginLink.textContent = "Se connecter";
+
+          try {
+            const parsed = new URL(CONFIG.BACKEND.LOGIN_URL);
+            loginLink.href = parsed.toString();
+            loginLink.addEventListener("click", (e) => {
+              e.preventDefault();
+              if (loginLink.href && loginLink.href !== "#") {
+                browser.tabs.create({ url: loginLink.href });
+              }
+            });
+          } catch (err) {
+            loginLink.href = "#";
+            loginLink.setAttribute("aria-disabled", "true");
+            loginLink.addEventListener("click", (e) => e.preventDefault());
+          }
+
+          loginSection.appendChild(promptSpan);
+          loginSection.appendChild(loginLink);
+        }
       }
 
       // Gestion du bouton "Plus de détails"
@@ -201,7 +246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
           // Ouvrir l'URL dans un nouvel onglet
-          window.open(url, "_blank");
+          browser.tabs.create({ url: url });
         });
       }
     } catch (error) {

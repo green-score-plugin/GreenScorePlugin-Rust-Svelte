@@ -15,6 +15,8 @@ jobs:
         run: |
           cargo build --release
           cp target/release/backend ../backend
+        env:
+          SQLX_OFFLINE: true
 
       # --- PARTIE SVELTE ---
       - name: Install & Build Svelte
@@ -25,31 +27,47 @@ jobs:
           tar -czf ../frontend_deploy.tar.gz build/ package.json package-lock.json
 
       # --- DÉPLOIEMENT ---
+      - name: Prepare artifacts for deployment
+        run: |
+          mkdir -p deploy_folder/frontend
+          mkdir -p deploy_folder/backend
+          
+          cp frontend_deploy.tar.gz deploy_folder/frontend/
+          cp backend/target/release/backend deploy_folder/backend/backend_binary
+
       - name: Deploy to AlwaysData via SSH
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.ALWAYS_SSH_KEY }}
+          REMOTE_HOST: "ssh-greenscore.alwaysdata.net"
+          REMOTE_USER: "greenscore"
+          TARGET: "/home/greenscore/www/app/"
+          SOURCE: "deploy_folder/"
           ARGS: "-rlgoDzvc -i"
-          REMOTE_HOST: "ssh-testgreenscore.alwaysdata.net"
-          REMOTE_USER: "testgreenscore"
-          TARGET: "/home/testgreenscore/www/app/"
-          SOURCE: "frontend_deploy.tar.gz,backend_binary"
 
       # --- REDÉMARRAGE ---
       - name: Restart Services
         uses: appleboy/ssh-action@master
         with:
-          host: "ssh-testgreenscore.alwaysdata.net"
-          username: "testgreenscore"
+          host: "ssh-greenscore.alwaysdata.net"
+          username: "greenscore"
           key: ${{ secrets.ALWAYS_SSH_KEY }}
           script: |
+            APP_DIR="/home/greenscore/www/app"
+            
             # 1. Gestion du FRONTEND
-            mv /home/testgreenscore/www/app/frontend_deploy.tar.gz /home/testgreenscore/www/app/frontend/
-            cd /home/testgreenscore/www/app/frontend/
-            tar -xzf frontend_deploy.tar.gz --strip-components=1
+            # Remove old build files
+            rm -rf $APP_DIR/frontend/build
+            rm -rf $APP_DIR/frontend/node_modules
+            
+            cd $APP_DIR/frontend/
+            tar -xzf frontend_deploy.tar.gz
             npm install --omit=dev
             rm frontend_deploy.tar.gz
-
+            
             # 2. Gestion du BACKEND
-            mv /home/testgreenscore/www/app/backend_binary /home/testgreenscore/www/app/backend/backend
-            chmod +x /home/testgreenscore/www/app/backend/backend
+            chmod +x $APP_DIR/backend/backend_binary
+            
+            # 3. Restart les serveurs
+            curl -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }} account=greenscore:" https://api.alwaysdata.com/v1/site/1007299/restart/
+            curl -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }} account=greenscore:" https://api.alwaysdata.com/v1/service/19361/restart/

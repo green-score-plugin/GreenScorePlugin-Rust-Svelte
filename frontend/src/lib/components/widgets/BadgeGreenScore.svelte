@@ -6,7 +6,7 @@
     $: desktopUrl = letterGreenScore ? `/images/badges/desktop/${letterGreenScore}.svg` : null;
 </script>
 
-<div class="flex flex-col bg-gradient-to-tr from-white via-blue-100 to-green-100 p-6 rounded-lg shadow-md col-span-1 order-3 sm:order-2 lg:order-3 lg:col-span-4 text-grey-950 font-outfit">
+<div class="h-full flex flex-col bg-gradient-to-tr from-white via-blue-100 to-green-100 p-6 rounded-lg shadow-md col-span-1 order-3 sm:order-2 lg:order-3 lg:col-span-4 text-grey-950 font-outfit">
     <div class="flex flex-col items-center justify-between h-full text-center">
         <h2 class="text-lg font-bold row-span-1">Badge d'impact environnemental</h2>
 

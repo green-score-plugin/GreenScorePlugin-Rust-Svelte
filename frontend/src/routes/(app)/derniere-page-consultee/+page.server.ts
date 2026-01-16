@@ -1,6 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { BACKEND_URL } from "$lib/config.ts";
-import { ELECTRICITY_MAP_API_KEY } from '$env/static/private';
+import { BACKEND_URL, ELECTRICITY_MAP_API_KEY } from "$lib/config.ts";
 
 export const load: PageServerLoad = async ({ fetch }) => {
     try {
@@ -35,7 +34,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
                 if (countries && countries[0]) {
                     countryCode = countries[0].cca2.toLowerCase();
-                    flagUrl = `https://flagcdn.com/${countryCode}.svg`;
+                    flagUrl = `/images/flags/${countryCode}.svg`;
                 }
             } catch (error) {
                 console.error('Erreur lors de la récupération du drapeau :', error);

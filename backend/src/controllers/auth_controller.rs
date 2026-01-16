@@ -85,14 +85,14 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
     } else {
 
         if roles == "[\"ROLE_USER\"]" {
-            match sqlx::query_as::<_, (String, String)>(
-                "SELECT first_name, last_name FROM user WHERE email = ?"
+            match sqlx::query_as::<_, (String, String, Option<i64>)>(
+                "SELECT first_name, last_name, organisation_id FROM user WHERE email = ?"
             )
                 .bind(&email)
                 .fetch_optional(&pool)
                 .await {
-                Ok(Some((first_name, last_name))) => {
-                    let account = Account::User(User { id: user_id, email, nom: first_name, prenom: last_name});
+                Ok(Some((first_name, last_name, organisation_id))) => {
+                    let account = Account::User(User { id: user_id, email, prenom: first_name, nom: last_name, id_orga: organisation_id});
                     session.insert("account", account.clone()).await.unwrap();
 
                     return Json(json!({
@@ -113,20 +113,21 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
         }
 
         if roles == "[\"ROLE_ORGANISATION\"]" {
-            match sqlx::query_as::<_, (String, String, Option<String>)>(
-                "SELECT o.organisation_name, o.organisation_code, o.siret FROM user u
-             JOIN organisation o ON u.is_admin_of_id = o.id
+            match sqlx::query_as::<_, (i64, String, String, Option<String>)>(
+                "SELECT o.id, o.organisation_name, o.organisation_code, o.siret FROM user u
+             JOIN organisation o ON o.admin_id = u.id
              WHERE email = ?"
             )
                 .bind(&email)
                 .fetch_optional(&pool)
                 .await {
-                Ok(Some((organisation_name, organisation_code, siret))) => {
+                Ok(Some((organisation_id, organisation_name, organisation_code, siret))) => {
                     let account = Account::Organisation(Organisation {
-                        id: user_id,
+                        id: organisation_id,
                         nom: organisation_name,
                         siret,
-                        code: organisation_code
+                        code: organisation_code,
+                        admin_id: user_id
                     });
                     session.insert("account", account).await.unwrap();
 
@@ -191,8 +192,9 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
             let account = Account::User(User {
                 id: user_id,
                 email: payload.email.clone(),
-                nom: payload.firstname.clone(),
-                prenom: payload.lastname.clone(),
+                prenom: payload.firstname.clone(),
+                nom: payload.lastname.clone(),
+                id_orga: None,
             });
 
             session.insert("account", account).await.unwrap();
@@ -232,29 +234,13 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
     };
 
     let organisation_code = generate_organisation_code();
-
-    let orga_id = match sqlx::query(
-        "INSERT INTO organisation (organisation_name, organisation_code, city, siret) VALUES (?, ?, ?, ?)"
-    )
-        .bind(&payload.orga_name)
-        .bind(&organisation_code)
-        .bind("France")
-        .bind(&payload.siret)
-        .execute(&pool)
-        .await {
-        Ok(result) => result.last_insert_id() as i64,
-        Err(e) => return Json(json!({
-            "success": false,
-            "message": format!("Erreur création organisation: {}", e)
-        })),
-    };
+    let organisation_id: i64;
 
     let role : &str = "[\"ROLE_ORGANISATION\"]";
 
     match sqlx::query(
-        "INSERT INTO user (is_admin_of_id, email, roles, password) VALUES (?, ?, ?, ?)"
+        "INSERT INTO user (email, roles, password) VALUES (?, ?, ?)"
     )
-        .bind(&orga_id)
         .bind(&payload.email)
         .bind(&role)
         .bind(&password_hash)
@@ -263,24 +249,39 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
         Ok(result) => {
             let user_id = result.last_insert_id() as i64;
 
+            match sqlx::query(
+                "INSERT INTO organisation (organisation_name, organisation_code, city, siret, admin_id) VALUES (?, ?, ?, ?, ?)"
+            )
+                .bind(&payload.orga_name)
+                .bind(&organisation_code)
+                .bind("France")
+                .bind(&payload.siret)
+                .bind(user_id)
+                .execute(&pool)
+                .await {
+                Ok(_res) => { organisation_id = _res.last_insert_id() as i64;},
+                Err(e) => {
+                    let _ = sqlx::query("DELETE FROM user WHERE id = ?").bind(user_id).execute(&pool).await;
+                    return Json(json!({
+                        "success": false,
+                        "message": format!("Erreur création organisation: {}", e)
+                    }));
+                }
+            };
+
             let account = Account::Organisation(Organisation {
-                id: user_id,
+                id: organisation_id,
                 nom: payload.orga_name.clone(),
                 siret: payload.siret.clone(),
-                code: organisation_code.clone()
+                code: organisation_code.clone(),
+                admin_id : user_id
             });
-            session.insert("account", account).await.unwrap();
+            session.insert("account", account.clone()).await.unwrap();
 
 
             Json(json!({
                 "success": true,
-                "code": organisation_code,
-                "organisation" : {
-                    "user_id" : user_id,
-                    "email" : &payload.email,
-                    "role": &role,
-                    "siret": payload.siret.as_deref()
-                }
+                "account" : account
             }))
         },
         Err(e) => Json(json!({
@@ -290,10 +291,28 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
     }
 }
 
-pub async fn get_current_account(session: Session) -> Json<Value> {
-    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    if let Some(account) = account {
+    if let Some(mut account) = account_opt {
+        if let Account::User(ref mut u) = account {
+            let row_opt = sqlx::query_as::<_, (String, String, String, Option<i64>)>(
+                "SELECT email, first_name, last_name, organisation_id FROM user WHERE id = ?"
+            )
+            .bind(u.id)
+            .fetch_optional(&pool)
+            .await;
+
+            if let Ok(Some((email, first_name, last_name, org_id))) = row_opt {
+                 u.email = email;
+                 u.prenom = first_name;
+                 u.nom = last_name;
+                 u.id_orga = org_id;
+
+                 let _ = session.insert("account", account.clone()).await;
+            }
+        }
+
         Json(json!({
             "success": true,
             "account": account

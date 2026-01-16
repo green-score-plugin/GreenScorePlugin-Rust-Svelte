@@ -37,7 +37,7 @@ export const actions = {
 
             if(result.success) {
                 setSessionCookie(cookies, response);
-                redirect(303,`/inscription-organisation/${result.code}`);
+                redirect(303,`/inscription-organisation/${result.account.code}`);
             }
 
             return fail(400, { message: result.message || 'Erreur de connexion' });
