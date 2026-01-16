@@ -5,6 +5,8 @@ use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::models::Account;
 use crate::green_score::calculate_green_score;
+use crate::controllers::helpers::{advice, equivalent};
+use crate::controllers::helpers::Equivalent;
 
 #[derive(Serialize)]
 pub struct LastPageConsultedInfos {
@@ -14,13 +16,6 @@ pub struct LastPageConsultedInfos {
     data_transferred: f64,
     loading_time: f64,
     country: String,
-}
-
-#[derive(Serialize, sqlx::FromRow)]
-pub struct Equivalent {
-    name: String,
-    value: f64,
-    icon: String,
 }
 
 #[derive(Serialize)]
@@ -64,62 +59,28 @@ async fn last_search_informations(State(pool): State<MySqlPool>, session: Sessio
     }
 }
 
-async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
-    use tokio::try_join;
-
-    let dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 1 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(&pool);
-
-    let non_dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 0 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(&pool);
-
-    match try_join!(dev_query, non_dev_query) {
-        Ok(((dev_advice,), (non_dev_advice,))) => vec![dev_advice, non_dev_advice],
-        Err(_) => vec![
-            "Utilisez des requêtes SQL optimisées pour réduire la charge serveur.".to_string(),
-            "Fermez les onglets inutilisés pour réduire la consommation d'énergie.".to_string(),
-        ],
-    }
-}
-pub(crate) async fn equivalents(State(pool): State<MySqlPool>, carbon_footprint: f64) -> Vec<Equivalent> {
-    let carbon_footprint_in_kg = carbon_footprint / 1000.0;
-
-    let equivalents = sqlx::query_as::<_, Equivalent>(
-        "SELECT name, ROUND(? * equivalent, 2) as value, icon_thumbnail as icon
-         FROM equivalent
-         WHERE (? * equivalent) >= 1.0
-         ORDER BY RAND()
-         LIMIT 2",
-    )
-        .bind(carbon_footprint_in_kg)
-        .bind(carbon_footprint_in_kg)
-        .fetch_all(&pool)
-        .await;
-
-    match equivalents {
-        Ok(rows) => rows,
-        Err(e) => {
-            eprintln!("Erreur SQL : {:?}", e);
-            vec![]
-        },
-    }
-}
-
 pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPageConsultedResponse> {
     let last_search_informations: Option<LastPageConsultedInfos> = last_search_informations(State(pool.clone()), session).await;
 
-    let advices: Vec<String> = advices(State(pool.clone())).await;
+    let advices: Vec<String> = {
+        let mut v = Vec::new();
+        v.push(advice(&pool, false).await);
+        v.push(advice(&pool, true).await);
+        v
+    };
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
-        let (l, n) = calculate_green_score(infos.carbon_footprint);
+        let (l, n) = calculate_green_score(&State(pool.clone()), infos.carbon_footprint, "lpc".to_string()).await;
 
-        let eq = equivalents(State(pool.clone()), infos.carbon_footprint).await;
+        let mut collected: Vec<Equivalent> = Vec::new();
+        for _ in 0..2 {
+            if let Some(e) = equivalent(&pool, infos.carbon_footprint).await {
+                collected.push(e);
+            }
+        }
+        let eqs = if collected.is_empty() { None } else { Some(collected) };
 
-        (Some(l), Some(n), Some(eq))
+        (Some(l), Some(n), eqs)
     } else {
         (None, None, None)
     };

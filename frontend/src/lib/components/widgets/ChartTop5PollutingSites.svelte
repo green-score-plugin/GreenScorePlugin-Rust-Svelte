@@ -67,7 +67,7 @@
     });
 </script>
 
-<div class="bg-white rounded-lg shadow p-6 lg:col-span-6 flex flex-col min-h-[280px]">
+<div class="bg-white rounded-lg shadow p-6 lg:col-span-6 col-span-1 sm:col-span-2 flex-wrap order-7 lg:order-7 flex flex-col min-h-[280px]">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Top 5 des sites les plus polluants</h2>
 
     {#if topPollutingSites.length > 0}

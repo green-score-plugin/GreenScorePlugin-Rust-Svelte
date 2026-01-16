@@ -17,7 +17,7 @@
             {advice}
         </p>
         <div class="flex w-full justify-end">
-            <button class="{type === 'dev' ? 'bg-[#455a79]' : 'bg-[#4b7d60]'} text-white px-4 py-2 mt-4 rounded-lg">En savoir plus</button>
+            <a class="{type === 'dev' ? 'bg-[#455a79]' : 'bg-[#4b7d60]'} text-white px-4 py-2 mt-4 rounded-lg hover:cursor-pointer hover:scale-105 transition-all ease-in-out duration-300" href="/#advice">En savoir plus</a>
         </div>
     {:else}
         <p class="text-center text-gray-500 flex items-center justify-center h-full">pas de données</p>

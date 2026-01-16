@@ -26,7 +26,7 @@
         }
     });
 
-    $: if (canvas) {
+    $: if (canvas && consumptionData) {
         updateChart();
     }
 
@@ -104,7 +104,7 @@
     ] as const;
 </script>
 
-<div class="bg-white rounded-lg shadow p-6 lg:col-span-4">
+<div class="bg-white rounded-lg shadow p-6 lg:col-span-4 col-span-1 sm:col-span-2 order-2 sm:order-3 lg:order-2">
     <div class="flex justify-between items-center mb-1">
         <h2 class="text-lg font-semibold text-gray-900">Votre consommation</h2>
         <select
