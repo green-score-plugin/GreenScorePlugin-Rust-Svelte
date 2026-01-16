@@ -71,7 +71,7 @@ pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPa
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
         let (l, n) = calculate_green_score(&State(pool.clone()), infos.carbon_footprint, "lpc".to_string()).await;
-
+        println!("Calculated green score: Letter: {:?}, Env Nomination: {:?}", l, n);
         let mut collected: Vec<Equivalent> = Vec::new();
         for _ in 0..2 {
             if let Some(e) = equivalent(&pool, infos.carbon_footprint).await {
@@ -84,6 +84,8 @@ pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPa
     } else {
         (None, None, None)
     };
+
+    println!("Letter: {:?}, Env Nomination: {:?}", letter, env_nomination);
 
     Json(LastPageConsultedResponse {
         success: true,
