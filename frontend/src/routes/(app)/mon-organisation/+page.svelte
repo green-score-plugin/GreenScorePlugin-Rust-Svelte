@@ -18,10 +18,16 @@
 
     let selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'monthly';
 
-    $: description = 'Toutes les données sur les membres de : ' + data.organisationData!.name;
-    $: averageFootprint = data.organisationData!.averageDailyCarbonFootprint;
-    $: equivalentAverage = data.organisationData!.equivalent;
-    $: carbonFootprint = (data.organisationData!.totalCarbonFootprint ?? 0).toFixed(2);
+    if (data.organisationData === null) {
+        noDatas = true;
+    } else {
+        noDatas = false;
+    }
+
+    $: description = 'Toutes les données sur les membres de : ' + data.organisationData?.name;
+    $: averageFootprint = data.organisationData?.averageDailyCarbonFootprint;
+    $: equivalentAverage = data.organisationData?.equivalent;
+    $: carbonFootprint = (data.organisationData?.totalCarbonFootprint ?? 0).toFixed(2);
     $: letterGreenScore = data.letterGreenScore || 'A';
     $: envNomination = data.envNomination || 'Maître des Forêts';
     $: equivalent1 = data.equivalents?.[0] || { name: '', value: 0, icon: '' };
