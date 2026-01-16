@@ -68,7 +68,7 @@
     {#if hasOrga}
         <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-1">
-                    <label class="text-xs font-semibold uppercase text-grey-500">Nom de l'organisation</label>
+                    <p class="text-xs font-semibold uppercase text-grey-500">Nom de l'organisation</p>
                     <div class="text-xl font-bold text-gs-green-950">{orgaDetails?.name}</div>
                 </div>
 

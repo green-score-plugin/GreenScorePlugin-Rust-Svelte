@@ -305,8 +305,8 @@ pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>
 
             if let Ok(Some((email, first_name, last_name, org_id))) = row_opt {
                  u.email = email;
-                 u.nom = first_name;
-                 u.prenom = last_name;
+                 u.prenom = first_name;
+                 u.nom = last_name;
                  u.id_orga = org_id;
 
                  let _ = session.insert("account", account.clone()).await;
