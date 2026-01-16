@@ -59,7 +59,7 @@ async fn last_search_informations(State(pool): State<MySqlPool>, session: Sessio
     }
 }
 
-pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPageConsultedResponse> {
+pub async fn lpc(session: Session, State(pool): State<MySqlPool>) -> Json<LastPageConsultedResponse> {
     let last_search_informations: Option<LastPageConsultedInfos> = last_search_informations(State(pool.clone()), session).await;
 
     let advices: Vec<String> = {
