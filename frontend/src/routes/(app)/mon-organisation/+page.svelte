@@ -6,39 +6,36 @@
     import TotalConsumption from "$lib/components/widgets/TotalConsumption.svelte";
     import ChartTop5PollutingSites from "$lib/components/widgets/ChartTop5PollutingSites.svelte";
     import Advice from "$lib/components/widgets/Advice.svelte";
-
-    export let title : string = 'Mon Organisation';
-    export let description : string = 'Toutes les données sur les membres de : ';
-    export let noDatas : boolean = false;
-    export let averageFootprint: number = 10;
-    export let equivalentAverage: { name: string; value: number; icon: string } = { name: 'km en voiture', value: 5, icon: 'car.png' };
-    export let usersIdsCharts: string = '1,2,3,4,5';
-    export let letterGreenScore = 'A';
-    export let envNomination = 'Maître des Forêts';
-    export let equivalent1: { name: string; value: number; icon: string } = { name: 'douches', value: 20, icon: 'shower.png' };
-    export let equivalent2: { name: string; value: number; icon: string } = { name: 'km en vélo', value: 100, icon: 'bike.png' };
-    export let totalConsuUnit: string = 'gCO2eq';
-    export let label: string = 'Total de la consommation de votre organisation depuis la création du compte :';
-    export let advice: string = "Réduisez la résolution des images sur votre site web.";
-    export let adviceDev: string = "Mettez en place un système de mise en cache efficace.";
-    export let carbonFootprint: number;
-
     import type { PageData } from './$types';
+
     export let data: PageData;
-    
-    $: if (data.organisationData) {
-        description += data.organisationData.name;
-        averageFootprint = data.organisationData.averageDailyCarbonFootprint;
-        equivalentAverage = data.organisationData.equivalent;
-        usersIdsCharts = data.organisationData.members;
-        carbonFootprint = data.organisationData.totalCarbonFootprint.toFixed(2);
-        letterGreenScore = data.letterGreenScore;
-        envNomination = data.envNomination;
-        equivalent1 = data.equivalents[0];
-        equivalent2 = data.equivalents[1];
-        advice = data.adviceUser;
-        adviceDev = data.adviceDev;
-    }
+
+    export let totalConsuUnit = 'gCO2eq';
+    export let title: string = 'Mon Organisation';
+    export let description: string = 'Toutes les données sur les membres de : ';
+    export let noDatas: boolean = false;
+    export let label: string = 'Total de la consommation de votre organisation depuis la création du compte :';
+
+    let selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'monthly';
+
+    $: description = 'Toutes les données sur les membres de : ' + data.organisationData!.name;
+    $: averageFootprint = data.organisationData!.averageDailyCarbonFootprint;
+    $: equivalentAverage = data.organisationData!.equivalent;
+    $: usersIdsCharts = data.organisationData!.members;
+    $: carbonFootprint = (data.organisationData!.totalCarbonFootprint ?? 0).toFixed(2);
+    $: letterGreenScore = data.letterGreenScore || 'A';
+    $: envNomination = data.envNomination || 'Maître des Forêts';
+    $: equivalent1 = data.equivalents?.[0] || { name: '', value: 0, icon: '' };
+    $: equivalent2 = data.equivalents?.[1] || { name: '', value: 0, icon: '' };
+    $: advice = data.adviceUser || '';
+    $: adviceDev = data.adviceDev || '';
+    $: dailyConsumption = data.dailyConsumption || [];
+    $: weeklyConsumption = data.weeklyConsumption || [];
+    $: monthlyConsumption = data.monthlyConsumption || [];
+
+    $: consumptionData = selectedPeriod === 'daily' ? dailyConsumption
+        : selectedPeriod === 'weekly' ? weeklyConsumption
+            : monthlyConsumption;
 </script>
 
 <svelte:head>
@@ -58,7 +55,7 @@
     {#if !noDatas}
     <div class="grid grid-cols-1 gap-6 p-10 sm:grid-cols-2 lg:grid-cols-12">
         <OrganizationAverageDailyCarbonFootprint {averageFootprint} {equivalentAverage}/>
-        <ChartConsumptionFiltered {usersIdsCharts}/>
+        <ChartConsumptionFiltered {consumptionData} bind:selectedPeriod/>
         <BadgeGreenScore {letterGreenScore} {envNomination}/>
         <Equivalent equivalent={equivalent1} order={1} />
         <TotalConsumption {carbonFootprint} {totalConsuUnit} {label} />
