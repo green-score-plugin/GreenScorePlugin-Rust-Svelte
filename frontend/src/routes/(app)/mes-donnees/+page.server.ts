@@ -5,14 +5,12 @@ function formatMonthlyData(data: Array<{ label: string; value: number }>) {
     const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
     const now = new Date();
     const result: Array<{ label: string; value: number }> = [];
-    // Créer les 12 derniers mois
     for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthIndex = date.getMonth();
         const year = date.getFullYear();
         const formattedLabel = `${monthNames[monthIndex]} ${year}`;
 
-        // Chercher si des données existent pour ce mois
         const monthKey = `${String(monthIndex + 1).padStart(2, '0')}/${year}`;
         const existingData = data.find(d => d.label === monthKey);
 

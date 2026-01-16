@@ -51,10 +51,8 @@
             </p>
         {/if}
     </div>
-
     {#if !noDatas}
         <div class="p-10 space-y-6">
-            <!-- Ligne 1 : Empreinte carbone + Consommation + Badge -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div class="lg:col-span-1 h-full">
                     <UserAverageDailyCarbonFootprint
@@ -63,7 +61,6 @@
                             {messageAverageFootprint}
                     />
                 </div>
-
                 <div class="lg:col-span-2 h-full">
                     <ChartConsumptionFiltered {consumptionData} bind:selectedPeriod/>
                 </div>
@@ -72,8 +69,6 @@
                     <BadgeGreenScore {letterGreenScore} {envNomination}/>
                 </div>
             </div>
-
-            <!-- Ligne 2 : Équivalent 1 + Total consommation + Équivalent 2 -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div class="lg:col-span-1 h-full">
                     <Equivalent equivalent={equivalent1} order={1}/>
@@ -91,8 +86,6 @@
                     <Equivalent equivalent={equivalent2} order={2}/>
                 </div>
             </div>
-
-            <!-- Ligne 3 : Top 5 sites + Conseils navigation + Conseils dev -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div class="lg:col-span-2 h-full">
                     <ChartTop5PollutingSites {topPollutingSites}/>
@@ -108,7 +101,6 @@
             </div>
         </div>
     {:else}
-
         <div class="w-full h-screen flex items-center justify-center font-outfit">
             <p class="text-2xl text-gray-600 font-medium">
                 Vous n'avez pas encore utilisé notre plugin afin d'analyser votre consommation !
