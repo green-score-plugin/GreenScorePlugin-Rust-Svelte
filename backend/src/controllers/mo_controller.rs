@@ -26,6 +26,9 @@ pub struct MyOrganizationResponse {
     letter: Option<String>,
     env_nomination: Option<String>,
     equivalents: Option<Vec<Equivalent>>,
+    daily_consumption: Vec<ConsumptionDataPoint>,
+    weekly_consumption: Vec<ConsumptionDataPoint>,
+    monthly_consumption: Vec<ConsumptionDataPoint>,
 }
 
 #[derive(Serialize, Debug)]
@@ -125,7 +128,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
                     average_daily_carbon_footprint,
                     equivalent,
                     members,
-                    total_consumption
+                    total_consumption,
                 })
             }
             None => None,
@@ -208,6 +211,53 @@ async fn get_monthly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> 
 }
 
 pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrganizationResponse> {
+    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let org_id: i64 = match account {
+        Some(acc) => match acc.organization_id(&pool).await {
+            Ok(Some(id)) => id,
+            Ok(None) => {
+                return Json(MyOrganizationResponse {
+                    success: false,
+                    mo_infos: None,
+                    advices: vec![],
+                    letter: None,
+                    env_nomination: None,
+                    equivalents: None,
+                    daily_consumption: vec![],
+                    weekly_consumption: vec![],
+                    monthly_consumption: vec![],
+                });
+            }
+            Err(_) => {
+                return Json(MyOrganizationResponse {
+                    success: false,
+                    mo_infos: None,
+                    advices: vec![],
+                    letter: None,
+                    env_nomination: None,
+                    equivalents: None,
+                    daily_consumption: vec![],
+                    weekly_consumption: vec![],
+                    monthly_consumption: vec![],
+                });
+            }
+        },
+        None => {
+            return Json(MyOrganizationResponse {
+                success: false,
+                mo_infos: None,
+                advices: vec![],
+                letter: None,
+                env_nomination: None,
+                equivalents: None,
+                daily_consumption: vec![],
+                weekly_consumption: vec![],
+                monthly_consumption: vec![],
+            });
+        }
+    };
+
     let organization_informations: Option<MyOrganizationInfos> = organization_informations(State(pool.clone()), session).await;
 
     let advices: Vec<String> = {
@@ -233,6 +283,10 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
         (None, None, None)
     };
 
+    let daily_consumption = get_daily_consumption(State(pool.clone()), org_id).await.unwrap_or(vec![]);
+    let weekly_consumption = get_weekly_consumption(State(pool.clone()), org_id).await.unwrap_or(vec![]);
+    let monthly_consumption = get_monthly_consumption(State(pool.clone()), org_id).await.unwrap_or(vec![]);
+
     Json(MyOrganizationResponse {
         success: true,
         mo_infos: organization_informations,
@@ -240,5 +294,8 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
         letter,
         env_nomination,
         equivalents,
+        daily_consumption,
+        weekly_consumption,
+        monthly_consumption,
     })
 }
