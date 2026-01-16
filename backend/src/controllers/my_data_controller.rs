@@ -3,7 +3,8 @@ use axum::Json;
 use serde::{Serialize};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
-use crate::controllers::lpc_controller::{Equivalent};
+use crate::controllers::helpers::{advice, equivalent};
+use crate::controllers::helpers::Equivalent;
 use crate::green_score::calculate_green_score;
 use crate::models::Account;
 
@@ -33,30 +34,6 @@ pub struct TopPollutingSite {
     url_domain: String,
     total_footprint: f64,
 }
-
-
-async fn advices(State(pool): State<MySqlPool>) -> Vec<String> {
-    use tokio::try_join;
-
-    let dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 1 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(&pool);
-
-    let non_dev_query = sqlx::query_as::<_, (String,)>(
-        "SELECT advice FROM advice WHERE is_dev = 0 ORDER BY RAND() LIMIT 1",
-    )
-        .fetch_one(&pool);
-
-    match try_join!(dev_query, non_dev_query) {
-        Ok(((dev_advice,), (non_dev_advice,))) => vec![dev_advice, non_dev_advice],
-        Err(_) => vec![
-            "Utilisez des requêtes SQL optimisées pour réduire la charge serveur.".to_string(),
-            "Fermez les onglets inutilisés pour réduire la consommation d'énergie.".to_string(),
-        ],
-    }
-}
-
 
 async fn get_top5_polluting_sites(
     pool: &MySqlPool,
@@ -290,12 +267,20 @@ pub async fn my_data(
     };
 
     let (letter_green_score, env_nomination, equivalents) = if let Some(avg) = my_average_daily_carbon_footprint {
-        let (l, n) = calculate_green_score(avg);
-        let eq = crate::controllers::lpc_controller::equivalents(State(pool.clone()), avg).await;
-        (Some(l), Some(n), Some(eq))
+        let (l, n) = calculate_green_score(&pool, avg, "my_data".to_string()).await;
+        let mut collected: Vec<Equivalent> = Vec::new();
+        for _ in 0..2 {
+            if let Some(e) = equivalent(&pool, avg).await {
+                collected.push(e);
+            }
+        }
+        let eqs = if collected.is_empty() { None } else { Some(collected) };
+
+        (Some(l), Some(n), eqs)
     } else {
         (None, None, None)
     };
+
     let total_consumption = get_total_consumption(&pool, session.clone()).await;
 
     let (daily_consumption, weekly_consumption, monthly_consumption) =
@@ -308,7 +293,13 @@ pub async fn my_data(
         } else {
             (vec![], vec![], vec![])
         };
-    let advices: Vec<String> = advices(State(pool.clone())).await;
+    let advices: Vec<String> = {
+        let mut v = Vec::new();
+        v.push(advice(&pool, false).await);
+        v.push(advice(&pool, true).await);
+        v
+    };
+
     let top_polluting_sites = if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
         get_top5_polluting_sites(&pool, account.id() as i32).await.unwrap_or_default()
     } else {

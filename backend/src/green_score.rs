@@ -48,7 +48,7 @@ pub async fn calculate_green_score(pool: &MySqlPool, carbon_footprint: f64, page
 
         (letter.to_string(), nomination.to_string())
 
-    } else if page == "lpc" {
+    } else if page == "lpc" || page == "my_data" {
         let echelle: f64 = 0.25;
 
         let (letter_green_score, env_nomination) = if carbon_footprint < echelle {
