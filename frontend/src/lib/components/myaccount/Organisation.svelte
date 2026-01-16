@@ -2,6 +2,7 @@
     import { enhance } from '$app/forms';
     import { page } from '$app/stores';
     import { invalidateAll } from '$app/navigation';
+    import CodeClipboard from "$lib/components/CodeClipboard.svelte";
 
     export const form: { message?: string, success?: boolean } | null = null;
 
@@ -40,14 +41,6 @@
             }
         }
     }
-
-    function copyCode() {
-        if (orgaDetails?.code) {
-            navigator.clipboard.writeText(orgaDetails.code);
-            successMessage = "Code copié dans le presse-papier !";
-            setTimeout(() => successMessage = '', 3000);
-        }
-    }
 </script>
 
 <div class="flex flex-col gap-4">
@@ -75,22 +68,7 @@
 
                 <div class="w-full flex flex-col gap-2">
                     <label for="codeDisplay" class="text-sm font-semibold text-grey-700">Code Organisation</label>
-                    <div class="flex gap-2">
-                        <input
-                                id="codeDisplay"
-                                type="text"
-                                readonly
-                                value={orgaDetails?.code || ''}
-                                class="px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full bg-gray-50 cursor-not-allowed focus:outline-none"
-                        />
-                        <button
-                                type="button"
-                                on:click={copyCode}
-                                class="px-4 py-2 rounded-lg border border-grey-200 hover:bg-gray-100 font-semibold text-grey-700 transition-colors"
-                        >
-                            Copier
-                        </button>
-                    </div>
+                    <CodeClipboard code={orgaDetails?.code || 'Inconnu'} />
                 </div>
 
                 <div class="flex gap-3 pt-2">
