@@ -1,0 +1,73 @@
+name: Deploy to AlwaysData
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- PARTIE RUST ---
+      - name: Build Rust (Release)
+        working-directory: ./backend
+        run: |
+          cargo build --release
+          cp target/release/backend ../backend
+        env:
+          SQLX_OFFLINE: true
+
+      # --- PARTIE SVELTE ---
+      - name: Install & Build Svelte
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm run build
+          tar -czf ../frontend_deploy.tar.gz build/ package.json package-lock.json
+
+      # --- DÉPLOIEMENT ---
+      - name: Prepare artifacts for deployment
+        run: |
+          mkdir -p deploy_folder/frontend
+          mkdir -p deploy_folder/backend
+          
+          cp frontend_deploy.tar.gz deploy_folder/frontend/
+          cp backend/target/release/backend deploy_folder/backend/backend_binary
+
+      - name: Deploy to AlwaysData via SSH
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.ALWAYS_SSH_KEY }}
+          REMOTE_HOST: "ssh-greenscore.alwaysdata.net"
+          REMOTE_USER: "greenscore"
+          TARGET: "/home/greenscore/www/app/"
+          SOURCE: "deploy_folder/"
+          ARGS: "-rlgoDzvc -i"
+
+      # --- REDÉMARRAGE ---
+      - name: Restart Services
+        uses: appleboy/ssh-action@master
+        with:
+          host: "ssh-greenscore.alwaysdata.net"
+          username: "greenscore"
+          key: ${{ secrets.ALWAYS_SSH_KEY }}
+          script: |
+            APP_DIR="/home/greenscore/www/app"
+            
+            # 1. Gestion du FRONTEND
+            # Remove old build files
+            rm -rf $APP_DIR/frontend/build
+            rm -rf $APP_DIR/frontend/node_modules
+            
+            cd $APP_DIR/frontend/
+            tar -xzf frontend_deploy.tar.gz
+            npm install --omit=dev
+            rm frontend_deploy.tar.gz
+            
+            # 2. Gestion du BACKEND
+            chmod +x $APP_DIR/backend/backend_binary
+            
+            # 3. Restart les serveurs
+            curl -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }} account=greenscore:" https://api.alwaysdata.com/v1/site/1007299/restart/
+            curl -X POST --basic --user "${{ secrets.ALWAYSDATA_TOKEN }} account=greenscore:" https://api.alwaysdata.com/v1/service/19361/restart/

@@ -23,7 +23,7 @@
             <p id="code-text" class="text-grey-950 text-center text-3xl font-outfit font-semibold tracking-widest">{code}</p>
         </div>
         <div class="px-4 py-4 flex flex-col items-center justify-center relative">
-            <button type="button" on:click={copyToClipboard}
+            <button type="button" onclick={copyToClipboard}
                 class="cursor-pointer transition-transform duration-200 hover:scale-110 bg-transparent border-0 p-0"
                 aria-label="Copier le code"
             >

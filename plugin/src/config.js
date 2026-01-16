@@ -1,13 +1,13 @@
 const CONFIG = {
     BACKEND: {
-      PLUGIN_BACKEND_URL: "http://localhost:3000", // URL du backend du plugin
+      PLUGIN_BACKEND_URL: "https://greenscore.alwaysdata.net/plugin", // URL du backend du plugin
 
-      DOMAIN: "localhost", // Utilisé pour récupérer l'ID utilisateur
+      DOMAIN: "greenscore.alwaysdata.net", // Utilisé pour récupérer l'ID utilisateur
       
-      WEBSITE_URL: "http://localhost:5173", // URL du site Greenscore
+      WEBSITE_URL: "https://greenscore.alwaysdata.net", // URL du site Greenscore
       
-      LOGIN_URL: "http://localhost:5173/login", // URL de la page de connexion
-      DETAILS_URL: "http://localhost:5173/derniere-page" // URL de la page de détails
+      LOGIN_URL: "https://greenscore.alwaysdata.net/login", // URL de la page de connexion
+      DETAILS_URL: "https://greenscore.alwaysdata.net/derniere-page" // URL de la page de détails
     }
   };
   

@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
-import { BACKEND_URL } from '$lib/config';
-import { invalidateCache } from '$lib/server/session';
+import type { RequestHandler } from '../../../../.svelte-kit/types/src/routes';
+import { BACKEND_URL } from '$lib/config.ts';
+import { invalidateCache } from '$lib/server/session.ts';
 
 export const GET: RequestHandler = async ({ url, cookies, fetch }) => {
     const sessionCookie = cookies.get('greenscoreweb_sessions');
