@@ -9,11 +9,16 @@
     let deletingMemberId: number | null = $state(null);
 
     let user = $derived(page.data.user as Organisation);
-    let members = $derived(page.data.members || []);
+    let members = $state(page.data.members || []);
+
+    $effect(() => {
+        members = page.data.members || [];
+    });
 
     let query = $state('');
     let limit = $state(6);
     let scrollContainer: HTMLElement | undefined = $state();
+
 
     const handleDeleteResult: SubmitFunction = () => {
         return async ({ result }) => {
@@ -117,7 +122,7 @@
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
             <h2 class="text-xl font-semibold mb-4">Confirmer la suppression</h2>
             <p class="text-gray-600 mb-6">
-                Êtes-vous sûr de vouloir supprimer votre compte utilisateur ?
+                Êtes-vous sûr de vouloir supprimer ce membre de votre organisation ?
             </p>
             <div class="flex justify-end gap-4">
                 <button

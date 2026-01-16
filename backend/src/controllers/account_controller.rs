@@ -222,7 +222,7 @@ pub async fn get_organisation_member(session: Session, State(pool): State<MySqlP
     };
 
     let members = match sqlx::query_as::<_, User>(
-        "SELECT id, email, first_name AS prenom, last_name AS nom FROM user WHERE organisation_id = ?"
+        "SELECT id, email, first_name AS prenom, last_name AS nom, organisation_id AS id_orga FROM user WHERE organisation_id = ?"
     )
         .bind(organisation.id)
         .fetch_all(&pool)
