@@ -5,7 +5,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
     try {
         console.log(`${BACKEND_URL}/derniere-page-consultee`)
         const response = await fetch(`${BACKEND_URL}/derniere-page-consultee`, {
-            method: 'GET',
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
             credentials: 'include'
         });
