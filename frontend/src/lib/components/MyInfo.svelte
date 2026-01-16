@@ -4,6 +4,8 @@
 
     let submitted = false;
     let loading = false;
+    let submittedPassword = '';
+    let submittedPasswordConfirm = '';
 
     let user = { prenom: '', nom: '', email: '' };
     let password = '';
@@ -32,27 +34,46 @@
             }
         }
     }
-    $: passwordValid = !submitted || (password === passwordConfirm && (password.length === 0 || password.length >= 8));
+
+    $: passwordValid = (password === '' && passwordConfirm === '') ||
+                       (password === passwordConfirm && password.length >= 8);
+
+    $: showPasswordError = submitted && !passwordValid;
 
     const noAutofill = { autocomplete: 'nop' } as any;
+
+    function handlePasswordInput() {
+        if (submitted && (password !== submittedPassword || passwordConfirm !== submittedPasswordConfirm)) {
+            submitted = false;
+        }
+    }
 </script>
 
 <form
         method="POST"
         action="?/modifier"
         autocomplete="off"
-        use:enhance={() => {
-        submitted = true;
-        if (!passwordValid) return async () => {};
-        loading = true;
-        successMessage = '';
-        errorMessage = '';
+        use:enhance={({ cancel }) => {
+            const isValid = (password === '' && passwordConfirm === '') ||
+                            (password === passwordConfirm && password.length >= 8);
 
-        return async ({ update }) => {
-            await update();
-            loading = false;
-        };
-    }}
+            if (!isValid) {
+                submittedPassword = password;
+                submittedPasswordConfirm = passwordConfirm;
+                submitted = true;
+                cancel();
+                return;
+            }
+
+            loading = true;
+            successMessage = '';
+            errorMessage = '';
+
+            return async ({ update }) => {
+                await update();
+                loading = false;
+            };
+        }}
         class="flex flex-col gap-4"
 >
     <h1 class="text-2xl font-bold py-2">Mes informations</h1>
@@ -73,6 +94,13 @@
             {errorMessage}
         </div>
     {/if}
+
+    {#if showPasswordError}
+        <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            Les mots de passe doivent être identiques et contenir au moins 8 caractères
+        </div>
+    {/if}
+
 
     <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full flex flex-col">
@@ -127,6 +155,7 @@
                     name="password"
                     type="password"
                     bind:value={password}
+                    on:input={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Votre mot de passe"
                     autocomplete="new-password"
@@ -139,6 +168,7 @@
                     id="passwordConfirm"
                     type="password"
                     bind:value={passwordConfirm}
+                    on:input={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder="Confirmez votre mot de passe"
                     autocomplete="new-password"
@@ -146,15 +176,10 @@
         </div>
     </div>
 
-    {#if !passwordValid}
-        <span class="text-red-500 text-sm">
-            Les mots de passe doivent être identiques et contenir au moins 8 caractères
-        </span>
-    {/if}
 
     <button
             type="submit"
-            disabled={loading || !passwordValid}
+            disabled={loading}
             class="mt-4 w-full h-fit rounded-lg bg-gs-green-950 px-4 py-2 font-semibold font-outfit text-white
                cursor-pointer hover:bg-gs-green-800 active:bg-gs-green-700
                transition-colors duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"

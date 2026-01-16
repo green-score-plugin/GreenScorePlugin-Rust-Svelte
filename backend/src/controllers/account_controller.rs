@@ -52,6 +52,21 @@ pub async fn update_account(
     let mut params: Vec<String> = Vec::new();
 
     if let Some(ref email) = payload.email {
+        if email != &user.email {
+            let email_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
+                .bind(email)
+                .fetch_optional(&pool)
+                .await
+                .unwrap_or(None);
+
+            if email_exists.is_some() {
+                return Json(json!({
+                    "success": false,
+                    "message": "Cet email est déjà utilisé par un autre compte"
+                }));
+            }
+        }
+
         updates.push("email = ?");
         params.push(email.clone());
         user.email = email.clone();
@@ -302,4 +317,3 @@ pub async fn get_my_organization(
         "organisation": null
     }));
 }
-
