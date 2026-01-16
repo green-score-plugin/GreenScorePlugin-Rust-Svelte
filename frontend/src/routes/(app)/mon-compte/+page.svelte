@@ -8,10 +8,6 @@
     let activePage = $state("my_info");
     let user = $derived(page.data.user);
 
-    $effect(() => {
-        console.log("PAGE: activePage changed to", activePage);
-    });
-
 </script>
 
 <div class="xl:px-52 flex flex-col h-full">
