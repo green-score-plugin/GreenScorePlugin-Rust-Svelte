@@ -1,12 +1,15 @@
 import type { PageServerLoad } from './$types';
 import { BACKEND_URL, ELECTRICITY_MAP_API_KEY } from "$lib/config.ts";
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, request }) => {
     try {
         console.log(`${BACKEND_URL}/derniere-page-consultee`)
         const response = await fetch(`${BACKEND_URL}/derniere-page-consultee`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': request.headers.get('cookie') || ''
+            },
             credentials: 'include'
         });
         const result = await response.json();
