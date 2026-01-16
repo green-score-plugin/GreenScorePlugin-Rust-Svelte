@@ -30,17 +30,17 @@ pub struct LastPageConsultedResponse {
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
-
+    println!("Retrieved account from session: {:?}", account);
     if let Some(account) = account {
         let id = account.id();
-
+        println!("Fetching last monitored website for user_id: {}", id);
         let result = sqlx::query_as::<_, (String, i32, f64, f64, f64, String)>(
             "SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country FROM monitored_website WHERE user_id = ? ORDER BY creation_date DESC LIMIT 1",
         )
             .bind(id)
             .fetch_one(&pool)
             .await;
-
+        println!("Database query result: {:?}", result);
         match result {
             Ok((url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country)) => {
                 Some(LastPageConsultedInfos {
