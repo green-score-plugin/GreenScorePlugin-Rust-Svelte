@@ -29,6 +29,7 @@ pub struct MyOrganizationResponse {
     daily_consumption: Vec<ConsumptionDataPoint>,
     weekly_consumption: Vec<ConsumptionDataPoint>,
     monthly_consumption: Vec<ConsumptionDataPoint>,
+    top_polluting_sites: Vec<TopPollutingSite>,
 }
 
 #[derive(Serialize, Debug)]
@@ -37,7 +38,211 @@ pub struct ConsumptionDataPoint {
     value: f64,
 }
 
-async fn average_daily_carbon_footprint(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
+#[derive(Serialize, Debug)]
+pub struct TopPollutingSite {
+    url_domain: String,
+    total_footprint: f64,
+}
+
+// async fn average_daily_carbon_footprint(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
+//     let result = sqlx::query_as::<_, (f64,)>(
+//         "SELECT ROUND(
+//                 COALESCE(
+//                     SUM(mw.carbon_footprint) / NULLIF(DATEDIFF(CURDATE(), MIN(DATE(mw.creation_date))) + 1, 0)
+//                 , 0)
+//             , 2) AS average_daily_carbon_footprint
+//         FROM monitored_website mw
+//         JOIN user u ON u.id = mw.user_id
+//         WHERE u.organisation_id = ?"
+//     )
+//         .bind(org_id)
+//         .fetch_one(&pool)
+//         .await;
+//
+//     match result {
+//         Ok((average_daily_carbon_footprint,)) => Some(average_daily_carbon_footprint),
+//         Err(_) => None,
+//     }
+// }
+
+async fn get_top5_polluting_sites(pool: &MySqlPool, org_id: i64) -> Result<Vec<TopPollutingSite>, sqlx::Error> {
+    let results = sqlx::query_as::<_, (String, f64)>(
+        "SELECT
+            mw.url_domain,
+            SUM(mw.carbon_footprint) as total_footprint
+         FROM monitored_website mw
+         JOIN user u ON u.id = mw.user_id
+         WHERE u.organisation_id = ?
+         AND mw.url_domain IS NOT NULL
+         GROUP BY mw.url_domain
+         ORDER BY total_footprint DESC
+         LIMIT 5"
+    )
+        .bind(org_id)
+        .fetch_all(pool)
+        .await?;
+
+    Ok(results.into_iter()
+        .map(|(url_domain, total_footprint)| TopPollutingSite {
+            url_domain,
+            total_footprint: (total_footprint * 100.0).round() / 100.0
+        })
+        .collect())
+}
+
+// async fn organization_members(State(pool): State<MySqlPool>, org_id: i64) -> Vec<i32> {
+//     let result = sqlx::query_as::<_, (i32,)>(
+//         "SELECT id FROM user WHERE organisation_id = ?",
+//     )
+//         .bind(org_id)
+//         .fetch_all(&pool)
+//         .await;
+//
+//     match result {
+//         Ok(rows) => rows.into_iter().map(|(id,)| id).collect(),
+//         Err(_) => vec![],
+//     }
+// }
+//
+// async fn total_organization_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
+//     let result = sqlx::query_as::<_, (f64,)>(
+//         "SELECT SUM(mw.carbon_footprint) as total_consumption
+//         FROM monitored_website mw
+//         JOIN user u
+//        	ON mw.user_id = u.id
+//         WHERE u.organisation_id = ?",
+//     )
+//         .bind(org_id)
+//         .fetch_one(&pool)
+//         .await;
+//
+//     match result {
+//         Ok((total_consumption,)) => Some(total_consumption),
+//         Err(_) => None,
+//     }
+// }
+//
+// async fn organization_name(State(pool): State<MySqlPool>, org_id: i64) -> Option<String> {
+//     let result = sqlx::query_as::<_, (String,)>(
+//         "SELECT organisation_name FROM organisation WHERE id = ? LIMIT 1",
+//     )
+//         .bind(org_id)
+//         .fetch_one(&pool)
+//         .await;
+//
+//     match result {
+//         Ok((name,)) => Some(name),
+//         Err(_) => None,
+//     }
+// }
+//
+// async fn organization_informations(State(pool): State<MySqlPool>, session: Session) -> Option<MyOrganizationInfos> {
+//     let account: Option<Account> = session.get("account").await.unwrap_or(None);
+//
+//     if let Some(account) = account {
+//         let org_id: i64 = match account.organization_id(&pool).await {
+//             Ok(Some(id)) => id,
+//             Ok(None) => return None,
+//             Err(_) => return None,
+//         };
+//
+//         let name = organization_name(State(pool.clone()), org_id).await?;
+//         let average_daily_carbon_footprint_result = average_daily_carbon_footprint(State(pool.clone()), org_id).await;
+//         let total_consumption = total_organization_consumption(State(pool.clone()), org_id).await.unwrap_or(0.0);
+//
+//         match average_daily_carbon_footprint_result {
+//             Some(average_daily_carbon_footprint) => {
+//                 let equivalent = equivalent(&pool, average_daily_carbon_footprint).await;
+//                 let members = organization_members(State(pool.clone()), org_id).await;
+//
+//                 Some(MyOrganizationInfos {
+//                     name,
+//                     average_daily_carbon_footprint,
+//                     equivalent,
+//                     members,
+//                     total_consumption,
+//                 })
+//             }
+//             None => None,
+//         }
+//     } else {
+//         None
+//     }
+// }
+//
+// async fn get_daily_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+//     let results = sqlx::query_as::<_, (String, f64)>(
+//         "SELECT DATE_FORMAT(mw.creation_date, '%d/%m') as day,
+//                 SUM(mw.carbon_footprint) as total
+//          FROM monitored_website mw
+//          JOIN user u ON u.id = mw.user_id
+//          WHERE u.organisation_id = ?
+//            AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+//          GROUP BY DATE(mw.creation_date)
+//          ORDER BY DATE(mw.creation_date) ASC"
+//     )
+//         .bind(org_id)
+//         .fetch_all(&pool)
+//         .await?;
+//
+//     Ok(results.into_iter()
+//         .map(|(label, value)| ConsumptionDataPoint {
+//             label,
+//             value: (value * 100.0).round() / 100.0
+//         })
+//         .collect()
+//     )
+// }
+//
+// async fn get_weekly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+//     let results = sqlx::query_as::<_, (String, f64)>(
+//         "SELECT CONCAT('Semaine ', WEEK(mw.creation_date, 1)) as week,
+//                 SUM(mw.carbon_footprint) as total
+//          FROM monitored_website mw
+//          JOIN user u ON u.id = mw.user_id
+//          WHERE u.organisation_id = ?
+//            AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
+//          GROUP BY WEEK(mw.creation_date, 1)
+//          ORDER BY WEEK(mw.creation_date, 1) ASC"
+//     )
+//         .bind(org_id)
+//         .fetch_all(&pool)
+//         .await?;
+//
+//     Ok(results.into_iter()
+//         .map(|(label, value)| ConsumptionDataPoint {
+//             label,
+//             value: (value * 100.0).round() / 100.0
+//         })
+//         .collect()
+//     )
+// }
+//
+// async fn get_monthly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+//     let results = sqlx::query_as::<_, (String, f64)>(
+//         "SELECT DATE_FORMAT(mw.creation_date, '%m/%Y') as month,
+//                 SUM(mw.carbon_footprint) as total
+//          FROM monitored_website mw
+//          JOIN user u ON u.id = mw.user_id
+//          WHERE u.organisation_id = ?
+//            AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+//          GROUP BY MONTH(mw.creation_date), YEAR(mw.creation_date)
+//          ORDER BY YEAR(mw.creation_date), MONTH(mw.creation_date) ASC"
+//     )
+//         .bind(org_id)
+//         .fetch_all(&pool)
+//         .await?;
+//
+//     Ok(results.into_iter()
+//         .map(|(label, value)| ConsumptionDataPoint {
+//             label,
+//             value: (value * 100.0).round() / 100.0
+//         })
+//         .collect()
+//     )
+// }
+
+async fn average_daily_carbon_footprint(pool: &MySqlPool, org_id: i64) -> Option<f64> {
     let result = sqlx::query_as::<_, (f64,)>(
         "SELECT ROUND(
                 COALESCE(
@@ -49,7 +254,7 @@ async fn average_daily_carbon_footprint(State(pool): State<MySqlPool>, org_id: i
         WHERE u.organisation_id = ?"
     )
         .bind(org_id)
-        .fetch_one(&pool)
+        .fetch_one(pool)
         .await;
 
     match result {
@@ -58,12 +263,12 @@ async fn average_daily_carbon_footprint(State(pool): State<MySqlPool>, org_id: i
     }
 }
 
-async fn organization_members(State(pool): State<MySqlPool>, org_id: i64) -> Vec<i32> {
+async fn organization_members(pool: &MySqlPool, org_id: i64) -> Vec<i32> {
     let result = sqlx::query_as::<_, (i32,)>(
         "SELECT id FROM user WHERE organisation_id = ?",
     )
         .bind(org_id)
-        .fetch_all(&pool)
+        .fetch_all(pool)
         .await;
 
     match result {
@@ -72,16 +277,16 @@ async fn organization_members(State(pool): State<MySqlPool>, org_id: i64) -> Vec
     }
 }
 
-async fn total_organization_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Option<f64> {
+async fn total_organization_consumption(pool: &MySqlPool, org_id: i64) -> Option<f64> {
     let result = sqlx::query_as::<_, (f64,)>(
         "SELECT SUM(mw.carbon_footprint) as total_consumption
         FROM monitored_website mw
         JOIN user u
-       	ON mw.user_id = u.id
+        ON mw.user_id = u.id
         WHERE u.organisation_id = ?",
     )
         .bind(org_id)
-        .fetch_one(&pool)
+        .fetch_one(pool)
         .await;
 
     match result {
@@ -90,12 +295,12 @@ async fn total_organization_consumption(State(pool): State<MySqlPool>, org_id: i
     }
 }
 
-async fn organization_name(State(pool): State<MySqlPool>, org_id: i64) -> Option<String> {
+async fn organization_name(pool: &MySqlPool, org_id: i64) -> Option<String> {
     let result = sqlx::query_as::<_, (String,)>(
         "SELECT organisation_name FROM organisation WHERE id = ? LIMIT 1",
     )
         .bind(org_id)
-        .fetch_one(&pool)
+        .fetch_one(pool)
         .await;
 
     match result {
@@ -104,24 +309,24 @@ async fn organization_name(State(pool): State<MySqlPool>, org_id: i64) -> Option
     }
 }
 
-async fn organization_informations(State(pool): State<MySqlPool>, session: Session) -> Option<MyOrganizationInfos> {
+async fn organization_informations(pool: &MySqlPool, session: Session) -> Option<MyOrganizationInfos> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
     if let Some(account) = account {
-        let org_id: i64 = match account.organization_id(&pool).await {
+        let org_id: i64 = match account.organization_id(pool).await {
             Ok(Some(id)) => id,
             Ok(None) => return None,
             Err(_) => return None,
         };
 
-        let name = organization_name(State(pool.clone()), org_id).await?;
-        let average_daily_carbon_footprint_result = average_daily_carbon_footprint(State(pool.clone()), org_id).await;
-        let total_consumption = total_organization_consumption(State(pool.clone()), org_id).await.unwrap_or(0.0);
+        let name = organization_name(pool, org_id).await?;
+        let average_daily_carbon_footprint_result = average_daily_carbon_footprint(pool, org_id).await;
+        let total_consumption = total_organization_consumption(pool, org_id).await.unwrap_or(0.0);
 
         match average_daily_carbon_footprint_result {
             Some(average_daily_carbon_footprint) => {
-                let equivalent = equivalent(&pool, average_daily_carbon_footprint).await;
-                let members = organization_members(State(pool.clone()), org_id).await;
+                let equivalent = equivalent(pool, average_daily_carbon_footprint).await;
+                let members = organization_members(pool, org_id).await;
 
                 Some(MyOrganizationInfos {
                     name,
@@ -138,7 +343,7 @@ async fn organization_informations(State(pool): State<MySqlPool>, session: Sessi
     }
 }
 
-async fn get_daily_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+async fn get_daily_consumption(pool: &MySqlPool, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
     let results = sqlx::query_as::<_, (String, f64)>(
         "SELECT DATE_FORMAT(mw.creation_date, '%d/%m') as day,
                 SUM(mw.carbon_footprint) as total
@@ -150,7 +355,7 @@ async fn get_daily_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Re
          ORDER BY DATE(mw.creation_date) ASC"
     )
         .bind(org_id)
-        .fetch_all(&pool)
+        .fetch_all(pool)
         .await?;
 
     Ok(results.into_iter()
@@ -162,7 +367,7 @@ async fn get_daily_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Re
     )
 }
 
-async fn get_weekly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+async fn get_weekly_consumption(pool: &MySqlPool, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
     let results = sqlx::query_as::<_, (String, f64)>(
         "SELECT CONCAT('Semaine ', WEEK(mw.creation_date, 1)) as week,
                 SUM(mw.carbon_footprint) as total
@@ -174,7 +379,7 @@ async fn get_weekly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> R
          ORDER BY WEEK(mw.creation_date, 1) ASC"
     )
         .bind(org_id)
-        .fetch_all(&pool)
+        .fetch_all(pool)
         .await?;
 
     Ok(results.into_iter()
@@ -186,7 +391,7 @@ async fn get_weekly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> R
     )
 }
 
-async fn get_monthly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
+async fn get_monthly_consumption(pool: &MySqlPool, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
     let results = sqlx::query_as::<_, (String, f64)>(
         "SELECT DATE_FORMAT(mw.creation_date, '%m/%Y') as month,
                 SUM(mw.carbon_footprint) as total
@@ -198,7 +403,7 @@ async fn get_monthly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> 
          ORDER BY YEAR(mw.creation_date), MONTH(mw.creation_date) ASC"
     )
         .bind(org_id)
-        .fetch_all(&pool)
+        .fetch_all(pool)
         .await?;
 
     Ok(results.into_iter()
@@ -209,6 +414,7 @@ async fn get_monthly_consumption(State(pool): State<MySqlPool>, org_id: i64) -> 
         .collect()
     )
 }
+
 
 pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrganizationResponse> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
@@ -227,6 +433,7 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
                     daily_consumption: vec![],
                     weekly_consumption: vec![],
                     monthly_consumption: vec![],
+                    top_polluting_sites: vec![],
                 });
             }
             Err(_) => {
@@ -240,6 +447,7 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
                     daily_consumption: vec![],
                     weekly_consumption: vec![],
                     monthly_consumption: vec![],
+                    top_polluting_sites: vec![],
                 });
             }
         },
@@ -254,11 +462,12 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
                 daily_consumption: vec![],
                 weekly_consumption: vec![],
                 monthly_consumption: vec![],
+                top_polluting_sites: vec![],
             });
         }
     };
 
-    let organization_informations: Option<MyOrganizationInfos> = organization_informations(State(pool.clone()), session).await;
+    let organization_informations: Option<MyOrganizationInfos> = organization_informations(&pool, session).await;
 
     let advices: Vec<String> = {
         let mut v = Vec::new();
@@ -268,7 +477,7 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
     };
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = organization_informations {
-        let (l, n) = calculate_green_score(&State(pool.clone()), infos.average_daily_carbon_footprint, "mo".to_string()).await;
+        let (l, n) = calculate_green_score(&pool, infos.average_daily_carbon_footprint, "mo".to_string()).await;
 
         let mut collected: Vec<Equivalent> = Vec::new();
         for _ in 0..2 {
@@ -283,9 +492,11 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
         (None, None, None)
     };
 
-    let daily_consumption = get_daily_consumption(State(pool.clone()), org_id).await.unwrap_or(vec![]);
-    let weekly_consumption = get_weekly_consumption(State(pool.clone()), org_id).await.unwrap_or(vec![]);
-    let monthly_consumption = get_monthly_consumption(State(pool.clone()), org_id).await.unwrap_or(vec![]);
+    let daily_consumption = get_daily_consumption(&pool, org_id).await.unwrap_or(vec![]);
+    let weekly_consumption = get_weekly_consumption(&pool, org_id).await.unwrap_or(vec![]);
+    let monthly_consumption = get_monthly_consumption(&pool, org_id).await.unwrap_or(vec![]);
+
+    let top_polluting_sites = get_top5_polluting_sites(&pool, org_id).await.unwrap_or(vec![]);
 
     Json(MyOrganizationResponse {
         success: true,
@@ -297,5 +508,6 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
         daily_consumption,
         weekly_consumption,
         monthly_consumption,
+        top_polluting_sites
     })
 }

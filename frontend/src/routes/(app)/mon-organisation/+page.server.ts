@@ -43,7 +43,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
                 equivalents: [],
                 dailyConsumption: [],
                 weeklyConsumption: [],
-                monthlyConsumption: formatMonthlyData([])
+                monthlyConsumption: formatMonthlyData([]),
+                topPoulltingSites: [],
             };
         }
         
@@ -62,7 +63,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
             equivalents: result.equivalents || [],
             dailyConsumption: result.daily_consumption || [],
             weeklyConsumption: result.weekly_consumption || [],
-            monthlyConsumption: formatMonthlyData(result.monthly_consumption) || formatMonthlyData([])
+            monthlyConsumption: formatMonthlyData(result.monthly_consumption) || formatMonthlyData([]),
+            topPollutingSites: result.top_polluting_sites || [],
         };
 
     } catch (error) {
@@ -76,7 +78,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
             equivalents: [],
             dailyConsumption: [],
             weeklyConsumption: [],
-            monthlyConsumption: formatMonthlyData([])
+            monthlyConsumption: formatMonthlyData([]),
+            topPoulltingSites: [],
         };
     }
 }

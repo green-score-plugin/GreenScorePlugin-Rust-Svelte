@@ -32,6 +32,7 @@
     $: dailyConsumption = data.dailyConsumption || [];
     $: weeklyConsumption = data.weeklyConsumption || [];
     $: monthlyConsumption = data.monthlyConsumption || [];
+    $: topPollutingSites = data.topPollutingSites || [];
 
     $: consumptionData = selectedPeriod === 'daily' ? dailyConsumption
         : selectedPeriod === 'weekly' ? weeklyConsumption
@@ -60,7 +61,7 @@
         <Equivalent equivalent={equivalent1} order={1} />
         <TotalConsumption {carbonFootprint} {totalConsuUnit} {label} />
         <Equivalent equivalent={equivalent2} order={2} />
-        <ChartTop5PollutingSites {usersIdsCharts} />
+        <ChartTop5PollutingSites {topPollutingSites} />
         <Advice type="nav" advice={advice}/>
         <Advice type="dev" advice={adviceDev} />
     </div>
