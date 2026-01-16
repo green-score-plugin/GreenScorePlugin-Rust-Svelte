@@ -1,4 +1,3 @@
-// rust
 use sqlx::MySqlPool;
 
 pub async fn calculate_green_score(pool: &MySqlPool, carbon_footprint: f64, page: String) -> (String, String) {
