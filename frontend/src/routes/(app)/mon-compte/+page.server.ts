@@ -1,16 +1,43 @@
 import {fail, redirect} from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { BACKEND_URL } from '$lib/config';
 import {setSessionCookie, invalidateCache} from "$lib/server/session.ts";
 
-export const load = async ({ fetch }) => {
-    const res = await fetch(`${BACKEND_URL}/get_organisation_members`, {method: "POST"});
-    const data = await res.json();
+export const load: PageServerLoad = async ({ fetch, request, locals }) => {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || ''
+    };
+
+    let members = [];
+    let organisation = null;
+
+    if (locals.user?.role === 'organisation') {
+        const res = await fetch(`${BACKEND_URL}/get_organisation_members`, { method: "POST", headers });
+        if (res.ok) {
+            try {
+                const data = await res.json();
+                if (data.success) members = data.members;
+            } catch {}
+        }
+    } else if (locals.user?.role === 'user') {
+        const orgRes = await fetch(`${BACKEND_URL}/get-my-organization`, { method: 'GET', headers, credentials: 'include' });
+        if (orgRes.ok) {
+            try {
+                const result = await orgRes.json();
+                if (result.success && result.organisation) {
+                    organisation = result.organisation;
+                }
+            } catch {}
+        }
+    }
 
     return {
-        members: data.success ? data.members : []
+        members,
+        organisation
     };
 };
+
 
 export const actions = {
     supprimer: async ({ request, fetch }) => {
@@ -204,7 +231,6 @@ export const actions = {
             }
 
         } catch (error) {
-            console.error("Erreur join_orga:", error);
             return fail(500, { actionType: 'join_orga', message: "Erreur serveur lors de la connexion à l'organisation" });
         }
     },
@@ -269,6 +295,117 @@ export const actions = {
                 actionType: 'update_orga',
                 message: `Erreur serveur: ${err instanceof Error ? err.message : 'Erreur inconnue'}`
             });
+        }
+    },
+    leave_orga: async({ request, fetch, cookies }) => {
+        try {
+            const response = await fetch(`${BACKEND_URL}/leave_organization`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                return fail(response.status, {
+                    actionType: 'leave_orga',
+                    message: `Erreur: ${errorText}`
+                });
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    await setSessionCookie(cookies, response);
+                } catch (cookieError) {}
+
+                return {
+                    actionType: 'leave_orga',
+                    success: true,
+                    message: "Vous avez quitté l'organisation."
+                };
+            } else {
+                return fail(400, { actionType: 'leave_orga', message: result.message || "Erreur" });
+            }
+
+        } catch (error) {
+            return fail(500, { actionType: 'leave_orga', message: "Erreur serveur" });
+        }
+    },
+    change_orga: async({ request, fetch, cookies }) => {
+        const data = await request.formData();
+        const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
+
+        if (!codeOrganisation) {
+            return fail(400, { actionType: 'change_orga', message: "Le code de l'organisation est requis" });
+        }
+
+        try {
+            const payload = { code: codeOrganisation };
+
+            const response = await fetch(`${BACKEND_URL}/join_organization`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorMessage = errorText;
+                try {
+                    const jsonError = JSON.parse(errorText);
+                    errorMessage = jsonError.message || errorText;
+                } catch {}
+
+                return fail(response.status, {
+                    actionType: 'change_orga',
+                    message: errorMessage || "Code invalide"
+                });
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    const sessionValue = (result.token ?? result.session ?? result.sessionValue) as string | undefined | null;
+                    if (sessionValue) {
+                        const fakeRes = new Response(null, {
+                            headers: { 'set-cookie': `greenscoreweb_sessions=${sessionValue}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600` }
+                        });
+                        await setSessionCookie(cookies, fakeRes);
+                    } else {
+                        await setSessionCookie(cookies, response);
+                    }
+                } catch (cookieError) {}
+
+                return {
+                    actionType: 'change_orga',
+                    success: true,
+                    message: "Vous avez changé d'organisation avec succès."
+                };
+            } else {
+                return fail(400, { actionType: 'change_orga', message: result.message || "Erreur lors de l'opération" });
+            }
+
+        } catch (error) {
+            return fail(500, { actionType: 'change_orga', message: "Erreur serveur lors du changement d'organisation" });
         }
     }
 } satisfies Actions;

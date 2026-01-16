@@ -15,7 +15,7 @@
 <div class="xl:px-52 flex flex-col h-full">
     <div class="px-4 lg:px-16 py-8 flex justify-center lg:justify-start items-center gap-x-4">
         <img class="w-[54px] h-auto" src={salutation} alt="Salutation">
-        <h1 class="text-2xl font-bold">Bonjour {user.nom}!</h1>
+        <h1 class="text-2xl font-bold">Bonjour {user.prenom}!</h1>
     </div>
 
     <div class="flex flex-col lg:flex-row px-4 lg:px-16 gap-8 lg:gap-16 mb-2">
@@ -40,4 +40,3 @@
         </div>
     </div>
 </div>
-

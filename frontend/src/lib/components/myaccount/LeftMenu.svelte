@@ -12,10 +12,9 @@
 
 </script>
 
-
-
 <div class="flex flex-col gap-2 p-2">
     <button
+            type="button"
             class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
                {activePage === 'my_info' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
             onclick={() => activePage = 'my_info'}
@@ -30,6 +29,7 @@
     </button>
 
     <button
+            type="button"
             class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
                {activePage === 'organisation' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
             onclick={() => activePage = 'organisation'}
@@ -58,6 +58,7 @@
 
 
     <button
+            type="button"
             class="flex items-center gap-x-2 px-8 py-4 text-red-600 hover:bg-red-50 transition-colors w-full justify-center cursor-pointer"
             onclick={() => showDeleteModal = true}
     >
@@ -103,5 +104,4 @@
         </div>
     </div>
 {/if}
-
 
