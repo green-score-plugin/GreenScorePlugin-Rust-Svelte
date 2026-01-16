@@ -34,7 +34,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 
                 if (countries && countries[0]) {
                     countryCode = countries[0].cca2.toLowerCase();
-                    flagUrl = `https://flagcdn.com/${countryCode}.svg`;
+                    flagUrl = `/images/flags/${countryCode}.svg`;
                 }
             } catch (error) {
                 console.error('Erreur lors de la récupération du drapeau :', error);
