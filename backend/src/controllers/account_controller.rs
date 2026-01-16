@@ -2,7 +2,7 @@ use axum::extract::State;
 use axum::Json;
 use sqlx::MySqlPool;
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{json, Value};
 use tower_sessions::Session;
 use crate::models::{Account, User};
 use bcrypt;
@@ -34,7 +34,7 @@ pub async fn update_account(
     session: Session,
     State(pool): State<MySqlPool>,
     Json(payload): Json<UpdateAccountRequest>,
-) -> Json<serde_json::Value> {
+) -> Json<Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let mut user = match account_opt {
@@ -131,83 +131,48 @@ pub async fn update_account(
 
     session.insert("account", updated_account.clone()).await.unwrap();
 
-    return Json(json!({
+    Json(json!({
                         "success": true,
                         "account": updated_account
-                    }));
+                    }))
 
 }
 
 
-pub async fn delete_account(
-    session: Session,
-    State(pool): State<MySqlPool>,
-) -> Json<serde_json::Value> {
+pub async fn delete_account( session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
+
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
-    let user = match account_opt {
-        Some(Account::User(u)) => u,
-        _ => {
-            return Json(json!({
-                "success": false,
-                "message": "Non authentifié"
-            }));
+    let account = match account_opt {
+        Some(acc) => acc,
+        None => return Json(json!({"success": false, "message": "Non authentifié"})),
+    };
+
+    let id_to_delete = match &account {
+        Account::User(u) => u.id,
+        Account::Organisation(o) => o.admin_id,
+    };
+
+    match sqlx::query("DELETE FROM user WHERE id = ?")
+        .bind(id_to_delete)
+        .execute(&pool)
+        .await
+    {
+        Ok(_) => {
+            session.delete().await.unwrap();
+            Json(json!({"success": true}))
         }
-    };
-
-    let mut tx = match pool.begin().await {
-        Ok(t) => t,
-        Err(e) => return Json(json!({
-            "success": false,
-            "message": format!("Erreur de connexion BDD: {}", e)
-        }))
-    };
-
-    if let Err(e) = sqlx::query("UPDATE monitored_website SET user_id = NULL WHERE user_id = ?")
-        .bind(user.id)
-        .execute(&mut *tx)
-        .await
-    {
-        return Json(json!({
-            "success": false,
-            "message": format!("Erreur dissociation sites web: {}", e)
-        }));
+        Err(e) => Json(json!({"success": false, "message": format!("Erreur suppression compte: {}", e)})),
     }
 
-
-    if let Err(e) = sqlx::query("DELETE FROM user WHERE id = ?")
-        .bind(user.id)
-        .execute(&mut *tx)
-        .await
-    {
-        return Json(json!({
-            "success": false,
-            "message": format!("Erreur suppression compte: {}", e)
-        }));
-    }
-
-    if let Err(e) = tx.commit().await {
-        return Json(json!({
-            "success": false,
-            "message": format!("Erreur validation transaction: {}", e)
-        }));
-    }
-
-    return Json(json!({
-        "success": true,
-    }));
 }
-
-
-
-
 
 
 pub async fn join_organization(
     session: Session,
     State(pool): State<MySqlPool>,
     Json(payload): Json<JoinOrgaRequest>,
-) -> Json<serde_json::Value> {
+) -> Json<Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let mut user = match account_opt {
@@ -242,10 +207,119 @@ pub async fn join_organization(
     user.id_orga = Some(org_id);
     session.insert("account", Account::User(user)).await.unwrap();
 
-    return Json(json!({
+    Json(json!({
         "success": true,
         "message": "Organisation rejointe avec succès"
-    }));
+    }))
+}
+
+pub async fn get_organisation_member(session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let organisation = match account_opt {
+        Some(Account::Organisation(o)) => o,
+        _ => return Json(json!({ "success": false, "message": "Non authentifié en tant qu'organisation" })),
+    };
+
+    let members = match sqlx::query_as::<_, User>(
+        "SELECT id, email, first_name AS prenom, last_name AS nom, organisation_id AS id_orga FROM user WHERE organisation_id = ?"
+    )
+        .bind(organisation.id)
+        .fetch_all(&pool)
+        .await
+    {
+        Ok(r) => r,
+        Err(e) => return Json(json!({ "success": false, "message": format!("Erreur récupération membres: {}", e) })),
+    };
+
+    Json(json!({
+        "success": true,
+        "members": members
+    }))
+}
+
+pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Json(payload) : Json<Value>) -> Json<Value> {
+
+    match sqlx::query("UPDATE user SET organisation_id = NULL WHERE id = ?")
+        .bind(payload["userId"].as_str().unwrap())
+        .execute(&pool)
+        .await
+    {
+        Ok(_) => Json(json!({ "success": true })),
+        Err(e) => Json(json!({ "success": false, "message": format!("Erreur suppression membre: {}", e) })),
+    }
+
+}
+
+pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>, Json(payload) : Json<Value>) -> Json<Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let organisation = match account_opt {
+        Some(Account::Organisation(o)) => o,
+        _ => return Json(json!({ "success": false, "message": "Non authentifié en tant qu'organisation" })),
+    };
+
+    let new_name = payload["name"].as_str().unwrap();
+
+    if new_name != organisation.nom {
+        let row_opt = match sqlx::query("SELECT id FROM organisation WHERE organisation_name = ?")
+            .bind(new_name)
+            .fetch_optional(&pool)
+            .await
+        {
+            Ok(r) => r,
+            Err(e) => return Json(json!({ "success": false, "message": format!("Erreur technique recherche: {}", e) }))
+        };
+
+        if row_opt.is_some() {
+            return Json(json!({ "success": false, "message": format!("Le nom '{}' est déjà utilisé par une autre organisation.", new_name) }));
+        }
+    }
+
+    let new_siret = payload["siret"].as_str();
+
+    if new_siret != organisation.siret.as_deref() {
+        if let Some(siret) = new_siret {
+            let row_opt = match sqlx::query("SELECT id FROM organisation WHERE siret = ?")
+                .bind(siret)
+                .fetch_optional(&pool)
+                .await
+            {
+                Ok(r) => r,
+                Err(e) => return Json(json!({ "success": false, "message": format!("Erreur technique recherche: {}", e) }))
+            };
+
+            if row_opt.is_some() {
+                return Json(json!({ "success": false, "message": format!("Le SIRET '{}' est déjà utilisé par une autre organisation.", siret) }));
+            }
+        }
+    }
+
+    match sqlx::query("UPDATE organisation SET organisation_name = ?, siret = ? WHERE id = ?")
+        .bind(payload["name"].as_str().unwrap())
+        .bind(payload["siret"].as_str().map(|s| s.to_string()))
+        .bind(organisation.id)
+        .execute(&pool)
+        .await
+    {
+        Ok(_) => {
+            let updated_organisation = Account::Organisation(crate::models::Organisation {
+                id: organisation.id,
+                nom: payload["name"].as_str().unwrap().to_string(),
+                siret: payload["siret"].as_str().map(|s| s.to_string()),
+                code: organisation.code.clone(),
+                admin_id: organisation.admin_id,
+            });
+
+            session.insert("account", updated_organisation.clone()).await.unwrap();
+
+            Json(json!({
+                "success": true,
+                "organisation": updated_organisation
+            }))
+        }
+        Err(e) => Json(json!({ "success": false, "message": format!("Erreur mise à jour organisation: {}", e) })),
+    }
 }
 
 pub async fn leave_organization(
@@ -317,3 +391,4 @@ pub async fn get_my_organization(
         "organisation": null
     }));
 }
+

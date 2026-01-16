@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 pub struct User {
     pub id: i64,
     pub email: String,
@@ -23,11 +23,12 @@ pub struct Organisation {
     pub nom: String,
     pub siret: Option<String>,
     pub code: String,
+    pub admin_id: i64
 }
 
 impl Organisation {
-    pub fn new(id: i64, nom: String, siret: Option<String>, code: String) -> Self {
-        Organisation { id, nom, siret, code }
+    pub fn new(id: i64, nom: String, siret: Option<String>, code: String, admin_id: i64) -> Self {
+        Organisation { id, nom, siret, code, admin_id }
     }
 }
 

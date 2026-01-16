@@ -48,18 +48,59 @@ export function invalidateCache(sessionCookie: string) {
     cache.delete(sessionCookie);
 }
 
-export function setSessionCookie(cookies: Cookies, response: Response) {
-    const setCookieHeader = response.headers.get('set-cookie');
-    if (setCookieHeader) {
-        const cookieMatch = setCookieHeader.match(/greenscoreweb_sessions=([^;]+)/);
-        if (cookieMatch) {
-            const sessionValue = cookieMatch[1];
-            cookies.set('greenscoreweb_sessions', sessionValue, {
-                path: '/',
-                httpOnly: true,
-                sameSite: 'lax',
-                maxAge: 60 * 60 // 1 heure
-            });
+export async function setSessionCookie(cookies: Cookies, source: Response | string | null | undefined) {
+    if (!source) {
+        console.warn('setSessionCookie: source vide');
+        return;
+    }
+
+    if (typeof source === 'string') {
+        cookies.set('greenscoreweb_sessions', source, {
+            path: '/',
+            httpOnly: true,
+            sameSite: 'lax',
+            maxAge: 60 * 60 // 1 heure
+        });
+        return;
+    }
+
+    try {
+        const setCookieHeader = source.headers?.get?.('set-cookie');
+        if (setCookieHeader) {
+            const cookieMatch = setCookieHeader.match(/greenscoreweb_sessions=([^;]+)/);
+            if (cookieMatch) {
+                const sessionValue = cookieMatch[1];
+                cookies.set('greenscoreweb_sessions', sessionValue, {
+                    path: '/',
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    maxAge: 60 * 60
+                });
+                return;
+            }
         }
+
+
+        try {
+            const cloned = (typeof (source as any).clone === 'function') ? (source as any).clone() : source;
+            const maybeJson = await cloned.json().catch(() => null);
+            const sessionValueFromJson = maybeJson?.token ?? maybeJson?.session ?? maybeJson?.sessionValue ?? null;
+            if (typeof sessionValueFromJson === 'string') {
+                cookies.set('greenscoreweb_sessions', sessionValueFromJson, {
+                    path: '/',
+                    httpOnly: true,
+                    sameSite: 'lax',
+                    maxAge: 60 * 60
+                });
+                return;
+            }
+        } catch (e) {
+
+        }
+
+        console.warn('setSessionCookie: aucun token trouvé ni header Set-Cookie dans la source fournie');
+
+    } catch (err) {
+        console.error('Erreur dans setSessionCookie:', err);
     }
 }
