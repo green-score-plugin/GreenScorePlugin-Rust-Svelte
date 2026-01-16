@@ -23,6 +23,7 @@ export const actions = {
 
             const result = await response.json();
 
+
             if (result.success) {
                 setSessionCookie(cookies, response);
                 return redirect(303, '/');
