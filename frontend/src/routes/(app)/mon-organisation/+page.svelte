@@ -21,7 +21,6 @@
     $: description = 'Toutes les données sur les membres de : ' + data.organisationData!.name;
     $: averageFootprint = data.organisationData!.averageDailyCarbonFootprint;
     $: equivalentAverage = data.organisationData!.equivalent;
-    $: usersIdsCharts = data.organisationData!.members;
     $: carbonFootprint = (data.organisationData!.totalCarbonFootprint ?? 0).toFixed(2);
     $: letterGreenScore = data.letterGreenScore || 'A';
     $: envNomination = data.envNomination || 'Maître des Forêts';

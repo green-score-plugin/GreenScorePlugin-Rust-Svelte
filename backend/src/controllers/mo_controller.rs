@@ -13,7 +13,6 @@ pub struct MyOrganizationInfos {
     name: String,
     average_daily_carbon_footprint: f64,
     equivalent: Option<Equivalent>,
-    members: Vec<i32>,
     total_consumption: f64,
 }
 
@@ -90,20 +89,6 @@ async fn average_daily_carbon_footprint(pool: &MySqlPool, org_id: i64) -> Option
     }
 }
 
-async fn organization_members(pool: &MySqlPool, org_id: i64) -> Vec<i32> {
-    let result = sqlx::query_as::<_, (i32,)>(
-        "SELECT id FROM user WHERE organisation_id = ?",
-    )
-        .bind(org_id)
-        .fetch_all(pool)
-        .await;
-
-    match result {
-        Ok(rows) => rows.into_iter().map(|(id,)| id).collect(),
-        Err(_) => vec![],
-    }
-}
-
 async fn total_organization_consumption(pool: &MySqlPool, org_id: i64) -> Option<f64> {
     let result = sqlx::query_as::<_, (f64,)>(
         "SELECT SUM(mw.carbon_footprint) as total_consumption
@@ -153,13 +138,11 @@ async fn organization_informations(pool: &MySqlPool, session: Session) -> Option
         match average_daily_carbon_footprint_result {
             Some(average_daily_carbon_footprint) => {
                 let equivalent = equivalent(pool, average_daily_carbon_footprint).await;
-                let members = organization_members(pool, org_id).await;
 
                 Some(MyOrganizationInfos {
                     name,
                     average_daily_carbon_footprint,
                     equivalent,
-                    members,
                     total_consumption,
                 })
             }
