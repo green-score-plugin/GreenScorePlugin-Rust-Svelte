@@ -92,7 +92,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
                 .fetch_optional(&pool)
                 .await {
                 Ok(Some((first_name, last_name, organisation_id))) => {
-                    let account = Account::User(User { id: user_id, email, nom: first_name, prenom: last_name, id_orga: organisation_id});
+                    let account = Account::User(User { id: user_id, email, prenom: first_name, nom: last_name, id_orga: organisation_id});
                     session.insert("account", account.clone()).await.unwrap();
 
                     return Json(json!({
@@ -191,8 +191,8 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
             let account = Account::User(User {
                 id: user_id,
                 email: payload.email.clone(),
-                nom: payload.firstname.clone(),
-                prenom: payload.lastname.clone(),
+                prenom: payload.firstname.clone(),
+                nom: payload.lastname.clone(),
                 id_orga: None,
             });
 

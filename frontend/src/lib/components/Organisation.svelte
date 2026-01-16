@@ -104,7 +104,7 @@
                     <button
                             type="button"
                             on:click={() => showChangeModal = true}
-                            class="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold transition-colors cursor-pointer"
+                            class="flex-1 px-4 py-2 rounded-lg bg-gs-green-950 text-white hover:bg-gs-green-800 font-semibold transition-colors cursor-pointer"
                     >
                         Changer d'organisation
                     </button>
