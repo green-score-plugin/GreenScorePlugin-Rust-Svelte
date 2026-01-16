@@ -43,11 +43,11 @@ fn generate_organisation_code() -> String {
     const CHARACTERS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const LENGTH: usize = 8;
 
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     (0..LENGTH)
         .map(|_| {
-            let idx = rng.gen_range(0..CHARACTERS.len());
+            let idx = rng.random_range(0..CHARACTERS.len());
             CHARACTERS[idx] as char
         })
         .collect()
