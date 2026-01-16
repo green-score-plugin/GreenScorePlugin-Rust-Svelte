@@ -1,54 +1,79 @@
 use sqlx::MySqlPool;
 
 pub async fn calculate_green_score(pool: &MySqlPool, carbon_footprint: f64, page: String) -> (String, String) {
-    if page == "mo" {
+    if page == "mo" || page == "my_data" {
+        let mut least: f64 = 0.0;
+        let mut avg: f64 = 0.0;
 
-        let avg = match organizations_global_average_carbon_footprint(pool).await {
-            Ok(v) if v.is_finite() => v,
-            Ok(_) | Err(_) => {
-                0.0
-            }
-        };
+        if page == "mo" {
+            avg = match organizations_global_average_carbon_footprint(pool).await {
+                Ok(v) if v.is_finite() => v,
+                Ok(_) | Err(_) => {
+                    0.0
+                }
+            };
 
-        let least = match organizations_least_carbon_footprint(pool).await {
-            Ok(v) if v.is_finite() => v,
-            Ok(_) | Err(_) => {
-                avg
-            }
-        };
-
-        let max_carbon_footprint = (least - avg) * 2.0;
-        let mut scale = (max_carbon_footprint - least) / 7.0;
-        if !scale.is_finite() || scale <= 0.0 {
-            scale = 0.25;
+            least = match organizations_least_carbon_footprint(pool).await {
+                Ok(v) if v.is_finite() => v,
+                Ok(_) | Err(_) => {
+                    avg
+                }
+            };
         }
 
-        let t1 = least + scale;
-        let t2 = least + 2.0 * scale;
-        let t3 = least + 3.0 * scale;
-        let t4 = least + 4.0 * scale;
-        let t5 = least + 5.0 * scale;
-        let t6 = least + 6.0 * scale;
+        if page == "my_data" {
+            avg = match users_global_average_carbon_footprint(pool).await {
+                Ok(v) if v.is_finite() => v,
+                Ok(_) | Err(_) => {
+                    0.0
+                }
+            };
 
-        let (letter, nomination) = if carbon_footprint < t1 {
-            ("A", "Gardien des Écosystèmes")
-        } else if carbon_footprint < t2 {
-            ("B", "Allié de la Nature")
-        } else if carbon_footprint < t3 {
-            ("C", "Explorateur Prudent")
-        } else if carbon_footprint < t4 {
-            ("D", "Voyageur Insouciant")
-        } else if carbon_footprint < t5 {
-            ("E", "Consommateur Dynamique")
-        } else if carbon_footprint < t6 {
-            ("F", "Exploitant Intense")
+            least = match users_least_carbon_footprint(pool).await {
+                Ok(v) if v.is_finite() => v,
+                Ok(_) | Err(_) => {
+                    avg
+                }
+            };
+        }
+
+        if avg > 0.0 && least > 0.0 && carbon_footprint > 0.0 {
+            let max_carbon_footprint = (least - avg) * 2.0;
+            let mut scale = (max_carbon_footprint - least) / 7.0;
+            if !scale.is_finite() || scale <= 0.0 {
+                scale = 0.25;
+            }
+
+            let t1 = least + scale;
+            let t2 = least + 2.0 * scale;
+            let t3 = least + 3.0 * scale;
+            let t4 = least + 4.0 * scale;
+            let t5 = least + 5.0 * scale;
+            let t6 = least + 6.0 * scale;
+
+            let (letter, nomination) = if carbon_footprint < t1 {
+                ("A", "Gardien des Écosystèmes")
+            } else if carbon_footprint < t2 {
+                ("B", "Allié de la Nature")
+            } else if carbon_footprint < t3 {
+                ("C", "Explorateur Prudent")
+            } else if carbon_footprint < t4 {
+                ("D", "Voyageur Insouciant")
+            } else if carbon_footprint < t5 {
+                ("E", "Consommateur Dynamique")
+            } else if carbon_footprint < t6 {
+                ("F", "Exploitant Intense")
+            } else {
+                ("G", "Grand consommateur")
+            };
+
+            (letter.to_string(), nomination.to_string())
+
         } else {
-            ("G", "Grand consommateur")
-        };
+            ("N/A".to_string(), "N/A".to_string())
+        }
 
-        (letter.to_string(), nomination.to_string())
-
-    } else if page == "lpc" {
+    } else if page == "lpc" || page == "my_data" {
         let echelle: f64 = 0.25;
 
         let (letter_green_score, env_nomination) = if carbon_footprint < echelle {
@@ -112,4 +137,30 @@ async fn organizations_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, s
         .await?;
 
     Ok(row.0)
+}
+
+async fn users_global_average_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
+    let row = sqlx::query_scalar::<_, f64>(
+        "SELECT AVG(total_carbon_footprint) AS averageConsumption
+        FROM `user`
+        WHERE total_carbon_footprint IS NOT NULL
+        AND total_carbon_footprint > 0;",
+    )
+        .fetch_one(pool)
+        .await?;
+
+    Ok(row)
+}
+
+async fn users_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
+    let row = sqlx::query_scalar::<_, f64>(
+        "SELECT MIN(total_carbon_footprint) AS leastConsumption
+        FROM `user`
+        WHERE total_carbon_footprint IS NOT NULL
+        AND total_carbon_footprint > 0;",
+    )
+        .fetch_one(pool)
+        .await?;
+
+    Ok(row)
 }
