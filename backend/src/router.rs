@@ -1,5 +1,5 @@
 use axum::Router;
-use crate::controllers::{home_controller, auth_controller, plugin_controller, lpc_controller};
+use crate::controllers::{home_controller, auth_controller, plugin_controller, lpc_controller, mo_controller};
 use axum::routing::{post, get};
 use sqlx::MySqlPool;
 
@@ -12,6 +12,7 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/logout", post(auth_controller::logout))
         .route("/get-account", post(auth_controller::get_current_account))
         .route("/derniere-page-consultee", get(lpc_controller::lpc))
+        .route("/mon-organisation", get(mo_controller::mo))
         .route("/plugin/get-account", post(auth_controller::get_current_account))
         .route("/plugin/equivalent", post(plugin_controller::get_equivalent))
         .route("/plugin/save_monitored_website_data", post(plugin_controller::save_monitored_website_data))
