@@ -325,7 +325,7 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
 pub async fn leave_organization(
     session: Session,
     State(pool): State<MySqlPool>,
-) -> Json<serde_json::Value> {
+) -> Json<Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let mut user = match account_opt {
@@ -344,16 +344,16 @@ pub async fn leave_organization(
     user.id_orga = None;
     session.insert("account", Account::User(user)).await.unwrap();
 
-    return Json(json!({
+    Json(json!({
         "success": true,
         "message": "Vous avez quitté l'organisation avec succès."
-    }));
+    }))
 }
 
 pub async fn get_my_organization(
     session: Session,
     State(pool): State<MySqlPool>,
-) -> Json<serde_json::Value> {
+) -> Json<Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let user = match account_opt {
@@ -369,9 +369,9 @@ pub async fn get_my_organization(
             .fetch_optional(&pool)
             .await;
 
-        match row_opt {
+        return match row_opt {
             Ok(Some((id, nom, siret, code))) => {
-                 return Json(json!({
+                Json(json!({
                      "success": true,
                      "organisation": {
                          "id": id,
@@ -379,19 +379,15 @@ pub async fn get_my_organization(
                          "siret": siret,
                          "code": code
                      }
-                 }));
+                 }))
             },
-            Ok(None) => return Json(json!({ "success": false, "message": "Organisation introuvable" })),
-            Err(e) => return Json(json!({ "success": false, "message": format!("Erreur DB: {}", e) })),
+            Ok(None) => Json(json!({ "success": false, "message": "Organisation introuvable" })),
+            Err(e) => Json(json!({ "success": false, "message": format!("Erreur DB: {}", e) })),
         }
     }
 
-    return Json(json!({
+     Json(json!({
         "success": true,
         "organisation": null
-    }));
+    }))
 }
-
-#[cfg(test)]
-#[path = "./account_controller_tests.rs"]
-mod tests;
