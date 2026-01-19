@@ -36,7 +36,7 @@ export const actions = {
             const result = await response.json();
 
             if(result.success) {
-                setSessionCookie(cookies, response);
+                await setSessionCookie(cookies, response);
                 redirect(303,`/inscription-organisation/${result.account.code}`);
             }
 
