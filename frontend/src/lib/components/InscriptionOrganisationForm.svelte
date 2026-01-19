@@ -25,14 +25,19 @@
         confirmPassword === password &&
         organisationName.trim() !== '' &&
         agreeTerms;
+
+    function handleSubmit(event: SubmitEvent) {
+        submitted = true;
+
+        if (!isFormValid) {
+            event.preventDefault();
+            loading = false;
+            return;
+        }
+    }
 </script>
 
-<form method="POST" use:enhance={() => {
-    submitted = true;
-    if (!isFormValid) {
-        loading = false;
-        return async () => {};
-    }
+<form method="POST" on:submit={handleSubmit} use:enhance={() => {
     loading = true;
     return async ({ update }) => {
         await update();
