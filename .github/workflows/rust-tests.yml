@@ -48,6 +48,56 @@ jobs:
       - name: Installation de cargo-nextest
         uses: taiki-e/install-action@nextest
 
+      - name: Liste des tests disponibles
+        run: |
+          echo "=========================================="
+          echo "LISTE DE TOUS LES TESTS DISPONIBLES"
+          echo "=========================================="
+          cargo test --no-run --message-format=json 2>/dev/null | \
+            jq -r 'select(.profile.test == true) | .target.name' | sort -u || true
+          echo ""
+          echo "=========================================="
+          echo "DÉTAILS DES TESTS AVEC NEXTEST"
+          echo "=========================================="
+          cargo nextest list --verbose || true
+          echo ""
+
+      - name: Extraction du code source des tests
+        run: |
+          echo "=========================================="
+          echo "CODE SOURCE DES TESTS"
+          echo "=========================================="
+          echo ""
+          
+          # Trouver tous les fichiers de tests
+          for test_file in $(find src -name "*test*.rs" -o -name "*.rs" | grep -E "(test|spec)"); do
+            if [ -f "$test_file" ]; then
+              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+              echo "Fichier: $test_file"
+              echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+              
+              # Extraire les noms et le code des tests
+              grep -n "#\[test\]" "$test_file" | while read -r line; do
+                line_num=$(echo "$line" | cut -d: -f1)
+                echo ""
+                echo "Test trouvé à la ligne $line_num:"
+                # Afficher le test complet (annotation + fonction)
+                sed -n "${line_num},$((line_num + 20))p" "$test_file" | sed '/^[[:space:]]*$/q'
+                echo "----------------------------------------"
+              done
+              echo ""
+            fi
+          done
+          
+          # Aussi chercher les tests dans les modules
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "RÉSUMÉ DES TESTS PAR MODULE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          find src -name "*.rs" -exec grep -l "#\[test\]" {} \; | while read -r file; do
+            count=$(grep -c "#\[test\]" "$file" || echo "0")
+            echo "$file: $count test(s)"
+          done
+
       - name: Configuration de nextest
         run: |
           mkdir -p .config
