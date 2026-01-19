@@ -52,7 +52,14 @@ jobs:
         env:
           NEXTEST_JUNIT_PATH: junit.xml
         run: |
-            cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest
+          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --all-targets -- --junit-path junit.xml
+
+      - name: Localisation du rapport
+        if: always()
+        run: |
+          echo "Liste de tous les fichiers XML générés :"
+          find . -name "*.xml"
+          echo "Répertoire courant : $(pwd)"
 
       - name: Publication du rapport de tests
         uses: EnricoMi/publish-unit-test-result-action@v2
