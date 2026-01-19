@@ -50,7 +50,7 @@ jobs:
 
       - name: Exécution des tests et Couverture
         run: |
-          cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info --junit-path junit.xml
+          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --junit-path junit.xml
 
       - name: Publication du rapport de tests (UI GitHub)
         uses: EnricoMi/publish-unit-test-result-action@v2
