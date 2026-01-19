@@ -52,7 +52,7 @@ jobs:
         env:
           NEXTEST_JUNIT_PATH: junit.xml
         run: |
-            cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --junit-path junit.xml --all-targets
+          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --all-targets -- --junit-path junit.xml
 
       - name: Publication du rapport de tests
         uses: EnricoMi/publish-unit-test-result-action@v2
