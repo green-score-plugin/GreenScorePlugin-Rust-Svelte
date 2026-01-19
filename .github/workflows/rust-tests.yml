@@ -1,0 +1,45 @@
+name: Tests Backend Rust
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+    
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    # On précise que les commandes doivent s'exécuter dans le dossier 'backend'
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache des dépendances Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            backend/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Vérification de la compilation
+        run: cargo check --verbose
+
+      - name: Lancement des tests
+        run: cargo test --verbose
