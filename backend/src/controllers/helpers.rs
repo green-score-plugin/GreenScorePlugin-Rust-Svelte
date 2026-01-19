@@ -31,7 +31,7 @@ pub async fn advice(pool: &MySqlPool, is_dev: bool) -> String {
     }
 }
 
-pub async fn equivalent(pool: &MySqlPool, carbon_footprint: f64) -> Option<Equivalent> {
+pub async fn equivalent(pool: &MySqlPool, carbon_footprint: f64, nb_results: i32) -> Option<Vec<Equivalent>> {
     let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
     let result = sqlx::query_as::<_, Equivalent>(
@@ -39,17 +39,18 @@ pub async fn equivalent(pool: &MySqlPool, carbon_footprint: f64) -> Option<Equiv
          FROM equivalent
          WHERE (? * equivalent) >= 1.0
          ORDER BY RAND()
-         LIMIT 1",
+         LIMIT ?",
     )
         .bind(carbon_footprint_in_kg)
         .bind(carbon_footprint_in_kg)
-        .fetch_one(pool)
+        .bind(nb_results)
+        .fetch_all(pool)
         .await;
 
     match result {
-        Ok(row) => Some(row),
-        Err(e) => {
-            eprintln!("Erreur SQL (equivalent) : {:?}", e);
+        Ok(rows) if !rows.is_empty() => Some(rows),
+        Ok(_) | Err(_) => {
+            eprintln!("Erreur SQL (equivalent)");
             None
         }
     }
