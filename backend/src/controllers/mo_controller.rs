@@ -137,7 +137,9 @@ async fn organization_informations(pool: &MySqlPool, session: Session) -> Option
 
         match average_daily_carbon_footprint_result {
             Some(average_daily_carbon_footprint) => {
-                let equivalent = equivalent(pool, average_daily_carbon_footprint).await;
+                let equivalent_vec = equivalent(pool, average_daily_carbon_footprint, 1).await;
+                let equivalent = equivalent_vec
+                    .and_then(|mut v| v.pop());
 
                 Some(MyOrganizationInfos {
                     name,
@@ -289,13 +291,11 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = organization_informations {
         let (l, n) = calculate_green_score(&pool, infos.average_daily_carbon_footprint, "mo".to_string()).await;
 
-        let mut collected: Vec<Equivalent> = Vec::new();
-        for _ in 0..2 {
-            if let Some(e) = equivalent(&pool, infos.total_consumption).await {
-                collected.push(e);
-            }
-        }
-        let eqs = if collected.is_empty() { None } else { Some(collected) };
+        let eqs = equivalent(&pool, infos.total_consumption, 2).await;
+        let eqs = match eqs {
+            Some(v) if !v.is_empty() => Some(v),
+            _ => None,
+        };
 
         (Some(l), Some(n), eqs)
     } else {

@@ -268,13 +268,11 @@ pub async fn my_data(
 
     let (letter_green_score, env_nomination, equivalents) = if let Some(avg) = my_average_daily_carbon_footprint {
         let (l, n) = calculate_green_score(&pool, avg, "my_data".to_string()).await;
-        let mut collected: Vec<Equivalent> = Vec::new();
-        for _ in 0..2 {
-            if let Some(e) = equivalent(&pool, avg).await {
-                collected.push(e);
-            }
-        }
-        let eqs = if collected.is_empty() { None } else { Some(collected) };
+        let eqs = equivalent(&pool, avg, 2).await;
+        let eqs = match eqs {
+            Some(v) if !v.is_empty() => Some(v),
+            _ => None,
+        };
 
         (Some(l), Some(n), eqs)
     } else {
