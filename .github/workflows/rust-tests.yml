@@ -17,7 +17,7 @@ env:
 
 jobs:
   test:
-    name: Run Tests
+    name: Exécution des Tests Backend
     runs-on: ubuntu-latest
 
     defaults:
@@ -25,10 +25,10 @@ jobs:
         working-directory: ./backend
 
     steps:
-      - name: Checkout code
+      - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Install Rust
+      - name: Installation de Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache Cargo
@@ -42,13 +42,13 @@ jobs:
             backend/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('backend/Cargo.lock') }}
 
-      - name: Cargo check
+      - name: Vérification du code
         run: cargo check --verbose
 
-      - name: Install cargo-nextest
+      - name: Installation de cargo-nextest
         uses: taiki-e/install-action@nextest
 
-      - name: Create nextest config
+      - name: Configuration de nextest
         run: |
           mkdir -p .config
           cat > .config/nextest.toml << 'EOF'
@@ -57,35 +57,47 @@ jobs:
           
           [profile.ci.junit]
           path = "junit.xml"
-          report-name = "nextest-run"
+          report-name = "Rapport des Tests Backend"
           store-success-output = true
           store-failure-output = true
           EOF
 
-      - name: Run tests with nextest and generate JUnit
+      - name: Exécution des tests avec nextest
         run: |
-          cargo nextest run --profile ci --verbose
+          cargo nextest run --profile ci --verbose --no-fail-fast
         continue-on-error: true
 
-      - name: Debug - Check JUnit file
+      - name: Vérification du rapport JUnit
         if: always()
         run: |
+          echo "Contenu du répertoire:"
           ls -la
+          echo ""
           if [ -f junit.xml ]; then
-            echo "JUnit file found!"
-            head -50 junit.xml
+            echo "Fichier JUnit trouvé!"
+            echo "Aperçu du rapport:"
+            head -100 junit.xml
+            echo ""
+            echo "Statistiques du rapport:"
+            grep -o 'tests="[0-9]*"' junit.xml | head -1
+            grep -o 'failures="[0-9]*"' junit.xml | head -1
+            grep -o 'errors="[0-9]*"' junit.xml | head -1
           else
-            echo "JUnit file NOT found!"
+            echo "Fichier JUnit NON trouvé!"
+            echo "Recherche de fichiers XML:"
+            find . -name "*.xml" -type f
           fi
 
-      - name: Publish Test Results
+      - name: Publication du rapport détaillé des tests
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           files: backend/junit.xml
-          check_name: "Résultats des Tests Backend"
-          comment_title: "Résultats des Tests Backend"
+          check_name: "Rapport Détaillé des Tests Backend"
+          comment_title: "Résultats des Tests Backend Rust"
           report_individual_runs: true
           deduplicate_classes_by_file_name: false
-          check_run_annotations: all tests
+          check_run_annotations: all tests, skipped tests
           compare_to_earlier_commit: false
+          action_fail: false
+          action_fail_on_inconclusive: false
