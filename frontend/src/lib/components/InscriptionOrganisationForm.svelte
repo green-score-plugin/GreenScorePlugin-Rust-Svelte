@@ -73,7 +73,6 @@
                    class="px-3 py-1.5 text-sm border rounded-lg w-full focus:outline-none {submitted && errors.password ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="••••••••">
             {#if submitted && errors.password}
                 <div class="text-red-500 text-xs mt-1">
-                    <p class="font-semibold mb-0.5">Le mot de passe doit contenir :</p>
                     <ul class="list-disc list-inside space-y-0.5 ml-1">
                         <li>Au moins 8 caractères</li>
                         <li>Une majuscule</li>
