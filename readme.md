@@ -21,14 +21,14 @@ cd frontend
 cd backend
 ```
 
-#### Ajouter les .env.local
-Pour que le projet fonctionne en local, il vous faut les identifiants de la base de données dans deux fichier .env.local.
+#### Ajouter les .env
+Pour que le projet fonctionne en local, il vous faut les identifiants de la base de données dans deux fichier .env
 
-- Front-end du site : [.env.local](BACKEND_URL=http://127.0.0.1:3000), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/frontend'
-- Backend du site : [.env.local]("FRONTEND_URL=http://localhost:5173 BACKEND_URL=127.0.0.1:3000"), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/bakcend'
+- Front-end du site : [.env](BACKEND_URL=http://127.0.0.1:3000), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/frontend'
+- Backend du site : [.env]("FRONTEND_URL=http://localhost:5173 BACKEND_URL=127.0.0.1:3000"), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/backend'
 
-Pensez a correctement les renommer '.env.local' et à changer les valeurs dans les .env.local pour qu'ils fonctionnent correctement avec votre base de données.
-Pour que la récupération de l'empreinte carbone fonctionne, pensez à créer une clé API et l'ajouter correctement dans le .env.local du front-end.
+Pensez a correctement les renommer '.env' et à changer les valeurs dans les .env pour qu'ils fonctionnent correctement avec votre base de données.
+Pour que la récupération de l'empreinte carbone fonctionne, pensez à créer une clé API ElectricityMap et l'ajouter correctement dans le .env du front-end.
 
 #### Modifier les adresses du plugin
 Pour que le plugin puisse fonctionner correctement, il vous faut paramétrer le fichier [config.js](./Plugin/src/config.js) pour permettre au plugin une connexion vers son backend, ainsi que l'accès au site et l'API.
@@ -36,7 +36,7 @@ Pour que le plugin puisse fonctionner correctement, il vous faut paramétrer le 
 #### Base de données
 Pour que la base de données puisse fonctionner, il vous faut utiliser le .sql suivant :
 
-[greenscore.sql](./generic_env_local/greenscore.sql)
+[greenscore.sql](./db/greenscoreweb_database.sql)
 
 #### Installer les dépendances du front-end
 Dans le dossier front-end :
@@ -47,6 +47,7 @@ npm install
 #### Installer les dépendances back-end
 Installez les dépendances front-end nécessaires avec npm :
 ```bash
+cargo install sqlx
 cargo sqlx prepare
 ```
 
@@ -61,7 +62,7 @@ cargo run
 npm run dev
 ```
 
-Laissez ces terminals ouvert.
+Laissez ces terminalaux ouvert.
 
 
 ### 4. Configurer le plugin dans Firefox
