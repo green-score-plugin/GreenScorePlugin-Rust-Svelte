@@ -43,6 +43,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       isLocalhost = true;
       const mainContainer = document.getElementById("main-container");
       if (mainContainer) {
+        while (mainContainer.firstChild) {
+          mainContainer.removeChild(mainContainer.firstChild);
+        }
+
         const wrapper = document.createElement("div");
         wrapper.className = "flex flex-col items-center justify-center h-full text-center gap-6 py-4 px-4";
 
