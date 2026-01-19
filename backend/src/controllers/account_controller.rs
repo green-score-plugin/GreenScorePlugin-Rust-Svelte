@@ -392,3 +392,6 @@ pub async fn get_my_organization(
     }));
 }
 
+#[cfg(test)]
+#[path = "./account_controller_tests.rs"]
+mod tests;
