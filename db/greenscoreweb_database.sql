@@ -108,7 +108,7 @@ INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
 (3, 'emails', 2000, 'email.png'),
 (4, 'recherches sur le web', 5000, 'search.png'),
 (5, 'heures de streaming vidéo', 17.86, 'youtube.png'),
-(6, 'km en autocar thermique', 36, 'autocar.png'),
+(6, 'km en autocar thermique', 36, 'bus.png'),
 (7, 'km en moto thermique', 4.54, 'motorbike.png'),
 (8, 'km en voiture thermique', 4.54, 'car.png'),
 (9, 'ordinateur portable', 0.004, 'laptop.png'),
