@@ -34,7 +34,7 @@ async fn main() {
 
     let cors = CorsLayer::new()
         .allow_origin([
-            "https://testgreenscore.alwaysdata.net".parse::<HeaderValue>().unwrap(),
+            "https://greenscore.alwaysdata.net".parse::<HeaderValue>().unwrap(),
             "http://localhost:5173".parse::<HeaderValue>().unwrap(),
             "http://127.0.0.1:5173".parse::<HeaderValue>().unwrap()
         ])

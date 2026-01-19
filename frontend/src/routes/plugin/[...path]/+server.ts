@@ -6,8 +6,6 @@ export const fallback: RequestHandler = async ({ params, request }) => {
     const route = params.path;
     const backendUrl = `${BACKEND_URL}/plugin/${route}`;
 
-    console.log(backendUrl);
-
     const options: RequestInit = {
         method: request.method,
         headers: new Headers(request.headers),

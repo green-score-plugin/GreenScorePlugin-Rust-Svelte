@@ -19,12 +19,14 @@
     $: hasErrors = Object.values(errors).some(Boolean);
 </script>
 
-<form method="POST" use:enhance={({ cancel }) => {
+
+<form method="POST" use:enhance={({cancel}) => {
     submitted = true;
-    if (hasErrors) cancel();
-    else {
-        loading = true;
-        return async ({ update }) => { await update(); loading = false; };
+
+    if (!isFormValid) {
+        loading = false;
+        cancel();
+        return;
     }
 }} class="flex flex-col gap-4">
 

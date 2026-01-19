@@ -15,16 +15,31 @@
         agreeTerms: !agreeTerms
     };
 
-    $: hasErrors = Object.values(errors).some(Boolean);
+    $: isFormValid =
+        validator.isEmail(email) &&
+        password.length >= 8 &&
+        confirmPassword.trim() !== '' &&
+        confirmPassword === password &&
+        organisationName.trim() !== '' &&
+        agreeTerms;
+
+    function handleSubmit(event: SubmitEvent) {
+        submitted = true;
+
+        if (!isFormValid) {
+            event.preventDefault();
+            loading = false;
+            return;
+        }
+    }
 </script>
 
-<form method="POST" use:enhance={({ cancel }) => {
-    submitted = true;
-    if (hasErrors) cancel();
-    else {
-        loading = true;
-        return async ({ update }) => { await update(); loading = false; };
-    }
+<form method="POST" on:submit={handleSubmit} use:enhance={() => {
+    loading = true;
+    return async ({ update }) => {
+        await update();
+        loading = false;
+    };
 }} class="flex flex-col gap-3 max-w-full overflow-hidden">
 
     <!-- Nom Organisation -->

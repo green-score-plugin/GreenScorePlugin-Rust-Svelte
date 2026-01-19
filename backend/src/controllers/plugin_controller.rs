@@ -60,8 +60,7 @@ pub async fn get_equivalent(State(pool): State<MySqlPool>, Json(payload): Json<V
                 "data": equivalents
             })))
         },
-        Err(e) => {
-            eprintln!("Database error: {}", e);
+        Err(_) => {
             (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({
                 "success": false,
                 "error": "Internal server error"
@@ -132,8 +131,7 @@ pub async fn save_monitored_website_data(State(pool): State<MySqlPool>, Json(pay
 
     let inserted_id = match insert_result {
         Ok(res) => res.last_insert_id(),
-        Err(e) => {
-            eprintln!("Database insertion error: {}", e);
+        Err(_) => {
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"success": false, "error": "Internal server error"})));
         }
     };
@@ -147,8 +145,7 @@ pub async fn save_monitored_website_data(State(pool): State<MySqlPool>, Json(pay
                 "updatedTotalCarbonFootprint": new_total_footprint
             })))
         },
-        Err(e) => {
-            eprintln!("User footprint update error: {}", e);
+        Err(_) => {
             (StatusCode::OK, Json(json!({
                 "success": true,
                 "warning": "Website saved but user total not updated",
