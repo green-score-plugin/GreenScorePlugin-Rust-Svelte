@@ -1,12 +1,26 @@
-use axum::extract::{State};
+use axum::extract::{State, Query};
 use axum::Json;
-use serde::{Serialize};
+use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use crate::models::Account;
 use crate::green_score::calculate_green_score;
 use crate::controllers::helpers::{advice, equivalent};
 use crate::controllers::helpers::Equivalent;
+
+#[derive(Deserialize)]
+pub struct LpcParams {
+    url_full: Option<String>,
+    country: Option<String>,
+    #[serde(rename = "totalConsu")]
+    total_consu: Option<f64>,
+    #[serde(rename = "pageSize")]
+    page_size: Option<f64>,
+    #[serde(rename = "loadingTime")]
+    loading_time: Option<f64>,
+    #[serde(rename = "queriesQuantity")]
+    queries_quantity: Option<i32>,
+}
 
 #[derive(Serialize)]
 pub struct LastPageConsultedInfos {
@@ -56,8 +70,37 @@ async fn last_search_informations(State(pool): State<MySqlPool>, session: Sessio
     }
 }
 
-pub async fn lpc(session: Session, State(pool): State<MySqlPool>) -> Json<LastPageConsultedResponse> {
-    let last_search_informations: Option<LastPageConsultedInfos> = last_search_informations(State(pool.clone()), session).await;
+pub async fn lpc(
+    session: Session,
+    State(pool): State<MySqlPool>,
+    Query(params): Query<LpcParams>,
+) -> Json<LastPageConsultedResponse> {
+    let last_search_informations: Option<LastPageConsultedInfos> = if let (
+        Some(url),
+        Some(country),
+        Some(carbon),
+        Some(data),
+        Some(time),
+        Some(queries),
+    ) = (
+        params.url_full,
+        params.country,
+        params.total_consu,
+        params.page_size,
+        params.loading_time,
+        params.queries_quantity,
+    ) {
+        Some(LastPageConsultedInfos {
+            link: url,
+            country,
+            carbon_footprint: carbon,
+            data_transferred: data,
+            loading_time: time,
+            queries_quantity: queries,
+        })
+    } else {
+        last_search_informations(State(pool.clone()), session).await
+    };
 
     let advices: Vec<String> = {
         let mut v = Vec::new();
