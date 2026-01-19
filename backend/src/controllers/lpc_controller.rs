@@ -30,17 +30,14 @@ pub struct LastPageConsultedResponse {
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
-    println!("Retrieved account from session: {:?}", account);
     if let Some(account) = account {
         let id = account.id();
-        println!("Fetching last monitored website for user_id: {}", id);
         let result = sqlx::query_as::<_, (String, i32, f64, f64, f64, String)>(
             "SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country FROM monitored_website WHERE user_id = ? ORDER BY creation_date DESC LIMIT 1",
         )
             .bind(id)
             .fetch_one(&pool)
             .await;
-        println!("Database query result: {:?}", result);
         match result {
             Ok((url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country)) => {
                 Some(LastPageConsultedInfos {
@@ -71,7 +68,6 @@ pub async fn lpc(session: Session, State(pool): State<MySqlPool>) -> Json<LastPa
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
         let (l, n) = calculate_green_score(&State(pool.clone()), infos.carbon_footprint, "lpc".to_string()).await;
-        println!("Calculated green score: Letter: {:?}, Env Nomination: {:?}", l, n);
         let mut collected: Vec<Equivalent> = Vec::new();
         for _ in 0..2 {
             if let Some(e) = equivalent(&pool, infos.carbon_footprint).await {
@@ -85,7 +81,6 @@ pub async fn lpc(session: Session, State(pool): State<MySqlPool>) -> Json<LastPa
         (None, None, None)
     };
 
-    println!("Letter: {:?}, Env Nomination: {:?}", letter, env_nomination);
 
     Json(LastPageConsultedResponse {
         success: true,

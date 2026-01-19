@@ -3,7 +3,6 @@ import { BACKEND_URL, ELECTRICITY_MAP_API_KEY } from "$lib/config.ts";
 
 export const load: PageServerLoad = async ({ fetch, request }) => {
     try {
-        console.log(`${BACKEND_URL}/derniere-page-consultee`)
         const response = await fetch(`${BACKEND_URL}/derniere-page-consultee`, {
             method: 'GET',
             headers: {
@@ -13,8 +12,6 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             credentials: 'include'
         });
         const result = await response.json();
-
-        console.log(result);
 
         if (!result.success) {
             return {

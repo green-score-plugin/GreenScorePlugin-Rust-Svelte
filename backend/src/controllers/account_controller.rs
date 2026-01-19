@@ -36,7 +36,6 @@ pub async fn update_account(
     Json(payload): Json<UpdateAccountRequest>,
 ) -> Json<Value> {
     let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
-    println!("Retrieved account from session: {:?}", account_opt);
     let mut user = match account_opt {
         Some(Account::User(u)) => u,
         _ => {

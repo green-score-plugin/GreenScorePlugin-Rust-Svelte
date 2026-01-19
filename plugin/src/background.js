@@ -615,7 +615,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         );
 
         if (!response.ok) {
-          console.log(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/equivalent`)
           throw new Error(`Erreur API RUST : ${response.status}`);
         }
 
