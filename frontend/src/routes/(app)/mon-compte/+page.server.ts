@@ -106,13 +106,6 @@ export const actions = {
 
         const payload: Record<string, string> = { prenom, nom, email };
 
-        if (password && password.length > 0) {
-            if (password.length < 8) {
-                return fail(400, { actionType: 'update_info', message: "Le mot de passe doit contenir au moins 8 caractères" });
-            }
-            payload.password = password;
-        }
-
         try {
             const url = `${BACKEND_URL}/update_account`;
             const res = await fetch(url, {
