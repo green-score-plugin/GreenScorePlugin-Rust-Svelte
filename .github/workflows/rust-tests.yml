@@ -1,3 +1,5 @@
+name: Tests Backend Rust
+
 on:
   push:
   pull_request:
@@ -58,11 +60,29 @@ jobs:
         run: |
           cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --all-targets --profile ci
 
+      - name: Vérification des fichiers générés
+        if: always()
+        run: |
+          echo "Contenu du répertoire backend:"
+          ls -la
+          if [ -f junit.xml ]; then
+            echo "✓ junit.xml trouvé"
+            wc -l junit.xml
+          else
+            echo "✗ junit.xml non trouvé"
+          fi
+          if [ -f lcov.info ]; then
+            echo "✓ lcov.info trouvé"
+            wc -l lcov.info
+          else
+            echo "✗ lcov.info non trouvé"
+          fi
+
       - name: Publication du rapport de tests
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: "backend/junit.xml"
+          files: "./backend/junit.xml"
           check_name: "Rapport des Tests"
 
       - name: Commentaire de couverture sur la PR
