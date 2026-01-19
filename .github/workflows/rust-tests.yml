@@ -46,11 +46,6 @@ jobs:
       - name: Cargo check
         run: cargo check --verbose
 
-      - name: Run tests and generate JUnit report
-        run: |
-          cargo nextest run -- --junit-path junit-report.xml || true
-          cp junit-report.xml ../junit-report.xml
-
       - name: Debug - fichiers racine
         if: always()
         run: |
@@ -62,6 +57,7 @@ jobs:
         if: success() || failure()
         with:
           name: Résultat Tests Backend
-          path: ./junit-report.xml
+          path: backend/junit-report.xml
           reporter: java-junit
           fail-on-empty: false
+
