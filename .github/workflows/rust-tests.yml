@@ -10,6 +10,7 @@ permissions:
   checks: write
   contents: read
   pull-requests: write
+  actions: read
 
 env:
   CARGO_TERM_COLOR: always
@@ -44,35 +45,47 @@ jobs:
       - name: Cargo check
         run: cargo check --verbose
 
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@nextest
 
-      - name: Run tests and generate report
+      - name: Create nextest config
         run: |
-          cargo test --verbose -- --test-threads=1 --nocapture 2>&1 | tee test-output.txt
-        continue-on-error: true
-
-      - name: Create JUnit XML from output
-        if: always()
-        run: |
-          cat > junit-report.xml << 'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <testsuites>
-            <testsuite name="backend-tests" tests="1" failures="0" errors="0" skipped="0">
-              <testcase name="cargo-test" classname="backend">
-                <system-out><![CDATA[
-          $(cat test-output.txt)
-                ]]></system-out>
-              </testcase>
-            </testsuite>
-          </testsuites>
+          mkdir -p .config
+          cat > .config/nextest.toml << 'EOF'
+          [profile.ci]
+          retries = 0
+          
+          [profile.ci.junit]
+          path = "junit.xml"
+          report-name = "nextest-run"
+          store-success-output = true
+          store-failure-output = true
           EOF
 
-      - name: Publish test report
-        uses: dorny/test-reporter@v1
+      - name: Run tests with nextest and generate JUnit
+        run: |
+          cargo nextest run --profile ci --verbose
+        continue-on-error: true
+
+      - name: Debug - Check JUnit file
+        if: always()
+        run: |
+          ls -la
+          if [ -f junit.xml ]; then
+            echo "JUnit file found!"
+            head -50 junit.xml
+          else
+            echo "JUnit file NOT found!"
+          fi
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          name: Résultat Tests Backend
-          path: backend/junit-report.xml
-          reporter: java-junit
-          fail-on-empty: false
+          files: backend/junit.xml
+          check_name: "Résultats des Tests Backend"
+          comment_title: "Résultats des Tests Backend"
+          report_individual_runs: true
+          deduplicate_classes_by_file_name: false
+          check_run_annotations: all tests
+          compare_to_earlier_commit: false
