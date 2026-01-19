@@ -25,7 +25,7 @@ cd backend
 Pour que le projet fonctionne en local, il vous faut les identifiants de la base de données dans deux fichier .env
 
 - Front-end du site : [.env](BACKEND_URL=http://127.0.0.1:3000), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/frontend'
-- Backend du site : [.env]("FRONTEND_URL=http://localhost:5173 BACKEND_URL=127.0.0.1:3000"), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/backend'
+- Backend du site : [.env]("BACKEND_URL=127.0.0.1:3000"), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/backend'
 
 Pensez a correctement les renommer '.env' et à changer les valeurs dans les .env pour qu'ils fonctionnent correctement avec votre base de données.
 Pour que la récupération de l'empreinte carbone fonctionne, pensez à créer une clé API ElectricityMap et l'ajouter correctement dans le .env du front-end.
@@ -47,7 +47,7 @@ npm install
 #### Installer les dépendances back-end
 Installez les dépendances front-end nécessaires avec npm :
 ```bash
-cargo install sqlx
+cargo install sqlx-cli
 cargo sqlx prepare
 ```
 
