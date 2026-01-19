@@ -23,11 +23,17 @@
 <form method="POST" use:enhance={({cancel}) => {
     submitted = true;
 
-    if (!isFormValid) {
+    if (hasErrors) {
         loading = false;
         cancel();
         return;
     }
+
+    loading = true;
+    return async ({ update }) => {
+        await update();
+        loading = false;
+    };
 }} class="flex flex-col gap-4">
 
     <!-- Prénom / Nom -->
