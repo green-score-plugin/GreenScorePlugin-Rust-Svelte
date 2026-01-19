@@ -34,7 +34,8 @@ function isLocalDomain(url) {
     return (
       hostname === "localhost" ||
       hostname === "127.0.0.1" ||
-      hostname === "[::1]"
+      hostname === "[::1]" ||
+      hostname === "greenscore.alwaysdata.net"
     );
   } catch (error) {
     console.error("Erreur lors de la vérification du domaine :", error);
@@ -121,12 +122,6 @@ function extractDomain(url) {
   } catch (error) {
     return null;
   }
-}
-
-function shouldSendData(oldData, newData) {
-  if (!oldData) return true;
-
-  return !(newData.lastDataSent && Date.now() - newData.lastDataSent < 10000);
 }
 
 async function getUserId() {
