@@ -1,6 +1,3 @@
-Voici le fichier modifié avec la configuration nextest appropriée :
-yamlname: Tests Backend Rust
-
 on:
   push:
   pull_request:
