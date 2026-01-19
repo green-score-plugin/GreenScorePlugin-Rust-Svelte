@@ -58,7 +58,18 @@
             <label for="inputPassword">Mot de passe</label>
             <input bind:value={password} type="password" name="password" id="inputPassword"
                    class="px-4 py-2 border rounded-lg w-full focus:outline-none {submitted && errors.password ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="••••••••">
-            {#if submitted && errors.password} <span class="text-red-500 text-sm">Les mots de passe doivent être identiques et contenir au moins 8 caractères, une majusule, une minuscule, un chiffre et un caractère spécial.</span> {/if}
+            {#if submitted && errors.password}
+                <div class="text-red-500 text-sm mt-1">
+                    <p class="font-semibold mb-1">Le mot de passe doit contenir :</p>
+                    <ul class="list-disc list-inside space-y-0.5 ml-1">
+                        <li>Au moins 8 caractères</li>
+                        <li>Une majuscule</li>
+                        <li>Une minuscule</li>
+                        <li>Un chiffre</li>
+                        <li>Un caractère spécial (#?!@$%^&*-)</li>
+                    </ul>
+                </div>
+            {/if}
         </div>
         <div class="w-full">
             <label for="confirmPassword">Confirmation</label>

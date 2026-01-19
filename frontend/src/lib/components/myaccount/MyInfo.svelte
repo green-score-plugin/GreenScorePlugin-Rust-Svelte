@@ -95,7 +95,14 @@
 
     {#if showPasswordError}
         <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-            Les mots de passe doivent être identiques et contenir au moins 8 caractères, une majusule, une minuscule, un chiffre et un caractère spécial.
+            <p class="font-semibold mb-2">Le mot de passe doit contenir :</p>
+            <ul class="list-disc list-inside space-y-1 ml-1">
+                <li>Au moins 8 caractères</li>
+                <li>Une majuscule</li>
+                <li>Une minuscule</li>
+                <li>Un chiffre</li>
+                <li>Un caractère spécial (#?!@$%^&*-)</li>
+            </ul>
         </div>
     {/if}
 
