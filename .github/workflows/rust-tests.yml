@@ -58,7 +58,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: backend/junit.xml
+          files: "**/junit.xml"
           check_name: "Rapport des Tests"
 
       - name: Commentaire de couverture sur la PR
