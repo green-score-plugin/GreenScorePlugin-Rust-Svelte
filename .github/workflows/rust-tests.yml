@@ -10,47 +10,67 @@ permissions:
   checks: write
   contents: read
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
 
+    # Tous les `run:` seront exécutés dans ./backend
     defaults:
       run:
         working-directory: ./backend
 
     steps:
-      - uses: actions/checkout@v4
+      #Récupération du code
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@stable
+      # Installation de Rust
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
 
-      - uses: taiki-e/install-action@nextest
+      # Installation de cargo-nextest
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@nextest
 
-      - uses: actions/cache@v3
+      # Cache des dépendances Cargo
+      - name: Cache Cargo
+        uses: actions/cache@v3
         with:
           path: |
-            ~/.cargo
-            backend/target
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            backend/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('backend/Cargo.lock') }}
 
+      # Vérification de la compilation
       - name: Cargo check
-        run: cargo check
+        run: cargo check --verbose
 
-      - name: Lancer les tests (génère JUnit)
+      # Lancement des tests et génération du rapport JUnit
+      - name: Run tests and generate JUnit report
         run: |
           cargo nextest run --junit-path junit-report.xml || true
+          # Copier le fichier à la racine pour que le reporter le voie
+          cp junit-report.xml ../junit-report.xml
 
-      - name: Debug - vérifier le rapport
+      # Debug – vérifier que le rapport est bien à la racine
+      - name: Debug - fichiers racine
         if: always()
         run: |
-          ls -la
-          find . -name "*junit*"
+          ls -la ../
 
-      - name: Publication du rapport de tests
+      # Publication du rapport JUnit
+      - name: Publish test report
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
           name: Résultat Tests Backend
-          path: backend/**/junit-report.xml
+          path: ./junit-report.xml  # fichier maintenant à la racine
           reporter: java-junit
           fail-on-empty: false
-
