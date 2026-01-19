@@ -70,11 +70,15 @@ jobs:
       - name: Vérification du rapport JUnit
         if: always()
         run: |
-          echo "Contenu du répertoire:"
+          echo "Contenu du répertoire backend:"
+          pwd
           ls -la
           echo ""
+          echo "Recherche de tous les fichiers XML:"
+          find . -name "*.xml" -type f
+          echo ""
           if [ -f junit.xml ]; then
-            echo "Fichier JUnit trouvé!"
+            echo "Fichier JUnit trouvé dans backend!"
             echo "Aperçu du rapport:"
             head -100 junit.xml
             echo ""
@@ -82,17 +86,25 @@ jobs:
             grep -o 'tests="[0-9]*"' junit.xml | head -1
             grep -o 'failures="[0-9]*"' junit.xml | head -1
             grep -o 'errors="[0-9]*"' junit.xml | head -1
+            echo ""
+            echo "📏 Taille du fichier:"
+            wc -l junit.xml
           else
-            echo "Fichier JUnit NON trouvé!"
-            echo "Recherche de fichiers XML:"
-            find . -name "*.xml" -type f
+            echo "Fichier junit.xml NON trouvé dans backend!"
           fi
+          echo ""
+          echo "Vérification depuis la racine:"
+          cd ..
+          pwd
+          find . -name "junit.xml" -type f
 
       - name: Publication du rapport détaillé des tests
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: backend/junit.xml
+          files: |
+            backend/junit.xml
+            backend/target/nextest/ci/junit.xml
           check_name: "Rapport Détaillé des Tests Backend"
           comment_title: "Résultats des Tests Backend Rust"
           report_individual_runs: true
