@@ -48,16 +48,18 @@ jobs:
         run: cargo check --verbose
 
       - name: Lancement des tests
-        run: cargo nextest run --junit-path junit-report.xml
+        run: cargo nextest run --junit-path ../junit-report.xml
 
       - name: Debug - Vérification fichiers
         if: always()
-        run: ls -R
+        run: |
+          echo "Contenu de la racine :"
+          ls -la ..
 
       - name: Publication du rapport
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
           name: Résultat Tests Backend
-          path: '**/junit-report.xml'
+          path: junit-report.xml
           reporter: java-junit
