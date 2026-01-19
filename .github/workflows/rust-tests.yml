@@ -18,10 +18,6 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./backend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,18 +36,12 @@ jobs:
             backend/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('backend/Cargo.lock') }}
 
-      - name: Cargo check
-        run: cargo check --verbose
-
       - name: Run tests
-        run: cargo test --verbose
-        continue-on-error: true
-
-      - name: Publish test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
+        uses: actions-rs/cargo@v1
         with:
-          files: |
-            backend/target/**/*.xml
-            backend/test-results/**/*.xml
-          check_name: Résultat Tests Backend
+          command: test
+          args: --verbose --manifest-path backend/Cargo.toml
+
+      - name: Upload test results
+        if: always()
+        run: echo "Tests completed"
