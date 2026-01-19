@@ -52,7 +52,7 @@ jobs:
         run: |
           cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --junit-path junit.xml
 
-      - name: Publication du rapport de tests (UI GitHub)
+      - name: Publication du rapport de tests
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
@@ -61,17 +61,16 @@ jobs:
 
       - name: Commentaire de couverture sur la PR
         uses: romeovs/lcov-reporter-action@v0.3.1
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && always()
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           lcov-file: ./backend/lcov.info
-          filter-changed-files: true
 
-      - name: Upload des artefacts
+      - name: Upload des rapports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports-backend
+          name: reports-backend-${{ github.ref_name }}
           path: |
             backend/junit.xml
             backend/lcov.info
