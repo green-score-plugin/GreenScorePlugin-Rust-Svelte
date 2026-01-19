@@ -27,8 +27,8 @@ Pour que le projet fonctionne en local, il vous faut les identifiants de la base
 - Front-end du site : [.env](BACKEND_URL=http://127.0.0.1:3000), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/frontend'
 - Backend du site : [.env]("BACKEND_URL=127.0.0.1:3000"), que vous devrez mettre à la racine du dossier 'GreenScorePlugin-Rust-Svelte/backend'
 
-Pensez a correctement les renommer '.env' et à changer les valeurs dans les .env pour qu'ils fonctionnent correctement avec votre base de données : DATABASE_URL= "".
-Pour que la récupération de l'empreinte carbone fonctionne, pensez à créer une clé API ElectricityMap et l'ajouter correctement dans le .env du front-end.
+Pensez a correctement les renommer '.env' et à changer les valeurs dans les .env pour qu'ils fonctionnent correctement avec votre base de données : DATABASE_URL= .
+Pour que la récupération de l'empreinte carbone fonctionne, pensez à créer une clé API ElectricityMap et l'ajouter correctement dans le .env du front-end : ELECTRICITY_MAP_API_KEY: .
 
 #### Modifier les adresses du plugin
 Pour que le plugin puisse fonctionner correctement, il vous faut paramétrer le fichier [config.js](./Plugin/src/config.js) pour permettre au plugin une connexion vers son backend, ainsi que l'accès au site et l'API.
