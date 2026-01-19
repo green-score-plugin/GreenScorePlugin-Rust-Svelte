@@ -49,8 +49,10 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Exécution des tests et Couverture
+        env:
+          NEXTEST_JUNIT_PATH: junit.xml
         run: |
-          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --junit-path junit.xml
+            cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest
 
       - name: Publication du rapport de tests
         uses: EnricoMi/publish-unit-test-result-action@v2
