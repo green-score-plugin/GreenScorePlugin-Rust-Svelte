@@ -31,12 +31,13 @@
 </script>
 
 
-<form method="POST" use:enhance={() => {
+<form method="POST" use:enhance={({cancel}) => {
     submitted = true;
 
     if (!isFormValid) {
         loading = false;
-        return async () => {};
+        cancel();
+        return;
     }
 
     loading = true;

@@ -11,6 +11,7 @@ export const actions = {
         const email = data.get('email');
         const password = data.get('password');
         const confirmPassword = data.get('confirmPassword');
+        const agreeTerms = data.get('agreeTerms');
 
         if(!organisationName || !email || !password) {
             return fail(400, { message: "Tous les champs sont requis" })
@@ -20,6 +21,9 @@ export const actions = {
             return fail(400, { message: "Les mots de passe ne correspondent pas" })
         }
 
+        if(agreeTerms !== 'on') {
+            return fail(400, { message: "Vous devez accepter les conditions générales d'utilisation" })
+        }
 
         try{
             const response = await fetch(`${BACKEND_URL}/inscription-organisation`, {
