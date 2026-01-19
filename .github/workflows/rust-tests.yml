@@ -1,4 +1,5 @@
-name: Tests Backend Rust
+Voici le fichier modifié avec la configuration nextest appropriée :
+yamlname: Tests Backend Rust
 
 on:
   push:
@@ -48,18 +49,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Exécution des tests et Couverture
-        env:
-          NEXTEST_JUNIT_PATH: junit.xml
+      - name: Configuration de nextest pour JUnit
         run: |
-          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --all-targets
-          cargo nextest run --all-features --workspace --all-targets --junit-path junit.xml
+          mkdir -p .config
+          cat > .config/nextest.toml << 'EOF'
+          [profile.ci]
+          junit-path = "junit.xml"
+          EOF
+
+      - name: Exécution des tests et Couverture
+        run: |
+          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info nextest --all-targets --profile ci
 
       - name: Publication du rapport de tests
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: "backend/*.xml"
+          files: "backend/junit.xml"
           check_name: "Rapport des Tests"
 
       - name: Commentaire de couverture sur la PR
