@@ -12,7 +12,7 @@
             <ul class="list-disc pl-6 space-y-2 text-lg">
                 <li><strong>GreenScore Web</strong></li>
                 <li>Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France</li>
-                <li>Email : <a href="mailto:greenscore.plugin@gmail.com" class="text-blue-600 hover:text-blue-800">greenscore.plugin@gmail.com</a></li>
+                <li>Email : <a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></li>
             </ul>
         </section>
 
@@ -93,7 +93,7 @@
                 <li>Réclamation : contacter la CNIL (France) si vous estimez que vos droits ne sont pas respectés.</li>
             </ul>
             <p class="mt-4">Pour exercer vos droits, contactez-nous à :</p>
-            <p><a href="mailto:greenscore.plugin@gmail.com" class="text-blue-600 hover:text-blue-800">greenscore.plugin@gmail.com</a></p>
+            <p><a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></p>
         </section>
 
         <section class="mt-8">
@@ -111,7 +111,7 @@
             <p>Pour toute question ou préoccupation concernant cette Politique de Confidentialité, contactez-nous :</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
                 <li>Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France</li>
-                <li>Email : <a href="mailto:greenscore.plugin@gmail.com" class="text-blue-600 hover:text-blue-800">greenscore.plugin@gmail.com</a></li>
+                <li>Email : <a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></li>
             </ul>
         </section>
     </div>

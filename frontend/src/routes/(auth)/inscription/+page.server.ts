@@ -10,9 +10,14 @@ export const actions = {
         const lastname = data.get('lastname');
         const email = data.get('email');
         const password = data.get('password');
+        const confirmPassword = data.get('confirmPassword');
 
         if(!firstname || !lastname || !email || !password) {
             return fail(400, { message: "Tous les champs sont requis" })
+        }
+
+        if(password !== confirmPassword) {
+            return fail(400, { message: "Les mots de passe ne correspondent pas" })
         }
 
         try{

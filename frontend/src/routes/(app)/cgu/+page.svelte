@@ -124,7 +124,7 @@
             </h2>
             <p class="text-lg mb-4">
                 Les données collectées via l'application et le plugin sont traitées conformément à
-                notre <a href="/politique-de-confidentialite" class="text-blue-600 hover:text-blue-800"
+                notre <a href="/confidentialite" class="text-blue-600 hover:text-blue-800"
             >Politique de Confidentialité</a
             >. Nous nous engageons à protéger vos informations et à respecter vos droits en matière
                 de vie privée.
@@ -171,8 +171,8 @@
                 <li>Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France</li>
                 <li>
                     Email: <a
-                        href="mailto:greenscore.plugin@gmail.com"
-                        class="text-blue-600 hover:text-blue-800">greenscore.plugin@gmail.com</a
+                        href="mailto:greenscoreweb@gmail.com"
+                        class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a
                 >
                 </li>
             </ul>

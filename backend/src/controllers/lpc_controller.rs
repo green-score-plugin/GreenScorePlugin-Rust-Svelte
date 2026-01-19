@@ -30,17 +30,14 @@ pub struct LastPageConsultedResponse {
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
-
     if let Some(account) = account {
         let id = account.id();
-
         let result = sqlx::query_as::<_, (String, i32, f64, f64, f64, String)>(
             "SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country FROM monitored_website WHERE user_id = ? ORDER BY creation_date DESC LIMIT 1",
         )
             .bind(id)
             .fetch_one(&pool)
             .await;
-
         match result {
             Ok((url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country)) => {
                 Some(LastPageConsultedInfos {
@@ -59,7 +56,7 @@ async fn last_search_informations(State(pool): State<MySqlPool>, session: Sessio
     }
 }
 
-pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPageConsultedResponse> {
+pub async fn lpc(session: Session, State(pool): State<MySqlPool>) -> Json<LastPageConsultedResponse> {
     let last_search_informations: Option<LastPageConsultedInfos> = last_search_informations(State(pool.clone()), session).await;
 
     let advices: Vec<String> = {
@@ -71,7 +68,6 @@ pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPa
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
         let (l, n) = calculate_green_score(&State(pool.clone()), infos.carbon_footprint, "lpc".to_string()).await;
-
         let mut collected: Vec<Equivalent> = Vec::new();
         for _ in 0..2 {
             if let Some(e) = equivalent(&pool, infos.carbon_footprint).await {
@@ -84,6 +80,7 @@ pub async fn lpc(State(pool): State<MySqlPool>, session: Session) -> Json<LastPa
     } else {
         (None, None, None)
     };
+
 
     Json(LastPageConsultedResponse {
         success: true,
