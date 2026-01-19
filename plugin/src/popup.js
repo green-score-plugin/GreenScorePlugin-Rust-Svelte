@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           let url = CONFIG.BACKEND.DETAILS_URL;
 
-          if (userData.isLoggedIn) {
+          if (!userData.isLoggedIn) {
             // Construction des paramètres d'URL si non connecté
             const params = new URLSearchParams({
               country: response.country || "",
