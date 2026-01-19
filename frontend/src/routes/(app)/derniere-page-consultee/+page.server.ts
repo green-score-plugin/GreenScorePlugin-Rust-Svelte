@@ -5,7 +5,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
     try {
         console.log(`${BACKEND_URL}/derniere-page-consultee`)
         const response = await fetch(`${BACKEND_URL}/derniere-page-consultee`, {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'Cookie': request.headers.get('cookie') || ''
