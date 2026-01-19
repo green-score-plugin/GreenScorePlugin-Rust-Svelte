@@ -45,11 +45,12 @@ jobs:
           ls -la
           find . -name "*junit*"
 
-      - name: Publication du rapport
+      - name: Publication du rapport de tests
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
           name: Résultat Tests Backend
-          path: backend/junit-report.xml
+          path: backend/**/junit-report.xml
           reporter: java-junit
           fail-on-empty: false
+
