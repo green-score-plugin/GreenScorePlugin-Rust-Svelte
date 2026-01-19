@@ -20,7 +20,7 @@ pub async fn advice(pool: &MySqlPool, is_dev: bool) -> String {
 
     match result {
         Ok((advice, )) => advice,
-        Err(e) => {
+        Err(_) => {
             if is_dev {
                 "Priorisez des outils et workflows durables pour réduire l'empreinte des développeurs.".to_string()
             } else {
@@ -47,7 +47,7 @@ pub async fn equivalent(pool: &MySqlPool, carbon_footprint: f64) -> Option<Equiv
 
     match result {
         Ok(row) => Some(row),
-        Err(e) => {
+        Err(_) => {
             None
         }
     }
