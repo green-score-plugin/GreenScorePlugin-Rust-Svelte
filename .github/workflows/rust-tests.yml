@@ -163,3 +163,135 @@ jobs:
           compare_to_earlier_commit: false
           action_fail: false
           action_fail_on_inconclusive: false
+
+      - name: Génération du résumé JSON des tests
+        if: always()
+        run: |
+          echo "Génération du résumé JSON des tests..."
+          
+          # Créer le fichier JSON avec les tests
+          echo '{' > test-details.json
+          echo '  "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'",' >> test-details.json
+          echo '  "tests": [' >> test-details.json
+          
+          first=true
+          for test_file in $(find src -name "*.rs" -type f); do
+            if grep -q "#\[test\]" "$test_file" 2>/dev/null; then
+              grep -n "#\[test\]" "$test_file" | while read -r line; do
+                line_num=$(echo "$line" | cut -d: -f1)
+                test_name=$(sed -n "$((line_num + 1))p" "$test_file" | grep -o "fn [a-zA-Z0-9_]*" | sed 's/fn //' || echo "unknown")
+                
+                if [ "$first" != true ]; then
+                  echo "    ," >> test-details.json
+                fi
+                first=false
+                
+                echo "    {" >> test-details.json
+                echo "      \"file\": \"$test_file\"," >> test-details.json
+                echo "      \"name\": \"$test_name\"," >> test-details.json
+                echo "      \"line\": $line_num" >> test-details.json
+                echo -n "    }" >> test-details.json
+              done
+            fi
+          done
+          
+          echo '' >> test-details.json
+          echo '  ]' >> test-details.json
+          echo '}' >> test-details.json
+          
+          echo "Résumé JSON généré!"
+          cat test-details.json
+
+      - name: Upload des rapports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: rapports-tests-backend
+          path: |
+            backend/junit.xml
+            backend/test-details.json
+            backend/target/nextest/ci/*.xml
+          retention-days: 30
+
+      - name: Création du résumé GitHub Actions
+        if: always()
+        run: |
+          echo "# Rapport Détaillé des Tests Backend Rust" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🕐 **Date d'exécution:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f junit.xml ]; then
+            # Extraire les statistiques
+            total=$(grep -o 'tests="[0-9]*"' junit.xml | head -1 | grep -o '[0-9]*' || echo "0")
+            failures=$(grep -o 'failures="[0-9]*"' junit.xml | head -1 | grep -o '[0-9]*' || echo "0")
+            errors=$(grep -o 'errors="[0-9]*"' junit.xml | head -1 | grep -o '[0-9]*' || echo "0")
+            skipped=$(grep -o 'skipped="[0-9]*"' junit.xml | head -1 | grep -o '[0-9]*' || echo "0")
+            success=$((total - failures - errors - skipped))
+            
+            echo "## Statistiques Globales" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Métrique | Valeur |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| ✅ Tests réussis | $success |" >> $GITHUB_STEP_SUMMARY
+            echo "| ❌ Tests échoués | $failures |" >> $GITHUB_STEP_SUMMARY
+            echo "| Erreurs | $errors |" >> $GITHUB_STEP_SUMMARY
+            echo "| Tests ignorés | $skipped |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Total** | **$total** |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Calculer le taux de réussite
+            if [ "$total" -gt 0 ]; then
+              success_rate=$(awk "BEGIN {printf \"%.1f\", ($success / $total) * 100}")
+              echo "**Taux de réussite:** $success_rate%" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          
+          echo "## Liste Complète des Tests avec Code Source" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Lister tous les tests avec leur code
+          counter=1
+          for test_file in $(find src -name "*.rs" -type f | sort); do
+            if [ -f "$test_file" ] && grep -q "#\[test\]" "$test_file"; then
+              echo "### Fichier: \`$test_file\`" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              grep -n "#\[test\]" "$test_file" | while read -r line; do
+                line_num=$(echo "$line" | cut -d: -f1)
+                test_name=$(sed -n "$((line_num + 1))p" "$test_file" | grep -o "fn [a-zA-Z0-9_]*" | sed 's/fn //' || echo "unknown")
+                
+                echo "#### Test #$counter: \`$test_name\`" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                echo "**Ligne:** $line_num" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                echo "<details>" >> $GITHUB_STEP_SUMMARY
+                echo "<summary>Voir le code source</summary>" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                echo '```rust' >> $GITHUB_STEP_SUMMARY
+                # Extraire le test complet (jusqu'à la fin de la fonction)
+                sed -n "${line_num}p" "$test_file" >> $GITHUB_STEP_SUMMARY
+                sed -n "$((line_num + 1)),$((line_num + 50))p" "$test_file" | awk '/^[[:space:]]*fn / {print; in_fn=1; brace_count=0; next} in_fn {print; if ($0 ~ /{/) brace_count++; if ($0 ~ /}/) brace_count--; if (brace_count==0 && $0 ~ /}/) exit}' >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                echo "</details>" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+                
+                counter=$((counter + 1))
+              done
+            fi
+          done
+          
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Accès aux Rapports Détaillés" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Les rapports complets sont disponibles dans plusieurs endroits :" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Check GitHub Actions** : Voir l'onglet \"Checks\" ci-dessus pour le rapport visuel" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Artefacts** : Télécharger les fichiers JUnit XML depuis les artefacts (bouton en haut à droite)" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Ce résumé** : Toutes les informations sont affichées ici" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Astuce** : Cliquez sur \"📊 Rapport Détaillé des Tests Backend\" dans les checks pour voir les résultats individuels!" >> $GITHUB_STEP_SUMMARY
+
