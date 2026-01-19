@@ -50,10 +50,14 @@ jobs:
       - name: Lancement des tests
         run: cargo nextest run --junit-path junit-report.xml
 
+      - name: Debug - Vérification fichiers
+        if: always()
+        run: ls -R
+
       - name: Publication du rapport
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
           name: Résultat Tests Backend
-          path: backend/junit-report.xml
+          path: '**/junit-report.xml'
           reporter: java-junit
