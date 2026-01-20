@@ -155,17 +155,27 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
 }
 
 pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {
-    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
-        .bind(&payload.email)
-        .fetch_optional(&pool)
-        .await
-        .unwrap_or(None);
+    let email = payload.email.trim();
 
-    if user_exists.is_some() {
-        return Json(InscriptionResponse {
-            success: false,
-            message: Some("Cet email est déjà utilisé".to_string()),
-        });
+    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
+        .bind(email)
+        .fetch_optional(&pool)
+        .await;
+
+    match user_exists {
+        Ok(Some(_)) => {
+            return Json(InscriptionResponse {
+                success: false,
+                message: Some("Cet email est déjà utilisé".to_string()),
+            });
+        }
+        Err(e) => {
+            return Json(InscriptionResponse {
+                success: false,
+                message: Some(format!("Erreur vérification email: {}", e)),
+            });
+        }
+        Ok(None) => {}
     }
 
     let password_hash = match hash_password(&payload.password) {
@@ -179,11 +189,11 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
     match sqlx::query(
         "INSERT INTO user (email, roles, password, first_name, last_name) VALUES (?, ?, ?, ?, ?)"
     )
-        .bind(&payload.email)
+        .bind(email)
         .bind("[\"ROLE_USER\"]")
         .bind(&password_hash)
-        .bind(&payload.firstname)
-        .bind(&payload.lastname)
+        .bind(payload.firstname.trim())
+        .bind(payload.lastname.trim())
         .execute(&pool)
         .await {
         Ok(result) => {
@@ -191,9 +201,9 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 
             let account = Account::User(User {
                 id: user_id,
-                email: payload.email.clone(),
-                prenom: payload.firstname.clone(),
-                nom: payload.lastname.clone(),
+                email: email.to_string(),
+                prenom: payload.firstname.trim().to_string(),
+                nom: payload.lastname.trim().to_string(),
                 id_orga: None,
             });
 
@@ -212,17 +222,27 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 }
 
 pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Json<Value> {
-    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
-        .bind(&payload.email)
-        .fetch_optional(&pool)
-        .await
-        .unwrap_or(None);
+    let email = payload.email.trim();
 
-    if user_exists.is_some() {
-        return Json(json!({
-            "success": false,
-            "message": "Cet email est déjà utilisé"
-        }));
+    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
+        .bind(email)
+        .fetch_optional(&pool)
+        .await;
+
+    match user_exists {
+        Ok(Some(_)) => {
+            return Json(json!({
+                "success": false,
+                "message": "Cet email est déjà utilisé"
+            }));
+        }
+        Err(e) => {
+             return Json(json!({
+                "success": false,
+                "message": format!("Erreur vérification email: {}", e)
+            }));
+        }
+        Ok(None) => {}
     }
 
     let password_hash = match hash_password(&payload.password) {
@@ -241,21 +261,23 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
     match sqlx::query(
         "INSERT INTO user (email, roles, password) VALUES (?, ?, ?)"
     )
-        .bind(&payload.email)
+        .bind(email)
         .bind(&role)
         .bind(&password_hash)
         .execute(&pool)
         .await {
         Ok(result) => {
             let user_id = result.last_insert_id() as i64;
+            let orga_name = payload.orga_name.trim();
+            let siret = payload.siret.as_ref().map(|s| s.trim().to_string());
 
             match sqlx::query(
                 "INSERT INTO organisation (organisation_name, organisation_code, city, siret, admin_id) VALUES (?, ?, ?, ?, ?)"
             )
-                .bind(&payload.orga_name)
+                .bind(orga_name)
                 .bind(&organisation_code)
                 .bind("France")
-                .bind(&payload.siret)
+                .bind(&siret)
                 .bind(user_id)
                 .execute(&pool)
                 .await {
@@ -271,8 +293,8 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
 
             let account = Account::Organisation(Organisation {
                 id: organisation_id,
-                nom: payload.orga_name.clone(),
-                siret: payload.siret.clone(),
+                nom: orga_name.to_string(),
+                siret,
                 code: organisation_code.clone(),
                 admin_id : user_id
             });

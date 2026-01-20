@@ -24,11 +24,14 @@ function formatMonthlyData(data: Array<{ label: string; value: number }>) {
     return result;
 }
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, request }) => {
     try {
         const response = await fetch(`${BACKEND_URL}/mon-organisation`, {
             method: 'GET',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': request.headers.get('cookie') || ''
+            },
             credentials: 'include'
         });
         const result = await response.json();
