@@ -7,19 +7,21 @@
     let loading = false;
     let submitted = false;
 
-    $: emailValid = !submitted || validator.isEmail(email);
-    $: passwordValid = !submitted || password.length >= 8;
+    const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
 
-    // Validation complète
-    $: isFormValid = validator.isEmail(email) && password.length >= 8;
+    $: emailValid = !submitted || validator.isEmail(email);
+    $: passwordValid = !submitted || passwordRegex.test(password);
+
+    $: isFormValid = validator.isEmail(email) && passwordRegex.test(password);
 </script>
 
-<form method="POST" use:enhance={() => {
+<form method="POST" use:enhance={({ cancel }) => {
     submitted = true;
 
     if (!isFormValid) {
         loading = false;
-        return async () => {};
+        cancel();
+        return;
     }
 
     loading = true;
@@ -54,7 +56,16 @@
                 placeholder="••••••••"
         >
         {#if !passwordValid}
-            <span class="text-red-500 text-sm">Le mot de passe doit contenir au moins 8 caractères</span>
+            <div class="text-red-500 text-sm mt-1">
+                <p class="font-semibold mb-1">Le mot de passe doit contenir :</p>
+                <ul class="list-disc list-inside space-y-0.5 ml-1">
+                    <li>Au moins 8 caractères</li>
+                    <li>Une majuscule</li>
+                    <li>Une minuscule</li>
+                    <li>Un chiffre</li>
+                    <li>Un caractère spécial (#?!@$%^&*-)</li>
+                </ul>
+            </div>
         {/if}
     </div>
 

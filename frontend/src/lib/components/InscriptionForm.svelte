@@ -2,39 +2,28 @@
     import validator from 'validator';
     import { enhance } from '$app/forms';
 
-    let firstname = '';
-    let lastname = '';
-    let email = '';
-    let password = '';
-    let confirmPassword = '';
-    let agreeTerms = false;
+    let firstname = '', lastname = '', email = '', password = '', confirmPassword = '';
+    let agreeTerms = false, loading = false, submitted = false;
 
-    let loading = false;
-    let submitted = false;
+    const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
 
-    $: emailValid = !submitted || validator.isEmail(email);
-    $: passwordValid = !submitted || password.length >= 8;
-    $: confirmPasswordValid = !submitted || (confirmPassword.trim() !== '' && confirmPassword === password);
-    $: firstnameValid = !submitted || firstname.trim() !== '';
-    $: lastnameValid = !submitted || lastname.trim() !== '';
-    $: agreeTermsValid = !submitted || agreeTerms;
+    $: errors = {
+        firstname: !firstname.trim(),
+        lastname: !lastname.trim(),
+        email: !validator.isEmail(email),
+        password: !passwordRegex.test(password),
+        confirmPassword: confirmPassword.trim() === '' || confirmPassword !== password,
+        agreeTerms: !agreeTerms
+    };
 
-    $: isFormValid =
-        validator.isEmail(email) &&
-        password.length >= 8 &&
-        confirmPassword.trim() !== '' &&
-        confirmPassword === password &&
-        firstname.trim() !== '' &&
-        lastname.trim() !== '' &&
-        agreeTerms;
-
+    $: hasErrors = Object.values(errors).some(Boolean);
 </script>
 
 
 <form method="POST" use:enhance={({cancel}) => {
     submitted = true;
 
-    if (!isFormValid) {
+    if (hasErrors) {
         loading = false;
         cancel();
         return;
@@ -47,112 +36,71 @@
     };
 }} class="flex flex-col gap-4">
 
-    <div class="flex flex-col md:flex-row gap-4 w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
+    <!-- Prénom / Nom -->
+    <div class="flex flex-col sm:flex-row gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full">
             <label for="firstname">Prénom</label>
-            <input
-                    bind:value={firstname}
-                    id="firstname" type="text" name="firstname"
-                    class="px-4 py-2 border rounded-lg text-grey-700 w-full focus:outline-none {!firstnameValid ? 'border-red-700 bg-red-50' : 'border-grey-200'}"
-                    placeholder="John"
-            >
-            {#if !firstnameValid}
-                <span class="text-red-500 text-sm">Veuillez entrer un prénom.</span>
-            {/if}
+            <input bind:value={firstname} id="firstname" name="firstname" type="text"
+                   class="px-4 py-2 border rounded-lg w-full focus:outline-none {submitted && errors.firstname ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="John">
+            {#if submitted && errors.firstname} <span class="text-red-500 text-sm">Prénom requis.</span> {/if}
         </div>
         <div class="w-full">
             <label for="lastname">Nom</label>
-            <input
-                    bind:value={lastname}
-                    id="lastname" type="text" name="lastname"
-                    class="px-4 py-2 border rounded-lg text-grey-700 w-full focus:outline-none {!lastnameValid ? 'border-red-700 bg-red-50' : 'border-grey-200'}"
-                    placeholder="Doe"
-            >
-            {#if !lastnameValid}
-                <span class="text-red-500 text-sm">Veuillez entrer un nom.</span>
-            {/if}
+            <input bind:value={lastname} id="lastname" name="lastname" type="text"
+                   class="px-4 py-2 border rounded-lg w-full focus:outline-none {submitted && errors.lastname ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="Doe">
+            {#if submitted && errors.lastname} <span class="text-red-500 text-sm">Nom requis.</span> {/if}
         </div>
     </div>
 
+    <!-- Email -->
     <div class="w-full text-grey-700 font-outfit font-semibold text-sm">
         <label for="inputEmail">Email</label>
-        <input
-                bind:value={email}
-                type="email"
-                name="email"
-                id="inputEmail"
-                class="form-control px-4 py-2 border rounded-lg w-full focus:outline-none {!emailValid ? 'border-red-700 bg-red-50' : 'border-grey-200'}"
-                placeholder="john.doe@example.com"
-        >
-        {#if !emailValid}
-            <span class="text-red-500 text-sm">Email invalide</span>
-        {/if}
+        <input bind:value={email} type="email" name="email" id="inputEmail"
+               class="px-4 py-2 border rounded-lg w-full focus:outline-none {submitted && errors.email ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="john.doe@example.com">
+        {#if submitted && errors.email} <span class="text-red-500 text-sm">Email invalide.</span> {/if}
     </div>
 
-    <div class="flex flex-col md:flex-row gap-4 w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
+    <!-- Mots de passe -->
+    <div class="flex flex-col sm:flex-row gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full">
             <label for="inputPassword">Mot de passe</label>
-            <input
-                    bind:value={password}
-                    type="password"
-                    name="password"
-                    id="inputPassword"
-                    class="form-control px-4 py-2 border rounded-lg w-full focus:outline-none {!passwordValid ? 'border-red-700 bg-red-50' : 'border-grey-200'}"
-                    placeholder="••••••••"
-            >
-            {#if !passwordValid}
-                <span class="text-red-500 text-sm">Le mot de passe doit contenir au moins 8 caractères</span>
+            <input bind:value={password} type="password" name="password" id="inputPassword"
+                   class="px-4 py-2 border rounded-lg w-full focus:outline-none {submitted && errors.password ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="••••••••">
+            {#if submitted && errors.password}
+                <div class="text-red-500 text-sm mt-1">
+                    <p class="font-semibold mb-1">Le mot de passe doit contenir :</p>
+                    <ul class="list-disc list-inside space-y-0.5 ml-1">
+                        <li>Au moins 8 caractères</li>
+                        <li>Une majuscule</li>
+                        <li>Une minuscule</li>
+                        <li>Un chiffre</li>
+                        <li>Un caractère spécial (#?!@$%^&*-)</li>
+                    </ul>
+                </div>
             {/if}
         </div>
         <div class="w-full">
-            <label for="confirmPassword">Confirmation du mot de passe</label>
-            <input
-                    bind:value={confirmPassword}
-                    id="confirmPassword" type="password" name="confirmPassword"
-                    class="px-4 py-2 border rounded-lg text-grey-700 w-full focus:outline-none {!confirmPasswordValid ? 'border-red-700 bg-red-50' : 'border-grey-200'}"
-                    placeholder="••••••••"
-            >
-            {#if !confirmPasswordValid}
-                <span class="text-red-500 text-sm">
-                {#if confirmPassword.trim() === ''}
-                    Veuillez confirmer votre mot de passe.
-                {:else}
-                    Les mots de passe ne correspondent pas.
-                {/if}
-                </span>
-            {/if}
+            <label for="confirmPassword">Confirmation</label>
+            <input bind:value={confirmPassword} id="confirmPassword" type="password" name="confirmPassword"
+                   class="px-4 py-2 border rounded-lg w-full focus:outline-none {submitted && errors.confirmPassword ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="••••••••">
+            {#if submitted && errors.confirmPassword} <span class="text-red-500 text-sm">Les mots de passe ne correspondent pas.</span> {/if}
         </div>
     </div>
 
+    <!-- CGU -->
     <div class="flex flex-col gap-2 text-grey-700 font-semibold text-sm font-outfit">
         <div class="flex gap-2 items-start">
-            <input
-                    bind:checked={agreeTerms}
-                    id="agreeTerms" type="checkbox" name="agreeTerms"
-                    class="w-4 h-4 mt-1 rounded border-gray-300 text-gs-green-950 focus:ring-0 focus:ring-offset-0 accent-gs-green-950 cursor-pointer"
-            >
-            <label for="agreeTerms">
-                En vous inscrivant sur GreenScoreWeb, vous acceptez nos conditions générales d'utilisation.
-            </label>
+            <input bind:checked={agreeTerms} id="agreeTerms" type="checkbox" name="agreeTerms" class="mt-1 accent-gs-green-950 cursor-pointer">
+            <label for="agreeTerms">En vous inscrivant sur GreenScoreWeb, vous acceptez nos conditions générales d'utilisation.</label>
         </div>
-        {#if !agreeTermsValid}
-            <span class="text-red-500 text-sm">Vous devez accepter nos conditions générales d'utilisation</span>
-        {/if}
+        {#if submitted && errors.agreeTerms} <span class="text-red-500 text-sm">Merci d'accepter les CGU.</span> {/if}
     </div>
 
-    <button type="submit" disabled={loading} class="w-full h-fit rounded-lg bg-gs-green-950 hover:bg-gs-green-800 hover:transition-all hover:duration-300 px-1 py-2 font-semibold font-outfit text-white hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-        {#if loading}
-            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Inscription...
-        {:else}
-            Inscription
-        {/if}
+    <!-- Bouton -->
+    <button type="submit" disabled={loading} class="w-full rounded-lg bg-gs-green-950 hover:bg-gs-green-800 p-2 font-semibold font-outfit text-white disabled:opacity-50 flex justify-center gap-2 transition-colors">
+        {#if loading} <span class="animate-spin h-5 w-5 border-2 border-white/20 border-t-white rounded-full"></span> {/if}
+        Inscription
     </button>
 
-    <a href="/inscription-organisation" class="text-grey-950 font-outfit font-semibold text-sm text-center">
-        Je suis une organisation
-    </a>
+    <a href="/inscription-organisation" class="text-grey-950 font-outfit font-semibold text-sm text-center">Je suis une organisation</a>
 </form>

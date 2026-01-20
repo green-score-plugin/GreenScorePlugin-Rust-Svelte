@@ -106,11 +106,15 @@ export const actions = {
 
         const payload: Record<string, string> = { prenom, nom, email };
 
-        if (password && password.length > 0) {
-            if (password.length < 8) {
-                return fail(400, { actionType: 'update_info', message: "Le mot de passe doit contenir au moins 8 caractères" });
-            }
-            payload.password = password;
+        if (password && password.trim() !== '') {
+             const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+             if (!passwordRegex.test(password)) {
+                 return fail(400, {
+                     actionType: 'update_info',
+                     message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)"
+                 });
+             }
+             payload.password = password;
         }
 
         try {
