@@ -9,7 +9,6 @@ on:
 permissions:
   checks: write
   contents: read
-  pull-requests: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -48,7 +47,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Exécution des tests avec couverture (une seule fois)
+      - name: Exécution des tests avec couverture
         run: |
           cargo llvm-cov --all-features --workspace nextest --all-targets --no-report
 
@@ -62,13 +61,6 @@ jobs:
         run: |
           cargo llvm-cov report --html
 
-      - name: Vérification des fichiers générés
-        if: always()
-        run: |
-          echo "📂 Fichiers générés:"
-          ls -lh lcov.info 2>/dev/null || echo "❌ lcov.info non trouvé"
-          ls -lh target/llvm-cov/html/index.html 2>/dev/null || echo "❌ HTML non trouvé"
-
       - name: Résumé de la couverture
         if: always()
         run: |
@@ -76,8 +68,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ -f "lcov.info" ]; then
-            total_lines=$(grep -c "^DA:" lcov.info || echo "0")
-            covered_lines=$(grep "^DA:" lcov.info | grep -c ",1$" || echo "0")
+            total_lines=$(grep -c "^DA:" lcov.info 2>/dev/null || echo "0")
+            covered_lines=$(grep "^DA:" lcov.info 2>/dev/null | grep -c ",1$" || echo "0")
           
             if [ "$total_lines" -gt 0 ]; then
               coverage=$((covered_lines * 100 / total_lines))
@@ -92,33 +84,8 @@ jobs:
               else
                 echo "- **Statut:** ❌ Couverture insuffisante" >> $GITHUB_STEP_SUMMARY
               fi
+            else
+              echo "⚠️ Aucune donnée de couverture trouvée (0 lignes)" >> $GITHUB_STEP_SUMMARY
             fi
-          fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📥 Téléchargez le rapport HTML dans les artifacts pour voir les détails par fichier" >> $GITHUB_STEP_SUMMARY
-
-      - name: Commentaire de couverture sur la PR
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        if: github.event_name == 'pull_request'
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./backend/lcov.info
-
-      - name: Upload du rapport HTML de couverture
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-html-report-${{ github.ref_name }}
-          path: ./backend/target/llvm-cov/html/
-          retention-days: 7
-          if-no-files-found: warn
-
-      - name: Upload du rapport lcov
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-lcov-report-${{ github.ref_name }}
-          path: ./backend/lcov.info
-          retention-days: 7
-          if-no-files-found: warn
+          else
+            echo "❌ Fichier lcov.info
