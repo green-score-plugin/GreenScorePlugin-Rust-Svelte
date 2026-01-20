@@ -620,7 +620,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         const jsonResponse = await response.json();
         const equivalents = jsonResponse.data;
-        console.log("Equivalents reçus :", equivalents);
         return {
           success: true,
           equivalents: equivalents.map((eq) => ({
