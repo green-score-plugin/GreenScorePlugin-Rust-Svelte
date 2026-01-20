@@ -111,19 +111,17 @@ pub async fn lpc(
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
         let (l, n) = calculate_green_score(&State(pool.clone()), infos.carbon_footprint, "lpc".to_string()).await;
-        let mut collected: Vec<Equivalent> = Vec::new();
-        for _ in 0..2 {
-            if let Some(e) = equivalent(&pool, infos.carbon_footprint).await {
-                collected.push(e);
-            }
-        }
-        let eqs = if collected.is_empty() { None } else { Some(collected) };
+
+        let eqs = equivalent(&pool, infos.carbon_footprint, 2).await;
+        let eqs = match eqs {
+            Some(v) if !v.is_empty() => Some(v),
+            _ => None,
+        };
 
         (Some(l), Some(n), eqs)
     } else {
         (None, None, None)
     };
-
 
     Json(LastPageConsultedResponse {
         success: true,
