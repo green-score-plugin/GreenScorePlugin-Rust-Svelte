@@ -10,7 +10,7 @@ use sqlx::Row;
 
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 pub struct UpdateAccountRequest {
     #[serde(default)]
     pub email: Option<String>,
@@ -23,35 +23,6 @@ pub struct UpdateAccountRequest {
 
     #[serde(default)]
     pub password: Option<String>,
-}
-
-impl UpdateAccountRequest {
-    pub fn build_update_query(&self) -> (String, usize) {
-        let mut query = String::from("UPDATE user SET ");
-        let mut updates = Vec::new();
-
-        if self.email.is_some() {
-            updates.push("email = ?");
-        }
-        if self.prenom.is_some() {
-            updates.push("first_name = ?");
-        }
-        if self.nom.is_some() {
-            updates.push("last_name = ?");
-        }
-        if self.password.is_some() {
-            updates.push("password = ?");
-        }
-
-        if updates.is_empty() {
-            return (String::new(), 0);
-        }
-
-        query.push_str(&updates.join(", "));
-        query.push_str(" WHERE id = ?");
-
-        (query, updates.len())
-    }
 }
 
 #[derive(Deserialize)]
@@ -419,4 +390,38 @@ pub async fn get_my_organization(
         "success": true,
         "organisation": null
     }))
+}
+
+
+
+// TESTS
+
+impl UpdateAccountRequest {
+    #[allow(dead_code)]
+    pub fn build_update_query(&self) -> (String, usize) {
+        let mut query = String::from("UPDATE user SET ");
+        let mut updates = Vec::new();
+
+        if self.email.is_some() {
+            updates.push("email = ?");
+        }
+        if self.prenom.is_some() {
+            updates.push("first_name = ?");
+        }
+        if self.nom.is_some() {
+            updates.push("last_name = ?");
+        }
+        if self.password.is_some() {
+            updates.push("password = ?");
+        }
+
+        if updates.is_empty() {
+            return (String::new(), 0);
+        }
+
+        query.push_str(&updates.join(", "));
+        query.push_str(" WHERE id = ?");
+
+        (query, updates.len())
+    }
 }

@@ -46,9 +46,8 @@ fn test_dynamic_query_building_logic() {
 
     let payload = UpdateAccountRequest {
         email: Some("new@example.com".to_string()),
-        prenom: None,
         nom: Some("NewName".to_string()),
-        password: None,
+        ..Default::default()
     };
 
     let (query, params_count) = payload.build_update_query();
