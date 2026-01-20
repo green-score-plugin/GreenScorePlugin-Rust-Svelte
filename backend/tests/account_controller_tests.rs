@@ -51,29 +51,7 @@ fn test_dynamic_query_building_logic() {
         password: None,
     };
 
-    let mut query = String::from("UPDATE user SET ");
-    let mut updates = Vec::new();
-    let mut params_count = 0;
-
-    if payload.email.is_some() {
-        updates.push("email = ?");
-        params_count += 1;
-    }
-    if payload.prenom.is_some() {
-        updates.push("first_name = ?");
-        params_count += 1;
-    }
-    if payload.nom.is_some() {
-        updates.push("last_name = ?");
-        params_count += 1;
-    }
-    if payload.password.is_some() {
-        updates.push("password = ?");
-        params_count += 1;
-    }
-
-    query.push_str(&updates.join(", "));
-    query.push_str(" WHERE id = ?");
+    let (query, params_count) = payload.build_update_query();
 
     assert_eq!(query, "UPDATE user SET email = ?, last_name = ? WHERE id = ?");
     assert_eq!(params_count, 2);
