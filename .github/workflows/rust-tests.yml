@@ -60,32 +60,3 @@ jobs:
         if: always()
         run: |
           cargo llvm-cov report --html
-
-      - name: Résumé de la couverture
-        if: always()
-        run: |
-          echo "## 📊 Rapport de Couverture" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [ -f "lcov.info" ]; then
-            total_lines=$(grep -c "^DA:" lcov.info 2>/dev/null || echo "0")
-            covered_lines=$(grep "^DA:" lcov.info 2>/dev/null | grep -c ",1$" || echo "0")
-          
-            if [ "$total_lines" -gt 0 ]; then
-              coverage=$((covered_lines * 100 / total_lines))
-              echo "- **Lignes totales:** $total_lines" >> $GITHUB_STEP_SUMMARY
-              echo "- **Lignes couvertes:** $covered_lines" >> $GITHUB_STEP_SUMMARY
-              echo "- **Taux de couverture:** ${coverage}%" >> $GITHUB_STEP_SUMMARY
-          
-              if [ "$coverage" -ge 80 ]; then
-                echo "- **Statut:** ✅ Excellente couverture" >> $GITHUB_STEP_SUMMARY
-              elif [ "$coverage" -ge 60 ]; then
-                echo "- **Statut:** ⚠️ Couverture acceptable" >> $GITHUB_STEP_SUMMARY
-              else
-                echo "- **Statut:** ❌ Couverture insuffisante" >> $GITHUB_STEP_SUMMARY
-              fi
-            else
-              echo "⚠️ Aucune donnée de couverture trouvée (0 lignes)" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "❌ Fichier lcov.info
