@@ -2,8 +2,7 @@ use backend::controllers::account_controller::{UpdateAccountRequest, JoinOrgaReq
 use serde_json::{from_value, json};
 
 #[test]
-fn test_update_account_request_deserialization() {
-    // Cas 1 : JSON complet
+fn test_update_account_request_deserialization_full() {
     let json_full = json!({
         "email": "test@example.com",
         "prenom": "Jean",
@@ -15,8 +14,10 @@ fn test_update_account_request_deserialization() {
     assert_eq!(req.prenom, Some("Jean".to_string()));
     assert_eq!(req.nom, Some("Dupont".to_string()));
     assert_eq!(req.password, Some("Password123!".to_string()));
+}
 
-    // Cas 2 : JSON partiel (seulement prénom)
+#[test]
+fn test_update_account_request_deserialization_partial() {
     let json_partial = json!({
         "prenom": "Pierre"
     });
@@ -25,8 +26,10 @@ fn test_update_account_request_deserialization() {
     assert_eq!(req.prenom, Some("Pierre".to_string()));
     assert!(req.nom.is_none());
     assert!(req.password.is_none());
+}
 
-    // Cas 3 : JSON vide
+#[test]
+fn test_update_account_request_deserialization_empty() {
     let json_empty = json!({});
     let req: UpdateAccountRequest = from_value(json_empty).expect("Devrait désérialiser le JSON vide");
     assert!(req.email.is_none());
