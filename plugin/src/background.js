@@ -623,8 +623,8 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return {
           success: true,
           equivalents: equivalents.map((eq) => ({
-            image: "../assets/images/equivalents/" + eq.icon_thumbnail,
-            value: parseFloat(eq.equivalent).toFixed(1),
+            image: "../assets/images/equivalents/" + eq.icon,
+            value: parseFloat(eq.value).toFixed(1),
             name: eq.name,
           })),
         };
