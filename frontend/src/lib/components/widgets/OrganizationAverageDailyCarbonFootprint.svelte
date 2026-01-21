@@ -13,15 +13,6 @@
     $: if (averageFootprint) {
         animatedAverageFootprint.set(averageFootprint);
     }
-
-    const modules = import.meta.glob('/src/lib/images/equivalents/*.{png,jpg,jpeg,webp,svg}', { eager: true }) as Record<string, any>;
-    const iconMap: Record<string, string> = {};
-    for (const p in modules) {
-        const name = p.split('/').pop()!;
-        iconMap[name] = modules[p].default ?? modules[p];
-    }
-
-    $: iconUrl = equivalentAverage?.icon ? iconMap[equivalentAverage.icon] ?? null : null;
 </script>
 
 <div class="bg-white flex flex-col justify-around gap-3 p-6 rounded-lg shadow-md col-span-1 order-1 lg:col-span-4 text-grey-950">
@@ -44,7 +35,7 @@
             {#if equivalentAverage.icon}
             <div class="flex justify-center items-center w-full mt-4">
                 <picture class="w-12 h-12 flex items-center justify-center">
-                    <img src="{iconUrl}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy">
+                    <img src="/images/equivalents/{equivalentAverage.icon}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy">
                 </picture>
             </div>
             {/if}
