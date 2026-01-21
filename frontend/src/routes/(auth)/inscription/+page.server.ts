@@ -11,6 +11,7 @@ export const actions = {
         const email = data.get('email');
         const password = data.get('password');
         const confirmPassword = data.get('confirmPassword');
+        const agreeTerms = data.get('agreeTerms');
 
         if(!firstname || !lastname || !email || !password) {
             return fail(400, { message: "Tous les champs sont requis" })
@@ -18,6 +19,16 @@ export const actions = {
 
         if(password !== confirmPassword) {
             return fail(400, { message: "Les mots de passe ne correspondent pas" })
+        }
+
+        const passwordString = password.toString();
+        const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+        if (!passwordRegex.test(passwordString)) {
+            return fail(400, { message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)" })
+        }
+
+        if(agreeTerms !== 'on') {
+            return fail(400, { message: "Vous devez accepter les conditions générales d'utilisation" })
         }
 
         try{

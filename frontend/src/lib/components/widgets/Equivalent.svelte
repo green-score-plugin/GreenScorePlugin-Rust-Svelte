@@ -26,7 +26,7 @@
             </picture>
         {/if}
         <p class="text-center mt-2 text-lg font-medium font-outfit">
-            <span class="animate-counter">{equivalent.value}</span>
+            <span class="animate-counter">{equivalent.value.toFixed(1)}</span>
             {equivalent.name}
         </p>
     {:else}

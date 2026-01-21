@@ -600,7 +600,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const tabData = getTabData(activeTab.id);
       const emissions = calculateCarbonEmissions(tabData);
       const gCO2 = emissions.totalEmissions;
-      const count = message.count || 1;
+      const count = message.count || 3;
 
       try {
         const response = await fetch(
@@ -623,10 +623,8 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return {
           success: true,
           equivalents: equivalents.map((eq) => ({
-            image:
-              "https://greenscoreweb.alwaysdata.net/public/equivalents/" +
-                eq.icon_thumbnail || "../assets/images/account.svg",
-            value: eq.equivalent,
+            image: "../assets/images/equivalents/" + eq.icon,
+            value: parseFloat(eq.value).toFixed(1),
             name: eq.name,
           })),
         };
