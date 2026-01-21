@@ -98,7 +98,7 @@
             <ul class="flex flex-col font-outfit font-medium text-grey-950 items-center gap-4 text-lg">
                 <li><a href="/">Informations</a></li>
                 <li><a href="/mes-donnees">Mes données</a></li>
-                <li><a href="/organisation">Mon organisation</a></li>
+                <li><a href="/mon-organisation">Mon organisation</a></li>
                 <li><a href="/derniere-page">Dernière page consultée</a></li>
 
                 {#if user}
