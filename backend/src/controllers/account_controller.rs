@@ -1,7 +1,7 @@
 use axum::extract::State;
 use axum::Json;
 use sqlx::MySqlPool;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tower_sessions::Session;
 use crate::models::{Account, User};
@@ -28,6 +28,23 @@ pub struct UpdateAccountRequest {
 #[derive(Deserialize)]
 pub struct JoinOrgaRequest {
     pub code: String,
+}
+
+#[derive(Serialize)]
+pub struct EquivalentResponse {
+    pub id: i64,
+    pub name: String,
+    pub icon_thumbnail: String,
+    pub is_selected: bool,
+}
+
+#[derive(Serialize)]
+pub struct AllEquivalentsResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub equivalents: Option<Vec<EquivalentResponse>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
 }
 
 pub async fn update_account(
@@ -391,6 +408,48 @@ pub async fn get_my_organization(
     }))
 }
 
+pub async fn get_account_all_equivalents(session: Session, State(pool): State<MySqlPool>) -> Json<AllEquivalentsResponse> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let account = match account_opt {
+        Some(acc) => acc,
+        None => return Json(AllEquivalentsResponse {
+            success: false,
+            equivalents: None,
+            message: Some("Non authentifié".to_string()),
+        }),
+    };
+
+    match sqlx::query_as::<_, (i64, String, String, bool)>(
+        "SELECT e.id, e.name, e.icon_thumbnail, (u.user_id IS NOT NULL) AS is_selected
+              FROM equivalent e LEFT JOIN user_equivalent u ON e.id = u.equivalent_id AND u.user_id = ?"
+    ).bind(account.id())
+        .fetch_all(&pool)
+        .await
+    {
+        Ok(equivalents) => {
+            let items: Vec<EquivalentResponse> = equivalents.into_iter().map(|(id, name, icon_thumbnail, is_selected)| {
+                EquivalentResponse {
+                    id,
+                    name,
+                    icon_thumbnail,
+                    is_selected,
+                }
+            }).collect();
+
+            Json(AllEquivalentsResponse {
+                success: true,
+                equivalents: Some(items),
+                message: None,
+            })
+        },
+        Err(e) => Json(AllEquivalentsResponse {
+            success: false,
+            equivalents: None,
+            message: Some(format!("Erreur récupération équivalents: {}", e)),
+        }),
+    }
+}
 
 
 // TESTS

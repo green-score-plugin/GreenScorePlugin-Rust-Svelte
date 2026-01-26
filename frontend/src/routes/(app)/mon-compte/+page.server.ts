@@ -11,6 +11,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 
     let members = [];
     let organisation = null;
+    let accountEquivalents = [];
 
     if (locals.user?.role === 'organisation') {
         const res = await fetch(`${BACKEND_URL}/get_organisation_members`, { method: "POST", headers });
@@ -32,11 +33,22 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
         }
     }
 
+    const equivRes = await fetch(`${BACKEND_URL}/account/get_account_all_equivalents`, { method: 'GET', headers, credentials: 'include' });
+    if (equivRes.ok) {
+        try {
+            const result = await equivRes.json();
+            if (result.success && result.equivalents) {
+                accountEquivalents = result.equivalents;
+            }
+        } catch {
+        }
+    }
     return {
         members,
-        organisation
+        organisation,
+        accountEquivalents
     };
-};
+}
 
 
 export const actions = {
