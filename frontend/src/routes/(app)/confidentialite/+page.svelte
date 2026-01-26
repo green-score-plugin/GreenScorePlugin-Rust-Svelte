@@ -31,6 +31,7 @@
                 <li>Système d'exploitation</li>
                 <li>Données de connexion (horodatage, durée de la session)</li>
                 <li>Cookies et technologies similaires (voir section 7).</li>
+                <li>Lorsque vous créez un compte et êtes connecté, nous collectons également les données des pages que vous consultez : le DNS, l’URL complète, le pays de recherche, le nombre de requêtes, le temps de chargement, la quantité de données transférées.</li>
             </ul>
         </section>
 
