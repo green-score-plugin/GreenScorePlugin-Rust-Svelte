@@ -423,5 +423,37 @@ export const actions = {
         } catch (error) {
             return fail(500, { actionType: 'change_orga', message: "Erreur serveur lors du changement d'organisation" });
         }
+    },
+    modification_equivalents: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const equivalents = data.getAll('equivalents').map(item => item.toString());
+
+        console.log('equivalents received:', equivalents);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/update_account_equivalents`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ equivalents })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return {
+                    actionType: 'modification_equivalents',
+                    success: true,
+                    message: 'Équivalents mis à jour avec succès'
+                };
+            } else {
+                return fail(400, { actionType: 'modification_equivalents', message: result.message || 'Erreur lors de la mise à jour' });
+            }
+        } catch (error) {
+            return fail(500, { actionType: 'modification_equivalents', message: 'Erreur serveur' });
+        }
     }
 } satisfies Actions;
