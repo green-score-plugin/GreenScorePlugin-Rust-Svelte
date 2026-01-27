@@ -1,2 +1,6 @@
 [env]
 SQLX_OFFLINE = "true"
+
+[alias]
+test-cov = "llvm-cov nextest --html"
+test-quick = "nextest run"

@@ -6,3 +6,4 @@ pub mod plugin_controller;
 pub mod mo_controller;
 pub mod helpers;
 pub mod my_data_controller;
+pub mod calculation_method;
