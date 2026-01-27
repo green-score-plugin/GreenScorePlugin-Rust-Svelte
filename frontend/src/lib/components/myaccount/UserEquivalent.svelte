@@ -37,23 +37,23 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {#each accountEquivalents as accountEquivalent}
-                <div class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-gs-green-950 focus-within:ring-offset-2 hover:border-gray-400">
+                <div class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-gray-400 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gs-green-950 has-[:checked]:border-gs-green-950 has-[:checked]:ring-1 has-[:checked]:ring-gs-green-950 has-[:checked]:bg-green-50">
                     <div class="flex-shrink-0">
-                        <img class="h-10 w-10 rounded-full object-cover" src="/images/equivalents/{accountEquivalent.icon_thumbnail}" alt="{accountEquivalent.name}">
+                        <img class="h-10 w-10 object-cover" src="/images/equivalents/{accountEquivalent.icon_thumbnail}" alt="{accountEquivalent.name}">
                     </div>
                     <div class="min-w-0 flex-1">
-                        <label for="equivalent-{accountEquivalent.id}" class="focus:outline-none cursor-pointer">
+                        <label for="equivalent-{accountEquivalent.id}" class="cursor-pointer">
                             <span class="absolute inset-0" aria-hidden="true"></span>
                             <span class="text-sm font-medium text-gray-900">{accountEquivalent.name}</span>
                         </label>
                     </div>
                     <div class="flex h-5 items-center">
-                         <input id="equivalent-{accountEquivalent.id}"
-                                name="equivalents"
-                                value={accountEquivalent.id}
-                                checked={accountEquivalent.is_selected}
-                                type="checkbox"
-                                class="h-4 w-4 rounded border-gray-300 text-gs-green-950 focus:ring-gs-green-950" />
+                        <input id="equivalent-{accountEquivalent.id}"
+                               name="equivalents"
+                               value={accountEquivalent.id}
+                               checked={accountEquivalent.is_selected}
+                               type="checkbox"
+                               class="h-4 w-4 rounded border-gray-300 text-gs-green-950" />
                     </div>
                 </div>
             {/each}
