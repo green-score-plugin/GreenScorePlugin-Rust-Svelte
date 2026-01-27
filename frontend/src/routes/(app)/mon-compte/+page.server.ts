@@ -428,8 +428,6 @@ export const actions = {
         const data = await request.formData();
         const equivalents = data.getAll('equivalents').map(item => item.toString());
 
-        console.log('equivalents received:', equivalents);
-
         try {
             const response = await fetch(`${BACKEND_URL}/account/update_account_equivalents`, {
                 method: 'PATCH',
