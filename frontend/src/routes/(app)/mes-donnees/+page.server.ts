@@ -57,7 +57,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             messageAverageFootprint: result.message_average_footprint,
             totalConsumption: result.total_consumption,
             letterGreenScore: result.letter_green_score || 'A',
-            envNomination: result.env_nomination || 'Maître des Forêts',
+            envNomination: result.env_nomination || 'nominations.profile.A',
             equivalents: result.equivalents || [],
             dailyConsumption: result.daily_consumption || [],
             weeklyConsumption: result.weekly_consumption || [],

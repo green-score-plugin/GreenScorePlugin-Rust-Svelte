@@ -103,17 +103,17 @@ PRIMARY KEY (`id`)
 --
 
 INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
-(1, 'A/R Lille - Nîmes', 0.004, 'car.png'),
-(2, 'A/R Paris - Berlin en TGV', 0.163, 'train-paris-berlin.png'),
-(3, 'emails', 2000, 'email.png'),
-(4, 'recherches sur le web', 5000, 'search.png'),
-(5, 'heures de streaming vidéo', 17.86, 'youtube.png'),
-(6, 'km en autocar thermique', 36, 'bus.png'),
-(7, 'km en moto thermique', 4.54, 'motorbike.png'),
-(8, 'km en voiture thermique', 4.54, 'car.png'),
-(9, 'ordinateur portable', 0.004, 'laptop.png'),
-(10, 'litres d\'eau du robinet', 7692, 'faucet.png'),
-(11, 'A/R Paris - New York en avion', 0.0007, 'new-york.png');
+(1, 'data.equivalent.lille_nimes', 0.004, 'car.png'),
+(2, 'data.equivalent.paris_berlin', 0.163, 'train-paris-berlin.png'),
+(3, 'data.equivalent.emails', 2000, 'email.png'),
+(4, 'data.equivalent.search', 5000, 'search.png'),
+(5, 'data.equivalent.streaming', 17.86, 'youtube.png'),
+(6, 'data.equivalent.bus', 36, 'bus.png'),
+(7, 'data.equivalent.motorbike', 4.54, 'motorbike.png'),
+(8, 'data.equivalent.car', 4.54, 'car.png'),
+(9, 'data.equivalent.laptop', 0.004, 'laptop.png'),
+(10, 'data.equivalent.tap_water', 7692, 'faucet.png'),
+(11, 'data.equivalent.paris_ny', 0.0007, 'new-york.png');
 
 -- --------------------------------------------------------
 

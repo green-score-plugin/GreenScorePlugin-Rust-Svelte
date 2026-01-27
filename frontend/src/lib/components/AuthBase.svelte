@@ -1,6 +1,7 @@
 <script lang="ts">
     import imageFond from '$lib/images/register-image1.png';
     import logo from '$lib/images/greenscore-logo.png';
+    import { t } from 'svelte-i18n';
 
     export let title: string;
     export let subtitle: string;
@@ -31,7 +32,7 @@
 
             {#if form?.message}
                 <div class="w-full bg-red-50 text-red-700 text-sm font-outfit font-medium border border-red-700 rounded-lg px-6 py-6">
-                    {form.message}
+                    {$t(form.message)}
                 </div>
             {/if}
 

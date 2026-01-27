@@ -46,12 +46,12 @@ export const actions = {
                 redirect(303,'/');
             }
 
-            return fail(400, { message: result.message || 'Erreur de connexion' });
+            return fail(400, { message: result.message || 'errors.connection_error' });
         }catch (error) {
             if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
                 throw error;
             }
-            return fail(500, { message: 'Erreur serveur' });
+            return fail(500, { message: 'errors.server_error' });
         }
     }
 } satisfies Actions;

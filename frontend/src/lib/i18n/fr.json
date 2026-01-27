@@ -1,0 +1,516 @@
+{
+  "hello": "Bonjour",
+  "header": {
+    "home": "Accueil",
+    "my_data": "Mes données",
+    "my_organization": "Mon organisation",
+    "last_visited_page": "Dernière page consultée",
+    "manage_organization": "Gérer mon organisation",
+    "manage_account": "Gérer mon compte",
+    "logout": "Se déconnecter",
+    "login": "Se connecter",
+    "informations": "Informations"
+  },
+  "footer": {
+    "copyright": "© 2025 GreenScore Web. Tous droits réservés.",
+    "privacy_policy": "Politique de Confidentialité",
+    "terms_of_use": "Conditions Générales d'Utilisation",
+    "contact_us": "Contactez-nous :"
+  },
+  "home": {
+    "hero": {
+      "title": "Mesurez votre empreinte carbone sur le web !",
+      "subtitle": "Chaque page que vous chargez consomme de l'énergie. Mesurez votre empreinte et agissez pour un internet plus vert.",
+      "add_to_firefox": "Ajouter à Firefox"
+    },
+    "video": {
+      "tag": "Web",
+      "title": "Installer. Analyser. Économiser.",
+      "description": "Réduire l'impact de votre site, c'est aussi réduire son empreinte sur la planète. Utilisez GreenScore Web !",
+      "description_more": "En vous inscrivant, vous pourrez consulter des tableaux de bords de votre consommation.",
+      "register": "S'inscrire"
+    },
+    "stats": {
+      "title": "Des chiffres qui parlent d'eux-mêmes!",
+      "users_count": "5.5",
+      "users_label": "milliards",
+      "users_desc": "C'est le nombre d'utilisateurs d'internet en 2025",
+      "devices_count": "34",
+      "devices_label": "milliards",
+      "devices_desc": "d'équipements informatiques en 2019",
+      "images_count": "47",
+      "images_label": "%",
+      "images_desc": "C'est le pourcentage du poids des images sur un site web",
+      "video_count": "300",
+      "video_label": "K",
+      "video_desc": "tonnes de CO2 générées par le format vidéo à lui seul",
+      "reduction_count": "15",
+      "reduction_label": "%",
+      "reduction_desc": "de réduction possible des émissions CO2 en appliquant les bonnes pratiques d'éco-conception !"
+    },
+    "advice": {
+      "title_dev": "Conseils développeurs",
+      "title_gen": "Quelques conseils",
+      "for_users": "Pour les utilisateurs",
+      "for_devs": "Pour les développeurs",
+      "no_advice": "Aucun conseil à afficher"
+    },
+    "greenscore": {
+      "title": "Comprendre le GreenScore",
+      "description": "Le GreenScore est un indicateur permettant de mesurer l'impact environnemental d'une page web. Il se base sur plusieurs critères liés à la consommation d'énergie et l'empreinte carbone générée par le site.",
+      "calc_title": "Comment est calculé le GreenScore ?",
+      "calc_desc": "Le calcul du GreenScore repose sur l'analyse de plusieurs facteurs clés basés sur l'énergie consommée :",
+      "calc_items": {
+        "resources": "Chargement des ressources (images, scripts, vidéos, etc.)",
+        "transfer": "Transfert de données sur le réseau",
+        "requests": "Nombre de requêtes effectuées",
+        "loading_time": "Temps de chargement de la page"
+      },
+      "calc_conclusion": "Ces valeurs sont ensuite multipliées par l'<span class=\"font-semibold\">intensité carbone</span> du pays où se trouve l'utilisateur du plugin, permettant d'obtenir l'empreinte carbone finale en grammes de CO<sub>2</sub> émis (gCO<sub>2</sub>e).",
+      "scale": {
+        "title": "L'échelle du GreenScore",
+        "description": "Le GreenScore est attribué en fonction de l'empreinte carbone calculée, selon la grille suivante :",
+        "grades": {
+          "A": "Excellent, très faible impact.",
+          "B": "Bon, impact modéré.",
+          "C": "Correct, amélioration possible.",
+          "D": "Acceptable, mais perfectible.",
+          "E": "Médiocre, impact élevé.",
+          "F": "Mauvais, impact très élevé.",
+          "G": "Très mauvais, impact critique."
+        },
+        "labels": {
+          "low": "Faible impact",
+          "critical": "Impact critique"
+        }
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Vous nous avez manqué !",
+      "email_label": "Email",
+      "email_placeholder": "john.doe@example.com",
+      "password_label": "Mot de passe",
+      "password_placeholder": "••••••••",
+      "submit_button": "Connexion",
+      "loading": "Connexion...",
+      "invalid_email": "Email invalide",
+      "password_requirements": "Le mot de passe doit contenir :",
+      "req_length": "Au moins 8 caractères",
+      "req_uppercase": "Une majuscule",
+      "req_lowercase": "Une minuscule",
+      "req_number": "Un chiffre",
+      "req_special": "Un caractère spécial (#?!@$%^&*-)",
+      "already_have_account": "J'ai déjà un compte",
+      "register_link": "Inscription",
+      "success_deleted": "Succès !",
+      "account_deleted_msg": "Votre compte a été supprimé avec succès."
+    },
+    "register": {
+      "user_title": "Inscription",
+      "org_title": "Inscription Organisation",
+      "switch_to_user": "Je suis un utilisateur",
+      "switch_to_org": "Je suis une organisation",
+      "firstname": "Prénom",
+      "lastname": "Nom",
+      "firstname_required": "Prénom requis.",
+      "lastname_required": "Nom requis.",
+      "org_name": "Nom de l'organisation",
+      "org_name_required": "Nom requis.",
+      "siret": "Numéro SIRET (optionnel)",
+      "confirm_password": "Confirmation",
+      "passwords_mismatch": "Les mots de passe ne correspondent pas.",
+      "agree_terms": "En vous inscrivant sur GreenScoreWeb, vous acceptez nos conditions générales d'utilisation.",
+      "accept_terms_error": "Merci d'accepter les CGU.",
+      "success_register": "Informations mises à jour avec succès",
+      "subtitle": "Prêts à agir ?",
+      "subtitle_org": "Observez l’empreinte carbone de votre organisation sur le web !"
+    }
+  },
+  "account": {
+    "menu": {
+      "my_info": "Mon compte",
+      "my_organization": "Mon organisation",
+      "manage_organization": "Gérer mon organisation",
+      "delete_account": "Supprimer le compte",
+      "delete_organization": "Supprimer l'organisation"
+    },
+    "info": {
+      "title": "Mes informations",
+      "button_validate": "Valider",
+      "button_saving": "Enregistrement..."
+    },
+    "organization": {
+      "title": "Organisation",
+      "name_label": "Nom de l'organisation",
+      "code_label": "Code Organisation",
+      "code_unknown": "Inconnu",
+      "leave_button": "Quitter",
+      "change_button": "Changer d'organisation",
+      "join_button": "Rejoindre",
+      "join_loading": "Chargement...",
+      "code_placeholder": "Entrez le code organisation",
+      "code_help": "Merci d'entrer le code à 8 caractères envoyé par votre organisation",
+      "invite_title": "Invitez des membres !",
+      "invite_desc": "Envoyez ce code aux membres de votre organisation. Ils peuvent le saisir dans la section : mon compte - mon organisation - rejoindre une organisation",
+      "finish_button": "Terminer"
+    },
+    "modals": {
+      "leave_org_confirm_title": "Confirmation",
+      "leave_org_confirm_desc": "Etes-vous sur de vouloir quitter l'organisation \"{orgName}\" ?",
+      "cancel": "Annuler",
+      "confirm_leave": "Oui, quitter",
+      "change_org_title": "Veuillez entrer le code qui vous a été envoyé par l'administrateur de votre organisation",
+      "new_code_placeholder": "Entrez le nouveau code",
+      "new_code_help": "Merci d'entrer le code à 8 caractères de la nouvelle organisation",
+      "confirm": "Confirmer",
+      "delete_confirm_title": "Confirmer la suppression",
+      "delete_confirm_desc": "Êtes-vous sûr de vouloir supprimer votre compte utilisateur ?",
+      "delete": "Supprimer"
+    }
+  },
+  "dashboard": {
+    "my_data": {
+      "title": "Mes données",
+      "description": "Voici une analyse détaillée de vos données de navigation : ",
+      "no_data": "Vous n'avez pas encore utilisé notre plugin afin d'analyser votre consommation !",
+      "total_consumption": "Total de votre consommation depuis la création du compte :"
+    },
+    "my_organization": {
+      "title": "Mon Organisation",
+      "description": "Toutes les données sur les membres de : ",
+      "no_data": "Votre organisation n'a pas de données à analyser ou vous n'êtes pas relié à une organisation",
+      "total_consumption": "Total de la consommation de votre organisation depuis la création du compte :"
+    },
+    "last_page": {
+      "title": "Dernière page consultée",
+      "description": "Voici une analyse détaillée de votre dernière page consultée : ",
+      "no_data": "Vous n'avez pas encore analysé de pages web avec notre plugin",
+      "carbon_emission": "Emission carbone de la page :"
+    },
+    "widgets": {
+      "advice": {
+        "title_dev": "Des conseils pour le développement ?",
+        "title_nav": "Des conseils pour la navigation ?",
+        "more_info": "En savoir plus",
+        "no_data": "pas de données"
+      },
+      "badge": {
+        "title": "Badge d'impact environnemental",
+        "no_data": "pas de données"
+      }
+    }
+  },
+  "legal": {
+    "privacy_policy_title": "Politique de Confidentialité",
+    "privacy_policy": {
+      "title": "Politique de Confidentialité",
+      "s1": {
+        "title": "1. Identité du Responsable du Traitement",
+        "content": "Le responsable du traitement des données personnelles est :",
+        "li1": "<strong>GreenScore Web</strong>",
+        "li2": "Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France",
+        "li3": "Email :"
+      },
+      "s2": {
+        "title": "2. Données collectées",
+        "s2_1_title": "2.1 Données fournies par l'utilisateur",
+        "s2_1_li1": "Lors de la création d'un compte : nom et prénom ou nom de l'organisation, adresse e-mail, mot de passe, numéro de SIRET (si l'utilisateur s'inscrit en tant qu'Organisation).",
+        "s2_1_li2": "Lors de l'utilisation du plugin ou de l'application web : données relatives à votre utilisation, comme les préférences ou les réglages choisis.",
+        "s2_2_title": "2.2 Données collectées automatiquement",
+        "s2_2_li1": "Adresse IP",
+        "s2_2_li2": "Type de navigateur",
+        "s2_2_li3": "Système d'exploitation",
+        "s2_2_li4": "Données de connexion (horodatage, durée de la session)",
+        "s2_2_li5": "Cookies et technologies similaires (voir section 7)."
+      },
+      "s3": {
+        "title": "3. Finalités du traitement",
+        "li1": "Fournir et améliorer les fonctionnalités de l'application web et du plugin.",
+        "li2": "Assurer la sécurité et prévenir les abus.",
+        "li3": "Répondre à vos demandes d'assistance ou de contact.",
+        "li4": "Personnaliser l'expérience utilisateur.",
+        "li5": "Se conformer à nos obligations légales et réglementaires."
+      },
+      "s4": {
+        "title": "4. Base légale du traitement",
+        "li1": "L'exécution d'un contrat, pour fournir les services liés à votre compte.",
+        "li2": "Notre intérêt légitime, pour sécuriser nos services et améliorer leur performance.",
+        "li3": "Une obligation légale, pour respecter les lois en vigueur."
+      },
+      "s5": {
+        "title": "5. Partage des données",
+        "intro": "Vos données ne sont jamais vendues. Nous les partageons uniquement avec :",
+        "li1": "Nos prestataires de services (hébergement, maintenance) dans le cadre de leur mission.",
+        "li2": "Les autorités compétentes, si requis par la loi.",
+        "outro": "Ces tiers sont tenus de garantir la confidentialité et la sécurité de vos informations."
+      },
+      "s6": {
+        "title": "6. Durée de conservation",
+        "intro": "Vos données personnelles sont conservées aussi longtemps que nécessaire pour les finalités décrites ci-dessus :",
+        "li1": "Données de compte : conservées jusqu'à désinscription.",
+        "li2": "Logs et données techniques : conservés pendant 12 mois.",
+        "li3": "Au-delà, les données sont supprimées ou anonymisées."
+      },
+      "s7": {
+        "title": "7. Cookies et technologies similaires",
+        "p1": "Nous utilisons des cookies pour améliorer votre navigation sur l'application web.",
+        "p2_strong": "Vos choix concernant les cookies :",
+        "p2": "Lors de votre première visite, un bandeau vous informe de l'utilisation des cookies. Vous pouvez accepter, refuser ou personnaliser vos préférences. Si vous bloquez les cookies, vous ne pourrez pas vous connecter sur l'application web."
+      },
+      "s8": {
+        "title": "8. Vos droits",
+        "intro": "En vertu du Règlement Général sur la Protection des Données (RGPD), vous disposez des droits suivants :",
+        "li1": "Accès : obtenir une copie des données que nous détenons.",
+        "li2": "Rectification : corriger des informations inexactes ou incomplètes.",
+        "li3": "Suppression : demander l'effacement de vos données, sauf obligation légale.",
+        "li4": "Opposition : refuser certains traitements (par exemple, le marketing direct).",
+        "li5": "Portabilité : recevoir vos données dans un format structuré.",
+        "li6": "Réclamation : contacter la CNIL (France) si vous estimez que vos droits ne sont pas respectés.",
+        "outro": "Pour exercer vos droits, contactez-nous à :"
+      },
+      "s9": {
+        "title": "9. Sécurité des données",
+        "content": "Nous mettons en œuvre des mesures techniques et organisationnelles adaptées pour protéger vos données contre les accès non autorisés, la perte ou l'altération."
+      },
+      "s10": {
+        "title": "10. Modifications de la Politique de Confidentialité",
+        "content": "Nous pouvons mettre à jour cette Politique de Confidentialité pour refléter des changements dans nos pratiques ou pour des raisons légales. La version actualisée sera publiée sur notre application web."
+      },
+      "s11": {
+        "title": "11. Contact",
+        "intro": "Pour toute question ou préoccupation concernant cette Politique de Confidentialité, contactez-nous :",
+        "li1": "Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France",
+        "li2": "Email :"
+      }
+    },
+    "cgu_title": "Conditions Générales d'Utilisation",
+    "cgu": {
+      "title": "Conditions Générales d'Utilisation",
+      "s1": {
+        "title": "1. Objet",
+        "intro": "Les CGU régissent l'utilisation :",
+        "li1": "de l'application web : GreenScore Web,",
+        "li2": "du plugin : GreenScore Web.",
+        "outro": "Ces services ont pour objectif de fournir des outils et des analyses pour évaluer l'empreinte carbone des activités en ligne."
+      },
+      "s2": {
+        "title": "2. Acceptation des CGU",
+        "content": "En utilisant l'application web ou le plugin, vous reconnaissez avoir lu, compris et accepté les présentes CGU. Si vous n'êtes pas d'accord avec l'un des termes, veuillez ne pas utiliser nos services."
+      },
+      "s3": {
+        "title": "3. Accès aux services",
+        "s3_1_title": "3.1 Application Web",
+        "s3_1_content": "L'accès à l'application est gratuit. Certaines sections ou services spécifiques peuvent nécessiter la création d'un compte utilisateur.",
+        "s3_2_title": "3.2 Plugin",
+        "s3_2_content": "L'accès au plugin est gratuit. Certaines fonctionnalités sont liées à l'application et peuvent donc nécessiter d'un compte utilisateur.",
+        "s3_3_title": "3.3 Pré-requis techniques",
+        "s3_3_intro": "Les utilisateurs doivent disposer :",
+        "s3_3_li1": "d'un équipement compatible (ordinateur, navigateur, etc.),",
+        "s3_3_li2": "d'une connexion Internet.",
+        "s3_3_outro": "Tous les coûts liés à ces équipements et connexions sont à la charge des utilisateurs."
+      },
+      "s4": {
+        "title": "4. Compte utilisateur",
+        "intro": "Pour accéder à certaines fonctionnalités, vous devrez :",
+        "li1": "créer un compte sur l'application ou via le plugin,",
+        "li2": "fournir des informations exactes et à jour,",
+        "li3": "maintenir la confidentialité de vos identifiants.",
+        "outro": "Vous êtes seul responsable de l'activité effectuée sous votre compte."
+      },
+      "s5": {
+        "title": "5. Utilisation autorisée",
+        "intro": "En utilisant l'application web et le plugin, vous acceptez de respecter :",
+        "li1": "les lois et réglementations en vigueur,",
+        "li2": "les droits des autres utilisateurs et de GreenScore Web.",
+        "forbidden_intro": "Il est strictement interdit de :",
+        "forbidden_li1": "exploiter les services à des fins frauduleuses ou nuisibles,",
+        "forbidden_li2": "désassembler, décompiler ou tenter de contourner les mesures de sécurité du plugin ou de l'application web."
+      },
+      "s6": {
+        "title": "6. Propriété intellectuelle",
+        "p1": "Tous les contenus de l'application et du plugin (logos, textes, codes, images, etc.) sont protégés par les lois sur la propriété intellectuelle. Vous ne pouvez pas les reproduire, distribuer ou utiliser sans autorisation préalable écrite de GreenScore Web.",
+        "p2": "Certaines images utilisées sur l'application et le plugin proviennent de Flaticon et sont utilisées conformément à leurs conditions d'utilisation. Ces images sont protégées par des droits d'auteur, et leur reproduction ou redistribution est interdite sans l'autorisation de Flaticon ou de l'auteur."
+      },
+      "s7": {
+        "title": "7. Limitation de responsabilité",
+        "intro": "Nous nous efforçons d'assurer un service de qualité, mais nous ne garantissons pas :",
+        "li1": "une disponibilité continue des services,",
+        "li2": "l'absence d'erreurs techniques.",
+        "outro": "GreenScore Web décline toute responsabilité en cas de dommages indirects ou liés à l'utilisation inappropriée de l'application web ou du plugin."
+      },
+      "s8": {
+        "title": "8. Collecte et utilisation des données personnelles",
+        "content": "Les données collectées via l'application et le plugin sont traitées conformément à notre",
+        "link": "Politique de Confidentialité",
+        "content_end": ". Nous nous engageons à protéger vos informations et à respecter vos droits en matière de vie privée."
+      },
+      "s9": {
+        "title": "9. Modifications des CGU",
+        "content": "Nous nous réservons le droit de modifier ces CGU à tout moment. Les modifications entreront en vigueur dès leur publication sur l'application web ou dans le plugin. Il vous incombe de consulter régulièrement ces CGU."
+      },
+      "s10": {
+        "title": "10. Durée et résiliation",
+        "p1": "Les CGU s'appliquent dès votre première utilisation des services. Vous pouvez à tout moment cesser d'utiliser l'application et le plugin.",
+        "p2": "Nous nous réservons le droit de suspendre ou de résilier votre accès en cas de non-respect des CGU."
+      },
+      "s11": {
+        "title": "11. Droit applicable et juridiction compétente",
+        "p1": "Les présentes CGU sont régies par le droit français.",
+        "p2": "En cas de litige, les tribunaux compétents de Bayonne seront seuls habilités à statuer."
+      },
+      "s12": {
+        "title": "12. Contact",
+        "intro": "Pour toute question ou réclamation concernant les présentes CGU, veuillez nous contacter :",
+        "address": "Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France",
+        "email": "Email:"
+      }
+    }
+  },
+  "widgets": {
+    "infos_greenscore": {
+      "title": "L'impact environnemental",
+      "greenscore": "GreenScore",
+      "score": {
+          "A": "Bravo ! Ce site est un modèle de durabilité 🌿",
+          "B": "Pas mal du tout ! Ce site a un bon score, mais il pourrait encore mieux protéger la planète 🌍",
+          "C": "Ce site est sur la bonne voie, mais l'impact environnemental reste présent 🌱",
+          "D": "Attention, ce site consomme pas mal de ressources ⚡",
+          "E": "Ce site a un impact environnemental considérable ♻️",
+          "F": "Ce site est très énergivore, c'est un vrai défi pour la planète 🔥",
+          "G": "Alerte ! Ce site a un impact environnemental majeur 🚨",
+          "unknown": "Le score environnemental n'est pas disponible pour ce site."
+      },
+      "description": "L'impact environnemental est évalué en fonction de la complexité de la page, du poids des données et du nombre de requêtes."
+    },
+    "common": {
+      "no_data": "Données indisponibles",
+      "page_in_numbers": "La page en quelques chiffres",
+      "total_consumption": "Consommation totale",
+      "metrics": {
+        "size": "Taille",
+        "loading_time": "Temps de chargement",
+        "requests_count": "Nombre de requêtes"
+      },
+      "average_daily_footprint": {
+        "title": "Moyenne de l'empreinte carbone sur un jour (en gCO2e)",
+        "you": "Vous",
+        "other_users": "Les autres utilisateurs"
+      },
+      "period": {
+        "labels": {
+            "daily": "Jour",
+            "weekly": "Semaine",
+            "monthly": "Mois"
+        },
+        "messages": {
+            "daily": "Vos données sur les 7 derniers jours",
+            "weekly": "Vos données sur les 4 dernières semaines",
+            "monthly": "Vos données sur les 12 derniers mois"
+        }
+      }
+    },
+    "chart_consumption": {
+      "title": "Votre consommation",
+      "no_data_period": "Aucune donnée disponible pour cette période"
+    },
+    "equivalent": {
+      "title": "Équivalent"
+    },
+    "country_carbon_intensity": {
+      "search_from": "Vous faites votre recherche depuis ce pays : {country}.",
+      "description": "Votre empreinte carbone dépend aussi de l’intensité carbone du pays.",
+      "data_source": "* : Données récupérées depuis",
+      "alt_flag": "Drapeau de {country}"
+    }
+  },
+  "nominations": {
+    "profile": {
+        "A": "Gardien des Écosystèmes",
+        "B": "Allié de la Nature",
+        "C": "Explorateur Prudent",
+        "D": "Voyageur Insouciant",
+        "E": "Consommateur Dynamique",
+        "F": "Exploitant Intense",
+        "G": "Grand consommateur"
+    },
+    "page": {
+        "A": "Maître des forêts",
+        "B": "Protecteur des Bois",
+        "C": "Frère des Arbres",
+        "D": "Initié de la Nature",
+        "E": "Explorateur Imprudent",
+        "F": "Tempête Numérique",
+        "G": "Destructeur des Écosystèmes"
+    }
+  },
+  "errors": {
+    "backend_communication": "Erreur de communication avec le backend",
+    "connection_error": "Erreur de connexion",
+    "server_error": "Erreur serveur",
+    "delete_error": "Erreur lors de la suppression",
+    "member_delete_error": "Erreur lors de la suppression du membre",
+    "communication_error": "Erreur lors de la communication avec le serveur",
+    "update_error": "Erreur lors de la mise à jour",
+    "unknown_error": "Erreur inconnue",
+    "operation_error": "Erreur lors de l'opération",
+    "org_connection_error": "Erreur serveur lors de la connexion à l'organisation",
+    "generic": "Une erreur est survenue",
+    "validation_org_name_required": "Le nom de l'organisation est requis",
+    "validation_siret_format": "Le SIRET doit contenir exactement 14 chiffres",
+    "validation_fields_required": "Prénom, nom et email requis",
+    "validation_password_complexity": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)",
+    "validation_code_required": "Le code de l'organisation est requis",
+    "validation_code_invalid": "Code invalide",
+    "org_change_error": "Erreur serveur lors du changement d'organisation",
+    "no_changes": "Aucune modification à effectuer",
+    "db_error": "Erreur base de données",
+    "org_not_found": "Organisation introuvable",
+    "org_name_exists": "Le nom de l'organisation est déjà utilisé",
+    "org_siret_exists": "Le SIRET est déjà utilisé",
+    "org_leave_error": "Erreur lors de la sortie de l'organisation",
+    "members_retrieval_error": "Erreur récupération membres",
+    "org_update_error": "Erreur mise à jour organisation",
+    "auth": {
+      "unauthenticated": "Non authentifié",
+      "email_exists": "Cet email est déjà utilisé",
+      "hash_error": "Erreur de hashage du mot de passe",
+      "connection_error": "Une erreur est survenue lors de la connexion",
+      "invalid_credentials": "Adresse e-mail ou mot de passe invalide",
+      "user_retrieval_error": "Erreur récupération utilisateur",
+      "email_verification_error": "Erreur vérification email",
+      "registration_error": "Erreur d'inscription",
+      "org_creation_error": "Erreur création organisation",
+      "user_creation_error": "Erreur création utilisateur"
+    }
+  },
+  "success": {
+    "member_deleted": "Membre supprimé avec succès",
+    "info_updated": "Vos informations ont été mises à jour avec succès",
+    "org_joined": "Vous avez rejoint l'organisation avec succès.",
+    "org_updated": "Les informations de l'organisation ont été mises à jour avec succès",
+    "operation_success": "Opération réussie",
+    "org_left": "Vous avez quitté l'organisation.",
+    "org_changed": "Vous avez changé d'organisation avec succès."
+  },
+  "data": {
+    "advice": {
+        "optimize_sql": "Optimisez vos requêtes SQL pour éviter les opérations inutiles."
+    },
+    "equivalent": {
+        "lille_nimes": "A/R Lille - Nîmes",
+        "paris_berlin": "A/R Paris - Berlin en TGV",
+        "emails": "emails",
+        "search": "recherches sur le web",
+        "streaming": "heures de streaming vidéo",
+        "bus": "km en autocar thermique",
+        "motorbike": "km en moto thermique",
+        "car": "km en voiture thermique",
+        "laptop": "ordinateur portable",
+        "tap_water": "litres d'eau du robinet",
+        "paris_ny": "A/R Paris - New York en avion"
+    }
+  }
+}

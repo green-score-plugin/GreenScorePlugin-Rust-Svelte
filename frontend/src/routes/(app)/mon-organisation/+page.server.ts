@@ -61,7 +61,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             adviceUser: result.advices?.[0] || '',
             adviceDev: result.advices?.[1] || '',
             letterGreenScore: result.letter || 'A',
-            envNomination: result.anv_nomination || 'Gardien des Écosystèmes',
+            envNomination: result.env_nomination || 'nominations.profile.A',
             equivalents: result.equivalents || [],
             dailyConsumption: result.daily_consumption || [],
             weeklyConsumption: result.weekly_consumption || [],

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { t } from 'svelte-i18n';
     export let equivalent: { name: string; value: number; icon: string | null } | null = null;
     export let order: number = 1;
 
@@ -13,7 +14,7 @@
             <picture class="bg-[#94e9b8] w-8 h-8 flex items-center justify-center rounded-full">
                 <img src="/images/equivalent.png" alt="Equivalent" class="w-4 h-4 rounded-full">
             </picture>
-            <h2 class="text-lg font-bold font-outfit">Équivalent</h2>
+            <h2 class="text-lg font-bold font-outfit">{$t('widgets.equivalent.title')}</h2>
         </div>
         {#if equivalent.icon}
             <picture class="w-24 h-24 flex items-center justify-center mt-4">
@@ -27,9 +28,9 @@
         {/if}
         <p class="text-center mt-2 text-lg font-medium font-outfit">
             <span class="animate-counter">{equivalent.value.toFixed(1)}</span>
-            {equivalent.name}
+            {$t(equivalent.name)}
         </p>
     {:else}
-        <p class="text-center text-gray-500 flex items-center justify-center h-full">pas de données</p>
+        <p class="text-center text-gray-500 flex items-center justify-center h-full">{$t('widgets.common.no_data')}</p>
     {/if}
 </div>

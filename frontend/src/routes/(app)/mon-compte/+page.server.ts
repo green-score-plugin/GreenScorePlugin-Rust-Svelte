@@ -86,8 +86,6 @@ export const actions = {
                     success: true,
                     message: 'Membre supprimé avec succès'
                 };
-            } else {
-                return fail(400, { message: result.message || 'Erreur lors de la suppression du membre' });
             }
         } catch (error) {
             return fail(500, { message: 'Erreur serveur' });
@@ -133,7 +131,7 @@ export const actions = {
                 const errorText = await res.text();
                 return fail(res.status, {
                     actionType: 'update_info',
-                    message: `Erreur ${res.status}: ${errorText || 'Erreur lors de la communication avec le serveur'}`
+                    message: `Erreur ${res.status}: ${errorText || 'errors.communication_error'}`
                 });
             }
 
@@ -202,7 +200,7 @@ export const actions = {
 
                 return fail(response.status, {
                     actionType: 'join_orga',
-                    message: errorMessage || "Code invalide"
+                    message: errorMessage || "errors.validation_code_invalid"
                 });
             }
 
@@ -230,8 +228,8 @@ export const actions = {
                     success: true,
                     message: "Vous avez rejoint l'organisation avec succès."
                 };
-            } else {
-                return fail(400, { actionType: 'join_orga', message: result.message || "Erreur lors de l'opération" });
+            if (!result.success) {
+                return fail(400, { actionType: 'join_orga', message: result.message || "errors.operation_error" });
             }
 
         } catch (error) {
@@ -245,11 +243,11 @@ export const actions = {
         const siret = data.get('siret')?.toString();
 
         if (!organisationName) {
-            return fail(400, { actionType: 'update_orga', message: "Le nom de l'organisation est requis" });
+            return fail(400, { actionType: 'update_orga', message: "errors.validation_org_name_required" });
         }
 
         if(siret && siret.length > 0 && !/^\d{14}$/.test(siret)) {
-            return fail(400, { actionType: 'update_orga', message: "Le SIRET doit contenir exactement 14 chiffres" });
+            return fail(400, { actionType: 'update_orga', message: "errors.validation_siret_format" });
         }
 
         try{
@@ -288,7 +286,7 @@ export const actions = {
                 return {
                     actionType: 'update_orga',
                     success: true,
-                    message: "Les informations de l'organisation ont été mises à jour avec succès"
+                    message: "success.org_updated"
                 };
             } else {
                 return fail(400, { actionType: 'update_orga', message: resJson.message || 'Erreur lors de la mise à jour' });
@@ -297,7 +295,7 @@ export const actions = {
         } catch (err) {
             return fail(500, {
                 actionType: 'update_orga',
-                message: `Erreur serveur: ${err instanceof Error ? err.message : 'Erreur inconnue'}`
+                message: `Erreur serveur: ${err instanceof Error ? err.message : 'errors.unknown_error'}`
             });
         }
     },
@@ -409,7 +407,7 @@ export const actions = {
             }
 
         } catch (error) {
-            return fail(500, { actionType: 'change_orga', message: "Erreur serveur lors du changement d'organisation" });
+            return fail(500, { actionType: 'change_orga', message: "errors.org_change_error" });
         }
     }
 } satisfies Actions;

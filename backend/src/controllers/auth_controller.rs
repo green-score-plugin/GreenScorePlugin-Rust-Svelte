@@ -64,14 +64,14 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
         Ok(u) => u,
         Err(_) => return Json(json!({
         "success": false,
-        "message": "Une erreur est survenue lors de la connexion"
+        "message": "errors.auth.connection_error"
         })),
     };
 
     if row.is_none() {
         return Json(json!({
             "success": false,
-            "message": "Adresse e-mail ou mot de passe invalide",
+            "message": "errors.auth.invalid_credentials",
         }));
     }
 
@@ -80,7 +80,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
     if !bcrypt::verify(password, &password_hash).unwrap_or(false) {
         Json(json!({
             "success": false,
-            "message": "Adresse e-mail ou mot de passe invalide",
+            "message": "errors.auth.invalid_credentials",
         }))
     } else {
 
@@ -103,10 +103,10 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
                 Ok(None) => {
 
                 },
-                Err(e) => {
+                Err(_) => {
                     return Json(json!({
                 "success": false,
-                "message": format!("Erreur récupération utilisateur: {}", e)
+                "message": "errors.auth.user_retrieval_error"
             }));
                 }
             }
@@ -141,7 +141,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
                 Err(_) => {
                     return Json(json!({
                 "success": false,
-                "message": "Une erreur est survenue lors de la connexion"
+                "message": "errors.auth.connection_error"
             }));
                 }
             }
@@ -149,7 +149,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
 
         Json(json!({
             "success": false,
-            "message": "Email ou mot de passe invalide"
+            "message": "errors.auth.invalid_credentials"
         }))
     }
 }
@@ -166,13 +166,13 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
         Ok(Some(_)) => {
             return Json(InscriptionResponse {
                 success: false,
-                message: Some("Cet email est déjà utilisé".to_string()),
+                message: Some("errors.auth.email_exists".to_string()),
             });
         }
-        Err(e) => {
+        Err(_) => {
             return Json(InscriptionResponse {
                 success: false,
-                message: Some(format!("Erreur vérification email: {}", e)),
+                message: Some("errors.auth.email_verification_error".to_string()),
             });
         }
         Ok(None) => {}
@@ -180,9 +180,9 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 
     let password_hash = match hash_password(&payload.password) {
         Ok(hash) => hash,
-        Err(e) => return Json(InscriptionResponse {
+        Err(_) => return Json(InscriptionResponse {
             success: false,
-            message: Some(format!("Erreur de hashage: {}", e)),
+            message: Some("errors.auth.hash_error".to_string()),
         }),
     };
 
@@ -214,9 +214,9 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
                 message: None,
             })
         },
-        Err(e) => Json(InscriptionResponse {
+        Err(_) => Json(InscriptionResponse {
             success: false,
-            message: Some(format!("Erreur d'inscription: {}", e)),
+            message: Some("errors.auth.registration_error".to_string()),
         }),
     }
 }
@@ -233,13 +233,13 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
         Ok(Some(_)) => {
             return Json(json!({
                 "success": false,
-                "message": "Cet email est déjà utilisé"
+                "message": "errors.auth.email_exists"
             }));
         }
-        Err(e) => {
+        Err(_) => {
              return Json(json!({
                 "success": false,
-                "message": format!("Erreur vérification email: {}", e)
+                "message": "errors.auth.email_verification_error"
             }));
         }
         Ok(None) => {}
@@ -247,9 +247,9 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
 
     let password_hash = match hash_password(&payload.password) {
         Ok(hash) => hash,
-        Err(e) => return Json(json!({
+        Err(_) => return Json(json!({
             "success": false,
-            "message": format!("Erreur de hashage: {}", e)
+            "message": "errors.auth.hash_error"
         })),
     };
 
@@ -282,11 +282,11 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
                 .execute(&pool)
                 .await {
                 Ok(_res) => { organisation_id = _res.last_insert_id() as i64;},
-                Err(e) => {
+                Err(_) => {
                     let _ = sqlx::query("DELETE FROM user WHERE id = ?").bind(user_id).execute(&pool).await;
                     return Json(json!({
                         "success": false,
-                        "message": format!("Erreur création organisation: {}", e)
+                        "message": "errors.auth.org_creation_error"
                     }));
                 }
             };
@@ -306,9 +306,9 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
                 "account" : account
             }))
         },
-        Err(e) => Json(json!({
+        Err(_) => Json(json!({
             "success": false,
-            "message": format!("Erreur création utilisateur: {}", e)
+            "message": "errors.auth.user_creation_error"
         })),
     }
 }
@@ -342,7 +342,7 @@ pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>
     } else {
         Json(json!({
             "success": false,
-            "message": "Non authentifié"
+            "message": "errors.auth.unauthenticated"
         }))
     }
 }
