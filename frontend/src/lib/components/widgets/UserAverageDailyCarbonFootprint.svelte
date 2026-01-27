@@ -37,7 +37,7 @@
 
         {#if myAverageDailyCarbonFootprint !== null && averageDailyCarbonFootprint !== null && messageAverageFootprint !== null}
             <p class="text-sm text-center {myAverageDailyCarbonFootprint > averageDailyCarbonFootprint ? 'text-red-700' : 'text-green-700'} font-medium mt-2">
-                {messageAverageFootprint}
+                {$t(messageAverageFootprint)}
             </p>
         {/if}
     {/if}

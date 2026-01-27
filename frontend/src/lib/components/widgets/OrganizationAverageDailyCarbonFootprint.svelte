@@ -36,11 +36,11 @@
             {#if equivalentAverage.icon}
             <div class="flex justify-center items-center w-full mt-4">
                 <picture class="w-12 h-12 flex items-center justify-center">
-                    <img src="/images/equivalents/{equivalentAverage.icon}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy">
+                    <img src="/images/equivalents/{equivalentAverage.icon}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy" on:error={(e) => e.currentTarget.src = '/images/equivalent.png'}>
                 </picture>
             </div>
             {/if}
-            <p class="text-center mt-2 text-lg font-medium"><span class="animate-counter">{equivalentAverage.value}</span> {equivalentAverage.name}</p>
+            <p class="text-center mt-2 text-lg font-medium"><span class="animate-counter">{equivalentAverage.value}</span> {$t(equivalentAverage.name)}</p>
         </div>
         {:else}
         <p class="text-center text-gray-500 flex items-center justify-center h-full">{$t('widgets.common.no_data')}</p>

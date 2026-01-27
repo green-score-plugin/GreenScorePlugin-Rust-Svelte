@@ -397,7 +397,12 @@
       "average_daily_footprint": {
         "title": "Moyenne de l'empreinte carbone sur un jour (en gCO2e)",
         "you": "Vous",
-        "other_users": "Les autres utilisateurs"
+        "other_users": "Les autres utilisateurs",
+        "message": {
+            "low": "Votre empreinte carbone quotidienne moyenne est faible par rapport à la moyenne globale.",
+            "average": "Votre empreinte carbone quotidienne moyenne est dans la moyenne globale.",
+            "high": "Votre empreinte carbone quotidienne moyenne est élevée par rapport à la moyenne globale."
+        }
       },
       "period": {
         "labels": {
@@ -416,6 +421,10 @@
       "title": "Votre consommation",
       "no_data_period": "Aucune donnée disponible pour cette période"
     },
+    "top_polluting_sites": {
+        "title": "Top 5 des sites les plus polluants",
+        "chart_label": "Empreinte carbone (gCO2e)"
+    },
     "equivalent": {
       "title": "Équivalent"
     },
@@ -433,7 +442,7 @@
         "C": "Explorateur Prudent",
         "D": "Voyageur Insouciant",
         "E": "Consommateur Dynamique",
-        "F": "Exploitant Intense",
+        "F": "Exploitation Intense",
         "G": "Grand consommateur"
     },
     "page": {
@@ -497,7 +506,9 @@
   },
   "data": {
     "advice": {
-        "optimize_sql": "Optimisez vos requêtes SQL pour éviter les opérations inutiles."
+        "optimize_sql": "Optimisez vos requêtes SQL pour éviter les opérations inutiles.",
+        "default_dev": "Priorisez des outils et workflows durables pour réduire l'empreinte des développeurs.",
+        "default_user": "Adoptez des usages numériques responsables pour diminuer la consommation énergétique."
     },
     "equivalent": {
         "lille_nimes": "A/R Lille - Nîmes",

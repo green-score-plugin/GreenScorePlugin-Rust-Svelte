@@ -23,6 +23,7 @@
                         alt={equivalent.name}
                         class="w-full h-auto object-contain"
                         loading="lazy"
+                        on:error={(e) => e.currentTarget.src = '/images/equivalent.png'}
                 >
             </picture>
         {/if}

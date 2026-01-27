@@ -1,6 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import Chart from 'chart.js/auto';
+    import { t } from 'svelte-i18n';
+    import { get } from 'svelte/store';
 
     export let topPollutingSites: Array<{ url_domain: string; total_footprint: number }> = [];
 
@@ -17,7 +19,7 @@
                 data: {
                     labels: topPollutingSites.map(site => site.url_domain),
                     datasets: [{
-                        label: 'Empreinte carbone (gCO2e)',
+                        label: get(t)('widgets.top_polluting_sites.chart_label'),
                         data: topPollutingSites.map(site => site.total_footprint),
                         backgroundColor: [
                             '#9333EA', // Violet
@@ -37,7 +39,7 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: (context) => `${context.parsed.y.toFixed(2)} gCO2e`
+                                label: (context) => `${context.parsed.y !== null ? context.parsed.y.toFixed(2) : 0} gCO2e`
                             }
                         }
                     },
@@ -68,7 +70,7 @@
 </script>
 
 <div class="bg-white rounded-lg shadow p-6 lg:col-span-6 col-span-1 sm:col-span-2 flex-wrap order-7 lg:order-7 flex flex-col min-h-[280px]">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Top 5 des sites les plus polluants</h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">{$t('widgets.top_polluting_sites.title')}</h2>
 
     {#if topPollutingSites.length > 0}
         <div class="flex-1 min-h-[200px]">
@@ -76,7 +78,7 @@
         </div>
     {:else}
         <div class="flex-1 flex items-center justify-center text-gray-500">
-            Aucune donnée disponible
+            {$t('widgets.common.no_data')}
         </div>
     {/if}
 </div>

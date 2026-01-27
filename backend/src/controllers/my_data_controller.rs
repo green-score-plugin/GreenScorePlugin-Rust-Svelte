@@ -230,11 +230,11 @@ pub async fn my_data(
     let message_average_footprint = match (my_average_daily_carbon_footprint, average_daily_carbon_footprint) {
         (Some(user_avg), Some(global_avg)) => {
             if user_avg < global_avg * 0.8 {
-                Some("Votre empreinte carbone quotidienne moyenne est faible par rapport à la moyenne globale.".to_string())
+                Some("widgets.common.average_daily_footprint.message.low".to_string())
             } else if user_avg <= global_avg * 1.2 {
-                Some("Votre empreinte carbone quotidienne moyenne est dans la moyenne globale.".to_string())
+                Some("widgets.common.average_daily_footprint.message.average".to_string())
             } else {
-                Some("Votre empreinte carbone quotidienne moyenne est élevée par rapport à la moyenne globale.".to_string())
+                Some("widgets.common.average_daily_footprint.message.high".to_string())
             }
         }
         _ => None,

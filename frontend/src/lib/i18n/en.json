@@ -397,7 +397,12 @@
       "average_daily_footprint": {
         "title": "Average daily carbon footprint (in gCO2e)",
         "you": "You",
-        "other_users": "Other Users"
+        "other_users": "Other Users",
+        "message": {
+            "low": "Your average daily carbon footprint is low compared to the global average.",
+            "average": "Your average daily carbon footprint is within the global average.",
+            "high": "Your average daily carbon footprint is high compared to the global average."
+        }
       },
       "period": {
         "labels": {
@@ -415,6 +420,10 @@
     "chart_consumption": {
       "title": "Your consumption",
       "no_data_period": "No data available for this period"
+    },
+    "top_polluting_sites": {
+        "title": "Top 5 most polluting sites",
+        "chart_label": "Carbon footprint (gCO2e)"
     },
     "equivalent": {
       "title": "Equivalent"
@@ -497,7 +506,9 @@
   },
   "data": {
     "advice": {
-        "optimize_sql": "Optimize your SQL queries to avoid unnecessary operations."
+        "optimize_sql": "Optimize your SQL queries to avoid unnecessary operations.",
+        "default_dev": "Prioritize sustainable tools and workflows to reduce developer footprint.",
+        "default_user": "Adopt responsible digital habits to reduce energy consumption."
     },
     "equivalent": {
         "lille_nimes": "Return trip Lille - Nîmes by car",
