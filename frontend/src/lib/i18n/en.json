@@ -21,7 +21,8 @@
     "hero": {
       "title": "Measure your carbon footprint on the web!",
       "subtitle": "Every page you load consumes energy. Measure your footprint and act for a greener internet.",
-      "add_to_firefox": "Add to Firefox"
+      "add_to_firefox": "Add to Firefox",
+      "add_to_chrome": "Add to Chrome"
     },
     "video": {
       "tag": "Web",
