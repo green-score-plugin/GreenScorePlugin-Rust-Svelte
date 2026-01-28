@@ -100,6 +100,7 @@
 
 <svelte:head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <meta name="google-site-verification" content="dJm0vNbi9V4IoEj0eTdExvhVHDS8N_ek9uLC1qNTvyw" />
 </svelte:head>
 
 <div class="min-h-screen bg-gs-green-950 text-white font-['Ovo']">
@@ -115,14 +116,14 @@
             </p>
 
             <div class="hidden lg:block">
-                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     {$t('home.hero.add_to_firefox')}
                 </a>
             </div>
 
             <div class="mt-8 lg:hidden flex justify-center">
-                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     {$t('home.hero.add_to_firefox')}
                 </a>
@@ -409,6 +410,12 @@
                 <p class="mt-6 text-gray-700">
                     {@html $t('home.greenscore.calc_conclusion')}
                 </p>
+
+                <div class="mt-4 bg-green-50 border-l-4 border-[#72A52D] p-4 rounded">
+                    <p class="text-gray-700">
+                        <span class="font-semibold">À noter :</span> Ce calcul fournit une <span class="font-semibold">estimation</span> et non une mesure exacte. Toutes les données nécessaires pour un calcul précis de l'empreinte carbone ne sont pas disponibles. Néanmoins, ces résultats permettent de <span class="font-semibold">comparer efficacement</span> la consommation énergétique entre différentes pages web et d'identifier les axes d'amélioration.
+                    </p>
+                </div>
             </div>
 
             <div>
