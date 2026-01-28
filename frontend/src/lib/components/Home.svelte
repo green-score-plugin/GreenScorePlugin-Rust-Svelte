@@ -100,6 +100,7 @@
 <svelte:head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <meta name="google-site-verification" content="dJm0vNbi9V4IoEj0eTdExvhVHDS8N_ek9uLC1qNTvyw" />
+    <title>Home | GreenScore Web</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gs-green-950 text-white font-['Ovo']">
