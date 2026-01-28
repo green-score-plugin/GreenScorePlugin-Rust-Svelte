@@ -15,13 +15,13 @@ async fn test_calculate_green_score_lpc_grade_b() {
 #[tokio::test]
 async fn test_calculate_green_score_lpc_all_grades() {
     let test_cases = vec![
-        (0.1, "A", "Maître des forêts"),
-        (0.3, "B", "Protecteur des Bois"),
-        (0.6, "C", "Frère des Arbres"),
-        (0.9, "D", "Initié de la Nature"),
-        (1.2, "E", "Explorateur Imprudent"),
-        (1.4, "F", "Tempête Numérique"),
-        (1.6, "G", "Destructeur des Écosystèmes"),
+        (0.1, "A", "nominations.page.A"),
+        (0.3, "B", "nominations.page.B"),
+        (0.6, "C", "nominations.page.C"),
+        (0.9, "D", "nominations.page.D"),
+        (1.2, "E", "nominations.page.E"),
+        (1.4, "F", "nominations.page.F"),
+        (1.6, "G", "nominations.page.G"),
     ];
 
     for (carbon, expected_letter, expected_nomination) in test_cases {
