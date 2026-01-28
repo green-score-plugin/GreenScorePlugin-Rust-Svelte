@@ -608,7 +608,7 @@
       "streaming": "streaming hours",
       "bus": "km by bus",
       "motorbike": "km by motorbike",
-      "car": "km by car",
+      "car": "km by fossil fuel car",
       "tap_water": "liters of tap water",
       "paris_ny": "paris-New York flight"
     }
