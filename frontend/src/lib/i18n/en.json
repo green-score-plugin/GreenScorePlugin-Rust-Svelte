@@ -483,6 +483,7 @@
     "org_leave_error": "Error leaving organization",
     "members_retrieval_error": "Error retrieving members",
     "org_update_error": "Error updating organization",
+    "errors_champs" : "All fields are required",
     "auth": {
       "unauthenticated": "Unauthenticated",
       "email_exists": "This email is already taken",
@@ -591,17 +592,17 @@
         "default_user": "Adopt responsible digital habits to reduce energy consumption."
     },
     "equivalent": {
-      "lille_nimes": "Trip Lille-Nîmes by car",
-      "paris_berlin": "Trip Paris-Berlin by train",
-      "emails": "Sent emails",
-      "search": "Google searches",
-      "streaming": "Streaming hours",
-      "bus": "Km by bus",
-      "motorbike": "Km by motorbike",
-      "car": "Km by car",
-      "laptop": "Laptop usage hours",
-      "tap_water": "Liters of tap water",
-      "paris_ny": "Paris-New York flight"
+      "lille_nimes": "trip Lille-Nîmes by car",
+      "paris_berlin": "trip Paris-Berlin by train",
+      "emails": "sent emails",
+      "search": "google searches",
+      "streaming": "streaming hours",
+      "bus": "km by bus",
+      "motorbike": "km by motorbike",
+      "car": "km by car",
+      "laptop": "laptop usage hours",
+      "tap_water": "liters of tap water",
+      "paris_ny": "paris-New York flight"
     }
   },
   "months": {

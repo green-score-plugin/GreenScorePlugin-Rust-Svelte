@@ -14,7 +14,7 @@ export const actions = {
         const agreeTerms = data.get('agreeTerms');
 
         if(!firstname || !lastname || !email || !password) {
-            return fail(400, { message: "Tous les champs sont requis" })
+            return fail(400, { message: "errors.server_champs" })
         }
 
         if(password !== confirmPassword) {

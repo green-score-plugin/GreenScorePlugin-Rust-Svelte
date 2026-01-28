@@ -46,14 +46,14 @@
             <div class="flex gap-3 ml-2">
                 <button
                     onclick={() => locale.set('en')}
-                    class="transition-all duration-300 hover:scale-110 {$locale === 'en' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
+                    class="transition-all duration-300 hover:scale-110 cursor-pointer {$locale === 'en' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
                     title="English"
                 >
                     <img src="/images/flags/gb.svg" alt="English" class="w-6 h-auto object-cover rounded shadow-sm" />
                 </button>
                 <button
                     onclick={() => locale.set('fr')}
-                    class="transition-all duration-300 hover:scale-110 {$locale === 'fr' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
+                    class="transition-all duration-300 hover:scale-110 cursor-pointer {$locale === 'fr' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
                     title="Français"
                 >
                     <img src="/images/flags/fr.svg" alt="Français" class="w-6 h-auto object-cover rounded shadow-sm" />
