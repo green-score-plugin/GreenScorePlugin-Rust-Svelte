@@ -58,19 +58,19 @@ pub async fn calculate_green_score(pool: Option<&MySqlPool>, carbon_footprint: f
             let t6 = least + 6.0 * scale;
 
             let (letter, nomination) = if carbon_footprint < t1 {
-                ("A", "Gardien des Écosystèmes")
+                ("A", "nominations.profile.A")
             } else if carbon_footprint < t2 {
-                ("B", "Allié de la Nature")
+                ("B", "nominations.profile.B")
             } else if carbon_footprint < t3 {
-                ("C", "Explorateur Prudent")
+                ("C", "nominations.profile.C")
             } else if carbon_footprint < t4 {
-                ("D", "Voyageur Insouciant")
+                ("D", "nominations.profile.D")
             } else if carbon_footprint < t5 {
-                ("E", "Consommateur Dynamique")
+                ("E", "nominations.profile.E")
             } else if carbon_footprint < t6 {
-                ("F", "Exploitant Intense")
+                ("F", "nominations.profile.F")
             } else {
-                ("G", "Grand consommateur")
+                ("G", "nominations.profile.G")
             };
 
             (letter.to_string(), nomination.to_string())
@@ -83,19 +83,19 @@ pub async fn calculate_green_score(pool: Option<&MySqlPool>, carbon_footprint: f
         let echelle: f64 = 0.25;
 
         let (letter_green_score, env_nomination) = if carbon_footprint < echelle {
-            ("A", "Maître des forêts")
+            ("A", "nominations.page.A")
         } else if carbon_footprint < 2.0 * echelle {
-            ("B", "Protecteur des Bois")
+            ("B", "nominations.page.B")
         } else if carbon_footprint < 3.0 * echelle {
-            ("C", "Frère des Arbres")
+            ("C", "nominations.page.C")
         } else if carbon_footprint < 4.0 * echelle {
-            ("D", "Initié de la Nature")
+            ("D", "nominations.page.D")
         } else if carbon_footprint < 5.0 * echelle {
-            ("E", "Explorateur Imprudent")
+            ("E", "nominations.page.E")
         } else if carbon_footprint < 6.0 * echelle {
-            ("F", "Tempête Numérique")
+            ("F", "nominations.page.F")
         } else {
-            ("G", "Destructeur des Écosystèmes")
+            ("G", "nominations.page.G")
         };
 
         (letter_green_score.to_string(), env_nomination.to_string())

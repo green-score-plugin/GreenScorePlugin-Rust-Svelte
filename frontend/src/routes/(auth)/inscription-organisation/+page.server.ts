@@ -14,21 +14,21 @@ export const actions = {
         const agreeTerms = data.get('agreeTerms');
 
         if(!organisationName || !email || !password) {
-            return fail(400, { message: "Tous les champs sont requis" })
+            return fail(400, { message: "errors.champs" })
         }
 
         if(password !== confirmPassword) {
-            return fail(400, { message: "Les mots de passe ne correspondent pas" })
+            return fail(400, { message: "errors.match_password" })
         }
 
         const passwordString = password.toString();
         const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
         if (!passwordRegex.test(passwordString)) {
-            return fail(400, { message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)" })
+            return fail(400, { message: "errors.regex_password" })
         }
 
         if(agreeTerms !== 'on') {
-            return fail(400, { message: "Vous devez accepter les conditions générales d'utilisation" })
+            return fail(400, { message: "errors.cgu" })
         }
 
         try{
@@ -55,7 +55,7 @@ export const actions = {
             if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
                 throw error;
             }
-            return fail(500, { message: 'Erreur serveur' });
+            return fail(500, { message: 'errors.server_error' });
         }
     }
 } satisfies Actions;

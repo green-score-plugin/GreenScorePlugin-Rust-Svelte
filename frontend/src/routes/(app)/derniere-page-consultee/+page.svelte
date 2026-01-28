@@ -6,9 +6,8 @@
     import TotalConsumption from '$lib/components/widgets/TotalConsumption.svelte';
     import PageInNumbers from '$lib/components/widgets/PageInNumbers.svelte';
     import Advice from '$lib/components/widgets/Advice.svelte';
+    import { t } from 'svelte-i18n';
 
-    export let title : string = 'Dernière page consultée';
-    export let description : string = 'Voici une analyse détaillée de votre dernière page consultée : ';
     export let noDatas : boolean = false;
     export let letterGreenScore: string = 'A';
     export let link: string | null = null;
@@ -23,7 +22,7 @@
     export let adviceUser: string = "Baissez la luminosité de vos écrans.";
     export let adviceDev: string = "Optimisez vos requêtes SQL.";
     export let carbonIntensity: number = 0;
-    export let envNomination: string = 'Maître des Forêts';
+    export let envNomination: string = 'nominations.page.A';
     export let equivalent1: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
     export let equivalent2: { name: string; value: number; icon: string } = { name: '', value: 0, icon: '' };
 
@@ -43,22 +42,22 @@
         adviceDev = data.adviceDev || "Optimisez vos requêtes SQL.";
         carbonIntensity = data.pageData.carbonIntensity || 0;
         letterGreenScore = data.letterGreenScore || 'A';
-        envNomination = data.envNomination || 'Maître des Forêts';
+        envNomination = data.envNomination || 'nominations.page.A';
         equivalent1 = data.equivalents[0]
         equivalent2 = data.equivalents[1]
     }
 </script>
 
 <svelte:head>
-    <title>{title} | GreenScore Web</title>
+    <title>{$t('dashboard.last_page.title')} | GreenScore Web</title>
 </svelte:head>
 
 <div class="w-full bg-green-bg min-h-screen">
     <div class="w-full text-center px-10 lg:px-0 pt-10 font-outfit flex items-center justify-center flex-col text-grey-950">
-        <h1 class="text-4xl font-bold">{title}</h1>
+        <h1 class="text-4xl font-bold">{$t('dashboard.last_page.title')}</h1>
         {#if !noDatas}
         <p class="text-base w-fit">
-            { description }
+            {$t('dashboard.last_page.description')}
             {#if link}
             <span class="text-base ml-1 w-52 truncate inline-block align-bottom text-left">
                     { link }
@@ -75,7 +74,7 @@
             <CountryCarbonIntensity {country} {carbonIntensity} {flagUrl} />
             <BadgeGreenScore {letterGreenScore} {envNomination} />
             <Equivalent equivalent={equivalent1} order={1} />
-            <TotalConsumption {carbonFootprint} {totalConsuUnit} label="Emission carbone de la page :" />
+            <TotalConsumption {carbonFootprint} {totalConsuUnit} label={$t('dashboard.last_page.carbon_emission')} />
             <Equivalent equivalent={equivalent2} order={2} />
             <PageInNumbers {pageSize} {loadingTime} {queriesQuantity} {pageSizeUnit} />
             <Advice type="nav" advice={adviceUser} />
@@ -84,7 +83,7 @@
     {:else}
         <div class="w-full h-screen flex items-center justify-center font-outfit">
             <p class="text-2xl text-gray-600 font-medium">
-                Vous n'avez pas encore analysé de pages web avec notre plugin
+                {$t('dashboard.last_page.no_data')}
             </p>
         </div>
     {/if}

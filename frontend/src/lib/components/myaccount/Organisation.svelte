@@ -3,6 +3,7 @@
     import { page } from '$app/stores';
     import { invalidateAll } from '$app/navigation';
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
+    import { t } from 'svelte-i18n';
 
     export const form: { message?: string, success?: boolean } | null = null;
 
@@ -23,7 +24,7 @@
     $: {
         if ($page.form?.actionType === 'join_orga' || $page.form?.actionType === 'leave_orga' || $page.form?.actionType === 'change_orga') {
             if ($page.form?.success) {
-                successMessage = $page.form.message || 'Opération réussie';
+                successMessage = $t($page.form.message || 'success.operation_success');
                 errorMessage = '';
                 codeOrganisation = '';
 
@@ -36,7 +37,7 @@
 
                 invalidateAll();
             } else if ($page.form?.message) {
-                errorMessage = $page.form.message;
+                errorMessage = $t($page.form.message);
                 successMessage = '';
             }
         }
@@ -45,7 +46,7 @@
 
 <div class="flex flex-col gap-4">
 
-    <h2 class="text-2xl font-bold py-2">Organisation</h2>
+    <h2 class="text-2xl font-bold py-2">{$t('account.organization.title')}</h2>
 
     {#if successMessage}
         <div class="px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
@@ -62,13 +63,13 @@
     {#if hasOrga}
         <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-1">
-                    <p class="text-xs font-semibold uppercase text-grey-500">Nom de l'organisation</p>
+                    <p class="text-xs font-semibold uppercase text-grey-500">{$t('account.organization.name_label')}</p>
                     <div class="text-xl font-bold text-gs-green-950">{orgaDetails?.name}</div>
                 </div>
 
                 <div class="w-full flex flex-col gap-2">
-                    <label for="codeDisplay" class="text-sm font-semibold text-grey-700">Code Organisation</label>
-                    <CodeClipboard code={orgaDetails?.code || 'Inconnu'} />
+                    <label for="codeDisplay" class="text-sm font-semibold text-grey-700">{$t('account.organization.code_label')}</label>
+                    <CodeClipboard code={orgaDetails?.code || $t('account.organization.code_unknown')} />
                 </div>
 
                 <div class="flex gap-3 pt-2">
@@ -77,7 +78,7 @@
                             on:click={() => showConfirmModal = true}
                             class="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold transition-colors cursor-pointer"
                     >
-                        Quitter
+                        {$t('account.organization.leave_button')}
                     </button>
 
                     <button
@@ -85,7 +86,7 @@
                             on:click={() => showChangeModal = true}
                             class="flex-1 px-4 py-2 rounded-lg bg-gs-green-950 text-white hover:bg-gs-green-800 font-semibold transition-colors cursor-pointer"
                     >
-                        Changer d'organisation
+                        {$t('account.organization.change_button')}
                     </button>
                 </div>
             </div>
@@ -93,9 +94,9 @@
             {#if showConfirmModal}
                 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
                     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
-                        <h2 class="text-xl font-semibold mb-4">Confirmation</h2>
+                        <h2 class="text-xl font-semibold mb-4">{$t('account.modals.leave_org_confirm_title')}</h2>
                         <p class="text-gray-600 mb-6">
-                            Etes-vous sur de vouloir quitter l'organisation "{orgaDetails?.name || 'Inconnue'}" ?
+                            {$t('account.modals.leave_org_confirm_desc', { values: { orgName: orgaDetails?.name || 'Inconnue' } })}
                         </p>
                         <div class="flex justify-end gap-4">
                             <button
@@ -103,7 +104,7 @@
                                     on:click={() => showConfirmModal = false}
                                     class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 cursor-pointer transition"
                             >
-                                Annuler
+                                {$t('account.modals.cancel')}
                             </button>
 
                             <form
@@ -120,7 +121,7 @@
                                         type="submit"
                                         class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer transition"
                                 >
-                                    Oui, quitter
+                                    {$t('account.modals.confirm_leave')}
                                 </button>
                             </form>
                         </div>
@@ -131,7 +132,7 @@
             {#if showChangeModal}
                 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
                     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
-                        <h2 class="text-xl font-semibold mb-4">Veuillez entrer le code qui vous a été envoyé par l'administrateur de votre organisation</h2>
+                        <h2 class="text-xl font-semibold mb-4">{$t('account.modals.change_org_title')}</h2>
                         <form
                                 action="?/change_orga"
                                 method="POST"
@@ -146,16 +147,16 @@
                                 class="flex flex-col gap-4"
                         >
                             <div class="flex flex-col gap-2">
-                                <label for="newCodeOrganisation" class="text-sm font-semibold text-grey-700">Code Organisation</label>
+                                <label for="newCodeOrganisation" class="text-sm font-semibold text-grey-700">{$t('account.organization.code_label')}</label>
                                 <input
                                         id="newCodeOrganisation"
                                         name="codeOrganisation"
                                         type="text"
                                         bind:value={codeOrganisation}
-                                        placeholder="Entrez le nouveau code"
+                                        placeholder={$t('account.modals.new_code_placeholder')}
                                         class="px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none"
                                 />
-                                <p class="text-xs text-gray-500">Merci d'entrer le code à 8 caractères de la nouvelle organisation</p>
+                                <p class="text-xs text-gray-500">{$t('account.modals.new_code_help')}</p>
                             </div>
                             <div class="flex justify-end gap-4">
                                 <button
@@ -166,14 +167,14 @@
                                         }}
                                         class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 cursor-pointer transition"
                                 >
-                                    Annuler
+                                    {$t('account.modals.cancel')}
                                 </button>
                                 <button
                                         type="submit"
                                         disabled={submitted}
                                         class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer transition disabled:opacity-50"
                                 >
-                                    {#if submitted}Chargement...{:else}Confirmer{/if}
+                                    {#if submitted}{$t('account.organization.join_loading')}{:else}{$t('account.modals.confirm')}{/if}
                                 </button>
                             </div>
                         </form>
@@ -198,16 +199,16 @@
 
             <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
                 <div class="w-full flex flex-col">
-                    <label for="codeOrganisation">Code Organisation</label>
+                    <label for="codeOrganisation">{$t('account.organization.code_label')}</label>
                     <input
                             id="codeOrganisation"
                             name="codeOrganisation"
                             type="text"
                             bind:value={codeOrganisation}
-                            placeholder="Entrez le code organisation"
+                            placeholder={$t('account.organization.code_placeholder')}
                             class="px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none"
                     />
-                    <p class="text-xs text-gray-500 mt-1">Merci d'entrer le code à 8 caractères envoyé par votre organisation</p>
+                    <p class="text-xs text-gray-500 mt-1">{$t('account.organization.code_help')}</p>
                 </div>
             </div>
 
@@ -220,7 +221,7 @@
                     active:bg-gs-green-700
                     transition-colors duration-150 ease-in-out disabled:opacity-50"
             >
-                {#if submitted}Chargement...{:else}Rejoindre{/if}
+                {#if submitted}{$t('account.organization.join_loading')}{:else}{$t('account.organization.join_button')}{/if}
             </button>
         </form>
     {/if}

@@ -3,6 +3,7 @@
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
     import type { Organisation } from "$lib/types/account";
     import { enhance } from '$app/forms';
+    import { t } from 'svelte-i18n';
 
 
     let organisation = $derived(page.data.user as Organisation);
@@ -22,7 +23,7 @@
       }}
 >
 
-    <h1 class="text-2xl font-bold py-2">Mes informations</h1>
+    <h1 class="text-2xl font-bold py-2">{$t('account.info.title')}</h1>
 
     {#if message}
         <div class={`px-4 py-3 rounded-lg border text-sm ${
@@ -30,13 +31,13 @@
                 ? 'bg-green-50 border-green-200 text-green-700'
                 : 'bg-red-50 border-red-200 text-red-700'
         }`}>
-            {message}
+            {$t(message)}
         </div>
     {/if}
 
     <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full flex flex-col">
-            <label for="organisationName">Nom de l'organisation</label>
+            <label for="organisationName">{$t('account.organization.name_label')}</label>
             <input
                     id="organisationName"
                     name="organisationName"
@@ -50,7 +51,7 @@
 
     <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full flex flex-col">
-            <label for="siret">SIRET</label>
+            <label for="siret">{$t('auth.register.siret')}</label>
             <input
                     id="siret"
                     name="siret"
@@ -71,7 +72,7 @@
                cursor-pointer hover:bg-gs-green-800 active:bg-gs-green-700
                transition-colors duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
     >
-            Valider
+            {$t('account.info.button_validate')}
     </button>
 
 </form>
