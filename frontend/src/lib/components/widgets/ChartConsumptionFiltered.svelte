@@ -105,7 +105,7 @@
             {/each}
         </select>
     </div>
-    <p class="text-xs text-gray-600 mb-1">(en gCO2e)</p>
+    <p class="text-xs text-gray-600 mb-1">(gCO2e)</p>
     <p class="text-xs text-blue-600 mb-2">{$t(`widgets.common.period.messages.${selectedPeriod}`)}</p>
 
     {#if consumptionData.length > 0}

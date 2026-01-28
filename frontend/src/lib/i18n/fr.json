@@ -414,7 +414,8 @@
             "daily": "Vos données sur les 7 derniers jours",
             "weekly": "Vos données sur les 4 dernières semaines",
             "monthly": "Vos données sur les 12 derniers mois"
-        }
+        },
+        "months": ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"]
       }
     },
     "chart_consumption": {
@@ -507,21 +508,60 @@
   "data": {
     "advice": {
         "optimize_sql": "Optimisez vos requêtes SQL pour éviter les opérations inutiles.",
+        "minify_files": "Minifiez et compressez les fichiers CSS et JavaScript.",
+        "server_cache": "Implémentez un système de cache efficace côté serveur.",
+        "reduce_http_requests": "Réduisez le nombre de requêtes HTTP en regroupant les fichiers.",
+        "use_webp": "Utilisez des images dans des formats modernes comme WebP.",
+        "lazy_loading": "Adoptez le chargement différé (lazy loading) pour les images et les scripts.",
+        "avoid_loops": "Évitez les boucles infinies ou les calculs inutiles côté serveur.",
+        "eco_servers": "Déployez votre application sur des serveurs écologiques.",
+        "use_cdn": "Utilisez des CDN pour distribuer vos contenus statiques.",
+        "reduce_resource_usage": "Surveillez et réduisez l'utilisation de mémoire et CPU dans vos scripts.",
+        "efficient_algorithms": "Concevez des algorithmes plus efficaces pour économiser des ressources.",
+        "reduce_cookies": "Réduisez la taille des cookies et limitez leur utilisation.",
+        "http_caching": "Implémentez des stratégies de mise en cache HTTP (ETag, Cache-Control).",
+        "lightweight_frameworks": "Utilisez des frameworks ou bibliothèques légères.",
+        "adapted_db": "Choisissez des bases de données adaptées à vos besoins pour éviter la surcharge.",
+        "test_performance": "Testez régulièrement les performances de votre code.",
+        "cloud_solutions": "Optez pour des solutions cloud avec une empreinte carbone réduite.",
+        "disable_logs": "Désactivez les logs en mode production pour réduire la charge.",
+        "offline_reports": "Générez les rapports ou analyses hors ligne si possible.",
+        "resource_audit": "Faites des audits réguliers pour détecter les ressources inutilisées.",
+        "adjust_brightness": "Réglez la luminosité de votre écran pour économiser de l'énergie.",
+        "close_unused_tabs": "Fermez les onglets inutilisés dans votre navigateur.",
+        "block_ads": "Utilisez un bloqueur de publicités pour réduire la charge réseau.",
+        "eco_search_engines": "Privilégiez les moteurs de recherche écologiques comme Ecosia.",
+        "disable_autoplay": "Désactivez les vidéos en lecture automatique.",
+        "download_necessary": "Téléchargez des fichiers uniquement si nécessaire.",
+        "clear_cache": "Effacez régulièrement les caches et cookies de votre navigateur.",
+        "limit_extensions": "Limitez l'utilisation des extensions de navigateur gourmandes.",
+        "data_saver_mode": "Privilégiez le mode économie de données sur les appareils mobiles.",
+        "mobile_optimized_sites": "Consultez les sites optimisés pour mobile pour réduire la consommation de données.",
+        "low_res_video": "Regardez des vidéos en basse résolution si la haute définition n'est pas nécessaire.",
+        "logout_unused": "Déconnectez-vous des comptes inutilisés pendant la navigation.",
+        "lightweight_browser": "Utilisez un navigateur léger comme Firefox Focus pour les tâches simples.",
+        "wifi_over_data": "Téléchargez des contenus en Wi-Fi au lieu d'utiliser les données mobiles.",
+        "avoid_heavy_ads": "Évitez les sites web surchargés de publicités.",
+        "plan_searches": "Planifiez vos recherches web pour éviter de multiplier les requêtes.",
+        "text_mode": "Privilégiez les versions texte des articles lorsque c'est possible.",
+        "share_links": "Partagez les ressources (documents, vidéos) via des liens plutôt qu'en pièce jointe.",
+        "disable_push": "Désactivez les notifications push non essentielles sur les sites web.",
+        "close_background_apps": "Fermez les applications ouvertes en arrière-plan pour économiser des ressources.",
         "default_dev": "Priorisez des outils et workflows durables pour réduire l'empreinte des développeurs.",
         "default_user": "Adoptez des usages numériques responsables pour diminuer la consommation énergétique."
     },
     "equivalent": {
-        "lille_nimes": "A/R Lille - Nîmes",
-        "paris_berlin": "A/R Paris - Berlin en TGV",
-        "emails": "emails",
-        "search": "recherches sur le web",
-        "streaming": "heures de streaming vidéo",
-        "bus": "km en autocar thermique",
-        "motorbike": "km en moto thermique",
-        "car": "km en voiture thermique",
-        "laptop": "ordinateur portable",
-        "tap_water": "litres d'eau du robinet",
-        "paris_ny": "A/R Paris - New York en avion"
+        "lille_nimes": "Trajet Lille-Nîmes en voiture",
+        "paris_berlin": "Trajet Paris-Berlin en train",
+        "emails": "Emails envoyés",
+        "search": "Recherches Google",
+        "streaming": "Heures de streaming",
+        "bus": "Km en bus",
+        "motorbike": "Km en moto",
+        "car": "Km en voiture",
+        "laptop": "Heures d'ordinateur portable",
+        "tap_water": "Litres d'eau du robinet",
+        "paris_ny": "Vol Paris-New York"
     }
   }
 }

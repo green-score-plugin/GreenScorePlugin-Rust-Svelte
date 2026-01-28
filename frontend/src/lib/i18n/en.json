@@ -414,7 +414,8 @@
             "daily": "Your data over the last 7 days",
             "weekly": "Your data over the last 4 weeks",
             "monthly": "Your data over the last 12 months"
-        }
+        },
+        "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
       }
     },
     "chart_consumption": {
@@ -507,21 +508,60 @@
   "data": {
     "advice": {
         "optimize_sql": "Optimize your SQL queries to avoid unnecessary operations.",
-        "default_dev": "Prioritize sustainable tools and workflows to reduce developer footprint.",
+        "minify_files": "Minify and compress CSS and JavaScript files.",
+        "server_cache": "Implement efficient server-side caching.",
+        "reduce_http_requests": "Reduce HTTP requests by bundling files.",
+        "use_webp": "Use modern image formats like WebP.",
+        "lazy_loading": "Adopt lazy loading for images and scripts.",
+        "avoid_loops": "Avoid infinite loops or unnecessary server-side calculations.",
+        "eco_servers": "Deploy your application on eco-friendly servers.",
+        "use_cdn": "Use CDNs to distribute your static content.",
+        "reduce_resource_usage": "Monitor and reduce memory and CPU usage in your scripts.",
+        "efficient_algorithms": "Design more efficient algorithms to save resources.",
+        "reduce_cookies": "Reduce cookie size and limit their usage.",
+        "http_caching": "Implement HTTP caching strategies (ETag, Cache-Control).",
+        "lightweight_frameworks": "Use lightweight frameworks or libraries.",
+        "adapted_db": "Choose databases adapted to your needs to avoid overload.",
+        "test_performance": "Regularly test your code performance.",
+        "cloud_solutions": "Opt for cloud solutions with a reduced carbon footprint.",
+        "disable_logs": "Disable logs in production mode to reduce load.",
+        "offline_reports": "Generate reports or analyses offline if possible.",
+        "resource_audit": "Conduct regular audits to detect unused resources.",
+        "adjust_brightness": "Adjust your screen brightness to save energy.",
+        "close_unused_tabs": "Close unused tabs in your browser.",
+        "block_ads": "Use an ad blocker to reduce network load.",
+        "eco_search_engines": "Prioritize eco-friendly search engines like Ecosia.",
+        "disable_autoplay": "Disable video autoplay.",
+        "download_necessary": "Download files only if necessary.",
+        "clear_cache": "Regularly clear your browser cache and cookies.",
+        "limit_extensions": "Limit the use of resource-heavy browser extensions.",
+        "data_saver_mode": "Prioritize data saver mode on mobile devices.",
+        "mobile_optimized_sites": "Visit mobile-optimized sites to reduce data consumption.",
+        "low_res_video": "Watch videos in low resolution if high definition is not necessary.",
+        "logout_unused": "Log out of unused accounts while browsing.",
+        "lightweight_browser": "Use a lightweight browser like Firefox Focus for simple tasks.",
+        "wifi_over_data": "Download content over Wi-Fi instead of using mobile data.",
+        "avoid_heavy_ads": "Avoid websites overloaded with ads.",
+        "plan_searches": "Plan your web searches to avoid multiplying requests.",
+        "text_mode": "Prioritize text versions of articles when possible.",
+        "share_links": "Share resources (documents, videos) via links rather than attachments.",
+        "disable_push": "Disable non-essential push notifications on websites.",
+        "close_background_apps": "Close apps running in the background to save resources.",
+        "default_dev": "Prioritize sustainable tools and workflows to reduced developer footprint.",
         "default_user": "Adopt responsible digital habits to reduce energy consumption."
     },
     "equivalent": {
-        "lille_nimes": "Return trip Lille - Nîmes by car",
-        "paris_berlin": "Return trip Paris - Berlin by TGV",
-        "emails": "emails",
-        "search": "web searches",
-        "streaming": "hours of video streaming",
-        "bus": "km by thermal bus",
-        "motorbike": "km by thermal motorbike",
-        "car": "km by thermal car",
-        "laptop": "laptop",
-        "tap_water": "liters of tap water",
-        "paris_ny": "Return trip Paris - New York by plane"
+      "lille_nimes": "Trip Lille-Nîmes by car",
+      "paris_berlin": "Trip Paris-Berlin by train",
+      "emails": "Sent emails",
+      "search": "Google searches",
+      "streaming": "Streaming hours",
+      "bus": "Km by bus",
+      "motorbike": "Km by motorbike",
+      "car": "Km by car",
+      "laptop": "Laptop usage hours",
+      "tap_water": "Liters of tap water",
+      "paris_ny": "Paris-New York flight"
     }
   }
 }

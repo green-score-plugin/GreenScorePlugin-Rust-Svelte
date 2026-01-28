@@ -1,17 +1,19 @@
 import type { PageServerLoad } from './$types';
 import { BACKEND_URL } from "$lib/config.ts";
+import fr from '$lib/i18n/fr.json';
+import en from '$lib/i18n/en.json';
 
-function formatMonthlyData(data: Array<{ label: string; value: number }>) {
-    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+function formatMonthlyData(data: Array<{ label: string; value: number }>, locale: string) {
+    const monthNames = locale === 'en' ? en.widgets.common.period.months : fr.widgets.common.period.months;
     const now = new Date();
     const result: Array<{ label: string; value: number }> = [];
     for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthIndex = date.getMonth();
         const year = date.getFullYear();
-        const formattedLabel = `${monthNames[monthIndex]} ${year}`;
-
         const monthKey = `${String(monthIndex + 1).padStart(2, '0')}/${year}`;
+
+        const formattedLabel = `${monthNames[monthIndex]} ${year}`;
         const existingData = data.find(d => d.label === monthKey);
 
         result.push({
@@ -23,11 +25,23 @@ function formatMonthlyData(data: Array<{ label: string; value: number }>) {
 }
 export const load: PageServerLoad = async ({ fetch, request }) => {
     try {
+        const cookieHeader = request.headers.get('cookie') || '';
+        let locale = 'fr';
+        // Simple check for lang cookie or similar if used.
+        // The user's i18n/index.ts uses localStorage which is not sent.
+        // Assuming the app might set a cookie or we default to fr.
+        // If we want to support 'en', we rely on client sending something or just default to 'fr'.
+        // But if the user wants "anglais, fr", we can try to parse Accept-Language if no cookie.
+        // For now, let's look for a "lang" cookie which is common, even if not explicitly set in index.ts shown.
+        if (cookieHeader.includes('lang=en') || request.headers.get('accept-language')?.startsWith('en')) {
+             locale = 'en';
+        }
+
         const response = await fetch(`${BACKEND_URL}/mes-donnees`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Cookie': request.headers.get('cookie') || ''
+                'Cookie': cookieHeader
             },
             credentials: 'include'
         });
@@ -44,7 +58,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
                 equivalents: [],
                 dailyConsumption: [],
                 weeklyConsumption: [],
-                monthlyConsumption: formatMonthlyData([]),
+                monthlyConsumption: formatMonthlyData([], locale),
                 topPollutingSites: [],
                 adviceUser: '',
                 adviceDev: '',
@@ -61,7 +75,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             equivalents: result.equivalents || [],
             dailyConsumption: result.daily_consumption || [],
             weeklyConsumption: result.weekly_consumption || [],
-            monthlyConsumption: formatMonthlyData(result.monthly_consumption || []),
+            monthlyConsumption: formatMonthlyData(result.monthly_consumption || [], locale),
             topPollutingSites: result.top_polluting_sites || [],
             adviceUser: result.advices?.[1] || '',
             adviceDev: result.advices?.[0] || '',
@@ -79,7 +93,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             equivalents: [],
             dailyConsumption: [],
             weeklyConsumption: [],
-            monthlyConsumption: formatMonthlyData([]),
+            monthlyConsumption: formatMonthlyData([], 'fr'),
             topPollutingSites: [],
             adviceUser: '',
             adviceDev: '',

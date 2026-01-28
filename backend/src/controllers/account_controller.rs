@@ -86,7 +86,7 @@ pub async fn update_account(
     if let Some(ref password) = payload.password {
         let hash = match bcrypt::hash(password, bcrypt::DEFAULT_COST) {
             Ok(h) => h,
-            Err(e) => {
+            Err(_) => {
                 return Json(json!({
                     "success": false,
                     "message": "errors.auth.hash_error"
@@ -194,7 +194,7 @@ pub async fn join_organization(
         None => return Json(json!({ "success": false, "message": "errors.validation_code_invalid" }))
     };
 
-    if let Err(e) = sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
+    if let Err(_) = sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
         .bind(org_id)
         .bind(user.id)
         .execute(&pool)
@@ -228,7 +228,7 @@ pub async fn get_organisation_member(session: Session, State(pool): State<MySqlP
         .await
     {
         Ok(r) => r,
-        Err(e) => return Json(json!({ "success": false, "message": "errors.members_retrieval_error" })),
+        Err(_) => return Json(json!({ "success": false, "message": "errors.members_retrieval_error" })),
     };
 
     Json(json!({
@@ -245,7 +245,7 @@ pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Json(payl
         .await
     {
         Ok(_) => Json(json!({ "success": true })),
-        Err(e) => Json(json!({ "success": false, "message": "errors.org_update_error" })),
+        Err(_) => Json(json!({ "success": false, "message": "errors.org_update_error" })),
     }
 
 }
@@ -255,7 +255,7 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
 
     let organisation = match account_opt {
         Some(Account::Organisation(o)) => o,
-        _ => return Json(json!({ "success": false, "message": "errors.auth.unauthenticated_org" })),
+         _ => return Json(json!({ "success": false, "message": "errors.auth.unauthenticated_org" })),
     };
 
     let new_name = payload["name"].as_str().unwrap();
@@ -267,7 +267,7 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
             .await
         {
             Ok(r) => r,
-            Err(e) => return Json(json!({ "success": false, "message": "errors.db_error" }))
+            Err(_) => return Json(json!({ "success": false, "message": "errors.db_error" }))
         };
 
         if row_opt.is_some() {
@@ -285,7 +285,7 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
                 .await
             {
                 Ok(r) => r,
-                Err(e) => return Json(json!({ "success": false, "message": "errors.db_error" }))
+                Err(_) => return Json(json!({ "success": false, "message": "errors.db_error" }))
             };
 
             if row_opt.is_some() {
@@ -317,7 +317,7 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
                 "organisation": updated_organisation
             }))
         }
-        Err(e) => Json(json!({ "success": false, "message": "errors.org_update_error" })),
+        Err(_) => Json(json!({ "success": false, "message": "errors.org_update_error" })),
     }
 }
 
@@ -332,7 +332,7 @@ pub async fn leave_organization(
         _ => return Json(json!({ "success": false, "message": "errors.auth.unauthenticated" })),
     };
 
-    if let Err(e) = sqlx::query("UPDATE user SET organisation_id = NULL WHERE id = ?")
+    if let Err(_) = sqlx::query("UPDATE user SET organisation_id = NULL WHERE id = ?")
         .bind(user.id)
         .execute(&pool)
         .await
@@ -381,7 +381,7 @@ pub async fn get_my_organization(
                  }))
             },
             Ok(None) => Json(json!({ "success": false, "message": "errors.org_not_found" })),
-            Err(e) => Json(json!({ "success": false, "message": "errors.db_error" })),
+            Err(_) => Json(json!({ "success": false, "message": "errors.db_error" })),
         }
     }
 

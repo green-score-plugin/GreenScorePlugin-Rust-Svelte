@@ -1,8 +1,10 @@
 import type { PageServerLoad } from './$types';
 import { BACKEND_URL } from "$lib/config.ts";
+import fr from '$lib/i18n/fr.json';
+import en from '$lib/i18n/en.json';
 
-function formatMonthlyData(data: Array<{ label: string; value: number }>) {
-    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+function formatMonthlyData(data: Array<{ label: string; value: number }>, locale: string) {
+    const monthNames = locale === 'en' ? en.widgets.common.period.months : fr.widgets.common.period.months;
     const now = new Date();
     const result: Array<{ label: string; value: number }> = [];
     // Créer les 12 derniers mois
@@ -26,11 +28,17 @@ function formatMonthlyData(data: Array<{ label: string; value: number }>) {
 
 export const load: PageServerLoad = async ({ fetch, request }) => {
     try {
+        const cookieHeader = request.headers.get('cookie') || '';
+        let locale = 'fr';
+        if (cookieHeader.includes('lang=en') || request.headers.get('accept-language')?.startsWith('en')) {
+             locale = 'en';
+        }
+
         const response = await fetch(`${BACKEND_URL}/mon-organisation`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Cookie': request.headers.get('cookie') || ''
+                'Cookie': cookieHeader
             },
             credentials: 'include'
         });
@@ -46,8 +54,8 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
                 equivalents: [],
                 dailyConsumption: [],
                 weeklyConsumption: [],
-                monthlyConsumption: formatMonthlyData([]),
-                topPoulltingSites: [],
+                monthlyConsumption: formatMonthlyData([], locale),
+                topPollutingSites: [],
             };
         }
         
@@ -65,7 +73,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             equivalents: result.equivalents || [],
             dailyConsumption: result.daily_consumption || [],
             weeklyConsumption: result.weekly_consumption || [],
-            monthlyConsumption: formatMonthlyData(result.monthly_consumption) || formatMonthlyData([]),
+            monthlyConsumption: formatMonthlyData(result.monthly_consumption || [], locale),
             topPollutingSites: result.top_polluting_sites || [],
         };
 
@@ -80,8 +88,8 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             equivalents: [],
             dailyConsumption: [],
             weeklyConsumption: [],
-            monthlyConsumption: formatMonthlyData([]),
-            topPoulltingSites: [],
+            monthlyConsumption: formatMonthlyData([], 'fr'),
+            topPollutingSites: [],
         };
     }
 }
