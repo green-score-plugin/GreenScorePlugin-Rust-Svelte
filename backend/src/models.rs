@@ -45,11 +45,10 @@ impl Account {
         }
     }
 
-    pub async fn organization_id(&self) -> Result<Option<i64>, sqlx::Error> {
-
+    pub fn organization_id(&self) -> Option<i64> {
         match self {
-            Account::User(u) => Ok(u.id_orga),
-            Account::Organisation(o) => Ok(Some(o.id)),
+            Account::User(u) => u.id_orga,
+            Account::Organisation(o) => Some(o.id),
         }
     }
 }

@@ -125,10 +125,9 @@ async fn organization_informations(pool: &MySqlPool, session: Session) -> Option
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
     if let Some(account) = account {
-        let org_id: i64 = match account.organization_id().await {
-            Ok(Some(id)) => id,
-            Ok(None) => return None,
-            Err(_) => return None,
+        let org_id: i64 = match account.organization_id() {
+            Some(id) => id,
+            None => return None,
         };
 
         let name = organization_name(pool, org_id).await?;
@@ -232,23 +231,9 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let org_id: i64 = match account {
-        Some(acc) => match acc.organization_id().await {
-            Ok(Some(id)) => id,
-            Ok(None) => {
-                return Json(MyOrganizationResponse {
-                    success: false,
-                    mo_infos: None,
-                    advices: vec![],
-                    letter: None,
-                    env_nomination: None,
-                    equivalents: None,
-                    daily_consumption: vec![],
-                    weekly_consumption: vec![],
-                    monthly_consumption: vec![],
-                    top_polluting_sites: vec![],
-                });
-            }
-            Err(_) => {
+        Some(acc) => match acc.organization_id() {
+            Some(id) => id,
+            None => {
                 return Json(MyOrganizationResponse {
                     success: false,
                     mo_infos: None,
