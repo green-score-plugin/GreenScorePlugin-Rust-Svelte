@@ -225,6 +225,8 @@ pub async fn my_data(
     session: Session,
 )-> Json<MyDataResponse> {
 
+    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+
     let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, session.clone()).await;
     let average_daily_carbon_footprint = get_average_daily_carbon_footprint(&pool).await;
     let message_average_footprint = match (my_average_daily_carbon_footprint, average_daily_carbon_footprint) {
