@@ -438,27 +438,27 @@ async fn test_calculate_green_score_my_data_all_intermediate_grades(pool: MySqlP
     // Test grade B
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.30, "my_data".to_string()).await;
     assert_eq!(letter, "B");
-    assert_eq!(nomination, "nominations.page.B");
+    assert_eq!(nomination, "nominations.profile.B");
 
     // Test grade C
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.60, "my_data".to_string()).await;
     assert_eq!(letter, "C");
-    assert_eq!(nomination, "nominations.page.C");
+    assert_eq!(nomination, "nominations.profile.C");
 
     // Test grade D
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.90, "my_data".to_string()).await;
     assert_eq!(letter, "D");
-    assert_eq!(nomination, "nominations.page.D");
+    assert_eq!(nomination, "nominations.profile.D");
 
     // Test grade E
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 51.10, "my_data".to_string()).await;
     assert_eq!(letter, "E");
-    assert_eq!(nomination, "nominations.page.E");
+    assert_eq!(nomination, "nominations.profile.E");
 
     // Test grade F
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 51.40, "my_data".to_string()).await;
     assert_eq!(letter, "F");
-    assert_eq!(nomination, "nominations.page.F");
+    assert_eq!(nomination, "nominations.profile.F");
 
     Ok(())
 }
