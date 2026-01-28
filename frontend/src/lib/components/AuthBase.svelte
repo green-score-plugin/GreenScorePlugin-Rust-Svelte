@@ -1,7 +1,7 @@
 <script lang="ts">
     import imageFond from '$lib/images/register-image1.png';
     import logo from '$lib/images/greenscore-logo.png';
-    import { t } from 'svelte-i18n';
+    import { t, locale } from 'svelte-i18n';
 
     export let title: string;
     export let subtitle: string;
@@ -13,7 +13,24 @@
 
 <div class="flex items-center w-screen h-screen">
     <img src="{imageFond}" alt="GreenScore" class="hidden xl:flex w-1/2 h-full object-cover">
-    <div class="w-full xl:w-1/2 h-full px-6 md:px-[120px] py-24 flex flex-col items-center justify-center">
+    <div class="relative w-full xl:w-1/2 h-full px-6 md:px-[120px] py-24 flex flex-col items-center justify-center">
+        <div class="absolute top-5 right-5 flex gap-3">
+            <button
+                    onclick={() => locale.set('en')}
+                    class="transition-all duration-300 hover:scale-110 cursor-pointer {$locale === 'en' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
+                    title="English"
+            >
+                <img src="/images/flags/gb.svg" alt="English" class="w-6 h-auto object-cover rounded shadow-sm" />
+            </button>
+            <button
+                    onclick={() => locale.set('fr')}
+                    class="transition-all duration-300 hover:scale-110 cursor-pointer {$locale === 'fr' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
+                    title="Français"
+            >
+                <img src="/images/flags/fr.svg" alt="Français" class="w-6 h-auto object-cover rounded shadow-sm" />
+            </button>
+        </div>
+
         <div class="flex flex-col w-full gap-10">
             <div class="flex gap-2 items-center">
                 <img width="55px" height="auto" src="{logo}" alt="GreenScore Logo">
