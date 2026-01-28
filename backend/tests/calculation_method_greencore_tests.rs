@@ -181,6 +181,16 @@ async fn test_calculate_green_score_mo_empty_database(pool: MySqlPool) -> sqlx::
 }
 
 #[sqlx::test]
+async fn test_calculate_green_score_mo_missing_table(pool: MySqlPool) -> sqlx::Result<()> {
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "mo".to_string()).await;
+
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
+
+    Ok(())
+}
+
+#[sqlx::test]
 async fn test_calculate_green_score_mo_with_null_values(pool: MySqlPool) -> sqlx::Result<()> {
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS user (
@@ -273,7 +283,6 @@ async fn test_calculate_green_score_my_data_with_pool(pool: MySqlPool) -> sqlx::
     Ok(())
 }
 
-
 #[sqlx::test]
 async fn test_calculate_green_score_my_data_empty_database(pool: MySqlPool) -> sqlx::Result<()> {
     sqlx::query(
@@ -286,6 +295,16 @@ async fn test_calculate_green_score_my_data_empty_database(pool: MySqlPool) -> s
     .execute(&pool)
     .await?;
 
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "my_data".to_string()).await;
+
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_missing_table(pool: MySqlPool) -> sqlx::Result<()> {
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "my_data".to_string()).await;
 
     assert_eq!(letter, "N/A");

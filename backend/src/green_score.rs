@@ -14,8 +14,6 @@ pub async fn calculate_green_score(pool: Option<&MySqlPool>, carbon_footprint: f
         if page == "mo" {
             avg = match organizations_global_average_carbon_footprint(pool).await {
                 Ok(v) if v.is_finite() => v,
-                // Protection défensive : gère les erreurs SQL ou valeurs non finies (NaN/Infinity)
-                // Cas très rare, difficile à tester sans mock de base de données
                 Ok(_) | Err(_) => {
                     0.0
                 }
