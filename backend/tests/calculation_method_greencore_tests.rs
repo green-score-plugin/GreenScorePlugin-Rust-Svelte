@@ -386,27 +386,27 @@ async fn test_calculate_green_score_mo_all_intermediate_grades(pool: MySqlPool) 
     // Test grade B (>= t1, < t2)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.30, "mo".to_string()).await;
     assert_eq!(letter, "B");
-    assert_eq!(nomination, "nominations.page.B");
+    assert_eq!(nomination, "nominations.profile.B");
 
     // Test grade C (>= t2, < t3)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.60, "mo".to_string()).await;
     assert_eq!(letter, "C");
-    assert_eq!(nomination, "nominations.page.C");
+    assert_eq!(nomination, "nominations.profile.C");
 
     // Test grade D (>= t3, < t4)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.90, "mo".to_string()).await;
     assert_eq!(letter, "D");
-    assert_eq!(nomination, "nominations.page.D");
+    assert_eq!(nomination, "nominations.profile.D");
 
     // Test grade E (>= t4, < t5)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 201.10, "mo".to_string()).await;
     assert_eq!(letter, "E");
-    assert_eq!(nomination, "nominations.page.E");
+    assert_eq!(nomination, "nominations.profile.E");
 
     // Test grade F (>= t5, < t6)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 201.40, "mo".to_string()).await;
     assert_eq!(letter, "F");
-    assert_eq!(nomination, "nominations.page.F");
+    assert_eq!(nomination, "nominations.profile.F");
 
     // Test grade G (>= t6)
     let (letter, _) = green_score::calculate_green_score(Some(&pool), 202.0, "mo".to_string()).await;
