@@ -38,4 +38,25 @@ mod tests {
 
         assert!(result.0.success);
     }
+
+    #[tokio::test]
+    async fn test_lpc_from_session_history() {
+        let pool = get_test_pool().await;
+        let store = Arc::new(MemoryStore::default());
+
+        let session = Session::new(Some(Id::default()), store, None);
+
+        let params = LpcParams {
+            url_full: None,
+            country: None,
+            total_consu: None,
+            page_size: None,
+            loading_time: None,
+            queries_quantity: None,
+        };
+
+        let result = lpc(session, State(pool), Query(params)).await;
+
+        assert!(result.0.success);
+    }
 }
