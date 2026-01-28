@@ -10,8 +10,12 @@
 
     let activePage = $state("my_info");
     let user = $derived(page.data.user);
-
+    let title = 'Mon Compte';
 </script>
+
+<svelte:head>
+    <title>{title} | GreenScore Web</title>
+</svelte:head>
 
 <div class="xl:px-52 flex flex-col h-full">
     <div class="px-4 lg:px-16 py-8 flex justify-center lg:justify-start items-center gap-x-4">
