@@ -20,6 +20,7 @@
     import homeImageMobile3 from '$lib/images/home-image-mobile3.png';
     // import registerImage1 from '$lib/images/register-image1.png';
     import { onMount, tick } from "svelte";
+    import { t } from 'svelte-i18n';
 
 
     interface AdviceItem {
@@ -107,24 +108,24 @@
     <div  style="background-image: url({backgroundImage});" class="bg-cover flex flex-col items-center pt-20 pb-0 px-4 sm:px-6 lg:px-8 h-[calc(100vh-96px)] overflow-hidden md:justify-between">
         <div class="max-w-4xl w-full text-center md:w-[703px]">
             <h1 class="text-4xl text-gs-green-950 mb-4 font-outfit font-extrabold sm:text-5xl">
-                Mesurez votre empreinte carbone sur le web !
+                {$t('home.hero.title')}
             </h1>
 
             <p class="text-xl text-gs-green-950 mb-8 font-outfit font-regular">
-                Chaque page que vous chargez consomme de l'énergie. Mesurez votre empreinte et agissez pour un internet plus vert.
+                {$t('home.hero.subtitle')}
             </p>
 
             <div class="hidden lg:block">
                 <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
-                    Ajouter à Firefox
+                    {$t('home.hero.add_to_firefox')}
                 </a>
             </div>
 
             <div class="mt-8 lg:hidden flex justify-center">
                 <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
-                    Ajouter à Firefox
+                    {$t('home.hero.add_to_firefox')}
                 </a>
             </div>
         </div>
@@ -185,7 +186,7 @@
             <div class="bg-white rounded-lg overflow-hidden block">
                 <div class="text-black font-outfit font-regular px-4 py-2 flex items-center gap-2">
                     <div class="w-4 h-4 bg-[#6D874B] rounded-full"></div>
-                    <span class="text-xs font-bold">Web</span>
+                    <span class="text-xs font-bold">{$t('home.video.tag')}</span>
                 </div>
                 <div class="h-[200px] lg:h-[400px] flex items-center justify-center overflow-hidden bg-black relative">
                     {#if showVideo}
@@ -222,16 +223,15 @@
             </div>
 
             <div class="flex flex-col text-center justify-center">
-                <h1 class="text-3xl md:text-4xl mb-6">Installer. Analyser. Économiser.</h1>
+                <h1 class="text-3xl md:text-4xl mb-6">{$t('home.video.title')}</h1>
                 <p class="text-lg md:text-xl mb-6 px-4 md:px-2 font-outfit font-extralight">
-                    Réduire l'impact de votre site, c'est aussi réduire son empreinte sur la planète.
-                    Utilisez GreenScore Web !
-                    <span class="hidden md:inline">En vous inscrivant, vous pourrez consulter des tableaux de bords de votre consommation.</span>
+                    {$t('home.video.description')}
+                    <span class="hidden md:inline">{$t('home.video.description_more')}</span>
                 </p>
                 {#if !isLoggedIn}
                     <div class="hidden lg:block">
                         <a href="/login" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular py-3 px-5 rounded-full mx-auto shadow-md shadow-black">
-                            <span class="mr-4">S'inscrire</span>
+                            <span class="mr-4">{$t('home.video.register')}</span>
                             <span class="bg-gray-200 px-3 py-1.5 rounded-full flex items-center justify-center">
                 <i class="fa-solid fa-arrow-right"></i>
               </span>
@@ -250,56 +250,56 @@
 
         <div class="container mx-auto text-center relative z-1">
             <h2 class="text-3xl md:text-5xl font-regular mb-12 relative px-4 md:px-[40px] font-outfit">
-                Des chiffres qui parlent d'eux-mêmes!
+                {$t('home.stats.title')}
             </h2>
 
             <div class="flex flex-col md:flex-row justify-center items-center gap-8 mb-12">
                 <div class="text-center">
                     <div class="flex flex-row items-baseline justify-center">
-                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">5.5</h3>
-                        <p class="text-2xl md:text-3xl">milliards</p>
+                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">{$t('home.stats.users_count')}</h3>
+                        <p class="text-2xl md:text-3xl">{$t('home.stats.users_label')}</p>
                     </div>
-                    <p class="max-w-70 text-[13px]">C'est le nombre d'utilisateurs d'internet en 2025</p>
+                    <p class="max-w-70 text-[13px]">{$t('home.stats.users_desc')}</p>
                 </div>
 
                 <div class="hidden md:block w-12 border-t border-dashed border-gray-500"></div>
 
                 <div class="text-center">
                     <div class="flex flex-row items-baseline justify-center">
-                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">34</h3>
-                        <p class="text-2xl md:text-3xl">milliards</p>
+                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">{$t('home.stats.devices_count')}</h3>
+                        <p class="text-2xl md:text-3xl">{$t('home.stats.devices_label')}</p>
                     </div>
-                    <p class="max-w-56 text-[13px]">d'équipements informatiques en 2019</p>
+                    <p class="max-w-56 text-[13px]">{$t('home.stats.devices_desc')}</p>
                 </div>
 
                 <div class="hidden md:block w-12 border-t border-dashed border-gray-500"></div>
 
                 <div class="text-center">
                     <div class="flex flex-row items-baseline justify-center">
-                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">47</h3>
-                        <p class="text-2xl md:text-3xl">%</p>
+                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">{$t('home.stats.images_count')}</h3>
+                        <p class="text-2xl md:text-3xl">{$t('home.stats.images_label')}</p>
                     </div>
-                    <p class="max-w-56 text-[13px]">C'est le pourcentage du poids des images sur un site web</p>
+                    <p class="max-w-56 text-[13px]">{$t('home.stats.images_desc')}</p>
                 </div>
             </div>
 
             <div class="flex flex-col md:flex-row justify-center items-center gap-8">
                 <div class="text-center">
                     <div class="flex flex-row items-baseline justify-center">
-                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">300</h3>
-                        <p class="text-2xl md:text-3xl">K</p>
+                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">{$t('home.stats.video_count')}</h3>
+                        <p class="text-2xl md:text-3xl">{$t('home.stats.video_label')}</p>
                     </div>
-                    <p class="max-w-70 text-[13px]">tonnes de CO2 générées par le format vidéo à lui seul</p>
+                    <p class="max-w-70 text-[13px]">{$t('home.stats.video_desc')}</p>
                 </div>
 
                 <div class="hidden md:block w-12 border-t border-dashed border-gray-500"></div>
 
                 <div class="text-center">
                     <div class="flex flex-row items-baseline justify-center">
-                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">15</h3>
-                        <p class="text-2xl md:text-3xl">%</p>
+                        <h3 class="text-6xl md:text-8xl text-gs-green-950 mr-2">{$t('home.stats.reduction_count')}</h3>
+                        <p class="text-2xl md:text-3xl">{$t('home.stats.reduction_label')}</p>
                     </div>
-                    <p class="max-w-64 text-[13px]">de réduction possible des émissions CO2 en appliquant les bonnes pratiques d'éco-conception !</p>
+                    <p class="max-w-64 text-[13px]">{$t('home.stats.reduction_desc')}</p>
                 </div>
             </div>
         </div>
@@ -310,7 +310,7 @@
         <div class="container mx-auto px-4 md:px-16">
             <div class="flex justify-center items-center mb-8">
                 <h2 class="text-3xl font-ovo font-regular text-center mr-4">
-                    {isDevMode ? 'Conseils développeurs' : 'Quelques conseils'}
+                    {isDevMode ? $t('home.advice.title_dev') : $t('home.advice.title_gen')}
                 </h2>
                 <button
                         on:click={toggleDevMode}
@@ -322,10 +322,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75A3.75 3.75 0 1 1 12 3a3.75 3.75 0 0 1 3.75 3.75ZM19.5 21v-1.5a6 6 0 0 0-6-6h-3a6 6 0 0 0-6 6V21"/>
               </svg>
             </span>
-                        Pour les utilisateurs
+                        {$t('home.advice.for_users')}
                     {:else}
                         <span class="mr-2">&lt;/&gt;</span>
-                        Pour les développeurs
+                        {$t('home.advice.for_devs')}
                     {/if}
                 </button>
             </div>
@@ -341,8 +341,8 @@
                                             <i class="{item.icon} text-[#6D874B] text-3xl"></i>
                                         </div>
                                         <div>
-                                            <h3 class="font-outfit font-semibold text-lg mb-2 text-gray-900">{item.title}</h3>
-                                            <p class="text-sm leading-relaxed text-gray-600">{item.advice}</p>
+                                            <h3 class="font-outfit font-semibold text-lg mb-2 text-gray-900">{$t(item.title)}</h3>
+                                            <p class="text-sm leading-relaxed text-gray-600">{$t(item.advice)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -362,7 +362,7 @@
                     </button>
                 {:else}
                     <div class="text-center py-8">
-                        <p class="text-gray-500">Aucun conseil à afficher</p>
+                        <p class="text-gray-500">{$t('home.advice.no_advice')}</p>
                     </div>
                 {/if}
             </div>
@@ -373,42 +373,42 @@
     <div id="greenscore" class="flex flex-col md:flex-row mx-auto gap-6 bg-white w-full font-outfit">
         <div class="w-full p-8 md:w-2/3 flex flex-col space-y-8 md:p-16">
             <div>
-                <h1 class="text-4xl font-regular text-gray-800 text-center mb-4">Comprendre le GreenScore</h1>
+                <h1 class="text-4xl font-regular text-gray-800 text-center mb-4">{$t('home.greenscore.title')}</h1>
                 <p class="text-gray-700">
-                    Le GreenScore est un indicateur permettant de mesurer l'impact environnemental d'une page web. Il se base sur plusieurs critères liés à la consommation d'énergie et l'empreinte carbone générée par le site.
+                    {$t('home.greenscore.description')}
                 </p>
             </div>
 
             <div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Comment est calculé le GreenScore ?</h2>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">{$t('home.greenscore.calc_title')}</h2>
                 <p class="text-gray-700 mb-6">
-                    Le calcul du GreenScore repose sur l'analyse de plusieurs facteurs clés basés sur l'énergie consommée :
+                    {$t('home.greenscore.calc_desc')}
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-gray-100 rounded-lg p-4 flex items-center gap-3">
                         <i class="fa-solid fa-leaf fa-2xl text-[#72A52D]"></i>
-                        <p class="text-gray-700">Chargement des ressources (images, scripts, vidéos, etc.)</p>
+                        <p class="text-gray-700">{$t('home.greenscore.calc_items.resources')}</p>
                     </div>
 
                     <div class="bg-gray-100 rounded-lg p-4 flex items-center gap-3">
                         <i class="fa-solid fa-database fa-2xl text-[#72A52D]"></i>
-                        <p class="text-gray-700">Transfert de données sur le réseau</p>
+                        <p class="text-gray-700">{$t('home.greenscore.calc_items.transfer')}</p>
                     </div>
 
                     <div class="bg-gray-100 rounded-lg p-4 flex items-center gap-3">
                         <i class="fa-solid fa-server fa-2xl text-[#72A52D]"></i>
-                        <p class="text-gray-700">Nombre de requêtes effectuées</p>
+                        <p class="text-gray-700">{$t('home.greenscore.calc_items.requests')}</p>
                     </div>
 
                     <div class="bg-gray-100 rounded-lg p-4 flex items-center gap-3">
                         <i class="fa-solid fa-clock fa-2xl text-[#72A52D]"></i>
-                        <p class="text-gray-700">Temps de chargement de la page</p>
+                        <p class="text-gray-700">{$t('home.greenscore.calc_items.loading_time')}</p>
                     </div>
                 </div>
 
                 <p class="mt-6 text-gray-700">
-                    Ces valeurs sont ensuite multipliées par l'<span class="font-semibold">intensité carbone</span> du pays où se trouve l'utilisateur du plugin, permettant d'obtenir l'empreinte carbone finale en grammes de CO<sub>2</sub> émis (gCO<sub>2</sub>e).
+                    {@html $t('home.greenscore.calc_conclusion')}
                 </p>
 
                 <div class="mt-4 bg-green-50 border-l-4 border-[#72A52D] p-4 rounded">
@@ -419,46 +419,46 @@
             </div>
 
             <div>
-                <h2 class="text-4xl font-regular text-gray-800 text-center mb-4">L'échelle du GreenScore</h2>
+                <h2 class="text-4xl font-regular text-gray-800 text-center mb-4">{$t('home.greenscore.scale.title')}</h2>
                 <p class="text-gray-700 mb-6">
-                    Le GreenScore est attribué en fonction de l'empreinte carbone calculée, selon la grille suivante :
+                    {$t('home.greenscore.scale.description')}
                 </p>
 
                 <!-- Mobile Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center sm:hidden">
                     <div class="bg-green-500 text-gray-800 rounded-lg p-4">
                         <h3 class="font-bold">A (≤ 0,25 gCO<sub>2</sub>e)</h3>
-                        <p>Excellent, très faible impact.</p>
+                        <p>{$t('home.greenscore.scale.grades.A')}</p>
                     </div>
 
                     <div class="bg-green-400 text-gray-800 rounded-lg p-4">
                         <h3 class="font-bold">B (≤ 0,50 gCO<sub>2</sub>e)</h3>
-                        <p>Bon, impact modéré.</p>
+                        <p>{$t('home.greenscore.scale.grades.B')}</p>
                     </div>
 
                     <div class="bg-yellow-400 text-gray-800 rounded-lg p-4">
                         <h3 class="font-bold">C (≤ 0,75 gCO<sub>2</sub>e)</h3>
-                        <p>Correct, amélioration possible.</p>
+                        <p>{$t('home.greenscore.scale.grades.C')}</p>
                     </div>
 
                     <div class="bg-orange-400 text-gray-800 rounded-lg p-4">
                         <h3 class="font-bold">D (≤ 1,00 gCO<sub>2</sub>e)</h3>
-                        <p>Acceptable, mais perfectible.</p>
+                        <p>{$t('home.greenscore.scale.grades.D')}</p>
                     </div>
 
                     <div class="bg-orange-600 text-gray-800 rounded-lg p-4">
                         <h3 class="font-bold">E (≤ 1,25 gCO<sub>2</sub>e)</h3>
-                        <p>Médiocre, impact élevé.</p>
+                        <p>{$t('home.greenscore.scale.grades.E')}</p>
                     </div>
 
                     <div class="bg-red-500 text-gray-800 rounded-lg p-4">
                         <h3 class="font-bold">F (≤ 1,50 gCO<sub>2</sub>e)</h3>
-                        <p>Mauvais, impact très élevé.</p>
+                        <p>{$t('home.greenscore.scale.grades.F')}</p>
                     </div>
 
                     <div class="bg-red-700 text-white rounded-lg p-4">
                         <h3 class="font-bold">G (≤ 1,75 gCO<sub>2</sub>e)</h3>
-                        <p>Très mauvais, impact critique.</p>
+                        <p>{$t('home.greenscore.scale.grades.G')}</p>
                     </div>
                 </div>
 
@@ -466,8 +466,8 @@
                 <div class="hidden sm:block">
                     <div class="relative w-full mb-24">
                         <div class="flex justify-between text-sm text-gray-600 px-2">
-                            <span>Faible impact</span>
-                            <span>Impact critique</span>
+                            <span>{$t('home.greenscore.scale.labels.low')}</span>
+                            <span>{$t('home.greenscore.scale.labels.critical')}</span>
                         </div>
                         <div class="flex w-full h-16">
                             <div class="relative flex-1 group cursor-pointer">
@@ -478,7 +478,7 @@
                                 </div>
                                 <div class="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-lg shadow-lg p-3 ml-2 w-48 z-20" style="top: 100%; margin-top: 8px;">
                                     <h3 class="font-bold text-gray-800">A (≤ 0,25 gCO<sub>2</sub>e)</h3>
-                                    <p class="text-gray-700">Excellent, très faible impact.</p>
+                                    <p class="text-gray-700">{$t('home.greenscore.scale.grades.A')}</p>
                                 </div>
                             </div>
 
@@ -490,7 +490,7 @@
                                 </div>
                                 <div class="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-lg shadow-lg p-3 ml-2 w-48 z-20" style="top: 100%; margin-top: 8px;">
                                     <h3 class="font-bold text-gray-800">B (≤ 0,50 gCO<sub>2</sub>e)</h3>
-                                    <p class="text-gray-700">Bon, impact modéré.</p>
+                                    <p class="text-gray-700">{$t('home.greenscore.scale.grades.B')}</p>
                                 </div>
                             </div>
 
@@ -502,7 +502,7 @@
                                 </div>
                                 <div class="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-lg shadow-lg p-3 ml-2 w-48 z-20" style="top: 100%; margin-top: 8px;">
                                     <h3 class="font-bold text-gray-800">C (≤ 0,75 gCO<sub>2</sub>e)</h3>
-                                    <p class="text-gray-700">Correct, amélioration possible.</p>
+                                    <p class="text-gray-700">{$t('home.greenscore.scale.grades.C')}</p>
                                 </div>
                             </div>
 
@@ -514,7 +514,7 @@
                                 </div>
                                 <div class="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-lg shadow-lg p-3 ml-2 w-48 z-20" style="top: 100%; margin-top: 8px;">
                                     <h3 class="font-bold text-gray-800">D (≤ 1,00 gCO<sub>2</sub>e)</h3>
-                                    <p class="text-gray-700">Acceptable, mais perfectible.</p>
+                                    <p class="text-gray-700">{$t('home.greenscore.scale.grades.D')}</p>
                                 </div>
                             </div>
 
@@ -526,7 +526,7 @@
                                 </div>
                                 <div class="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-lg shadow-lg p-3 ml-2 w-48 z-20" style="top: 100%; margin-top: 8px;">
                                     <h3 class="font-bold text-gray-800">E (≤ 1,25 gCO<sub>2</sub>e)</h3>
-                                    <p class="text-gray-700">Médiocre, impact élevé.</p>
+                                    <p class="text-gray-700">{$t('home.greenscore.scale.grades.E')}</p>
                                 </div>
                             </div>
 
@@ -538,7 +538,7 @@
                                 </div>
                                 <div class="absolute pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-lg shadow-lg p-3 ml-2 w-48 z-20" style="top: 100%; margin-top: 8px;">
                                     <h3 class="font-bold text-gray-800">F (≤ 1,50 gCO<sub>2</sub>e)</h3>
-                                    <p class="text-gray-700">Mauvais, impact très élevé.</p>
+                                    <p class="text-gray-700">{$t('home.greenscore.scale.grades.F')}</p>
                                 </div>
                             </div>
 
@@ -550,7 +550,7 @@
                                 </div>
                                 <div class="absolute pointer-events-none opacity-0 right-3 md:right-auto group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-lg shadow-lg p-3 ml-0 w-48 z-20" style="top: 100%; margin-top: 8px;">
                                     <h3 class="font-bold text-gray-800">G (≤ 1,75 gCO<sub>2</sub>e)</h3>
-                                    <p class="text-gray-700">Très mauvais, impact critique.</p>
+                                    <p class="text-gray-700">{$t('home.greenscore.scale.grades.G')}</p>
                                 </div>
                             </div>
                         </div>
@@ -566,3 +566,4 @@
         </div>
     </div>
 </div>
+
