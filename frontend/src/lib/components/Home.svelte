@@ -115,7 +115,7 @@
                 Chaque page que vous chargez consomme de l'énergie. Mesurez votre empreinte et agissez pour un internet plus vert.
             </p>
 
-            <div class="mt-8 flex justify-center gap-8">
+            <div class="mt-8 flex flex-col sm:flex-row justify-center gap-8">
                 <div class="flex">
                     <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                         <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
