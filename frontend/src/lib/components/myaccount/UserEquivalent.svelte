@@ -68,7 +68,7 @@
 
             <button type="submit"
                     disabled={loading}
-                    class="inline-flex justify-center rounded-lg border border-transparent bg-gs-green-950 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gs-green-800 focus:outline-none focus:ring-2 focus:ring-gs-green-950 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    class="hover:cursor-pointer inline-flex justify-center rounded-lg border border-transparent bg-gs-green-950 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gs-green-800 focus:outline-none focus:ring-2 focus:ring-gs-green-950 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
 
                 {#if loading}
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
