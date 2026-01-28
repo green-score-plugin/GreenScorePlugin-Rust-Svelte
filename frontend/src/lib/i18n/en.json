@@ -602,7 +602,7 @@
     },
     "equivalent": {
       "lille_marseille": "trip Lille-Marseille by car",
-      "paris_berlin": "trip Paris-Berlin by train",
+      "paris_londres": "trip Paris-Londres by train",
       "emails": "sent emails",
       "search": "google searches",
       "streaming": "streaming hours",

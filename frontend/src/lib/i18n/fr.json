@@ -614,7 +614,7 @@
     },
     "equivalent": {
         "lille_marseille": "Trajet(s) Lille-Marseille en voiture",
-        "paris_berlin": "Trajet(s) Paris-Berlin en train",
+        "paris_londres": "Trajet(s) Paris-Londres en train",
         "emails": "e-mail(s) envoyé(s)",
         "search": "recherche(s) Google",
         "streaming": "heure(s) de streaming",

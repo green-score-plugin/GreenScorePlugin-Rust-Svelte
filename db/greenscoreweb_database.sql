@@ -104,7 +104,7 @@ PRIMARY KEY (`id`)
 
 INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
 (1, 'data.equivalent.lille_marseille', 0.004, 'car.png'),
-(2, 'data.equivalent.paris_berlin', 0.163, 'train-paris-berlin.png'),
+(2, 'data.equivalent.paris_londres', 0.73, 'train-paris-londres.png'),
 (3, 'data.equivalent.emails', 2000, 'email.png'),
 (4, 'data.equivalent.search', 5000, 'search.png'),
 (5, 'data.equivalent.streaming', 17.86, 'youtube.png'),
