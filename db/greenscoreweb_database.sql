@@ -111,9 +111,8 @@ INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
 (6, 'data.equivalent.bus', 36, 'bus.png'),
 (7, 'data.equivalent.motorbike', 4.54, 'motorbike.png'),
 (8, 'data.equivalent.car', 4.54, 'car.png'),
-(9, 'data.equivalent.laptop', 0.004, 'laptop.png'),
-(10, 'data.equivalent.tap_water', 7692, 'faucet.png'),
-(11, 'data.equivalent.paris_ny', 0.0007, 'new-york.png');
+(9, 'data.equivalent.tap_water', 7692, 'faucet.png'),
+(10, 'data.equivalent.paris_ny', 0.0007, 'new-york.png');
 
 -- --------------------------------------------------------
 

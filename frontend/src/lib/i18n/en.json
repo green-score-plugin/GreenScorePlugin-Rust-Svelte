@@ -609,7 +609,6 @@
       "bus": "km by bus",
       "motorbike": "km by motorbike",
       "car": "km by car",
-      "laptop": "laptop usage hours",
       "tap_water": "liters of tap water",
       "paris_ny": "paris-New York flight"
     }

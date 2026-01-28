@@ -613,17 +613,16 @@
         "default_user": "Adoptez des usages numériques responsables pour diminuer la consommation énergétique."
     },
     "equivalent": {
-        "lille_nimes": "Trajet Lille-Nîmes en voiture",
-        "paris_berlin": "Trajet Paris-Berlin en train",
-        "emails": "Emails envoyés",
-        "search": "Recherches Google",
-        "streaming": "Heures de streaming",
-        "bus": "Km en bus",
-        "motorbike": "Km en moto",
-        "car": "Km en voiture",
-        "laptop": "Heures d'ordinateur portable",
-        "tap_water": "Litres d'eau du robinet",
-        "paris_ny": "Vol Paris-New York"
+        "lille_nimes": "Trajet(s) Lille-Nîmes en voiture",
+        "paris_berlin": "Trajet(s) Paris-Berlin en train",
+        "emails": "e-mail(s) envoyé(s)",
+        "search": "recherche(s) Google",
+        "streaming": "heure(s) de streaming",
+        "bus": "km en bus",
+        "motorbike": "km en moto",
+        "car": "km en voiture",
+        "tap_water": "litre(s) d'eau du robinet",
+        "paris_ny": "vol(s) Paris-New York"
     }
   },
   "months": {
