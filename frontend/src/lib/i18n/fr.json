@@ -148,6 +148,14 @@
       "password_label": "Votre mot de passe",
       "confirm_password_label": "Confirmer votre mot de passe"
     },
+    "equivalent": {
+      "message": {
+        "server_error": "Erreur serveur",
+        "success": "Équivalents mis à jour",
+        "loading": "Enregistrement..."
+      },
+      "button": "Enregistrer les modifications"
+    },
     "organization": {
       "title": "Organisation",
       "name_label": "Nom de l'organisation",

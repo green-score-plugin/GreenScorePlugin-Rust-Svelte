@@ -78,7 +78,7 @@
                     </svg>
                 {/if}
 
-                {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                {loading ? $t("account.equivalent.message.loading") : $t("account.equivalent.button")}
             </button>
         </div>
 

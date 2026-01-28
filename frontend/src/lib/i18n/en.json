@@ -148,6 +148,14 @@
       "password_label": "Your Password",
       "confirm_password_label": "Confirm your Password"
     },
+    "equivalent": {
+      "message": {
+        "server_error": "Server Error",
+        "success": "Equivalents updated successfully",
+        "loading": "Loading..."
+      },
+      "button": "Save changes"
+    },
     "organization": {
       "title": "Organization",
       "name_label": "Organization Name",
