@@ -103,7 +103,7 @@ PRIMARY KEY (`id`)
 --
 
 INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
-(1, 'data.equivalent.lille_nimes', 0.004, 'car.png'),
+(1, 'data.equivalent.lille_marseille', 0.004, 'car.png'),
 (2, 'data.equivalent.paris_berlin', 0.163, 'train-paris-berlin.png'),
 (3, 'data.equivalent.emails', 2000, 'email.png'),
 (4, 'data.equivalent.search', 5000, 'search.png'),
