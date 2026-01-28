@@ -170,7 +170,7 @@ export const actions = {
                 return {
                     actionType: 'update_info',
                     success: true,
-                    message: 'Vos informations ont été mises à jour avec succès'
+                    message: 'success.info_updated'
                 };
             }
             return fail(400, { actionType: 'update_info', message: result.message || 'Erreur lors de la mise à jour' });
@@ -188,7 +188,7 @@ export const actions = {
         const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
 
         if (!codeOrganisation) {
-            return fail(400, { actionType: 'join_orga', message: "Le code de l'organisation est requis" });
+            return fail(400, { actionType: 'join_orga', message: "errors.validation_code_required" });
         }
 
         try {
@@ -240,7 +240,7 @@ export const actions = {
                 return {
                     actionType: 'join_orga',
                     success: true,
-                    message: "Vous avez rejoint l'organisation avec succès."
+                    message: "success.join_organization"
                 };
             } else {
                 return fail(400, { actionType: 'join_orga', message: result.message || "Erreur lors de l'opération" });
@@ -346,7 +346,7 @@ export const actions = {
                 return {
                     actionType: 'leave_orga',
                     success: true,
-                    message: "Vous avez quitté l'organisation."
+                    message: "success.leave_organization"
                 };
             } else {
                 return fail(400, { actionType: 'leave_orga', message: result.message || "Erreur" });
@@ -361,7 +361,7 @@ export const actions = {
         const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
 
         if (!codeOrganisation) {
-            return fail(400, { actionType: 'change_orga', message: "Le code de l'organisation est requis" });
+            return fail(400, { actionType: 'change_orga', message: "errors.validation_code_required" });
         }
 
         try {
@@ -414,7 +414,7 @@ export const actions = {
                 return {
                     actionType: 'change_orga',
                     success: true,
-                    message: "Vous avez changé d'organisation avec succès."
+                    message: "success.org_changed"
                 };
             } else {
                 return fail(400, { actionType: 'change_orga', message: result.message || "Erreur lors de l'opération" });

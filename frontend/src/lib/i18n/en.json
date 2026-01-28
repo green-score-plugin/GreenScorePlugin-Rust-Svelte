@@ -514,7 +514,9 @@
     "org_updated": "Organization information has been updated successfully",
     "operation_success": "Operation successful",
     "org_left": "You have left the organization.",
-    "org_changed": "You have successfully changed your organization."
+    "org_changed": "You have successfully changed your organization.",
+    "join_organization": "You have successfully joined the organization.",
+    "leave_organization": "You have successfully left the organization."
   },
   "data": {
     "advice": {
