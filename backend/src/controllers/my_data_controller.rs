@@ -26,16 +26,16 @@ pub struct MyDataResponse {
 }
 #[derive(Serialize, Debug)]
 pub struct ConsumptionDataPoint {
-    label: String,
-    value: f64,
+    pub label: String,
+    pub value: f64,
 }
 #[derive(Serialize, Debug)]
 pub struct TopPollutingSite {
-    url_domain: String,
-    total_footprint: f64,
+    pub url_domain: String,
+    pub total_footprint: f64,
 }
 
-async fn get_top5_polluting_sites(
+pub async fn get_top5_polluting_sites(
     pool: &MySqlPool,
     user_id: i32,
 ) -> Result<Vec<TopPollutingSite>, sqlx::Error> {
@@ -64,7 +64,7 @@ async fn get_top5_polluting_sites(
 
 
 
-async fn get_daily_consumption(
+pub async fn get_daily_consumption(
     pool: &MySqlPool,
     user_id: i32,
 ) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
@@ -90,14 +90,14 @@ async fn get_daily_consumption(
         .collect())
 }
 
-async fn get_weekly_consumption(
+pub async fn get_weekly_consumption(
     pool: &MySqlPool,
     user_id: i32,
 ) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
-    let results = sqlx::query_as::<_, (i32, f64)>(
+    let results = sqlx::query_as::<_, (i32, i32, f64)>(
         "SELECT
-            YEAR(creation_date) as year,
-            WEEK(creation_date, 1) as week,
+            CAST(YEAR(creation_date) AS SIGNED) as year,
+            CAST(WEEK(creation_date, 1) AS SIGNED) as week,
             SUM(carbon_footprint) as total
          FROM monitored_website
          WHERE user_id = ?
@@ -110,14 +110,14 @@ async fn get_weekly_consumption(
         .await?;
 
     Ok(results.into_iter()
-        .map(|(week, value)| ConsumptionDataPoint {
+        .map(|(_, week, value)| ConsumptionDataPoint {
             label: format!("S{}", week),
             value: (value * 100.0).round() / 100.0
         })
         .collect())
 }
 
-async fn get_monthly_consumption(
+pub async fn get_monthly_consumption(
     pool: &MySqlPool,
     user_id: i32,
 ) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
@@ -144,7 +144,7 @@ async fn get_monthly_consumption(
 }
 
 
-async fn get_my_average_daily_carbon_footprint(
+pub async fn get_my_average_daily_carbon_footprint(
     pool: &MySqlPool,
     session: Session
 ) -> Option<f64> {
@@ -174,7 +174,7 @@ async fn get_my_average_daily_carbon_footprint(
     }
 }
 
-async fn get_average_daily_carbon_footprint(
+pub async fn get_average_daily_carbon_footprint(
     pool: &MySqlPool,
 ) -> Option<f64> {
     let result = sqlx::query_as::<_, (String, f64)>(
@@ -197,7 +197,7 @@ async fn get_average_daily_carbon_footprint(
     }
 }
 
-async fn get_total_consumption(
+pub async fn get_total_consumption(
     pool: &MySqlPool,
     session: Session
 ) -> Option<f64> {
