@@ -3,6 +3,7 @@
     import { page } from "$app/state";
     import { enhance } from '$app/forms';
     import { fade } from 'svelte/transition';
+    import { t } from 'svelte-i18n';
 
     interface EquivalentResponse {
         id: number;
@@ -44,7 +45,7 @@
                     <div class="min-w-0 flex-1">
                         <label for="equivalent-{accountEquivalent.id}" class="cursor-pointer">
                             <span class="absolute inset-0" aria-hidden="true"></span>
-                            <span class="text-sm font-medium text-gray-900">{accountEquivalent.name}</span>
+                            <span class="text-sm font-medium text-gray-900">{$t(accountEquivalent.name)}</span>
                         </label>
                     </div>
                     <div class="flex h-5 items-center">

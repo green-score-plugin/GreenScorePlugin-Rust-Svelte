@@ -132,6 +132,7 @@
   "account": {
     "menu": {
       "my_info": "Mon compte",
+      "my_equivalents": "Mes équivalents",
       "my_organization": "Mon organisation",
       "manage_organization": "Gérer mon organisation",
       "delete_account": "Supprimer le compte",

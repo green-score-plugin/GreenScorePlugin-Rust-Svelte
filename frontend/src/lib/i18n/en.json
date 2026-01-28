@@ -132,6 +132,7 @@
   "account": {
     "menu": {
       "my_info": "My Account",
+      "my_equivalents": "My Equivalents",
       "my_organization": "My Organization",
       "manage_organization": "Manage My Organization",
       "delete_account": "Delete Account",
