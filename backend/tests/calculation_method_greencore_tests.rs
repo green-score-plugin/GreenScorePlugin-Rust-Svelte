@@ -9,7 +9,7 @@ use sqlx::MySqlPool;
 async fn test_calculate_green_score_lpc_grade_b() {
     let (letter, nomination) = green_score::calculate_green_score(None, 0.3, "lpc".to_string()).await;
     assert_eq!(letter, "B");
-    assert_eq!(nomination, "Protecteur des Bois");
+    assert_eq!(nomination, "nominations.page.B");
 }
 
 #[tokio::test]
@@ -47,7 +47,7 @@ async fn test_calculate_green_score_lpc_boundary_exact() {
 async fn test_calculate_green_score_lpc_zero() {
     let (letter, nomination) = green_score::calculate_green_score(None, 0.0, "lpc".to_string()).await;
     assert_eq!(letter, "A");
-    assert_eq!(nomination, "Maître des forêts");
+    assert_eq!(nomination, "nominations.page.A");
 }
 
 #[tokio::test]
