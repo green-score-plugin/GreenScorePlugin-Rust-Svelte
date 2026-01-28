@@ -97,3 +97,31 @@ fn test_organization_id_organisation() {
 
     assert_eq!(account.organization_id(), Some(5));
 }
+
+#[test]
+fn test_account_id_user() {
+    let user = User::new(
+        123,
+        "test@example.com".to_string(),
+        "Dupont".to_string(),
+        "Marie".to_string(),
+        Some(10)
+    );
+    let account = Account::User(user);
+
+    assert_eq!(account.id(), 123);
+}
+
+#[test]
+fn test_account_id_organisation() {
+    let org = Organisation::new(
+        456,
+        "Enterprise Inc".to_string(),
+        Some("12345678901234".to_string()),
+        "ENT01".to_string(),
+        100
+    );
+    let account = Account::Organisation(org);
+
+    assert_eq!(account.id(), 456);
+}
