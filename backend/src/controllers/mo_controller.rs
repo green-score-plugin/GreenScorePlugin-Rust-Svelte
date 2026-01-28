@@ -125,10 +125,9 @@ async fn organization_informations(pool: &MySqlPool, session: Session) -> Option
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
     if let Some(account) = account {
-        let org_id: i64 = match account.organization_id(pool).await {
-            Ok(Some(id)) => id,
-            Ok(None) => return None,
-            Err(_) => return None,
+        let org_id: i64 = match account.organization_id() {
+            Some(id) => id,
+            None => return None,
         };
 
         let name = organization_name(pool, org_id).await?;
@@ -137,7 +136,7 @@ async fn organization_informations(pool: &MySqlPool, session: Session) -> Option
 
         match average_daily_carbon_footprint_result {
             Some(average_daily_carbon_footprint) => {
-                let equivalent_vec = equivalent(pool, average_daily_carbon_footprint, 1).await;
+                let equivalent_vec = equivalent(pool, average_daily_carbon_footprint, 1, Some(&account)).await;
                 let equivalent = equivalent_vec
                     .and_then(|mut v| v.pop());
 
@@ -230,25 +229,12 @@ async fn get_monthly_consumption(pool: &MySqlPool, org_id: i64) -> Result<Vec<Co
 
 pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrganizationResponse> {
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
+    let account_context = account.clone();
 
     let org_id: i64 = match account {
-        Some(acc) => match acc.organization_id(&pool).await {
-            Ok(Some(id)) => id,
-            Ok(None) => {
-                return Json(MyOrganizationResponse {
-                    success: false,
-                    mo_infos: None,
-                    advices: vec![],
-                    letter: None,
-                    env_nomination: None,
-                    equivalents: None,
-                    daily_consumption: vec![],
-                    weekly_consumption: vec![],
-                    monthly_consumption: vec![],
-                    top_polluting_sites: vec![],
-                });
-            }
-            Err(_) => {
+        Some(acc) => match acc.organization_id() {
+            Some(id) => id,
+            None => {
                 return Json(MyOrganizationResponse {
                     success: false,
                     mo_infos: None,
@@ -289,9 +275,9 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
     };
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = organization_informations {
-        let (l, n) = calculate_green_score(&pool, infos.average_daily_carbon_footprint, "mo".to_string()).await;
+        let (l, n) = calculate_green_score(Some(&pool), infos.average_daily_carbon_footprint, "mo".to_string()).await;
 
-        let eqs = equivalent(&pool, infos.total_consumption, 2).await;
+        let eqs = equivalent(&pool, infos.total_consumption, 2, account_context.as_ref()).await;
         let eqs = match eqs {
             Some(v) if !v.is_empty() => Some(v),
             _ => None,

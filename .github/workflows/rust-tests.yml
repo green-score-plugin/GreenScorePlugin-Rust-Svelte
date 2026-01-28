@@ -17,6 +17,20 @@ jobs:
   test:
     name: Tests & Coverage
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: greenscoreweb_database
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    env:
+      DATABASE_URL: mysql://root:root@localhost:3306/greenscoreweb_database
+
     defaults:
       run:
         working-directory: ./backend

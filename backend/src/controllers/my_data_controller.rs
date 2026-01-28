@@ -225,6 +225,8 @@ pub async fn my_data(
     session: Session,
 )-> Json<MyDataResponse> {
 
+    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+
     let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, session.clone()).await;
     let average_daily_carbon_footprint = get_average_daily_carbon_footprint(&pool).await;
     let message_average_footprint = match (my_average_daily_carbon_footprint, average_daily_carbon_footprint) {
@@ -241,8 +243,8 @@ pub async fn my_data(
     };
 
     let (letter_green_score, env_nomination, equivalents) = if let Some(avg) = my_average_daily_carbon_footprint {
-        let (l, n) = calculate_green_score(&pool, avg, "my_data".to_string()).await;
-        let eqs = equivalent(&pool, avg, 2).await;
+        let (l, n) = calculate_green_score(Some(&pool), avg, "my_data".to_string()).await;
+        let eqs = equivalent(&pool, avg, 2,account.as_ref()).await;
         let eqs = match eqs {
             Some(v) if !v.is_empty() => Some(v),
             _ => None,

@@ -115,14 +115,14 @@
             </p>
 
             <div class="hidden lg:block">
-                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     Ajouter à Firefox
                 </a>
             </div>
 
             <div class="mt-8 lg:hidden flex justify-center">
-                <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                     <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                     Ajouter à Firefox
                 </a>
@@ -410,6 +410,12 @@
                 <p class="mt-6 text-gray-700">
                     Ces valeurs sont ensuite multipliées par l'<span class="font-semibold">intensité carbone</span> du pays où se trouve l'utilisateur du plugin, permettant d'obtenir l'empreinte carbone finale en grammes de CO<sub>2</sub> émis (gCO<sub>2</sub>e).
                 </p>
+
+                <div class="mt-4 bg-green-50 border-l-4 border-[#72A52D] p-4 rounded">
+                    <p class="text-gray-700">
+                        <span class="font-semibold">À noter :</span> Ce calcul fournit une <span class="font-semibold">estimation</span> et non une mesure exacte. Toutes les données nécessaires pour un calcul précis de l'empreinte carbone ne sont pas disponibles. Néanmoins, ces résultats permettent de <span class="font-semibold">comparer efficacement</span> la consommation énergétique entre différentes pages web et d'identifier les axes d'amélioration.
+                    </p>
+                </div>
             </div>
 
             <div>

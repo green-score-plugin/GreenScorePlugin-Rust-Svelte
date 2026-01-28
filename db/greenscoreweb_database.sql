@@ -197,6 +197,20 @@ PRIMARY KEY (`id`),
 KEY `IDX_8D93D6499E6B1585` (`organisation_id`)
 )ENGINE=InnoDB;
 
+---
+--- Table structure for table `user_equivalent`
+---
+CREATE TABLE `user_equivalent` (
+`user_id` int(11) NOT NULL,
+`equivalent_id` int(11) NOT NULL,
+PRIMARY KEY (`user_id`,`equivalent_id`),
+KEY `IDX_5D8A3F6FA76ED395` (`user_id`),
+KEY `IDX_5D8A3F6F7C455263` (`equivalent_id`),
+CONSTRAINT `FK_5D8A3F6FA76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+CONSTRAINT `FK_5D8A3F6F7C455263` FOREIGN KEY (`equivalent_id`) REFERENCES `equivalent` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 --
 -- Déchargement des données de la table `user`
 --

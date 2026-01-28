@@ -11,6 +11,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 
     let members = [];
     let organisation = null;
+    let accountEquivalents = [];
 
     if (locals.user?.role === 'organisation') {
         const res = await fetch(`${BACKEND_URL}/get_organisation_members`, { method: "POST", headers });
@@ -32,11 +33,22 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
         }
     }
 
+    const equivRes = await fetch(`${BACKEND_URL}/account/get_account_all_equivalents`, { method: 'GET', headers, credentials: 'include' });
+    if (equivRes.ok) {
+        try {
+            const result = await equivRes.json();
+            if (result.success && result.equivalents) {
+                accountEquivalents = result.equivalents;
+            }
+        } catch {
+        }
+    }
     return {
         members,
-        organisation
+        organisation,
+        accountEquivalents
     };
-};
+}
 
 
 export const actions = {
@@ -410,6 +422,36 @@ export const actions = {
 
         } catch (error) {
             return fail(500, { actionType: 'change_orga', message: "Erreur serveur lors du changement d'organisation" });
+        }
+    },
+    modification_equivalents: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const equivalents = data.getAll('equivalents').map(item => item.toString());
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/update_account_equivalents`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ equivalents })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return {
+                    actionType: 'modification_equivalents',
+                    success: true,
+                    message: 'Équivalents mis à jour avec succès'
+                };
+            } else {
+                return fail(400, { actionType: 'modification_equivalents', message: result.message || 'Erreur lors de la mise à jour' });
+            }
+        } catch (error) {
+            return fail(500, { actionType: 'modification_equivalents', message: 'Erreur serveur' });
         }
     }
 } satisfies Actions;
