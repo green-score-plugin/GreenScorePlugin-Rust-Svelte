@@ -67,6 +67,7 @@
         "loading_time": "Temps de chargement de la page"
       },
       "calc_conclusion": "Ces valeurs sont ensuite multipliées par l'<span class=\"font-semibold\">intensité carbone</span> du pays où se trouve l'utilisateur du plugin, permettant d'obtenir l'empreinte carbone finale en grammes de CO<sub>2</sub> émis (gCO<sub>2</sub>e).",
+      "estimation": "<span class=\"font-semibold\">À noter :</span> Ce calcul fournit une <span class=\"font-semibold\">estimation </span>et non une mesure exacte. Toutes les données nécessaires pour un calcul précis de l'empreinte carbone ne sont pas disponibles. Néanmoins, ces résultats permettent de <span class=\"font-semibold\">comparer efficacement</span> la consommation énergétique entre différentes pages web et d'identifier les axes d'amélioration.",
       "scale": {
         "title": "L'échelle du GreenScore",
         "description": "Le GreenScore est attribué en fonction de l'empreinte carbone calculée, selon la grille suivante :",

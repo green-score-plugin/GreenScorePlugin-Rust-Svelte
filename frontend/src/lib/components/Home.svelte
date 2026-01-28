@@ -413,7 +413,7 @@
 
                 <div class="mt-4 bg-green-50 border-l-4 border-[#72A52D] p-4 rounded">
                     <p class="text-gray-700">
-                        <span class="font-semibold">À noter :</span> Ce calcul fournit une <span class="font-semibold">estimation</span> et non une mesure exacte. Toutes les données nécessaires pour un calcul précis de l'empreinte carbone ne sont pas disponibles. Néanmoins, ces résultats permettent de <span class="font-semibold">comparer efficacement</span> la consommation énergétique entre différentes pages web et d'identifier les axes d'amélioration.
+                        {@html $t ('home.greenscore.estimation')}
                     </p>
                 </div>
             </div>
