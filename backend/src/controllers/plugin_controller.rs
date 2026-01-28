@@ -3,9 +3,11 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use serde_json::{json, Value};
 use sqlx::{MySqlPool};
+use tower_sessions::Session;
 use crate::controllers::helpers;
+use crate::models::Account;
 
-pub async fn get_equivalent(State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> (StatusCode, Json<Value>) {
+pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> (StatusCode, Json<Value>) {
 
     let gco2 = payload["gCO2"].as_f64().unwrap_or(0.0);
     let count = payload["count"].as_i64().unwrap_or(3);
@@ -17,7 +19,8 @@ pub async fn get_equivalent(State(pool): State<MySqlPool>, Json(payload): Json<V
         })));
     }
 
-    let result = helpers::equivalent(&pool, gco2, count as i32).await;
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+    let result = helpers::equivalent(&pool, gco2, count as i32, account_opt.as_ref()).await;
 
     match result {
         Some(equivalents) => {
