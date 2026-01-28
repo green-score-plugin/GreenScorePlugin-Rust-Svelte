@@ -1,9 +1,15 @@
 use sqlx::MySqlPool;
 
-pub async fn calculate_green_score(pool: &MySqlPool, carbon_footprint: f64, page: String) -> (String, String) {
+pub async fn calculate_green_score(pool: Option<&MySqlPool>, carbon_footprint: f64, page: String) -> (String, String) {
     if page == "mo" || page == "my_data" {
         let mut least: f64 = 0.0;
         let mut avg: f64 = 0.0;
+
+        // Si pas de pool, retourner N/A
+        let pool = match pool {
+            Some(p) => p,
+            None => return ("N/A".to_string(), "N/A".to_string()),
+        };
 
         if page == "mo" {
             avg = match organizations_global_average_carbon_footprint(pool).await {
@@ -98,7 +104,7 @@ pub async fn calculate_green_score(pool: &MySqlPool, carbon_footprint: f64, page
     }
 }
 
-async fn organizations_global_average_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
+pub async fn organizations_global_average_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
     let rows = sqlx::query_as::<_, (f64, i64)>(
         "SELECT AVG(total_carbon_footprint) AS averageConsumption,
         organisation_id AS organisationId
@@ -121,7 +127,7 @@ async fn organizations_global_average_carbon_footprint(pool: &MySqlPool) -> Resu
     Ok(avg)
 }
 
-async fn organizations_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
+pub async fn organizations_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
     let row = sqlx::query_as::<_, (f64, i64)>(
         "SELECT SUM(total_carbon_footprint) AS totalConsumption,
         organisation_id AS organisationId
@@ -139,7 +145,7 @@ async fn organizations_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, s
     Ok(row.0)
 }
 
-async fn users_global_average_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
+pub async fn users_global_average_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
     let row = sqlx::query_scalar::<_, f64>(
         "SELECT AVG(total_carbon_footprint) AS averageConsumption
         FROM `user`
@@ -152,7 +158,7 @@ async fn users_global_average_carbon_footprint(pool: &MySqlPool) -> Result<f64, 
     Ok(row)
 }
 
-async fn users_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
+pub async fn users_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
     let row = sqlx::query_scalar::<_, f64>(
         "SELECT MIN(total_carbon_footprint) AS leastConsumption
         FROM `user`

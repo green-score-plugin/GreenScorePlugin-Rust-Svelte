@@ -289,7 +289,7 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
     };
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = organization_informations {
-        let (l, n) = calculate_green_score(&pool, infos.average_daily_carbon_footprint, "mo".to_string()).await;
+        let (l, n) = calculate_green_score(Some(&pool), infos.average_daily_carbon_footprint, "mo".to_string()).await;
 
         let eqs = equivalent(&pool, infos.total_consumption, 2).await;
         let eqs = match eqs {
