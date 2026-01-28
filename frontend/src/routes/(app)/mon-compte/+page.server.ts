@@ -65,7 +65,7 @@ export const actions = {
             const result = await response.json();
 
             if (result.success) {
-                 redirect(303, '/logout?account_deleted=true');
+                redirect(303, '/logout?account_deleted=true');
             } else {
                 return fail(400, { message: result.message || 'Erreur lors de la suppression' });
             }
@@ -119,14 +119,14 @@ export const actions = {
         const payload: Record<string, string> = { prenom, nom, email };
 
         if (password && password.trim() !== '') {
-             const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-             if (!passwordRegex.test(password)) {
-                 return fail(400, {
-                     actionType: 'update_info',
-                     message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)"
-                 });
-             }
-             payload.password = password;
+            const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                return fail(400, {
+                    actionType: 'update_info',
+                    message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)"
+                });
+            }
+            payload.password = password;
         }
 
         try {

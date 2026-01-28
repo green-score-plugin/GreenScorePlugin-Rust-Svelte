@@ -83,7 +83,7 @@ export const load: PageServerLoad = async ({ fetch, request, url }) => {
             adviceUser: result.advices?.[1] || '',
             adviceDev: result.advices?.[0] || '',
             letterGreenScore: result.letter || 'A',
-            envNomination: result.env_nomination || 'Maître des Forêts',
+            envNomination: result.env_nomination || 'nominations.page.A',
             equivalents: result.equivalents || []
         };
     } catch (error) {

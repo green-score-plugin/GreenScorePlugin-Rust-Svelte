@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from '$app/state';
-
+    import { t, locale } from 'svelte-i18n';
     import greenScoreLogo from '$lib/images/greenscore-logo.png';
 
     let user = $derived(page.data.user);
@@ -37,18 +37,38 @@
 
 <header class="flex w-full bg-white py-5 border-b border-grey-100 items-center h-24 relative">
     <div class="flex items-center w-full justify-between px-8">
-        <!-- Logo -->
-        <a class="cursor-pointer" href="/">
-            <img width="55" src="{greenScoreLogo}" alt="Logo" />
-        </a>
+        <div class="flex items-center gap-3">
+            <!-- Logo -->
+            <a class="cursor-pointer" href="/">
+                <img width="55" src="{greenScoreLogo}" alt="Logo" />
+            </a>
+
+            <div class="flex gap-3 ml-2">
+                <button
+                    onclick={() => locale.set('en')}
+                    class="transition-all duration-300 hover:scale-110 cursor-pointer {$locale === 'en' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
+                    title="English"
+                >
+                    <img src="/images/flags/gb.svg" alt="English" class="w-6 h-auto object-cover rounded shadow-sm" />
+                </button>
+                <button
+                    onclick={() => locale.set('fr')}
+                    class="transition-all duration-300 hover:scale-110 cursor-pointer {$locale === 'fr' ? 'opacity-100 scale-110 grayscale-0' : 'opacity-50 grayscale hover:grayscale-0 hover:opacity-100'}"
+                    title="Français"
+                >
+                    <img src="/images/flags/fr.svg" alt="Français" class="w-6 h-auto object-cover rounded shadow-sm" />
+                </button>
+            </div>
+        </div>
+
 
         <!-- Menu desktop -->
         <div class="hidden lg:flex gap-8 items-center">
             <ul class="flex font-outfit text-grey-950 items-center gap-8 text-lg font-medium">
-                <li><a href="/">Accueil</a></li>
-                <li><a href="/mes-donnees">Mes données</a></li>
-                <li><a href="/mon-organisation">Mon organisation</a></li>
-                <li><a href="/derniere-page-consultee">Dernière page consultée</a></li>
+                <li><a href="/">{$t('header.home')}</a></li>
+                <li><a href="/mes-donnees">{$t('header.my_data')}</a></li>
+                <li><a href="/mon-organisation">{$t('header.my_organization')}</a></li>
+                <li><a href="/derniere-page-consultee">{$t('header.last_visited_page')}</a></li>
 
                 {#if user}
                     <li class="relative">
@@ -66,16 +86,16 @@
                             <!-- Utilisation de l'action pour fermer le menu quand on clique à l'extérieur -->
                             <div use:clickOutside class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
                                 {#if user.role === 'organisation'}
-                                    <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon organisation</a>
+                                    <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_organization')}</a>
                                 {:else}
-                                    <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon compte</a>
+                                    <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_account')}</a>
                                 {/if}
-                                <a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Se déconnecter</a>
+                                <a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.logout')}</a>
                             </div>
                         {/if}
                     </li>
                 {:else}
-                    <li><a href="/login">Se connecter</a></li>
+                    <li><a href="/login">{$t('header.login')}</a></li>
                 {/if}
             </ul>
         </div>
@@ -96,16 +116,16 @@
         <!-- Ajouter l'action pour fermer le menu mobile quand on clique à l'extérieur -->
         <div use:clickOutside class="absolute top-24 left-0 w-full bg-white py-5 z-10 lg:hidden">
             <ul class="flex flex-col font-outfit font-medium text-grey-950 items-center gap-4 text-lg">
-                <li><a href="/">Informations</a></li>
-                <li><a href="/mes-donnees">Mes données</a></li>
-                <li><a href="/mon-organisation">Mon organisation</a></li>
-                <li><a href="/derniere-page">Dernière page consultée</a></li>
+                <li><a href="/">{$t('header.informations')}</a></li>
+                <li><a href="/mes-donnees">{$t('header.my_data')}</a></li>
+                <li><a href="/mon-organisation">{$t('header.my_organization')}</a></li>
+                <li><a href="/derniere-page">{$t('header.last_visited_page')}</a></li>
 
                 {#if user}
-                    <li><a href="/mon_compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Gérer mon compte</a></li>
-                    <li><a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Se déconnecter</a></li>
+                    <li><a href="/mon_compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_account')}</a></li>
+                    <li><a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.logout')}</a></li>
                 {:else}
-                    <li><a href="/login">Se connecter</a></li>
+                    <li><a href="/login">{$t('header.login')}</a></li>
                 {/if}
             </ul>
         </div>
