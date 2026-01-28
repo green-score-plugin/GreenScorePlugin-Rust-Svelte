@@ -1,118 +1,121 @@
+<script lang="ts">
+    import { t } from 'svelte-i18n';
+</script>
+
 <svelte:head>
-    <title>Politique de Confidentialité</title>
+    <title>{$t('legal.privacy_policy.title')}</title>
 </svelte:head>
 
 <div class="container mx-auto p-6 md:p-12 font-outfit">
-    <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Politique de Confidentialité</h1>
+    <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">{$t('legal.privacy_policy.title')}</h1>
 
     <div class="prose max-w-none mb-8 text-gray-700">
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">1. Identité du Responsable du Traitement</h2>
-            <p class="mb-2">Le responsable du traitement des données personnelles est :</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s1.title')}</h2>
+            <p class="mb-2">{$t('legal.privacy_policy.s1.content')}</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li><strong>GreenScore Web</strong></li>
-                <li>Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France</li>
-                <li>Email : <a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></li>
+                <li>{@html $t('legal.privacy_policy.s1.li1')}</li>
+                <li>{$t('legal.privacy_policy.s1.li2')}</li>
+                <li>{$t('legal.privacy_policy.s1.li3')} <a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></li>
             </ul>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">2. Données collectées</h2>
-            <p><strong>2.1 Données fournies par l'utilisateur</strong></p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s2.title')}</h2>
+            <p><strong>{$t('legal.privacy_policy.s2.s2_1_title')}</strong></p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Lors de la création d'un compte : nom et prénom ou nom de l'organisation, adresse e-mail, mot de passe, numéro de SIRET (si l'utilisateur s'inscrit en tant qu'Organisation).</li>
-                <li>Lors de l'utilisation du plugin ou de l'application web : données relatives à votre utilisation, comme les préférences ou les réglages choisis.</li>
+                <li>{$t('legal.privacy_policy.s2.s2_1_li1')}</li>
+                <li>{$t('legal.privacy_policy.s2.s2_1_li2')}</li>
             </ul>
 
-            <p><strong>2.2 Données collectées automatiquement</strong></p>
+            <p><strong>{$t('legal.privacy_policy.s2.s2_2_title')}</strong></p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Adresse IP</li>
-                <li>Type de navigateur</li>
-                <li>Système d'exploitation</li>
-                <li>Données de connexion (horodatage, durée de la session)</li>
-                <li>Cookies et technologies similaires (voir section 7).</li>
-                <li>Lorsque vous créez un compte et êtes connecté, nous collectons également les données des pages que vous consultez : le DNS, l’URL complète, le pays de recherche, le nombre de requêtes, le temps de chargement, la quantité de données transférées.</li>
-            </ul>
-        </section>
-
-        <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">3. Finalités du traitement</h2>
-            <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Fournir et améliorer les fonctionnalités de l'application web et du plugin.</li>
-                <li>Assurer la sécurité et prévenir les abus.</li>
-                <li>Répondre à vos demandes d'assistance ou de contact.</li>
-                <li>Personnaliser l'expérience utilisateur.</li>
-                <li>Se conformer à nos obligations légales et réglementaires.</li>
+                <li>{$t('legal.privacy_policy.s2.s2_2_li1')}</li>
+                <li>{$t('legal.privacy_policy.s2.s2_2_li2')}</li>
+                <li>{$t('legal.privacy_policy.s2.s2_2_li3')}</li>
+                <li>{$t('legal.privacy_policy.s2.s2_2_li4')}</li>
+                <li>{$t('legal.privacy_policy.s2.s2_2_li5')}</li>
             </ul>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">4. Base légale du traitement</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s3.title')}</h2>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>L'exécution d'un contrat, pour fournir les services liés à votre compte.</li>
-                <li>Notre intérêt légitime, pour sécuriser nos services et améliorer leur performance.</li>
-                <li>Une obligation légale, pour respecter les lois en vigueur.</li>
+                <li>{$t('legal.privacy_policy.s3.li1')}</li>
+                <li>{$t('legal.privacy_policy.s3.li2')}</li>
+                <li>{$t('legal.privacy_policy.s3.li3')}</li>
+                <li>{$t('legal.privacy_policy.s3.li4')}</li>
+                <li>{$t('legal.privacy_policy.s3.li5')}</li>
             </ul>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">5. Partage des données</h2>
-            <p class="mb-4">Vos données ne sont jamais vendues. Nous les partageons uniquement avec :</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s4.title')}</h2>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Nos prestataires de services (hébergement, maintenance) dans le cadre de leur mission.</li>
-                <li>Les autorités compétentes, si requis par la loi.</li>
-            </ul>
-            <p class="mt-4">Ces tiers sont tenus de garantir la confidentialité et la sécurité de vos informations.</p>
-        </section>
-
-        <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">6. Durée de conservation</h2>
-            <p class="mb-4">Vos données personnelles sont conservées aussi longtemps que nécessaire pour les finalités décrites ci-dessus :</p>
-            <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Données de compte : conservées jusqu'à désinscription.</li>
-                <li>Logs et données techniques : conservés pendant 12 mois.</li>
-                <li>Au-delà, les données sont supprimées ou anonymisées.</li>
+                <li>{$t('legal.privacy_policy.s4.li1')}</li>
+                <li>{$t('legal.privacy_policy.s4.li2')}</li>
+                <li>{$t('legal.privacy_policy.s4.li3')}</li>
             </ul>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">7. Cookies et technologies similaires</h2>
-            <p class="mb-4">Nous utilisons des cookies pour améliorer votre navigation sur l'application web.</p>
-            <p class="mb-4"><strong>Vos choix concernant les cookies :</strong></p>
-            <p>Lors de votre première visite, un bandeau vous informe de l'utilisation des cookies. Vous pouvez accepter, refuser ou personnaliser vos préférences. Si vous bloquez les cookies, vous ne pourrez pas vous connecter sur l'application web.</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s5.title')}</h2>
+            <p class="mb-4">{$t('legal.privacy_policy.s5.intro')}</p>
+            <ul class="list-disc pl-6 space-y-2 text-lg">
+                <li>{$t('legal.privacy_policy.s5.li1')}</li>
+                <li>{$t('legal.privacy_policy.s5.li2')}</li>
+            </ul>
+            <p class="mt-4">{$t('legal.privacy_policy.s5.outro')}</p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">8. Vos droits</h2>
-            <p class="mb-4">En vertu du Règlement Général sur la Protection des Données (RGPD), vous disposez des droits suivants :</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s6.title')}</h2>
+            <p class="mb-4">{$t('legal.privacy_policy.s6.intro')}</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Accès : obtenir une copie des données que nous détenons.</li>
-                <li>Rectification : corriger des informations inexactes ou incomplètes.</li>
-                <li>Suppression : demander l'effacement de vos données, sauf obligation légale.</li>
-                <li>Opposition : refuser certains traitements (par exemple, le marketing direct).</li>
-                <li>Portabilité : recevoir vos données dans un format structuré.</li>
-                <li>Réclamation : contacter la CNIL (France) si vous estimez que vos droits ne sont pas respectés.</li>
+                <li>{$t('legal.privacy_policy.s6.li1')}</li>
+                <li>{$t('legal.privacy_policy.s6.li2')}</li>
+                <li>{$t('legal.privacy_policy.s6.li3')}</li>
             </ul>
-            <p class="mt-4">Pour exercer vos droits, contactez-nous à :</p>
+        </section>
+
+        <section class="mt-8">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s7.title')}</h2>
+            <p class="mb-4">{$t('legal.privacy_policy.s7.p1')}</p>
+            <p class="mb-4"><strong>{$t('legal.privacy_policy.s7.p2_strong')}</strong></p>
+            <p>{$t('legal.privacy_policy.s7.p2')}</p>
+        </section>
+
+        <section class="mt-8">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s8.title')}</h2>
+            <p class="mb-4">{$t('legal.privacy_policy.s8.intro')}</p>
+            <ul class="list-disc pl-6 space-y-2 text-lg">
+                <li>{$t('legal.privacy_policy.s8.li1')}</li>
+                <li>{$t('legal.privacy_policy.s8.li2')}</li>
+                <li>{$t('legal.privacy_policy.s8.li3')}</li>
+                <li>{$t('legal.privacy_policy.s8.li4')}</li>
+                <li>{$t('legal.privacy_policy.s8.li5')}</li>
+                <li>{$t('legal.privacy_policy.s8.li6')}</li>
+            </ul>
+            <p class="mt-4">{$t('legal.privacy_policy.s8.outro')}</p>
             <p><a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">9. Sécurité des données</h2>
-            <p>Nous mettons en œuvre des mesures techniques et organisationnelles adaptées pour protéger vos données contre les accès non autorisés, la perte ou l'altération.</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s9.title')}</h2>
+            <p>{$t('legal.privacy_policy.s9.content')}</p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">10. Modifications de la Politique de Confidentialité</h2>
-            <p>Nous pouvons mettre à jour cette Politique de Confidentialité pour refléter des changements dans nos pratiques ou pour des raisons légales. La version actualisée sera publiée sur notre application web.</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s10.title')}</h2>
+            <p>{$t('legal.privacy_policy.s10.content')}</p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">11. Contact</h2>
-            <p>Pour toute question ou préoccupation concernant cette Politique de Confidentialité, contactez-nous :</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.privacy_policy.s11.title')}</h2>
+            <p>{$t('legal.privacy_policy.s11.intro')}</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France</li>
-                <li>Email : <a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></li>
+                <li>{$t('legal.privacy_policy.s11.li1')}</li>
+                <li>{$t('legal.privacy_policy.s11.li2')} <a href="mailto:greenscoreweb@gmail.com" class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a></li>
             </ul>
         </section>
     </div>

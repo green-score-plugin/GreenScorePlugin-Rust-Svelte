@@ -1,6 +1,7 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
     import {page} from "$app/state";
+    import { t } from 'svelte-i18n';
 
 
     let { activePage = $bindable() } = $props();
@@ -25,15 +26,15 @@
             <path d="M18.5 18C18.5 14.4999 16.3182 12.0001 12.5 12" stroke={activePage === 'my_info' ? 'white' : 'black'} />
             <path d="M6.5 18C6.5 14.4999 8.68182 12.0001 12.5 12" stroke={activePage === 'my_info' ? 'white' : 'black'} />
         </svg>
-        Mon compte
+        {$t('account.menu.my_info')}
     </button>
 
     <button
-        type="button"
-        aria-label="user equivalent"
-        class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
+            type="button"
+            aria-label="user equivalent"
+            class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
            {activePage === 'user_equivalent' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
-        onclick={() => activePage = 'user_equivalent'}
+            onclick={() => activePage = 'user_equivalent'}
     >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
             <path fill="currentColor" d="M14 12v7.88c.04.3-.06.62-.29.83a.996.996 0 0 1-1.41 0l-2.01-2.01a.99.99 0 0 1-.29-.83V12h-.03L4.21 4.62a1 1 0 0 1 .17-1.4c.19-.14.4-.22.62-.22h14c.22 0 .43.08.62.22a1 1 0 0 1 .17 1.4L14.03 12z"/>
@@ -66,7 +67,7 @@
         <rect x="17.4941" y="20.2788" width="2.66274" height="2.66274" rx="0.5" fill="white" stroke="black"/>
         <rect x="9.43652" y="2.69775" width="2.66274" height="2.66274" rx="0.5" fill="white" stroke="black"/>
         </svg>
-        {#if user.role === 'user' }Mon organisation {:else if user.role === 'organisation'} Gérer mon organisation {/if}
+        {#if user.role === 'user' }{$t('account.menu.my_organization')} {:else if user.role === 'organisation'} {$t('account.menu.manage_organization')} {/if}
     </button>
 
 
@@ -78,16 +79,16 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
         </svg>
-        <span class="text-base whitespace-nowrap">{#if user.role === 'user' }Supprimer le compte{:else if user.role === 'organisation'}Supprimer l'organisation{/if}</span>
+        <span class="text-base whitespace-nowrap">{#if user.role === 'user' }{$t('account.menu.delete_account')}{:else if user.role === 'organisation'}{$t('account.menu.delete_organization')}{/if}</span>
     </button>
 </div>
 
 {#if showDeleteModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
         <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
-            <h2 class="text-xl font-semibold mb-4">Confirmer la suppression</h2>
+            <h2 class="text-xl font-semibold mb-4">{$t('account.modals.delete_confirm_title')}</h2>
             <p class="text-gray-600 mb-6">
-                Êtes-vous sûr de vouloir supprimer votre compte utilisateur ?
+                {$t('account.modals.delete_confirm_desc')}
             </p>
             <div class="flex justify-end gap-4">
                 <button
@@ -95,7 +96,7 @@
                         class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer transition"
                         onclick={() => showDeleteModal = false}
                 >
-                    Annuler
+                    {$t('account.modals.cancel')}
                 </button>
 
                 <form
@@ -110,11 +111,10 @@
                         type="submit"
                         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer transition"
                 >
-                    Supprimer
+                    {$t('account.modals.delete')}
                 </button>
                 </form>
             </div>
         </div>
     </div>
 {/if}
-

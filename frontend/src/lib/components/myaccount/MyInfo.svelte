@@ -1,6 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import { enhance } from '$app/forms';
+    import { t } from 'svelte-i18n';
 
     let submitted = false;
     let loading = false;
@@ -23,13 +24,13 @@
     $: {
         if ($page.form?.actionType === 'update_info') {
             if ($page.form?.success) {
-                successMessage = $page.form.message || 'Informations mises à jour avec succès';
+                successMessage = $t($page.form.message || 'auth.register.success_register');
                 errorMessage = '';
                 password = '';
                 passwordConfirm = '';
                 submitted = false;
             } else if ($page.form?.message) {
-                errorMessage = $page.form.message;
+                errorMessage = $t($page.form.message);
                 successMessage = '';
             }
         }
@@ -74,7 +75,7 @@
         }}
         class="flex flex-col gap-4"
 >
-    <h1 class="text-2xl font-bold py-2">Mes informations</h1>
+    <h1 class="text-2xl font-bold py-2">{$t('account.info.title')}</h1>
 
     <div style="opacity: 0; position: absolute; top: 0; left: 0; height: 0; width: 0; z-index: -1;">
         <input type="text" name="fake_email_prevent_autofill" tabindex="-1" />
@@ -95,13 +96,13 @@
 
     {#if showPasswordError}
         <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-            <p class="font-semibold mb-2">Le mot de passe doit contenir :</p>
+            <p class="font-semibold mb-2">{$t('auth.login.password_requirements')}</p>
             <ul class="list-disc list-inside space-y-1 ml-1">
-                <li>Au moins 8 caractères</li>
-                <li>Une majuscule</li>
-                <li>Une minuscule</li>
-                <li>Un chiffre</li>
-                <li>Un caractère spécial (#?!@$%^&*-)</li>
+                <li>{$t('auth.login.req_length')}</li>
+                <li>{$t('auth.login.req_uppercase')}</li>
+                <li>{$t('auth.login.req_lowercase')}</li>
+                <li>{$t('auth.login.req_number')}</li>
+                <li>{$t('auth.login.req_special')}</li>
             </ul>
         </div>
     {/if}
@@ -109,14 +110,14 @@
 
     <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full flex flex-col">
-            <label for="firstName">Prénom</label>
+            <label for="firstName">{$t('auth.register.firstname')}</label>
             <input
                     id="firstName"
                     name="prenom"
                     type="text"
                     bind:value={user.prenom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre prénom"
+                    placeholder={$t ('account.info.first_name_label')}
                     {...noAutofill}
             />
         </div>
@@ -124,14 +125,14 @@
 
     <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full flex flex-col">
-            <label for="lastName">Nom</label>
+            <label for="lastName">{$t('auth.register.lastname')}</label>
             <input
                     id="lastName"
                     name="nom"
                     type="text"
                     bind:value={user.nom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre nom"
+                    placeholder={$t ('account.info.last_name_label')}
                     {...noAutofill}
             />
         </div>
@@ -139,14 +140,14 @@
 
     <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full flex flex-col">
-            <label for="email">Email</label>
+            <label for="email">{$t('auth.login.email_label')}</label>
             <input
                     id="email"
                     name="email"
                     type="email"
                     bind:value={user.email}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre email"
+                    placeholder={$t ('account.info.email_label')}
                     {...noAutofill}
             />
         </div>
@@ -154,7 +155,7 @@
 
     <div class="flex flex-col md:flex-row gap-4 w-full text-grey-700 font-outfit font-semibold text-sm">
         <div class="w-full flex flex-col">
-            <label for="password">Mot de passe</label>
+            <label for="password">{$t('auth.login.password_label')}</label>
             <input
                     id="password"
                     name="password"
@@ -162,20 +163,20 @@
                     bind:value={password}
                     on:input={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre mot de passe"
+                    placeholder={$t ('account.info.password_label')}
                     autocomplete="new-password"
             />
         </div>
 
         <div class="w-full flex flex-col">
-            <label for="passwordConfirm">Confirmation</label>
+            <label for="passwordConfirm">{$t('auth.register.confirm_password')}</label>
             <input
                     id="passwordConfirm"
                     type="password"
                     bind:value={passwordConfirm}
                     on:input={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Confirmez votre mot de passe"
+                    placeholder={$t ('account.info.confirm_password_label')}
                     autocomplete="new-password"
             />
         </div>
@@ -194,9 +195,9 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Enregistrement...
+            {$t('account.info.button_saving')}
         {:else}
-            Valider
+            {$t('account.info.button_validate')}
         {/if}
     </button>
 </form>

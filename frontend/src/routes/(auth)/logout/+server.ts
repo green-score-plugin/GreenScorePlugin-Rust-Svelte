@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import type { RequestHandler } from '../../../../.svelte-kit/types/src/routes';
+import type { RequestHandler } from './$types';
 import { BACKEND_URL } from '$lib/config.ts';
 import { invalidateCache } from '$lib/server/session.ts';
 
