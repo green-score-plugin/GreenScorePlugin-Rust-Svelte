@@ -2,6 +2,7 @@
     import LeftMenu from '$lib/components/myaccount/LeftMenu.svelte';
     import MyInfo from '$lib/components/myaccount/MyInfo.svelte';
     import MyInfoOrganisation from "$lib/components/myaccount/MyInfoOrganisation.svelte";
+    import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
     import Organisation from '$lib/components/myaccount/Organisation.svelte';
     import GererMembre from '$lib/components/myaccount/GererMembre.svelte';
     import salutation from '$lib/images/salutation.png';
@@ -30,6 +31,8 @@
                 {:else if user.role === 'organisation'}
                     <MyInfoOrganisation />
                 {/if}
+            {:else if activePage === 'user_equivalent'}
+                <UserEquivalent />
             {:else if activePage === 'organisation'}
                 {#if user.role === 'user' }
                     <Organisation />

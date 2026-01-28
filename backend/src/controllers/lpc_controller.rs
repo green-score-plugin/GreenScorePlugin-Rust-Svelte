@@ -112,7 +112,7 @@ pub async fn lpc(
     let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
         let (l, n) = calculate_green_score(&State(pool.clone()), infos.carbon_footprint, "lpc".to_string()).await;
 
-        let eqs = equivalent(&pool, infos.carbon_footprint, 2).await;
+        let eqs = equivalent(&pool, infos.carbon_footprint, 2, None).await;
         let eqs = match eqs {
             Some(v) if !v.is_empty() => Some(v),
             _ => None,
