@@ -341,8 +341,8 @@
                                             <i class="{item.icon} text-[#6D874B] text-3xl"></i>
                                         </div>
                                         <div>
-                                            <h3 class="font-outfit font-semibold text-lg mb-2 text-gray-900">{item.title}</h3>
-                                            <p class="text-sm leading-relaxed text-gray-600">{item.advice}</p>
+                                            <h3 class="font-outfit font-semibold text-lg mb-2 text-gray-900">{$t(item.title)}</h3>
+                                            <p class="text-sm leading-relaxed text-gray-600">{$t(item.advice)}</p>
                                         </div>
                                     </div>
                                 </div>

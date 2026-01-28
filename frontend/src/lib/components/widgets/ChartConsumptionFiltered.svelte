@@ -16,10 +16,20 @@
     });
 
     $: if (canvas && consumptionData) {
-        updateChart();
+        updateChart($t);
     }
 
-    function updateChart() {
+    function formatLabel(label: string) {
+        const match = label.match(/^(\d{2})\/(\d{4})$/);
+        if (match) {
+            const m = parseInt(match[1], 10);
+            const y = match[2];
+            return `${$t(`months.${m}`)} ${y}`;
+        }
+        return label;
+    }
+
+    function updateChart(_?: any) {
         const ctx = canvas?.getContext('2d');
         if (!ctx) return;
 
@@ -33,7 +43,7 @@
         chartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: consumptionData.map(d => d.label),
+                labels: consumptionData.map(d => formatLabel(d.label)),
                 datasets: [{
                     data: consumptionData.map(d => d.value),
                     backgroundColor: '#9333EA',
