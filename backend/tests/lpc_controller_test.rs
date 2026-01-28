@@ -7,6 +7,7 @@ mod tests {
     use tower_sessions::session::Id;
     use tower_sessions::{MemoryStore, Session};
     use tokio::sync::OnceCell;
+    use backend::models::Account;
 
     static POOL: OnceCell<MySqlPool> = OnceCell::const_new();
 
@@ -45,6 +46,35 @@ mod tests {
         let store = Arc::new(MemoryStore::default());
 
         let session = Session::new(Some(Id::default()), store, None);
+
+        let params = LpcParams {
+            url_full: None,
+            country: None,
+            total_consu: None,
+            page_size: None,
+            loading_time: None,
+            queries_quantity: None,
+        };
+
+        let result = lpc(session, State(pool), Query(params)).await;
+
+        assert!(result.0.success);
+    }
+
+    #[tokio::test]
+    async fn test_lpc_via_history_with_session() {
+        let pool = get_test_pool().await;
+        let store = Arc::new(MemoryStore::default());
+        let session = Session::new(Some(Id::default()), store, None);
+
+        let mock_account = Account::User(backend::models::User::new(
+            1,
+            "test@email.com".to_string(),
+            "John".to_string(),
+            "Doe".to_string(),
+            Some(1)
+        ));
+        session.insert("account", mock_account).await.unwrap();
 
         let params = LpcParams {
             url_full: None,
