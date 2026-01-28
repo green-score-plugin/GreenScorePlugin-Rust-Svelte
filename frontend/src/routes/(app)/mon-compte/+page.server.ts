@@ -11,6 +11,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 
     let members = [];
     let organisation = null;
+    let accountEquivalents = [];
 
     if (locals.user?.role === 'organisation') {
         const res = await fetch(`${BACKEND_URL}/get_organisation_members`, { method: "POST", headers });
@@ -32,11 +33,22 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
         }
     }
 
+    const equivRes = await fetch(`${BACKEND_URL}/account/get_account_all_equivalents`, { method: 'GET', headers, credentials: 'include' });
+    if (equivRes.ok) {
+        try {
+            const result = await equivRes.json();
+            if (result.success && result.equivalents) {
+                accountEquivalents = result.equivalents;
+            }
+        } catch {
+        }
+    }
     return {
         members,
-        organisation
+        organisation,
+        accountEquivalents
     };
-};
+}
 
 
 export const actions = {
@@ -53,7 +65,7 @@ export const actions = {
             const result = await response.json();
 
             if (result.success) {
-                 redirect(303, '/logout?account_deleted=true');
+                redirect(303, '/logout?account_deleted=true');
             } else {
                 return fail(400, { message: result.message || 'Erreur lors de la suppression' });
             }
@@ -84,11 +96,13 @@ export const actions = {
             if (result.success) {
                 return {
                     success: true,
-                    message: 'success.member_deleted'
+                    message: 'Membre supprimé avec succès'
                 };
+            } else {
+                return fail(400, { message: result.message || 'Erreur lors de la suppression du membre' });
             }
-        } catch {
-            return fail(500, { message: 'errors.member_delete_error' });
+        } catch (error) {
+            return fail(500, { message: 'Erreur serveur' });
         }
     },
     modifier: async ({ request, fetch, cookies }) => {
@@ -99,20 +113,20 @@ export const actions = {
         const password = data.get('password')?.toString();
 
         if (!prenom || !nom || !email) {
-            return fail(400, { actionType: 'update_info', message: "errors.validation_fields_required" });
+            return fail(400, { actionType: 'update_info', message: "Prénom, nom et email requis" });
         }
 
         const payload: Record<string, string> = { prenom, nom, email };
 
         if (password && password.trim() !== '') {
-             const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-             if (!passwordRegex.test(password)) {
-                 return fail(400, {
-                     actionType: 'update_info',
-                     message: "errors.validation_password_complexity"
-                 });
-             }
-             payload.password = password;
+            const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                return fail(400, {
+                    actionType: 'update_info',
+                    message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)"
+                });
+            }
+            payload.password = password;
         }
 
         try {
@@ -131,7 +145,7 @@ export const actions = {
                 const errorText = await res.text();
                 return fail(res.status, {
                     actionType: 'update_info',
-                    message: `Erreur ${res.status}: ${errorText || 'errors.communication_error'}`
+                    message: `Erreur ${res.status}: ${errorText || 'Erreur lors de la communication avec le serveur'}`
                 });
             }
 
@@ -156,10 +170,10 @@ export const actions = {
                 return {
                     actionType: 'update_info',
                     success: true,
-                    message: 'success.info_updated'
+                    message: 'Vos informations ont été mises à jour avec succès'
                 };
             }
-            return fail(400, { actionType: 'update_info', message: result.message || 'errors.update_error' });
+            return fail(400, { actionType: 'update_info', message: result.message || 'Erreur lors de la mise à jour' });
 
         } catch (err) {
             return fail(500, {
@@ -174,7 +188,7 @@ export const actions = {
         const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
 
         if (!codeOrganisation) {
-            return fail(400, { actionType: 'join_orga', message: "errors.validation_code_required" });
+            return fail(400, { actionType: 'join_orga', message: "Le code de l'organisation est requis" });
         }
 
         try {
@@ -200,7 +214,7 @@ export const actions = {
 
                 return fail(response.status, {
                     actionType: 'join_orga',
-                    message: errorMessage || "errors.validation_code_invalid"
+                    message: errorMessage || "Code invalide"
                 });
             }
 
@@ -226,15 +240,14 @@ export const actions = {
                 return {
                     actionType: 'join_orga',
                     success: true,
-                    message: "success.org_joined"
+                    message: "Vous avez rejoint l'organisation avec succès."
                 };
-            }
-            if (!result.success) {
-                return fail(400, { actionType: 'join_orga', message: result.message || "errors.operation_error" });
+            } else {
+                return fail(400, { actionType: 'join_orga', message: result.message || "Erreur lors de l'opération" });
             }
 
-        } catch {
-            return fail(500, { actionType: 'join_orga', message: "errors.org_connection_error" });
+        } catch (error) {
+            return fail(500, { actionType: 'join_orga', message: "Erreur serveur lors de la connexion à l'organisation" });
         }
     },
 
@@ -244,11 +257,11 @@ export const actions = {
         const siret = data.get('siret')?.toString();
 
         if (!organisationName) {
-            return fail(400, { actionType: 'update_orga', message: "errors.validation_org_name_required" });
+            return fail(400, { actionType: 'update_orga', message: "Le nom de l'organisation est requis" });
         }
 
         if(siret && siret.length > 0 && !/^\d{14}$/.test(siret)) {
-            return fail(400, { actionType: 'update_orga', message: "errors.validation_siret_format" });
+            return fail(400, { actionType: 'update_orga', message: "Le SIRET doit contenir exactement 14 chiffres" });
         }
 
         try{
@@ -287,16 +300,16 @@ export const actions = {
                 return {
                     actionType: 'update_orga',
                     success: true,
-                    message: "success.org_updated"
+                    message: "Les informations de l'organisation ont été mises à jour avec succès"
                 };
             } else {
-                return fail(400, { actionType: 'update_orga', message: resJson.message || 'errors.org_update_error' });
+                return fail(400, { actionType: 'update_orga', message: resJson.message || 'Erreur lors de la mise à jour' });
             }
 
         } catch (err) {
             return fail(500, {
                 actionType: 'update_orga',
-                message: `Erreur serveur: ${err instanceof Error ? err.message : 'errors.unknown_error'}`
+                message: `Erreur serveur: ${err instanceof Error ? err.message : 'Erreur inconnue'}`
             });
         }
     },
@@ -333,14 +346,14 @@ export const actions = {
                 return {
                     actionType: 'leave_orga',
                     success: true,
-                    message: "success.org_left"
+                    message: "Vous avez quitté l'organisation."
                 };
             } else {
-                return fail(400, { actionType: 'leave_orga', message: result.message || "errors.org_leave_error" });
+                return fail(400, { actionType: 'leave_orga', message: result.message || "Erreur" });
             }
 
-        } catch {
-            return fail(500, { actionType: 'leave_orga', message: "errors.server_error" });
+        } catch (error) {
+            return fail(500, { actionType: 'leave_orga', message: "Erreur serveur" });
         }
     },
     change_orga: async({ request, fetch, cookies }) => {
@@ -348,7 +361,7 @@ export const actions = {
         const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
 
         if (!codeOrganisation) {
-            return fail(400, { actionType: 'change_orga', message: "errors.validation_code_required" });
+            return fail(400, { actionType: 'change_orga', message: "Le code de l'organisation est requis" });
         }
 
         try {
@@ -374,7 +387,7 @@ export const actions = {
 
                 return fail(response.status, {
                     actionType: 'change_orga',
-                    message: errorMessage || "errors.validation_code_invalid"
+                    message: errorMessage || "Code invalide"
                 });
             }
 
@@ -401,14 +414,44 @@ export const actions = {
                 return {
                     actionType: 'change_orga',
                     success: true,
-                    message: "success.org_changed"
+                    message: "Vous avez changé d'organisation avec succès."
                 };
             } else {
-                return fail(400, { actionType: 'change_orga', message: result.message || "errors.operation_error" });
+                return fail(400, { actionType: 'change_orga', message: result.message || "Erreur lors de l'opération" });
             }
 
-        } catch {
-            return fail(500, { actionType: 'change_orga', message: "errors.org_change_error" });
+        } catch (error) {
+            return fail(500, { actionType: 'change_orga', message: "Erreur serveur lors du changement d'organisation" });
+        }
+    },
+    modification_equivalents: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const equivalents = data.getAll('equivalents').map(item => item.toString());
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/update_account_equivalents`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ equivalents })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return {
+                    actionType: 'modification_equivalents',
+                    success: true,
+                    message: 'Équivalents mis à jour avec succès'
+                };
+            } else {
+                return fail(400, { actionType: 'modification_equivalents', message: result.message || 'Erreur lors de la mise à jour' });
+            }
+        } catch (error) {
+            return fail(500, { actionType: 'modification_equivalents', message: 'Erreur serveur' });
         }
     }
 } satisfies Actions;

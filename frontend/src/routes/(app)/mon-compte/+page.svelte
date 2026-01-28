@@ -7,6 +7,7 @@
     import salutation from '$lib/images/salutation.png';
     import {page} from "$app/state";
     import { t } from 'svelte-i18n';
+    import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
 
     let activePage = $state("my_info");
     let user = $derived(page.data.user);
@@ -31,6 +32,8 @@
                 {:else if user.role === 'organisation'}
                     <MyInfoOrganisation />
                 {/if}
+            {:else if activePage === 'user_equivalent'}
+                <UserEquivalent />
             {:else if activePage === 'organisation'}
                 {#if user.role === 'user' }
                     <Organisation />
