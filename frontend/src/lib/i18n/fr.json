@@ -499,6 +499,7 @@
     "champ": "Tous les champs sont requis",
     "match_password": "Les mots de passe ne correspondent pas",
     "cgu": "You must accept the terms and conditions of use.",
+    "match_user": "Email et mot de passe requis",
     "auth": {
       "unauthenticated": "Non authentifié",
       "email_exists": "Cet email est déjà utilisé",
