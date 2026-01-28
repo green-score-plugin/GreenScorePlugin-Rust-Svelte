@@ -1,258 +1,717 @@
-use backend::controllers::calculation_method::{
-    calculate_carbon_emissions, CarbonConstants, EmissionsBreakdown, EmissionsMetrics,
-    EnergyMetrics, DataMetrics,
-};
+use backend::green_score;
+use sqlx::MySqlPool;
 
-#[test]
-fn test_carbon_constants() {
-    // Vérifie que les constantes correspondent aux valeurs du JavaScript
-    assert_eq!(CarbonConstants::KWH_PER_GB_TRANSFER, 0.519);
-    assert_eq!(CarbonConstants::KWH_PER_GB_DATACENTER, 0.065);
-    assert_eq!(CarbonConstants::KWH_PER_REQUEST, 0.00015);
-    assert_eq!(CarbonConstants::BYTES_TO_GB, 1.0 / (1024.0 * 1024.0 * 1024.0));
+// ============================================
+// Tests LPC (Last Page Consulted)
+// ============================================
+
+#[tokio::test]
+async fn test_calculate_green_score_lpc_grade_b() {
+    let (letter, nomination) = green_score::calculate_green_score(None, 0.3, "lpc".to_string()).await;
+    assert_eq!(letter, "B");
+    assert_eq!(nomination, "Protecteur des Bois");
 }
 
-#[test]
-fn test_calculate_carbon_emissions_zero_values() {
-    let result = calculate_carbon_emissions(0, 0, 0, 0, 442.0);
+#[tokio::test]
+async fn test_calculate_green_score_lpc_all_grades() {
+    let test_cases = vec![
+        (0.1, "A", "Maître des forêts"),
+        (0.3, "B", "Protecteur des Bois"),
+        (0.6, "C", "Frère des Arbres"),
+        (0.9, "D", "Initié de la Nature"),
+        (1.2, "E", "Explorateur Imprudent"),
+        (1.4, "F", "Tempête Numérique"),
+        (1.6, "G", "Destructeur des Écosystèmes"),
+    ];
 
-    assert_eq!(result.total_emissions, 0.0);
-    assert_eq!(result.breakdown.transfer, 0.0);
-    assert_eq!(result.breakdown.datacenter, 0.0);
-    assert_eq!(result.breakdown.requests, 0.0);
-    assert_eq!(result.metrics.energy.total, 0.0);
+    for (carbon, expected_letter, expected_nomination) in test_cases {
+        let (letter, nomination) = green_score::calculate_green_score(None, carbon, "lpc".to_string()).await;
+        assert_eq!(letter, expected_letter);
+        assert_eq!(nomination, expected_nomination);
+    }
 }
 
-#[test]
-fn test_calculate_carbon_emissions_basic_transfer() {
-    // Test avec 1 GB transféré
-    let one_gb = 1024 * 1024 * 1024;
-    let result = calculate_carbon_emissions(one_gb, one_gb, 1, 1000, 442.0);
-
-    // Énergie de transfert attendue : 1 GB * 0.519 kWh/GB = 0.519 kWh
-    // Émissions attendues : 0.519 * 442 = 229.398 gCO2
-    let expected_transfer_emissions = 0.519 * 442.0;
-
-    assert!(result.breakdown.transfer > 0.0);
-    assert!((result.breakdown.transfer - expected_transfer_emissions).abs() < 0.1);
+#[tokio::test]
+async fn test_calculate_green_score_lpc_boundary_a() {
+    let (letter, _) = green_score::calculate_green_score(None, 0.24, "lpc".to_string()).await;
+    assert_eq!(letter, "A");
 }
 
-#[test]
-fn test_calculate_carbon_emissions_datacenter_energy() {
-    // Test avec des ressources datacenter
-    let one_gb = 1024 * 1024 * 1024;
-    let result = calculate_carbon_emissions(0, one_gb, 0, 1000, 442.0);
-
-    // Énergie datacenter attendue : 1 GB * 0.065 kWh/GB = 0.065 kWh
-    // Émissions attendues : 0.065 * 442 = 28.73 gCO2
-    let expected_datacenter_emissions = 0.065 * 442.0;
-
-    assert!(result.breakdown.datacenter > 0.0);
-    assert!((result.breakdown.datacenter - expected_datacenter_emissions).abs() < 0.1);
+#[tokio::test]
+async fn test_calculate_green_score_lpc_boundary_exact() {
+    let (letter, _) = green_score::calculate_green_score(None, 0.25, "lpc".to_string()).await;
+    assert_eq!(letter, "B");
 }
 
-#[test]
-fn test_calculate_carbon_emissions_requests_energy() {
-    // Test avec 1000 requêtes
-    let result = calculate_carbon_emissions(0, 0, 1000, 1000, 442.0);
-
-    // Énergie requêtes attendue : 1000 * 0.00015 kWh = 0.15 kWh
-    // Émissions attendues : 0.15 * 442 = 66.3 gCO2
-    let expected_requests_emissions = 1000.0 * 0.00015 * 442.0;
-
-    assert!(result.breakdown.requests > 0.0);
-    assert!((result.breakdown.requests - expected_requests_emissions).abs() < 0.1);
+#[tokio::test]
+async fn test_calculate_green_score_lpc_zero() {
+    let (letter, nomination) = green_score::calculate_green_score(None, 0.0, "lpc".to_string()).await;
+    assert_eq!(letter, "A");
+    assert_eq!(nomination, "Maître des forêts");
 }
 
-#[test]
-fn test_calculate_carbon_emissions_realistic_scenario() {
-    // Scénario réaliste : 5 MB transférés, 10 MB ressources, 50 requêtes
-    let bytes_transferred = 5 * 1024 * 1024;
-    let bytes_resources = 10 * 1024 * 1024;
-    let requests = 50;
-    let carbon_intensity = 442.0;
-
-    let result = calculate_carbon_emissions(
-        bytes_transferred,
-        bytes_resources,
-        requests,
-        5000,
-        carbon_intensity
-    );
-
-    // Vérifications générales
-    assert!(result.total_emissions > 0.0);
-    assert!(result.breakdown.transfer > 0.0);
-    assert!(result.breakdown.datacenter > 0.0);
-    assert!(result.breakdown.requests > 0.0);
-
-    // La somme des breakdowns doit être égale au total
-    let sum = result.breakdown.transfer + result.breakdown.datacenter + result.breakdown.requests;
-    assert!((result.total_emissions - sum).abs() < 0.1);
-
-    // Les métriques d'énergie doivent être cohérentes
-    assert!(result.metrics.energy.transfer > 0.0);
-    assert!(result.metrics.energy.datacenter > 0.0);
-    assert!(result.metrics.energy.requests > 0.0);
-    assert!(result.metrics.energy.total > 0.0);
+#[tokio::test]
+async fn test_calculate_green_score_lpc_negative() {
+    let (letter, _) = green_score::calculate_green_score(None, -1.0, "lpc".to_string()).await;
+    assert_eq!(letter, "A");
 }
 
-#[test]
-fn test_calculate_carbon_emissions_different_carbon_intensities() {
-    let bytes = 1024 * 1024 * 1024;
+// ============================================
+// Tests MO (My Organization) sans pool
+// ============================================
 
-    // Test avec une intensité carbone faible (France, ~60 gCO2/kWh)
-    let result_low = calculate_carbon_emissions(bytes, bytes, 10, 1000, 60.0);
-
-    // Test avec une intensité carbone élevée (Pologne, ~700 gCO2/kWh)
-    let result_high = calculate_carbon_emissions(bytes, bytes, 10, 1000, 700.0);
-
-    // Les émissions doivent être proportionnelles à l'intensité carbone
-    assert!(result_high.total_emissions > result_low.total_emissions);
-    let ratio = result_high.total_emissions / result_low.total_emissions;
-    assert!((ratio - (700.0 / 60.0)).abs() < 0.1);
+#[tokio::test]
+async fn test_calculate_green_score_zero_carbon() {
+    let (letter, _nomination) = green_score::calculate_green_score(None, 0.0, "mo".to_string()).await;
+    assert_eq!(letter, "N/A");
 }
 
-#[test]
-fn test_emissions_breakdown_structure() {
-    let breakdown = EmissionsBreakdown {
-        transfer: 100.0,
-        datacenter: 50.0,
-        requests: 25.0,
-    };
-
-    assert_eq!(breakdown.transfer, 100.0);
-    assert_eq!(breakdown.datacenter, 50.0);
-    assert_eq!(breakdown.requests, 25.0);
+#[tokio::test]
+async fn test_calculate_green_score_mo_without_pool() {
+    let (letter, nomination) = green_score::calculate_green_score(None, 100.0, "mo".to_string()).await;
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
 }
 
-#[test]
-fn test_energy_metrics_structure() {
-    let energy = EnergyMetrics {
-        transfer: 0.1,
-        datacenter: 0.05,
-        requests: 0.025,
-        total: 0.175,
-    };
+// ============================================
+// Tests MY_DATA sans pool
+// ============================================
 
-    assert_eq!(energy.transfer, 0.1);
-    assert_eq!(energy.datacenter, 0.05);
-    assert_eq!(energy.requests, 0.025);
-    assert_eq!(energy.total, 0.175);
+#[tokio::test]
+async fn test_calculate_green_score_my_data_without_pool() {
+    let (letter, nomination) = green_score::calculate_green_score(None, 1.5, "my_data".to_string()).await;
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
 }
 
-#[test]
-fn test_data_metrics_structure() {
-    let data = DataMetrics {
-        gb_transferred: 1.0,
-        gb_resources: 2.0,
-        requests: 100,
-        load_time_ms: 5000,
-        carbon_intensity: 442.0,
-    };
+// ============================================
+// Tests page invalide
+// ============================================
 
-    assert_eq!(data.gb_transferred, 1.0);
-    assert_eq!(data.gb_resources, 2.0);
-    assert_eq!(data.requests, 100);
-    assert_eq!(data.load_time_ms, 5000);
-    assert_eq!(data.carbon_intensity, 442.0);
+#[tokio::test]
+async fn test_calculate_green_score_invalid_page() {
+    let (letter, nomination) = green_score::calculate_green_score(None, 1.0, "invalid".to_string()).await;
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
 }
 
-#[test]
-fn test_emissions_metrics_complete_structure() {
-    let result = calculate_carbon_emissions(
-        1024 * 1024 * 1024,
-        2 * 1024 * 1024 * 1024,
-        100,
-        5000,
-        442.0
-    );
+// ============================================
+// Tests MO (My Organization) avec pool
+// ============================================
 
-    // Vérifie que toutes les structures sont correctement remplies
-    assert!(result.metrics.energy.transfer > 0.0);
-    assert!(result.metrics.energy.datacenter > 0.0);
-    assert!(result.metrics.energy.requests > 0.0);
-    assert!(result.metrics.energy.total > 0.0);
+#[sqlx::test]
+async fn test_calculate_green_score_mo_with_pool(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
 
-    assert!(result.metrics.data.gb_transferred > 0.0);
-    assert!(result.metrics.data.gb_resources > 0.0);
-    assert_eq!(result.metrics.data.requests, 100);
-    assert_eq!(result.metrics.data.load_time_ms, 5000);
-    assert_eq!(result.metrics.data.carbon_intensity, 442.0);
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (100.0, 1), (200.0, 1), (150.0, 1),
+        (50.0, 2), (75.0, 2),
+        (300.0, 3)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "mo".to_string()).await;
+
+    assert_ne!(letter, "N/A");
+    assert_ne!(nomination, "N/A");
+
+    Ok(())
 }
 
-#[test]
-fn test_calculate_carbon_emissions_precision() {
-    // Test de précision avec des valeurs décimales
-    let result = calculate_carbon_emissions(
-        1_500_000, // 1.5 MB
-        3_000_000, // 3 MB
-        15,
-        2500,
-        442.0
-    );
+#[sqlx::test]
+async fn test_calculate_green_score_mo_all_grades(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
 
-    // Vérifier que les résultats sont arrondis à 2 décimales
-    assert_eq!(result.total_emissions, (result.total_emissions * 100.0).round() / 100.0);
-    assert_eq!(result.breakdown.transfer, (result.breakdown.transfer * 100.0).round() / 100.0);
-    assert_eq!(result.breakdown.datacenter, (result.breakdown.datacenter * 100.0).round() / 100.0);
-    assert_eq!(result.breakdown.requests, (result.breakdown.requests * 100.0).round() / 100.0);
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (100.0, 1), (100.0, 1),
+        (50.0, 2), (50.0, 2),
+        (200.0, 3), (200.0, 3)"
+    )
+    .execute(&pool)
+    .await?;
+
+    // Test grade A (très bas)
+    let (letter, _) = green_score::calculate_green_score(Some(&pool), 51.0, "mo".to_string()).await;
+    assert_eq!(letter, "A");
+
+    // Test grade G (très haut)
+    let (letter, _) = green_score::calculate_green_score(Some(&pool), 500.0, "mo".to_string()).await;
+    assert_eq!(letter, "G");
+
+    Ok(())
 }
 
-#[test]
-fn test_bytes_to_gb_conversion() {
-    let one_gb = 1024 * 1024 * 1024;
-    let result = calculate_carbon_emissions(one_gb, 0, 0, 1000, 442.0);
+#[sqlx::test]
+async fn test_calculate_green_score_mo_empty_database(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
 
-    // Vérifie que la conversion bytes vers GB est correcte
-    assert!((result.metrics.data.gb_transferred - 1.0).abs() < 0.001);
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "mo".to_string()).await;
+
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
+
+    Ok(())
 }
 
-#[test]
-fn test_edge_case_large_values() {
-    // Test avec de très grandes valeurs
-    let large_bytes = u64::MAX / 2;
-    let result = calculate_carbon_emissions(
-        large_bytes,
-        large_bytes,
-        1000000,
-        1000000,
-        442.0
-    );
+#[sqlx::test]
+async fn test_calculate_green_score_mo_with_null_values(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
 
-    // Vérifie que le calcul ne provoque pas de dépassement
-    assert!(result.total_emissions.is_finite());
-    assert!(result.total_emissions > 0.0);
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (NULL, 1), (0, 1), (-10.0, 1),
+        (100.0, 1), (200.0, 1)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter, _) = green_score::calculate_green_score(Some(&pool), 150.0, "mo".to_string()).await;
+
+    assert_ne!(letter, "N/A");
+
+    Ok(())
 }
 
-#[test]
-fn test_comparison_with_javascript_example() {
-    // Test avec les mêmes valeurs que dans le JavaScript
-    // pour vérifier la cohérence entre les deux implémentations
-    let bytes_transferred = 5_242_880; // 5 MB
-    let bytes_resources = 10_485_760; // 10 MB
-    let requests = 50;
-    let carbon_intensity = 442.0;
+#[sqlx::test]
+async fn test_calculate_green_score_mo_complete_flow(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
 
-    let result = calculate_carbon_emissions(
-        bytes_transferred,
-        bytes_resources,
-        requests,
-        5000,
-        carbon_intensity
-    );
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (50.0, 1), (60.0, 1), (55.0, 1),
+        (100.0, 2), (120.0, 2), (110.0, 2),
+        (200.0, 3), (220.0, 3), (210.0, 3)"
+    )
+    .execute(&pool)
+    .await?;
 
-    // Calcul manuel pour vérification
-    let gb_transferred = bytes_transferred as f64 * CarbonConstants::BYTES_TO_GB;
-    let gb_resources = bytes_resources as f64 * CarbonConstants::BYTES_TO_GB;
+    let (letter1, _) = green_score::calculate_green_score(Some(&pool), 52.0, "mo".to_string()).await;
+    let (letter2, _) = green_score::calculate_green_score(Some(&pool), 500.0, "mo".to_string()).await;
 
-    let transfer_energy = gb_transferred * CarbonConstants::KWH_PER_GB_TRANSFER;
-    let datacenter_energy = gb_resources * CarbonConstants::KWH_PER_GB_DATACENTER;
-    let request_energy = requests as f64 * CarbonConstants::KWH_PER_REQUEST;
+    assert_ne!(letter1, "N/A");
+    assert_ne!(letter2, "N/A");
 
-    let total_energy = transfer_energy + datacenter_energy + request_energy;
-    let expected_emissions = total_energy * carbon_intensity;
+    let grades = vec!["A", "B", "C", "D", "E", "F", "G"];
+    let pos1 = grades.iter().position(|&g| g == letter1).unwrap_or(10);
+    let pos2 = grades.iter().position(|&g| g == letter2).unwrap_or(10);
+    assert!(pos1 < pos2);
 
-    // Vérifie que le résultat correspond au calcul manuel (avec tolérance)
-    assert!((result.total_emissions - expected_emissions).abs() < 0.1);
+    Ok(())
 }
+
+// ============================================
+// Tests MY_DATA avec pool
+// ============================================
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_with_pool(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (100.0, 1), (200.0, 2), (150.0, 3), (50.0, 4)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 80.0, "my_data".to_string()).await;
+
+    assert_ne!(letter, "N/A");
+    assert_ne!(nomination, "N/A");
+
+    Ok(())
+}
+
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_empty_database(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "my_data".to_string()).await;
+
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_with_null_values(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (NULL, 1), (0, 2), (-10.0, 3),
+        (100.0, 4), (200.0, 5)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter, _) = green_score::calculate_green_score(Some(&pool), 150.0, "my_data".to_string()).await;
+
+    assert_ne!(letter, "N/A");
+
+    Ok(())
+}
+
+// ============================================
+// Tests des cas limites et edge cases
+// ============================================
+
+#[sqlx::test]
+async fn test_calculate_green_score_mo_all_intermediate_grades(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    // Créer une échelle avec :
+    // Org 1: total=200 (100+100)
+    // Org 2: total=400 (200+200)
+    // Org 3: total=600 (300+300)
+    // avg global = (200+400+600)/3 = 400
+    // least = 200 (org 1)
+    // max_carbon = (200-400)*2 = -400
+    // scale = (-400-200)/7 = -85.71 -> devient 0.25 (car <= 0)
+    // t1 = 200 + 0.25 = 200.25
+    // t2 = 200 + 0.50 = 200.50
+    // t3 = 200 + 0.75 = 200.75
+    // t4 = 200 + 1.00 = 201.00
+    // t5 = 200 + 1.25 = 201.25
+    // t6 = 200 + 1.50 = 201.50
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (100.0, 1), (100.0, 1),
+        (200.0, 2), (200.0, 2),
+        (300.0, 3), (300.0, 3)"
+    )
+    .execute(&pool)
+    .await?;
+
+    // Test grade A (< t1 = 200.25)
+    let (letter, _) = green_score::calculate_green_score(Some(&pool), 200.0, "mo".to_string()).await;
+    assert_eq!(letter, "A");
+
+    // Test grade B (>= t1, < t2)
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.30, "mo".to_string()).await;
+    assert_eq!(letter, "B");
+    assert_eq!(nomination, "Allié de la Nature");
+
+    // Test grade C (>= t2, < t3)
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.60, "mo".to_string()).await;
+    assert_eq!(letter, "C");
+    assert_eq!(nomination, "Explorateur Prudent");
+
+    // Test grade D (>= t3, < t4)
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.90, "mo".to_string()).await;
+    assert_eq!(letter, "D");
+    assert_eq!(nomination, "Voyageur Insouciant");
+
+    // Test grade E (>= t4, < t5)
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 201.10, "mo".to_string()).await;
+    assert_eq!(letter, "E");
+    assert_eq!(nomination, "Consommateur Dynamique");
+
+    // Test grade F (>= t5, < t6)
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 201.40, "mo".to_string()).await;
+    assert_eq!(letter, "F");
+    assert_eq!(nomination, "Exploitant Intense");
+
+    // Test grade G (>= t6)
+    let (letter, _) = green_score::calculate_green_score(Some(&pool), 202.0, "mo".to_string()).await;
+    assert_eq!(letter, "G");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_all_intermediate_grades(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    // Créer une échelle avec least=50, avg=100
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (50.0, 1), (100.0, 2), (150.0, 3)"
+    )
+    .execute(&pool)
+    .await?;
+
+    // Test grade B
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.30, "my_data".to_string()).await;
+    assert_eq!(letter, "B");
+    assert_eq!(nomination, "Allié de la Nature");
+
+    // Test grade C
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.60, "my_data".to_string()).await;
+    assert_eq!(letter, "C");
+    assert_eq!(nomination, "Explorateur Prudent");
+
+    // Test grade D
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.90, "my_data".to_string()).await;
+    assert_eq!(letter, "D");
+    assert_eq!(nomination, "Voyageur Insouciant");
+
+    // Test grade E
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 51.10, "my_data".to_string()).await;
+    assert_eq!(letter, "E");
+    assert_eq!(nomination, "Consommateur Dynamique");
+
+    // Test grade F
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 51.40, "my_data".to_string()).await;
+    assert_eq!(letter, "F");
+    assert_eq!(nomination, "Exploitant Intense");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_mo_single_organization(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (100.0, 1), (200.0, 1), (150.0, 1)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 175.0, "mo".to_string()).await;
+
+    // Avec une seule organisation, least = avg, donc scale devient 0.25
+    assert_ne!(letter, "N/A");
+    assert_ne!(nomination, "N/A");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_single_user(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (100.0, 1)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "my_data".to_string()).await;
+
+    assert_ne!(letter, "N/A");
+    assert_ne!(nomination, "N/A");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_mo_extreme_values(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (0.001, 1), (0.001, 1),
+        (10000.0, 2), (10000.0, 2)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter1, _) = green_score::calculate_green_score(Some(&pool), 0.002, "mo".to_string()).await;
+    let (letter2, _) = green_score::calculate_green_score(Some(&pool), 50000.0, "mo".to_string()).await;
+
+    assert_ne!(letter1, "N/A");
+    assert_ne!(letter2, "N/A");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_vs_lpc_scale(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    // Test que my_data utilise bien l'échelle dynamique avec pool
+    sqlx::query(
+        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
+        (100.0, 1), (200.0, 2)"
+    )
+    .execute(&pool)
+    .await?;
+
+    let (letter_my_data, _) = green_score::calculate_green_score(Some(&pool), 150.0, "my_data".to_string()).await;
+
+    // Devrait utiliser l'échelle dynamique, pas lpc
+    assert_ne!(letter_my_data, "N/A");
+
+    Ok(())
+}
+
+// ============================================
+// Tests directs des fonctions auxiliaires
+// ============================================
+
+#[sqlx::test]
+async fn test_organizations_global_average_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+        .execute(&pool)
+        .await?;
+
+    // Org 1: avg = 200
+    // Org 2: avg = 400
+    // Global avg = (200 + 400) / 2 = 300
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (100.0, 1), (300.0, 1), (400.0, 2)")
+        .execute(&pool)
+        .await?;
+
+    let avg = green_score::organizations_global_average_carbon_footprint(&pool).await?;
+    assert_eq!(avg, 300.0);
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_organizations_global_average_carbon_footprint_empty(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+        .execute(&pool)
+        .await?;
+
+    let avg = green_score::organizations_global_average_carbon_footprint(&pool).await?;
+    assert_eq!(avg, 0.0);
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_organizations_least_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+        .execute(&pool)
+        .await?;
+
+    // Org 1: sum = 200
+    // Org 2: sum = 50
+    // Org 3: sum = 300
+    // Least = 50 (Org 2)
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (100.0, 1), (100.0, 1), (50.0, 2), (300.0, 3)")
+        .execute(&pool)
+        .await?;
+
+    let least = green_score::organizations_least_carbon_footprint(&pool).await?;
+    assert_eq!(least, 50.0);
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_users_global_average_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+        .execute(&pool)
+        .await?;
+
+    // (100 + 200 + 300) / 3 = 200
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (100.0, 1), (200.0, 2), (300.0, 3)")
+        .execute(&pool)
+        .await?;
+
+    let avg = green_score::users_global_average_carbon_footprint(&pool).await?;
+    assert_eq!(avg, 200.0);
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_users_least_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+        .execute(&pool)
+        .await?;
+
+    // Min is 50
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (100.0, 1), (50.0, 2), (300.0, 3)")
+        .execute(&pool)
+        .await?;
+
+    let least = green_score::users_least_carbon_footprint(&pool).await?;
+    assert_eq!(least, 50.0);
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_mo_scale_positive(pool: MySqlPool) -> sqlx::Result<()> {
+    // We need least > 2 * avg to get positive scale
+    // least is MIN(SUM(footprint)) per org
+    // avg is AVG(AVG(footprint)) per org
+
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS user (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            total_carbon_footprint DOUBLE,
+            organisation_id INT
+        )"
+    )
+    .execute(&pool)
+    .await?;
+
+    // Create Org 1 with 10 users, each 10.0
+    // Org 1 Total = 100.0. Avg = 10.0.
+    for _ in 0..10 {
+        sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (10.0, 1)")
+            .execute(&pool)
+            .await?;
+    }
+
+    // Checking helper values first to confirm setup
+    let avg = green_score::organizations_global_average_carbon_footprint(&pool).await?;
+    assert_eq!(avg, 10.0);
+
+    let least = green_score::organizations_least_carbon_footprint(&pool).await?;
+    assert_eq!(least, 100.0);
+
+    // least (100) > 2*avg (20).
+    // max_carbon = (100 - 10) * 2 = 180.
+    // scale = (180 - 100) / 7 = 80 / 7 = 11.428...
+
+    // t1 = least + scale = 100 + 11.42 = 111.42
+    // A < 111.42
+    let (letter, _) = green_score::calculate_green_score(Some(&pool), 105.0, "mo".to_string()).await;
+    assert_eq!(letter, "A");
+
+    // Check G grade in this scale
+    // t6 = least + 6*scale = 100 + 68.57 = 168.57
+    // 170 > t6 => G
+    let (letter_g, _) = green_score::calculate_green_score(Some(&pool), 170.0, "mo".to_string()).await;
+    assert_eq!(letter_g, "G");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_organizations_helper_ignores_nulls(pool: MySqlPool) -> sqlx::Result<()> {
+    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+        .execute(&pool)
+        .await?;
+
+    // User with null org
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (100.0, NULL)")
+        .execute(&pool)
+        .await?;
+
+    // Valid user
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (50.0, 1)")
+        .execute(&pool)
+        .await?;
+
+    // Avg should be 50.0 (ignoring null org)
+    let avg = green_score::organizations_global_average_carbon_footprint(&pool).await?;
+    assert_eq!(avg, 50.0);
+
+    let least = green_score::organizations_least_carbon_footprint(&pool).await?;
+    assert_eq!(least, 50.0);
+
+    Ok(())
+}
+
