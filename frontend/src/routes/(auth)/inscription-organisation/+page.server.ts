@@ -18,7 +18,7 @@ export const actions = {
         }
 
         if(password !== confirmPassword) {
-            return fail(400, { message: "Les mots de passe ne correspondent pas" })
+            return fail(400, { message: "errors.match_password" })
         }
 
         const passwordString = password.toString();

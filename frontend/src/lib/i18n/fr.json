@@ -497,6 +497,7 @@
     "members_retrieval_error": "Erreur récupération membres",
     "org_update_error": "Erreur mise à jour organisation",
     "champ": "Tous les champs sont requis",
+    "match_password": "Les mots de passe ne correspondent pas",
     "auth": {
       "unauthenticated": "Non authentifié",
       "email_exists": "Cet email est déjà utilisé",
@@ -507,7 +508,7 @@
       "email_verification_error": "Erreur vérification email",
       "registration_error": "Erreur d'inscription",
       "org_creation_error": "Erreur création organisation",
-      "user_creation_error": "Erreur création utilisateur",
+      "user_creation_error": "Erreur création utilisateur"
     }
   },
   "success": {

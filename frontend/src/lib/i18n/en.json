@@ -484,6 +484,7 @@
     "members_retrieval_error": "Error retrieving members",
     "org_update_error": "Error updating organization",
     "errors_champs" : "All fields are required",
+    "erros_passwords" : "Passwords do not match",
     "auth": {
       "unauthenticated": "Unauthenticated",
       "email_exists": "This email is already taken",
