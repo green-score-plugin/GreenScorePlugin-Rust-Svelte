@@ -386,27 +386,27 @@ async fn test_calculate_green_score_mo_all_intermediate_grades(pool: MySqlPool) 
     // Test grade B (>= t1, < t2)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.30, "mo".to_string()).await;
     assert_eq!(letter, "B");
-    assert_eq!(nomination, "Allié de la Nature");
+    assert_eq!(nomination, "nominations.page.B");
 
     // Test grade C (>= t2, < t3)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.60, "mo".to_string()).await;
     assert_eq!(letter, "C");
-    assert_eq!(nomination, "Explorateur Prudent");
+    assert_eq!(nomination, "nominations.page.C");
 
     // Test grade D (>= t3, < t4)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 200.90, "mo".to_string()).await;
     assert_eq!(letter, "D");
-    assert_eq!(nomination, "Voyageur Insouciant");
+    assert_eq!(nomination, "nominations.page.D");
 
     // Test grade E (>= t4, < t5)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 201.10, "mo".to_string()).await;
     assert_eq!(letter, "E");
-    assert_eq!(nomination, "Consommateur Dynamique");
+    assert_eq!(nomination, "nominations.page.E");
 
     // Test grade F (>= t5, < t6)
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 201.40, "mo".to_string()).await;
     assert_eq!(letter, "F");
-    assert_eq!(nomination, "Exploitant Intense");
+    assert_eq!(nomination, "nominations.page.F");
 
     // Test grade G (>= t6)
     let (letter, _) = green_score::calculate_green_score(Some(&pool), 202.0, "mo".to_string()).await;
@@ -438,27 +438,27 @@ async fn test_calculate_green_score_my_data_all_intermediate_grades(pool: MySqlP
     // Test grade B
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.30, "my_data".to_string()).await;
     assert_eq!(letter, "B");
-    assert_eq!(nomination, "Allié de la Nature");
+    assert_eq!(nomination, "nominations.page.B");
 
     // Test grade C
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.60, "my_data".to_string()).await;
     assert_eq!(letter, "C");
-    assert_eq!(nomination, "Explorateur Prudent");
+    assert_eq!(nomination, "nominations.page.C");
 
     // Test grade D
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 50.90, "my_data".to_string()).await;
     assert_eq!(letter, "D");
-    assert_eq!(nomination, "Voyageur Insouciant");
+    assert_eq!(nomination, "nominations.page.D");
 
     // Test grade E
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 51.10, "my_data".to_string()).await;
     assert_eq!(letter, "E");
-    assert_eq!(nomination, "Consommateur Dynamique");
+    assert_eq!(nomination, "nominations.page.E");
 
     // Test grade F
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 51.40, "my_data".to_string()).await;
     assert_eq!(letter, "F");
-    assert_eq!(nomination, "Exploitant Intense");
+    assert_eq!(nomination, "nominations.page.F");
 
     Ok(())
 }
