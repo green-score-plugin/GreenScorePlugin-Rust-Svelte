@@ -498,6 +498,7 @@
     "org_update_error": "Erreur mise à jour organisation",
     "champ": "Tous les champs sont requis",
     "match_password": "Les mots de passe ne correspondent pas",
+    "cgu": "You must accept the terms and conditions of use.",
     "auth": {
       "unauthenticated": "Non authentifié",
       "email_exists": "Cet email est déjà utilisé",
