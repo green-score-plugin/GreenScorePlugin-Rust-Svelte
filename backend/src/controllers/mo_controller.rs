@@ -125,7 +125,7 @@ async fn organization_informations(pool: &MySqlPool, session: Session) -> Option
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
     if let Some(account) = account {
-        let org_id: i64 = match account.organization_id(pool).await {
+        let org_id: i64 = match account.organization_id().await {
             Ok(Some(id)) => id,
             Ok(None) => return None,
             Err(_) => return None,
@@ -232,7 +232,7 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
     let account: Option<Account> = session.get("account").await.unwrap_or(None);
 
     let org_id: i64 = match account {
-        Some(acc) => match acc.organization_id(&pool).await {
+        Some(acc) => match acc.organization_id().await {
             Ok(Some(id)) => id,
             Ok(None) => {
                 return Json(MyOrganizationResponse {
