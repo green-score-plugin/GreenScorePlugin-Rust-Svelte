@@ -140,7 +140,12 @@
     "info": {
       "title": "Mes informations",
       "button_validate": "Valider",
-      "button_saving": "Enregistrement..."
+      "button_saving": "Enregistrement...",
+      "first_name_label": "Prénom",
+      "last_name_label": "Nom",
+      "email_label": "Email",
+      "password_label": "Votre mot de passe",
+      "confirm_password_label": "Confirmer votre mot de passe"
     },
     "organization": {
       "title": "Organisation",

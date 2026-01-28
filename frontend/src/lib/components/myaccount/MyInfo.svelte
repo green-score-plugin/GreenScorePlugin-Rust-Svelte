@@ -117,7 +117,7 @@
                     type="text"
                     bind:value={user.prenom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre prénom"
+                    placeholder={$t ('account.info.first_name_label')}
                     {...noAutofill}
             />
         </div>
@@ -132,7 +132,7 @@
                     type="text"
                     bind:value={user.nom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre nom"
+                    placeholder={$t ('account.info.last_name_label')}
                     {...noAutofill}
             />
         </div>
@@ -147,7 +147,7 @@
                     type="email"
                     bind:value={user.email}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre email"
+                    placeholder={$t ('account.info.email_label')}
                     {...noAutofill}
             />
         </div>
@@ -163,7 +163,7 @@
                     bind:value={password}
                     on:input={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Votre mot de passe"
+                    placeholder={$t ('account.info.password_label')}
                     autocomplete="new-password"
             />
         </div>
@@ -176,7 +176,7 @@
                     bind:value={passwordConfirm}
                     on:input={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Confirmez votre mot de passe"
+                    placeholder={$t ('account.info.confirm_password_label')}
                     autocomplete="new-password"
             />
         </div>
