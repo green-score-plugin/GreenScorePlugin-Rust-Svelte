@@ -496,37 +496,3 @@ pub async fn update_account_equivalents(session: Session, State(pool): State<MyS
 
     Json(json!({ "success": true }))
 }
-
-
-
-// TESTS
-
-impl UpdateAccountRequest {
-    #[allow(dead_code)]
-    pub fn build_update_query(&self) -> (String, usize) {
-        let mut query = String::from("UPDATE user SET ");
-        let mut updates = Vec::new();
-
-        if self.email.is_some() {
-            updates.push("email = ?");
-        }
-        if self.prenom.is_some() {
-            updates.push("first_name = ?");
-        }
-        if self.nom.is_some() {
-            updates.push("last_name = ?");
-        }
-        if self.password.is_some() {
-            updates.push("password = ?");
-        }
-
-        if updates.is_empty() {
-            return (String::new(), 0);
-        }
-
-        query.push_str(&updates.join(", "));
-        query.push_str(" WHERE id = ?");
-
-        (query, updates.len())
-    }
-}
