@@ -1,7 +1,7 @@
 use axum::extract::State;
 use axum::Json;
 use sqlx::MySqlPool;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tower_sessions::Session;
 use crate::models::{Account, User};
@@ -28,6 +28,23 @@ pub struct UpdateAccountRequest {
 #[derive(Deserialize)]
 pub struct JoinOrgaRequest {
     pub code: String,
+}
+
+#[derive(Serialize)]
+pub struct EquivalentResponse {
+    pub id: i64,
+    pub name: String,
+    pub icon_thumbnail: String,
+    pub is_selected: bool,
+}
+
+#[derive(Serialize)]
+pub struct AllEquivalentsResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub equivalents: Option<Vec<EquivalentResponse>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
 }
 
 pub async fn update_account(
@@ -389,6 +406,95 @@ pub async fn get_my_organization(
         "success": true,
         "organisation": null
     }))
+}
+
+pub async fn get_account_all_equivalents(session: Session, State(pool): State<MySqlPool>) -> Json<AllEquivalentsResponse> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let account = match account_opt {
+        Some(acc) => acc,
+        None => return Json(AllEquivalentsResponse {
+            success: false,
+            equivalents: None,
+            message: Some("Non authentifié".to_string()),
+        }),
+    };
+
+    match sqlx::query_as::<_, (i64, String, String, bool)>(
+        "SELECT e.id, e.name, e.icon_thumbnail, (u.user_id IS NOT NULL) AS is_selected
+              FROM equivalent e LEFT JOIN user_equivalent u ON e.id = u.equivalent_id AND u.user_id = ?"
+    ).bind(account.id())
+        .fetch_all(&pool)
+        .await
+    {
+        Ok(equivalents) => {
+            let items: Vec<EquivalentResponse> = equivalents.into_iter().map(|(id, name, icon_thumbnail, is_selected)| {
+                EquivalentResponse {
+                    id,
+                    name,
+                    icon_thumbnail,
+                    is_selected,
+                }
+            }).collect();
+
+            Json(AllEquivalentsResponse {
+                success: true,
+                equivalents: Some(items),
+                message: None,
+            })
+        },
+        Err(e) => Json(AllEquivalentsResponse {
+            success: false,
+            equivalents: None,
+            message: Some(format!("Erreur récupération équivalents: {}", e)),
+        }),
+    }
+}
+
+pub async fn update_account_equivalents(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
+    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+
+    let account = match account_opt {
+        Some(acc) => acc,
+        None => return Json(json!({ "success": false, "message": "Non authentifié" })),
+    };
+
+    let equivalents = match payload["equivalents"].as_array() {
+        Some(arr) => arr,
+        None => return Json(json!({ "success": false, "message": "Liste d'équivalents manquante ou invalide" })),
+    };
+
+    let mut tx = match pool.begin().await {
+        Ok(t) => t,
+        Err(e) => return Json(json!({ "success": false, "message": format!("Erreur transaction: {}", e) })),
+    };
+
+    if let Err(e) = sqlx::query("DELETE FROM user_equivalent WHERE user_id = ?")
+        .bind(account.id())
+        .execute(&mut *tx)
+        .await
+    {
+        return Json(json!({ "success": false, "message": format!("Erreur nettoyage anciens équivalents: {}", e) }));
+    }
+
+    for eq_val in equivalents {
+        if let Some(eq_id) = eq_val.as_str() {
+            if let Err(e) = sqlx::query("INSERT INTO user_equivalent (user_id, equivalent_id) VALUES (?, ?)")
+                .bind(account.id())
+                .bind(eq_id)
+                .execute(&mut *tx)
+                .await
+            {
+                return Json(json!({ "success": false, "message": format!("Erreur ajout équivalent {}: {}", eq_id, e) }));
+            }
+        }
+    }
+
+    if let Err(e) = tx.commit().await {
+        return Json(json!({ "success": false, "message": format!("Erreur validation transaction: {}", e) }));
+    }
+
+    Json(json!({ "success": true }))
 }
 
 

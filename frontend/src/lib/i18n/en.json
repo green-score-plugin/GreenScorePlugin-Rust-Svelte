@@ -133,6 +133,7 @@
   "account": {
     "menu": {
       "my_info": "My Account",
+      "my_equivalents": "My Equivalents",
       "my_organization": "My Organization",
       "manage_organization": "Manage My Organization",
       "delete_account": "Delete Account",
@@ -147,6 +148,14 @@
       "email_label": "Email",
       "password_label": "Your Password",
       "confirm_password_label": "Confirm your Password"
+    },
+    "equivalent": {
+      "message": {
+        "server_error": "Server Error",
+        "success": "Equivalents updated successfully",
+        "loading": "Loading..."
+      },
+      "button": "Save changes"
     },
     "organization": {
       "title": "Organization",
@@ -602,15 +611,14 @@
         "default_user": "Adopt responsible digital habits to reduce energy consumption."
     },
     "equivalent": {
-      "lille_nimes": "trip Lille-Nîmes by car",
-      "paris_berlin": "trip Paris-Berlin by train",
+      "lille_marseille": "trip Lille-Marseille by car",
+      "paris_londres": "trip Paris-Londres by train",
       "emails": "sent emails",
       "search": "google searches",
       "streaming": "streaming hours",
       "bus": "km by bus",
       "motorbike": "km by motorbike",
-      "car": "km by car",
-      "laptop": "laptop usage hours",
+      "car": "km by fossil fuel car",
       "tap_water": "liters of tap water",
       "paris_ny": "paris-New York flight"
     }

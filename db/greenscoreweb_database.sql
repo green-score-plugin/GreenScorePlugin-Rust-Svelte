@@ -103,17 +103,16 @@ PRIMARY KEY (`id`)
 --
 
 INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
-(1, 'data.equivalent.lille_nimes', 0.004, 'car.png'),
-(2, 'data.equivalent.paris_berlin', 0.163, 'train-paris-berlin.png'),
+(1, 'data.equivalent.lille_marseille', 0.004, 'car.png'),
+(2, 'data.equivalent.paris_londres', 0.73, 'train-paris-londres.png'),
 (3, 'data.equivalent.emails', 2000, 'email.png'),
 (4, 'data.equivalent.search', 5000, 'search.png'),
 (5, 'data.equivalent.streaming', 17.86, 'youtube.png'),
 (6, 'data.equivalent.bus', 36, 'bus.png'),
 (7, 'data.equivalent.motorbike', 4.54, 'motorbike.png'),
 (8, 'data.equivalent.car', 4.54, 'car.png'),
-(9, 'data.equivalent.laptop', 0.004, 'laptop.png'),
-(10, 'data.equivalent.tap_water', 7692, 'faucet.png'),
-(11, 'data.equivalent.paris_ny', 0.0007, 'new-york.png');
+(9, 'data.equivalent.tap_water', 7692, 'faucet.png'),
+(10, 'data.equivalent.paris_ny', 0.0007, 'new-york.png');
 
 -- --------------------------------------------------------
 
