@@ -63,7 +63,7 @@
         <div class="flex items-center justify-end gap-3 mt-4 border-t border-gray-200 pt-4">
             {#if message}
                 <div in:fade class="text-sm font-medium {isSuccess ? 'text-green-600' : 'text-red-600'}">
-                    {message}
+                    {$t(message)}
                 </div>
             {/if}
 

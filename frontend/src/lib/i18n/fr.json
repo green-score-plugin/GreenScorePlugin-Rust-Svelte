@@ -150,7 +150,6 @@
     },
     "equivalent": {
       "message": {
-        "server_error": "Erreur serveur",
         "success": "Équivalents mis à jour",
         "loading": "Enregistrement..."
       },
