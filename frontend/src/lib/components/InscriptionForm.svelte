@@ -92,9 +92,9 @@
     <div class="flex flex-col gap-2 text-grey-700 font-semibold text-sm font-outfit">
         <div class="flex gap-2 items-start">
             <input bind:checked={agreeTerms} id="agreeTerms" type="checkbox" name="agreeTerms" class="mt-1 accent-gs-green-950 cursor-pointer">
-            <label for="agreeTerms">{$t('auth.register.agree_terms')}</label>
+            <label for="agreeTerms">{@html $t('auth.register.agree_terms')}</label>
         </div>
-        {#if submitted && errors.agreeTerms} <span class="text-red-500 text-sm">{$t('auth.register.accept_terms_error')}</span> {/if}
+        {#if submitted && errors.agreeTerms} <span class="text-red-500 text-sm">{@html $t('auth.register.accept_terms_error')}</span> {/if}
     </div>
 
     <!-- Bouton -->
