@@ -25,5 +25,7 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/plugin/get-account", post(auth_controller::get_current_account))
         .route("/plugin/equivalent", post(plugin_controller::get_equivalent))
         .route("/plugin/save_monitored_website_data", post(plugin_controller::save_monitored_website_data))
+        .route("/account/get_account_all_equivalents", get(account_controller::get_account_all_equivalents))
+        .route("/account/update_account_equivalents", patch(account_controller::update_account_equivalents))
         .with_state(pool)
 }
