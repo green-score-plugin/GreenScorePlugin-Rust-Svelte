@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { t } from 'svelte-i18n';
     export let pageSize: number | null = null;
     export let pageSizeUnit: string | null = null;
     export let loadingTime: number | null = null;
@@ -36,10 +37,10 @@
 </script>
 
 <div class="bg-white grid grid-row-3 p-6 rounded-lg shadow-md col-span-1 sm:col-span-2 lg:col-span-6 flex-col flex-wrap min-h-[300px] order-7 lg:order-7">
-    <h2 class="text-lg font-bold mb-4 row-span-1 font-outfit">La page en quelques chiffres</h2>
+    <h2 class="text-lg font-bold mb-4 row-span-1 font-outfit">{$t('widgets.common.page_in_numbers')}</h2>
     <div class="flex flex-col sm:flex-row sm:flex-wrap justify-center w-full h-fit row-span-2 gap-3">
         {#if !pageSize && !loadingTime && !queriesQuantity}
-            <p class="text-center text-gray-500 flex items-center justify-center h-full">pas de données</p>
+            <p class="text-center text-gray-500 flex items-center justify-center h-full">{$t('widgets.common.no_data')}</p>
         {:else }
             {#if pageSize && pageSizeUnit}
                 <div class="flex flex-col flex-1 h-fit items-center">
@@ -49,7 +50,7 @@
                         </svg>
                         <p class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-[#8458A9]">{Math.round($animatedPageSize)}{pageSizeUnit}</p>
                     </div>
-                    <p class="text-sm text-gray-500 text-center">Taille</p>
+                    <p class="text-sm text-gray-500 text-center">{$t('widgets.common.metrics.size')}</p>
                 </div>
             {/if}
             {#if loadingTime}
@@ -60,7 +61,7 @@
                         </svg>
                         <p class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-[#8458A9]">{$animatedLoadingTime.toFixed(1)} s</p>
                     </div>
-                    <p class="text-sm text-gray-500 text-center">Temps de chargement</p>
+                    <p class="text-sm text-gray-500 text-center">{$t('widgets.common.metrics.loading_time')}</p>
                 </div>
             {/if}
             {#if queriesQuantity}
@@ -71,7 +72,7 @@
                         </svg>
                         <p class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-[#8458A9]">{Math.round($animatedQueriesQuantity)}</p>
                     </div>
-                    <p class="text-sm text-gray-500 text-center">Nombre de requêtes</p>
+                    <p class="text-sm text-gray-500 text-center">{$t('widgets.common.metrics.requests_count')}</p>
                 </div>
             {/if}
         {/if}

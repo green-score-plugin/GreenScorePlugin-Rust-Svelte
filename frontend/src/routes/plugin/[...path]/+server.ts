@@ -22,6 +22,6 @@ export const fallback: RequestHandler = async ({ params, request }) => {
         return await fetch(backendUrl, options);
     } catch (err) {
         console.error('Erreur Proxy Rust:', err);
-        return new Response('Erreur de communication avec le backend', { status: 502 });
+        return new Response('errors.backend_communication', { status: 502 });
     }
 };

@@ -1,176 +1,162 @@
+<script lang="ts">
+    import { t } from 'svelte-i18n';
+</script>
+
 <svelte:head>
-    <title>Conditions Générales d'Utilisation</title>
+    <title>{$t('legal.cgu.title')}</title>
 </svelte:head>
 
 <div class="container mx-auto p-6 md:p-12 font-outfit">
     <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">
-        Conditions Générales d'Utilisation
+        {$t('legal.cgu.title')}
     </h1>
 
     <div class="prose max-w-none mb-8 text-gray-700">
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">1. Objet</h2>
-            <p class="text-lg mb-4">Les CGU régissent l'utilisation :</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s1.title')}</h2>
+            <p class="text-lg mb-4">{$t('legal.cgu.s1.intro')}</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>de l'application web : GreenScore Web,</li>
-                <li>du plugin : GreenScore Web.</li>
+                <li>{$t('legal.cgu.s1.li1')}</li>
+                <li>{$t('legal.cgu.s1.li2')}</li>
             </ul>
             <p class="mt-4">
-                Ces services ont pour objectif de fournir des outils et des analyses pour évaluer
-                l'empreinte carbone des activités en ligne.
+                {$t('legal.cgu.s1.outro')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">2. Acceptation des CGU</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s2.title')}</h2>
             <p class="text-lg mb-4">
-                En utilisant l'application web ou le plugin, vous reconnaissez avoir lu, compris et
-                accepté les présentes CGU. Si vous n'êtes pas d'accord avec l'un des termes, veuillez
-                ne pas utiliser nos services.
+                {$t('legal.cgu.s2.content')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">3. Accès aux services</h2>
-            <h3 class="text-2xl font-semibold text-gray-800 mb-4">3.1 Application Web</h3>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s3.title')}</h2>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s3.s3_1_title')}</h3>
             <p class="text-lg mb-4">
-                L'accès à l'application est gratuit. Certaines sections ou services spécifiques
-                peuvent nécessiter la création d'un compte utilisateur.
+                {$t('legal.cgu.s3.s3_1_content')}
             </p>
 
-            <h3 class="text-2xl font-semibold text-gray-800 mb-4">3.2 Plugin</h3>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s3.s3_2_title')}</h3>
             <p class="text-lg mb-4">
-                L'accès au plugin est gratuit. Certaines fonctionnalités sont liées à l'application
-                et peuvent donc nécessiter d'un compte utilisateur.
+                {$t('legal.cgu.s3.s3_2_content')}
             </p>
 
-            <h3 class="text-2xl font-semibold text-gray-800 mb-4">3.3 Pré-requis techniques</h3>
-            <p class="text-lg mb-4">Les utilisateurs doivent disposer :</p>
+            <h3 class="text-2xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s3.s3_3_title')}</h3>
+            <p class="text-lg mb-4">{$t('legal.cgu.s3.s3_3_intro')}</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>d'un équipement compatible (ordinateur, navigateur, etc.),</li>
-                <li>d'une connexion Internet.</li>
+                <li>{$t('legal.cgu.s3.s3_3_li1')}</li>
+                <li>{$t('legal.cgu.s3.s3_3_li2')}</li>
             </ul>
             <p class="mt-4">
-                Tous les coûts liés à ces équipements et connexions sont à la charge des utilisateurs.
+                {$t('legal.cgu.s3.s3_3_outro')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">4. Compte utilisateur</h2>
-            <p class="text-lg mb-4">Pour accéder à certaines fonctionnalités, vous devrez :</p>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s4.title')}</h2>
+            <p class="text-lg mb-4">{$t('legal.cgu.s4.intro')}</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>créer un compte sur l'application ou via le plugin,</li>
-                <li>fournir des informations exactes et à jour,</li>
-                <li>maintenir la confidentialité de vos identifiants.</li>
+                <li>{$t('legal.cgu.s4.li1')}</li>
+                <li>{$t('legal.cgu.s4.li2')}</li>
+                <li>{$t('legal.cgu.s4.li3')}</li>
             </ul>
             <p class="mt-4">
-                Vous êtes seul responsable de l'activité effectuée sous votre compte.
+                {$t('legal.cgu.s4.outro')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">5. Utilisation autorisée</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s5.title')}</h2>
             <p class="text-lg mb-4">
-                En utilisant l'application web et le plugin, vous acceptez de respecter :
+                {$t('legal.cgu.s5.intro')}
             </p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>les lois et réglementations en vigueur,</li>
-                <li>les droits des autres utilisateurs et de GreenScore Web.</li>
+                <li>{$t('legal.cgu.s5.li1')}</li>
+                <li>{$t('legal.cgu.s5.li2')}</li>
             </ul>
-            <p class="mt-4">Il est strictement interdit de :</p>
+            <p class="mt-4">{$t('legal.cgu.s5.forbidden_intro')}</p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>exploiter les services à des fins frauduleuses ou nuisibles,</li>
+                <li>{$t('legal.cgu.s5.forbidden_li1')}</li>
                 <li>
-                    désassembler, décompiler ou tenter de contourner les mesures de sécurité du plugin
-                    ou de l'application web.
+                    {$t('legal.cgu.s5.forbidden_li2')}
                 </li>
             </ul>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">6. Propriété intellectuelle</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s6.title')}</h2>
             <p class="text-lg mb-4">
-                Tous les contenus de l'application et du plugin (logos, textes, codes, images, etc.)
-                sont protégés par les lois sur la propriété intellectuelle. Vous ne pouvez pas les
-                reproduire, distribuer ou utiliser sans autorisation préalable écrite de GreenScore Web.
+                {$t('legal.cgu.s6.p1')}
             </p>
             <p class="text-lg mb-4">
-                Certaines images utilisées sur l'application et le plugin proviennent de Flaticon et
-                sont utilisées conformément à leurs conditions d'utilisation. Ces images sont protégées
-                par des droits d'auteur, et leur reproduction ou redistribution est interdite sans
-                l'autorisation de Flaticon ou de l'auteur.
+                {$t('legal.cgu.s6.p2')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">7. Limitation de responsabilité</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s7.title')}</h2>
             <p class="text-lg mb-4">
-                Nous nous efforçons d'assurer un service de qualité, mais nous ne garantissons pas :
+                {$t('legal.cgu.s7.intro')}
             </p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>une disponibilité continue des services,</li>
-                <li>l'absence d'erreurs techniques.</li>
+                <li>{$t('legal.cgu.s7.li1')}</li>
+                <li>{$t('legal.cgu.s7.li2')}</li>
             </ul>
             <p class="mt-4">
-                GreenScore Web décline toute responsabilité en cas de dommages indirects ou liés à
-                l'utilisation inappropriée de l'application web ou du plugin.
+                {$t('legal.cgu.s7.outro')}
             </p>
         </section>
 
         <section class="mt-8">
             <h2 class="text-3xl font-semibold text-gray-800 mb-4">
-                8. Collecte et utilisation des données personnelles
+                {$t('legal.cgu.s8.title')}
             </h2>
             <p class="text-lg mb-4">
-                Les données collectées via l'application et le plugin sont traitées conformément à
-                notre <a href="/confidentialite" class="text-blue-600 hover:text-blue-800"
-            >Politique de Confidentialité</a
-            >. Nous nous engageons à protéger vos informations et à respecter vos droits en matière
-                de vie privée.
+                {$t('legal.cgu.s8.content')} <a href="/confidentialite" class="text-blue-600 hover:text-blue-800"
+            >{$t('legal.cgu.s8.link')}</a
+            >{$t('legal.cgu.s8.content_end')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">9. Modifications des CGU</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s9.title')}</h2>
             <p class="text-lg mb-4">
-                Nous nous réservons le droit de modifier ces CGU à tout moment. Les modifications
-                entreront en vigueur dès leur publication sur l'application web ou dans le plugin.
-                Il vous incombe de consulter régulièrement ces CGU.
+                {$t('legal.cgu.s9.content')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">10. Durée et résiliation</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s10.title')}</h2>
             <p class="text-lg mb-4">
-                Les CGU s'appliquent dès votre première utilisation des services. Vous pouvez à tout
-                moment cesser d'utiliser l'application et le plugin.
+                {$t('legal.cgu.s10.p1')}
             </p>
             <p class="mt-4">
-                Nous nous réservons le droit de suspendre ou de résilier votre accès en cas de
-                non-respect des CGU.
+                {$t('legal.cgu.s10.p2')}
             </p>
         </section>
 
         <section class="mt-8">
             <h2 class="text-3xl font-semibold text-gray-800 mb-4">
-                11. Droit applicable et juridiction compétente
+                {$t('legal.cgu.s11.title')}
             </h2>
-            <p class="text-lg mb-4">Les présentes CGU sont régies par le droit français.</p>
+            <p class="text-lg mb-4">{$t('legal.cgu.s11.p1')}</p>
             <p class="text-lg">
-                En cas de litige, les tribunaux compétents de Bayonne seront seuls habilités à statuer.
+                {$t('legal.cgu.s11.p2')}
             </p>
         </section>
 
         <section class="mt-8">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-4">12. Contact</h2>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">{$t('legal.cgu.s12.title')}</h2>
             <p class="text-lg mb-4">
-                Pour toute question ou réclamation concernant les présentes CGU, veuillez nous contacter :
+                {$t('legal.cgu.s12.intro')}
             </p>
             <ul class="list-disc pl-6 space-y-2 text-lg">
-                <li>Adresse : 2 Allée du Parc Montaury, 64600 Anglet, France</li>
+                <li>{$t('legal.cgu.s12.address')}</li>
                 <li>
-                    Email: <a
+                    {$t('legal.cgu.s12.email')} <a
                         href="mailto:greenscoreweb@gmail.com"
                         class="text-blue-600 hover:text-blue-800">greenscoreweb@gmail.com</a
                 >
@@ -179,3 +165,4 @@
         </section>
     </div>
 </div>
+

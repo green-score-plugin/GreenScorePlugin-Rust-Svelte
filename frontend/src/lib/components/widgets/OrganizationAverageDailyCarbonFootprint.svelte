@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { t } from 'svelte-i18n';
     import { tweened } from 'svelte/motion';
     import { cubicOut } from 'svelte/easing';
     import equivalent from '$lib/images/equivalent.png';
@@ -17,7 +18,7 @@
 
 <div class="bg-white flex flex-col justify-around gap-3 p-6 rounded-lg shadow-md col-span-1 order-1 lg:col-span-4 text-grey-950">
     {#if averageFootprint}
-    <h2 class="text-lg font-bold text-center">Moyenne de l'empreinte carbone sur un jour (en gCO2e)</h2>
+    <h2 class="text-lg font-bold text-center">{$t('widgets.common.average_daily_footprint.title')}</h2>
     <div class="flex justify-center gap-5 items-center">
         <div class="flex flex-col items-center flex-1 flex-grow">
             <div class="relative text-center">
@@ -35,17 +36,17 @@
             {#if equivalentAverage.icon}
             <div class="flex justify-center items-center w-full mt-4">
                 <picture class="w-12 h-12 flex items-center justify-center">
-                    <img src="/images/equivalents/{equivalentAverage.icon}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy">
+                    <img src="/images/equivalents/{equivalentAverage.icon}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy" on:error={(e) => e.currentTarget.src = '/images/equivalent.png'}>
                 </picture>
             </div>
             {/if}
-            <p class="text-center mt-2 text-lg font-medium"><span class="animate-counter">{equivalentAverage.value}</span> {equivalentAverage.name}</p>
+            <p class="text-center mt-2 text-lg font-medium"><span class="animate-counter">{equivalentAverage.value}</span> {$t(equivalentAverage.name)}</p>
         </div>
         {:else}
-        <p class="text-center text-gray-500 flex items-center justify-center h-full">pas de données</p>
+        <p class="text-center text-gray-500 flex items-center justify-center h-full">{$t('widgets.common.no_data')}</p>
         {/if}
     </div>
     {:else}
-    <p class="text-center text-gray-500 flex items-center justify-center h-full">pas de données</p>
+    <p class="text-center text-gray-500 flex items-center justify-center h-full">{$t('widgets.common.no_data')}</p>
     {/if}
 </div>

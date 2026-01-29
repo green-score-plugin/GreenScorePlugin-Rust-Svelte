@@ -1,7 +1,6 @@
 name: Tests Backend Rust
 
 on:
-  push:
   pull_request:
     branches: ["main", "master"]
   workflow_dispatch:

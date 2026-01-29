@@ -10,7 +10,7 @@ export const actions = {
         const password = data.get('password');
 
         if (!email || !password) {
-            return fail(400, { message: 'Email et mot de passe requis' });
+            return fail(400, { message: 'errors.match_user' });
         }
 
         try {
@@ -34,7 +34,7 @@ export const actions = {
             if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
                 throw error;
             }
-            return fail(500, { message: 'Erreur serveur' });
+            return fail(500, { message: 'errors.server_error' });
         }
     }
 } satisfies Actions;

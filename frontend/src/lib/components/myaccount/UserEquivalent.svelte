@@ -3,6 +3,7 @@
     import { page } from "$app/state";
     import { enhance } from '$app/forms';
     import { fade } from 'svelte/transition';
+    import { t } from 'svelte-i18n';
 
     interface EquivalentResponse {
         id: number;
@@ -44,7 +45,7 @@
                     <div class="min-w-0 flex-1">
                         <label for="equivalent-{accountEquivalent.id}" class="cursor-pointer">
                             <span class="absolute inset-0" aria-hidden="true"></span>
-                            <span class="text-sm font-medium text-gray-900">{accountEquivalent.name}</span>
+                            <span class="text-sm font-medium text-gray-900">{$t(accountEquivalent.name)}</span>
                         </label>
                     </div>
                     <div class="flex h-5 items-center">
@@ -62,13 +63,13 @@
         <div class="flex items-center justify-end gap-3 mt-4 border-t border-gray-200 pt-4">
             {#if message}
                 <div in:fade class="text-sm font-medium {isSuccess ? 'text-green-600' : 'text-red-600'}">
-                    {message}
+                    {$t(message)}
                 </div>
             {/if}
 
             <button type="submit"
                     disabled={loading}
-                    class="inline-flex justify-center rounded-lg border border-transparent bg-gs-green-950 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gs-green-800 focus:outline-none focus:ring-2 focus:ring-gs-green-950 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                    class="hover:cursor-pointer inline-flex justify-center rounded-lg border border-transparent bg-gs-green-950 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-gs-green-800 focus:outline-none focus:ring-2 focus:ring-gs-green-950 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
 
                 {#if loading}
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -77,7 +78,7 @@
                     </svg>
                 {/if}
 
-                {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                {loading ? $t("account.equivalent.message.loading") : $t("account.equivalent.button")}
             </button>
         </div>
 
