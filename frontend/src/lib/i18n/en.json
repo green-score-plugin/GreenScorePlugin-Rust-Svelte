@@ -68,6 +68,7 @@
         "loading_time": "Page loading time"
       },
       "calc_conclusion": "These values are then multiplied by the <span class=\"font-semibold\">carbon intensity</span> of the country where the plugin user is located, resulting in the final carbon footprint in grams of CO<sub>2</sub> emitted (gCO<sub>2</sub>e).",
+      "estimation": "<span class=\"font-semibold\">Please note:</span> This calculation provides an <span class=\"font-semibold\">estimate </span>and not an exact measurement. Not all the data required for an accurate carbon footprint calculation is available. Nevertheless, these results enable<span class=\"font-semibold\">comparer efficacement</span> of energy consumption between different web pages and identification of areas for improvement.",
       "scale": {
         "title": "GreenScore Scale",
         "description": "GreenScore is awarded based on the calculated carbon footprint, according to the following grid:",
@@ -523,7 +524,9 @@
     "org_updated": "Organization information has been updated successfully",
     "operation_success": "Operation successful",
     "org_left": "You have left the organization.",
-    "org_changed": "You have successfully changed your organization."
+    "org_changed": "You have successfully changed your organization.",
+    "join_organization": "You have successfully joined the organization.",
+    "leave_organization": "You have successfully left the organization."
   },
   "data": {
     "advice": {
