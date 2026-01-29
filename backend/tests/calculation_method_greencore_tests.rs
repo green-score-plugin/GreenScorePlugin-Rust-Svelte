@@ -101,15 +101,10 @@ async fn test_calculate_green_score_invalid_page() {
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_with_pool(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -130,15 +125,10 @@ async fn test_calculate_green_score_mo_with_pool(pool: MySqlPool) -> sqlx::Resul
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_all_grades(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -162,15 +152,6 @@ async fn test_calculate_green_score_mo_all_grades(pool: MySqlPool) -> sqlx::Resu
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_empty_database(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
 
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "mo".to_string()).await;
 
@@ -192,15 +173,10 @@ async fn test_calculate_green_score_mo_missing_table(pool: MySqlPool) -> sqlx::R
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_with_null_values(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -219,15 +195,10 @@ async fn test_calculate_green_score_mo_with_null_values(pool: MySqlPool) -> sqlx
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_complete_flow(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -258,15 +229,10 @@ async fn test_calculate_green_score_mo_complete_flow(pool: MySqlPool) -> sqlx::R
 
 #[sqlx::test]
 async fn test_calculate_green_score_my_data_with_pool(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3'), (4, 'Org4', 'ORG4')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -285,15 +251,6 @@ async fn test_calculate_green_score_my_data_with_pool(pool: MySqlPool) -> sqlx::
 
 #[sqlx::test]
 async fn test_calculate_green_score_my_data_empty_database(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
 
     let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "my_data".to_string()).await;
 
@@ -315,15 +272,10 @@ async fn test_calculate_green_score_my_data_missing_table(pool: MySqlPool) -> sq
 
 #[sqlx::test]
 async fn test_calculate_green_score_my_data_with_null_values(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3'), (4, 'Org4', 'ORG4'), (5, 'Org5', 'ORG5')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -346,15 +298,10 @@ async fn test_calculate_green_score_my_data_with_null_values(pool: MySqlPool) ->
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_all_intermediate_grades(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
+        .execute(&pool)
+        .await?;
 
     // Créer une échelle avec :
     // Org 1: total=200 (100+100)
@@ -417,15 +364,10 @@ async fn test_calculate_green_score_mo_all_intermediate_grades(pool: MySqlPool) 
 
 #[sqlx::test]
 async fn test_calculate_green_score_my_data_all_intermediate_grades(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
+        .execute(&pool)
+        .await?;
 
     // Créer une échelle avec least=50, avg=100
     sqlx::query(
@@ -465,15 +407,10 @@ async fn test_calculate_green_score_my_data_all_intermediate_grades(pool: MySqlP
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_single_organization(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer l'organisation d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -493,15 +430,10 @@ async fn test_calculate_green_score_mo_single_organization(pool: MySqlPool) -> s
 
 #[sqlx::test]
 async fn test_calculate_green_score_my_data_single_user(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer l'organisation d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -520,15 +452,10 @@ async fn test_calculate_green_score_my_data_single_user(pool: MySqlPool) -> sqlx
 
 #[sqlx::test]
 async fn test_calculate_green_score_mo_extreme_values(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2')")
+        .execute(&pool)
+        .await?;
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
@@ -549,15 +476,10 @@ async fn test_calculate_green_score_mo_extreme_values(pool: MySqlPool) -> sqlx::
 
 #[sqlx::test]
 async fn test_calculate_green_score_my_data_vs_lpc_scale(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2')")
+        .execute(&pool)
+        .await?;
 
     // Test que my_data utilise bien l'échelle dynamique avec pool
     sqlx::query(
@@ -575,13 +497,37 @@ async fn test_calculate_green_score_my_data_vs_lpc_scale(pool: MySqlPool) -> sql
     Ok(())
 }
 
+#[sqlx::test]
+async fn test_calculate_green_score_mo_with_infinity_values(pool: MySqlPool) -> sqlx::Result<()> {
+    // Créer l'organisation d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
+        .execute(&pool)
+        .await?;
+
+    // Insérer des valeurs qui pourraient causer des calculs invalides (division par zéro, etc.)
+    // On utilise des valeurs qui donnent avg = 0 pour tester le cas d'erreur
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (0.0, 1)")
+        .execute(&pool)
+        .await?;
+
+    // Le calcul devrait gérer gracieusement les valeurs infinies ou NaN
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "mo".to_string()).await;
+
+    // Devrait retourner N/A car avg = 0
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
+
+    Ok(())
+}
+
 // ============================================
 // Tests directs des fonctions auxiliaires
 // ============================================
 
 #[sqlx::test]
 async fn test_organizations_global_average_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2')")
         .execute(&pool)
         .await?;
 
@@ -599,9 +545,6 @@ async fn test_organizations_global_average_carbon_footprint(pool: MySqlPool) -> 
 
 #[sqlx::test]
 async fn test_organizations_global_average_carbon_footprint_empty(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
-        .execute(&pool)
-        .await?;
 
     let avg = green_score::organizations_global_average_carbon_footprint(&pool).await?;
     assert_eq!(avg, 0.0);
@@ -610,7 +553,8 @@ async fn test_organizations_global_average_carbon_footprint_empty(pool: MySqlPoo
 
 #[sqlx::test]
 async fn test_organizations_least_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
         .execute(&pool)
         .await?;
 
@@ -629,7 +573,8 @@ async fn test_organizations_least_carbon_footprint(pool: MySqlPool) -> sqlx::Res
 
 #[sqlx::test]
 async fn test_users_global_average_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
         .execute(&pool)
         .await?;
 
@@ -645,7 +590,8 @@ async fn test_users_global_average_carbon_footprint(pool: MySqlPool) -> sqlx::Re
 
 #[sqlx::test]
 async fn test_users_least_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+    // Créer les organisations d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1'), (2, 'Org2', 'ORG2'), (3, 'Org3', 'ORG3')")
         .execute(&pool)
         .await?;
 
@@ -665,15 +611,10 @@ async fn test_calculate_green_score_mo_scale_positive(pool: MySqlPool) -> sqlx::
     // least is MIN(SUM(footprint)) per org
     // avg is AVG(AVG(footprint)) per org
 
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS user (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            total_carbon_footprint DOUBLE,
-            organisation_id INT
-        )"
-    )
-    .execute(&pool)
-    .await?;
+    // Créer l'organisation d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
+        .execute(&pool)
+        .await?;
 
     // Create Org 1 with 10 users, each 10.0
     // Org 1 Total = 100.0. Avg = 10.0.
@@ -710,7 +651,8 @@ async fn test_calculate_green_score_mo_scale_positive(pool: MySqlPool) -> sqlx::
 
 #[sqlx::test]
 async fn test_organizations_helper_ignores_nulls(pool: MySqlPool) -> sqlx::Result<()> {
-    sqlx::query("CREATE TABLE IF NOT EXISTS user (id INT PRIMARY KEY AUTO_INCREMENT, total_carbon_footprint DOUBLE, organisation_id INT)")
+    // Créer l'organisation d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
         .execute(&pool)
         .await?;
 
@@ -733,4 +675,68 @@ async fn test_organizations_helper_ignores_nulls(pool: MySqlPool) -> sqlx::Resul
 
     Ok(())
 }
+
+#[sqlx::test]
+async fn test_calculate_green_score_mo_with_database_error(pool: MySqlPool) -> sqlx::Result<()> {
+    // Créer l'organisation d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
+        .execute(&pool)
+        .await?;
+
+    // Insérer un utilisateur valide
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (100.0, 1)")
+        .execute(&pool)
+        .await?;
+
+    // Désactiver les contraintes de clés étrangères et renommer la table user
+    sqlx::query("SET FOREIGN_KEY_CHECKS = 0")
+        .execute(&pool)
+        .await?;
+
+    sqlx::query("RENAME TABLE user TO user_backup")
+        .execute(&pool)
+        .await?;
+
+    // Appeler calculate_green_score qui devrait gérer l'erreur gracieusement
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "mo".to_string()).await;
+
+    // Devrait retourner N/A car la requête va échouer
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
+
+    Ok(())
+}
+
+#[sqlx::test]
+async fn test_calculate_green_score_my_data_with_database_error(pool: MySqlPool) -> sqlx::Result<()> {
+    // Créer l'organisation d'abord
+    sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (1, 'Org1', 'ORG1')")
+        .execute(&pool)
+        .await?;
+
+    // Insérer un utilisateur valide
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id) VALUES (100.0, 1)")
+        .execute(&pool)
+        .await?;
+
+    // Désactiver les contraintes de clés étrangères et renommer la table user
+    sqlx::query("SET FOREIGN_KEY_CHECKS = 0")
+        .execute(&pool)
+        .await?;
+
+    sqlx::query("RENAME TABLE user TO user_backup")
+        .execute(&pool)
+        .await?;
+
+    // Appeler calculate_green_score qui devrait gérer l'erreur gracieusement
+    let (letter, nomination) = green_score::calculate_green_score(Some(&pool), 100.0, "my_data".to_string()).await;
+
+    // Devrait retourner N/A car la requête va échouer
+    assert_eq!(letter, "N/A");
+    assert_eq!(nomination, "N/A");
+
+    Ok(())
+}
+
+
 
