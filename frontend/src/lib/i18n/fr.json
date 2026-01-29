@@ -21,7 +21,8 @@
     "hero": {
       "title": "Mesurez votre empreinte carbone sur le web !",
       "subtitle": "Chaque page que vous chargez consomme de l'énergie. Mesurez votre empreinte et agissez pour un internet plus vert.",
-      "add_to_firefox": "Ajouter à Firefox"
+      "add_to_firefox": "Ajouter à Firefox",
+      "add_to_chrome": "Ajouter à Chrome"
     },
     "video": {
       "tag": "Web",
