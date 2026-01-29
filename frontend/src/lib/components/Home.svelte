@@ -6,6 +6,7 @@
     import 'swiper/css/pagination';
 
     import firefoxLogo from '$lib/images/firefox.png';
+    import chromeLogo from '$lib/images/chrome.png';
     import backgroundImage from '$lib/images/background.png';
     import citationImage from '$lib/images/citation.svg';
     import greenscoreImage from '$lib/images/greenscore-image.png';
@@ -101,6 +102,7 @@
 <svelte:head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <meta name="google-site-verification" content="dJm0vNbi9V4IoEj0eTdExvhVHDS8N_ek9uLC1qNTvyw" />
+    <title>{$t('header.home')} | GreenScore Web</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gs-green-950 text-white font-['Ovo']">
@@ -115,18 +117,19 @@
                 {$t('home.hero.subtitle')}
             </p>
 
-            <div class="hidden lg:block">
-                <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
-                    <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
-                    {$t('home.hero.add_to_firefox')}
-                </a>
-            </div>
-
-            <div class="mt-8 lg:hidden flex justify-center">
-                <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
-                    <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
-                    {$t('home.hero.add_to_firefox')}
-                </a>
+            <div class="mt-8 flex flex-col sm:flex-row justify-center gap-8">
+                <div class="flex">
+                    <a href="https://addons.mozilla.org/fr/firefox/addon/greenscoreplugin/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                        <img src="{firefoxLogo}" alt="Firefox" class="mr-2 h-6 w-6">
+                        {$t('home.hero.add_to_firefox')}
+                    </a>
+                </div>
+                <div class="flex">
+                    <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                        <img src="{chromeLogo}" alt="Firefox" class="mr-2 h-6 w-6">
+                        {$t('home.hero.add_to_chrome')}
+                    </a>
+                </div>
             </div>
         </div>
 

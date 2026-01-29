@@ -474,12 +474,12 @@ pub async fn update_account_equivalents(session: Session, State(pool): State<MyS
         .execute(&mut *tx)
         .await
     {
-         return Json(json!({ "success": false, "message": format!("Erreur nettoyage anciens équivalents: {}", e) }));
+        return Json(json!({ "success": false, "message": format!("Erreur nettoyage anciens équivalents: {}", e) }));
     }
 
     for eq_val in equivalents {
         if let Some(eq_id) = eq_val.as_str() {
-             if let Err(e) = sqlx::query("INSERT INTO user_equivalent (user_id, equivalent_id) VALUES (?, ?)")
+            if let Err(e) = sqlx::query("INSERT INTO user_equivalent (user_id, equivalent_id) VALUES (?, ?)")
                 .bind(account.id())
                 .bind(eq_id)
                 .execute(&mut *tx)
