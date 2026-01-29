@@ -7,12 +7,13 @@
     import ChartTop5PollutingSites from '$lib/components/widgets/ChartTop5PollutingSites.svelte';
     import Advice from "$lib/components/widgets/Advice.svelte";
     import type {PageData} from './$types';
+    import { t } from 'svelte-i18n';
 
     export let data: PageData;
 
     export let totalConsuUnit = 'gCO2eq';
-    export let title: string = 'Mes données';
-    export let description: string = 'Voici une analyse détaillée de vos données de navigation : ';
+    // export let title: string = 'Mes données';
+    // export let description: string = 'Voici une analyse détaillée de vos données de navigation : ';
     export let noDatas: boolean = false;
 
     let selectedPeriod: 'daily' | 'weekly' | 'monthly' = 'monthly';
@@ -21,7 +22,7 @@
     $: averageDailyCarbonFootprint = data.averageDailyCarbonFootprint || 0;
     $: messageAverageFootprint = data.messageAverageFootprint || '';
     $: letterGreenScore = data.letterGreenScore || 'A';
-    $: envNomination = data.envNomination || 'Maître des Forêts';
+    $: envNomination = data.envNomination || 'nominations.profile.A';
     $: dailyConsumption = data.dailyConsumption || [];
     $: weeklyConsumption = data.weeklyConsumption || [];
     $: monthlyConsumption = data.monthlyConsumption || [];
@@ -39,15 +40,15 @@
 </script>
 
 <svelte:head>
-    <title>{title} | GreenScore Web</title>
+    <title>{$t('dashboard.my_data.title')} | GreenScore Web</title>
 </svelte:head>
 
 <div class="w-full bg-green-bg min-h-screen">
     <div class="w-full text-center px-10 lg:px-0 pt-10 font-outfit flex items-center justify-center flex-col text-grey-950">
-        <h1 class="text-4xl font-bold">{title}</h1>
+        <h1 class="text-4xl font-bold">{$t('dashboard.my_data.title')}</h1>
         {#if !noDatas}
             <p class="text-base w-fit">
-                {description}
+                {$t('dashboard.my_data.description')}
             </p>
         {/if}
     </div>
@@ -78,7 +79,7 @@
                     <TotalConsumption
                             {carbonFootprint}
                             {totalConsuUnit}
-                            label="Total de votre consommation depuis la création du compte :"
+                            label={$t('dashboard.my_data.total_consumption')}
                     />
                 </div>
 
@@ -103,7 +104,7 @@
     {:else}
         <div class="w-full h-screen flex items-center justify-center font-outfit">
             <p class="text-2xl text-gray-600 font-medium">
-                Vous n'avez pas encore utilisé notre plugin afin d'analyser votre consommation !
+                {$t('dashboard.my_data.no_data')}
             </p>
         </div>
     {/if}

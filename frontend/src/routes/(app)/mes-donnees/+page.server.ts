@@ -2,25 +2,25 @@ import type { PageServerLoad } from './$types';
 import { BACKEND_URL } from "$lib/config.ts";
 
 function formatMonthlyData(data: Array<{ label: string; value: number }>) {
-    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
     const now = new Date();
     const result: Array<{ label: string; value: number }> = [];
     for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthIndex = date.getMonth();
         const year = date.getFullYear();
-        const formattedLabel = `${monthNames[monthIndex]} ${year}`;
-
+        // Standard format MM/YYYY
         const monthKey = `${String(monthIndex + 1).padStart(2, '0')}/${year}`;
+
         const existingData = data.find(d => d.label === monthKey);
 
         result.push({
-            label: formattedLabel,
+            label: monthKey,
             value: existingData?.value || 0
         });
     }
     return result;
 }
+
 export const load: PageServerLoad = async ({ fetch, request }) => {
     try {
         const response = await fetch(`${BACKEND_URL}/mes-donnees`, {
@@ -57,7 +57,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             messageAverageFootprint: result.message_average_footprint,
             totalConsumption: result.total_consumption,
             letterGreenScore: result.letter_green_score || 'A',
-            envNomination: result.env_nomination || 'Maître des Forêts',
+            envNomination: result.env_nomination || 'nominations.profile.A',
             equivalents: result.equivalents || [],
             dailyConsumption: result.daily_consumption || [],
             weeklyConsumption: result.weekly_consumption || [],

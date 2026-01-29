@@ -4,6 +4,7 @@
     import type { Organisation } from "$lib/types/account";
     import { enhance } from '$app/forms';
     import type { SubmitFunction } from '@sveltejs/kit';
+    import { t } from 'svelte-i18n';
 
     let showDeleteModal = $state(false);
     let deletingMemberId: number | null = $state(null);
@@ -26,6 +27,7 @@
                 members = members.filter((m: any) => m.id !== deletingMemberId);
                 showDeleteModal = false;
                 deletingMemberId = null;
+                // Add a toast or notification if needed, using result.data.message
             }
         };
     };
@@ -119,32 +121,30 @@
 
 {#if showDeleteModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
-            <h2 class="text-xl font-semibold mb-4">Confirmer la suppression</h2>
-            <p class="text-gray-600 mb-6">
-                Êtes-vous sûr de vouloir supprimer ce membre de votre organisation ?
-            </p>
-            <div class="flex justify-end gap-4">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-lg text-center">
+            <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <h2 class="text-xl font-bold mb-2">{$t('account.modals.delete_member_title')}</h2>
+            <p class="text-gray-600 mb-6">{$t('account.modals.delete_member_desc')}</p>
+            <div class="flex justify-center gap-4">
                 <button
-                        type="button"
-                        class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer transition"
-                        onclick={() => showDeleteModal = false}
+                        onclick={() => { showDeleteModal = false; deletingMemberId = null; }}
+                        class="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold cursor-pointer"
                 >
-                    Annuler
+                    {$t('account.modals.cancel')}
                 </button>
-
                 <form
+                        use:enhance={handleDeleteResult}
                         method="POST"
                         action="?/supprimer_membre"
-                        use:enhance={handleDeleteResult}
-                        class="flex flex-col gap-4"
                 >
                     <input type="hidden" name="deleteMemberId" value={deletingMemberId} />
                     <button
                             type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer transition"
-                    >
-                        Supprimer
+                            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold cursor-pointer"
+                        >
+                        {$t('account.modals.delete')}
                     </button>
                 </form>
             </div>
