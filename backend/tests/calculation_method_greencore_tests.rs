@@ -201,10 +201,10 @@ async fn test_calculate_green_score_mo_complete_flow(pool: MySqlPool) -> sqlx::R
         .await?;
 
     sqlx::query(
-        "INSERT INTO user (total_carbon_footprint, organisation_id) VALUES
-        (50.0, 1), (60.0, 1), (55.0, 1),
-        (100.0, 2), (120.0, 2), (110.0, 2),
-        (200.0, 3), (220.0, 3), (210.0, 3)"
+        "INSERT INTO user (total_carbon_footprint, organisation_id, email) VALUES
+        (50.0, 1, 'mathisrivrais@gmail.com'), (60.0, 1, 'mathisrivrais@gmail.com'), (55.0, 1, 'mathisrivrais@gmail.com'),
+        (100.0, 2, 'mathisrivrais@gmail.com'), (120.0, 2, 'mathisrivrais@gmail.com'), (110.0, 2, 'mathisrivrais@gmail.com'),
+        (200.0, 3, 'mathisrivrais@gmail.com'), (220.0, 3, 'mathisrivrais@gmail.com'), (210.0, 3, 'mathisrivrais@gmail.com')"
     )
     .execute(&pool)
     .await?;
