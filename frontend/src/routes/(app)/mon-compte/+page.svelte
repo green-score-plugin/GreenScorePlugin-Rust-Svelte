@@ -11,8 +11,11 @@
 
     let activePage = $state("my_info");
     let user = $derived(page.data.user);
-
 </script>
+
+<svelte:head>
+    <title>{$t('header.manage_account')} | GreenScore Web</title>
+</svelte:head>
 
 <div class="xl:px-52 flex flex-col h-full">
     <div class="px-4 lg:px-16 py-8 flex justify-center lg:justify-start items-center gap-x-4">
