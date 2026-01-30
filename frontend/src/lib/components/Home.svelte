@@ -124,7 +124,7 @@
                     </a>
                 </div>
                 <div class="flex">
-                    <a href="/" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
+                    <a href="https://chromewebstore.google.com/detail/greenscore/lmepagkjddahkpjlkcgfolbnmbjkogco" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular p-3 rounded-full mx-auto shadow-md shadow-black">
                         <img src="{chromeLogo}" alt="Firefox" class="mr-2 h-6 w-6">
                         {$t('home.hero.add_to_chrome')}
                     </a>
