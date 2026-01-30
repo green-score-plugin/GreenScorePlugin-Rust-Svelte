@@ -123,7 +123,7 @@
       "siret": "SIRET Number (optional)",
       "confirm_password": "Confirmation",
       "passwords_mismatch": "Passwords do not match.",
-      "agree_terms": "By registering on GreenScoreWeb, you accept our terms of use.",
+      "agree_terms": "By registering on GreenScoreWeb, you accept our <a href='/cgu' class='hover:underline'>terms of use</a> and our <a href='/confidentialite' class='hover:underline'>privacy policy</a>.",
       "accept_terms_error": "Please accept the Terms of Use.",
       "success_register": "Information updated successfully",
       "subtitle": "Ready to act?",

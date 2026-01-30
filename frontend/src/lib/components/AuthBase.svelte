@@ -9,7 +9,7 @@
     export let showModeSwitcher = false;
 </script>
 
-<title>{title}</title>
+<title>{title} | GreenScore Web</title>
 
 <div class="flex items-center w-screen h-screen">
     <img src="{imageFond}" alt="GreenScore" class="hidden xl:flex w-1/2 h-full object-cover">
