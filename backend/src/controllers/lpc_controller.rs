@@ -10,36 +10,36 @@ use crate::controllers::helpers::Equivalent;
 
 #[derive(Deserialize)]
 pub struct LpcParams {
-    url_full: Option<String>,
-    country: Option<String>,
+    pub url_full: Option<String>,
+    pub country: Option<String>,
     #[serde(rename = "totalConsu")]
-    total_consu: Option<f64>,
+    pub total_consu: Option<f64>,
     #[serde(rename = "pageSize")]
-    page_size: Option<f64>,
+    pub page_size: Option<f64>,
     #[serde(rename = "loadingTime")]
-    loading_time: Option<f64>,
+    pub loading_time: Option<f64>,
     #[serde(rename = "queriesQuantity")]
-    queries_quantity: Option<i32>,
+    pub queries_quantity: Option<i32>,
 }
 
 #[derive(Serialize)]
 pub struct LastPageConsultedInfos {
-    link: String,
-    queries_quantity: i32,
-    carbon_footprint: f64,
-    data_transferred: f64,
-    loading_time: f64,
-    country: String,
+    pub link: String,
+    pub queries_quantity: i32,
+    pub carbon_footprint: f64,
+    pub data_transferred: f64,
+    pub loading_time: f64,
+    pub country: String,
 }
 
 #[derive(Serialize)]
 pub struct LastPageConsultedResponse {
-    success: bool,
-    lpc_infos: Option<LastPageConsultedInfos>,
-    advices: Vec<String>,
-    letter: Option<String>,
-    env_nomination: Option<String>,
-    equivalents: Option<Vec<Equivalent>>,
+    pub success: bool,
+    pub lpc_infos: Option<LastPageConsultedInfos>,
+    pub advices: Vec<String>,
+    pub letter: Option<String>,
+    pub env_nomination: Option<String>,
+    pub equivalents: Option<Vec<Equivalent>>,
 }
 
 async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {

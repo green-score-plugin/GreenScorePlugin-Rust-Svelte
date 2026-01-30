@@ -133,6 +133,7 @@
   "account": {
     "menu": {
       "my_info": "Mon compte",
+      "my_equivalents": "Mes équivalents",
       "my_organization": "Mon organisation",
       "manage_organization": "Gérer mon organisation",
       "delete_account": "Supprimer le compte",
@@ -147,6 +148,13 @@
       "email_label": "Email",
       "password_label": "Votre mot de passe",
       "confirm_password_label": "Confirmer votre mot de passe"
+    },
+    "equivalent": {
+      "message": {
+        "success": "Équivalents mis à jour",
+        "loading": "Enregistrement..."
+      },
+      "button": "Enregistrer les modifications"
     },
     "organization": {
       "title": "Organisation",
@@ -614,17 +622,16 @@
         "default_user": "Adoptez des usages numériques responsables pour diminuer la consommation énergétique."
     },
     "equivalent": {
-        "lille_nimes": "Trajet Lille-Nîmes en voiture",
-        "paris_berlin": "Trajet Paris-Berlin en train",
-        "emails": "Emails envoyés",
-        "search": "Recherches Google",
-        "streaming": "Heures de streaming",
-        "bus": "Km en bus",
-        "motorbike": "Km en moto",
-        "car": "Km en voiture",
-        "laptop": "Heures d'ordinateur portable",
-        "tap_water": "Litres d'eau du robinet",
-        "paris_ny": "Vol Paris-New York"
+        "lille_marseille": "Trajet(s) Lille-Marseille en voiture",
+        "paris_londres": "Trajet(s) Paris-Londres en train",
+        "emails": "e-mail(s) envoyé(s)",
+        "search": "recherche(s) Google",
+        "streaming": "heure(s) de streaming",
+        "bus": "km en bus",
+        "motorbike": "km en moto",
+        "car": "km en voiture thermique",
+        "tap_water": "litre(s) d'eau du robinet",
+        "paris_ny": "vol(s) Paris-New York"
     }
   },
   "months": {

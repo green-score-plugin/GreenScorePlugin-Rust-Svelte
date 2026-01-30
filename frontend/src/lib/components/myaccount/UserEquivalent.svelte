@@ -3,6 +3,7 @@
     import { page } from "$app/state";
     import { enhance } from '$app/forms';
     import { fade } from 'svelte/transition';
+    import { t } from 'svelte-i18n';
 
     interface EquivalentResponse {
         id: number;
@@ -44,7 +45,7 @@
                     <div class="min-w-0 flex-1">
                         <label for="equivalent-{accountEquivalent.id}" class="cursor-pointer">
                             <span class="absolute inset-0" aria-hidden="true"></span>
-                            <span class="text-sm font-medium text-gray-900">{accountEquivalent.name}</span>
+                            <span class="text-sm font-medium text-gray-900">{$t(accountEquivalent.name)}</span>
                         </label>
                     </div>
                     <div class="flex h-5 items-center">
@@ -62,7 +63,7 @@
         <div class="flex items-center justify-end gap-3 mt-4 border-t border-gray-200 pt-4">
             {#if message}
                 <div in:fade class="text-sm font-medium {isSuccess ? 'text-green-600' : 'text-red-600'}">
-                    {message}
+                    {$t(message)}
                 </div>
             {/if}
 
@@ -77,7 +78,7 @@
                     </svg>
                 {/if}
 
-                {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                {loading ? $t("account.equivalent.message.loading") : $t("account.equivalent.button")}
             </button>
         </div>
 
