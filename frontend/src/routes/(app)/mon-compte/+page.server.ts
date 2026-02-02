@@ -343,7 +343,7 @@ export const actions = {
                 return fail(400, { actionType: 'modification_equivalents', message: 'errors.update_error' });
             }
 
-            return { actionType: 'modification_equivalents', success: true, message: 'equivalent.message.success' };
+            return { actionType: 'modification_equivalents', success: true, message: 'account.equivalent.message.success' };
         } catch {
             return fail(500, { actionType: 'modification_equivalents', message: 'errors.server_error' });
         }
