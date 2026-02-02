@@ -624,9 +624,9 @@
     "equivalent": {
         "lille_marseille": "Trajet(s) Lille-Marseille en voiture",
         "paris_londres": "Trajet(s) Paris-Londres en train",
-        "emails": "e-mail(s) envoyé(s)",
+        "emails": "e-mail(s) avec pièce jointe de 1Mo",
         "search": "recherche(s) Google",
-        "streaming": "heure(s) de streaming",
+        "streaming": "heure(s) de streaming en HD",
         "bus": "km en bus",
         "motorbike": "km en moto",
         "car": "km en voiture thermique",

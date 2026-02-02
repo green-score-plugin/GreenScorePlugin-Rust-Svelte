@@ -613,14 +613,14 @@
     "equivalent": {
       "lille_marseille": "trip Lille-Marseille by car",
       "paris_londres": "trip Paris-Londres by train",
-      "emails": "sent emails",
+      "emails": "sent emails with 1MB attachment",
       "search": "google searches",
-      "streaming": "streaming hours",
+      "streaming": "streaming hours in HD",
       "bus": "km by bus",
       "motorbike": "km by motorbike",
       "car": "km by fossil fuel car",
       "tap_water": "liters of tap water",
-      "paris_ny": "paris-New York flight"
+      "paris_ny": "Paris-New York flight"
     }
   },
   "months": {
