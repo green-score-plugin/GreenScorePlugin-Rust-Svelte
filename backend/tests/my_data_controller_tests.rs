@@ -83,14 +83,15 @@ mod tests {
             .execute(&pool).await.unwrap();
 
         // Insérer des données de monitoring variées
+        // Important: créer des données pour aujourd'hui et les 7 derniers jours
         sqlx::query("INSERT INTO monitored_website (user_id, url_domain, carbon_footprint, creation_date) VALUES
-                     (?, 'example.com', 10.0, DATE_SUB(NOW(), INTERVAL 1 DAY)),
-                     (?, 'test.com', 15.0, DATE_SUB(NOW(), INTERVAL 2 DAY)),
-                     (?, 'example.com', 5.0, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-                     (?, 'other.com', 8.0, DATE_SUB(NOW(), INTERVAL 1 WEEK)),
-                     (?, 'site.com', 12.0, DATE_SUB(NOW(), INTERVAL 2 WEEK)),
-                     (?, 'domain.com', 20.0, DATE_SUB(NOW(), INTERVAL 1 MONTH)),
-                     (?, NULL, 3.0, DATE_SUB(NOW(), INTERVAL 2 DAY))")
+                     (?, 'example.com', 10.0, NOW()),
+                     (?, 'test.com', 15.0, DATE_SUB(NOW(), INTERVAL 1 DAY)),
+                     (?, 'example.com', 5.0, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+                     (?, 'other.com', 8.0, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+                     (?, 'site.com', 12.0, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+                     (?, 'domain.com', 20.0, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+                     (?, NULL, 3.0, DATE_SUB(NOW(), INTERVAL 6 DAY))")
             .bind(user_id)
             .bind(user_id)
             .bind(user_id)
