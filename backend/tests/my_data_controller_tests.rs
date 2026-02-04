@@ -311,5 +311,231 @@ mod tests {
             "widgets.common.average_daily_footprint.message.high"
         );
     }
+
+    // Test 7: tester les erreurs SQL dans get_my_average_daily_carbon_footprint
+    #[sqlx::test]
+    async fn test_my_data_with_sql_error_on_my_average(pool: MySqlPool) {
+        use backend::controllers::my_data_controller::get_my_average_daily_carbon_footprint;
+        let store = Arc::new(MemoryStore::default());
+        let session = Session::new(Some(Id::default()), store, None);
+
+        let user_id = 999;
+
+        // Créer un utilisateur
+        sqlx::query("INSERT INTO user (id, email, password, first_name, last_name, organisation_id, roles) VALUES (?, ?, ?, ?, ?, NULL, '[]')")
+            .bind(user_id)
+            .bind("test@test.com")
+            .bind("hash")
+            .bind("John")
+            .bind("Doe")
+            .execute(&pool).await.unwrap();
+
+        let mock_account = Account::User(User::new(
+            user_id,
+            "test@test.com".to_string(),
+            "John".to_string(),
+            "Doe".to_string(),
+            None
+        ));
+        session.insert("account", mock_account).await.unwrap();
+
+        // Supprimer la table pour causer une erreur SQL
+        sqlx::query("DROP TABLE monitored_website").execute(&pool).await.unwrap();
+
+        let result = get_my_average_daily_carbon_footprint(&pool, session).await;
+
+        // Doit retourner None en cas d'erreur SQL
+        assert!(result.is_none());
+    }
+
+    // Test 8: tester les erreurs SQL dans get_average_daily_carbon_footprint
+    #[sqlx::test]
+    async fn test_my_data_with_sql_error_on_global_average(pool: MySqlPool) {
+        use backend::controllers::my_data_controller::get_average_daily_carbon_footprint;
+
+        // Supprimer la table pour causer une erreur SQL
+        sqlx::query("DROP TABLE monitored_website").execute(&pool).await.unwrap();
+
+        let result = get_average_daily_carbon_footprint(&pool).await;
+
+        // Doit retourner None en cas d'erreur SQL
+        assert!(result.is_none());
+    }
+
+    // Test 9: tester les erreurs SQL dans get_total_consumption
+    #[sqlx::test]
+    async fn test_my_data_with_sql_error_on_total_consumption(pool: MySqlPool) {
+        use backend::controllers::my_data_controller::get_total_consumption;
+        let store = Arc::new(MemoryStore::default());
+        let session = Session::new(Some(Id::default()), store, None);
+
+        let user_id = 999;
+
+        // Créer un utilisateur
+        sqlx::query("INSERT INTO user (id, email, password, first_name, last_name, organisation_id, roles) VALUES (?, ?, ?, ?, ?, NULL, '[]')")
+            .bind(user_id)
+            .bind("test@test.com")
+            .bind("hash")
+            .bind("John")
+            .bind("Doe")
+            .execute(&pool).await.unwrap();
+
+        let mock_account = Account::User(User::new(
+            user_id,
+            "test@test.com".to_string(),
+            "John".to_string(),
+            "Doe".to_string(),
+            None
+        ));
+        session.insert("account", mock_account).await.unwrap();
+
+        // Supprimer la table pour causer une erreur SQL
+        sqlx::query("DROP TABLE monitored_website").execute(&pool).await.unwrap();
+
+        let result = get_total_consumption(&pool, session).await;
+
+        // Doit retourner None en cas d'erreur SQL
+        assert!(result.is_none());
+    }
+
+    // Test 10: tester la branche else de message_average_footprint (une seule None)
+    #[sqlx::test]
+    async fn test_my_data_with_only_global_average(pool: MySqlPool) {
+        let store = Arc::new(MemoryStore::default());
+        let session = Session::new(Some(Id::default()), store, None);
+
+        let user_id = 999;
+
+        // Créer plusieurs utilisateurs
+        for id in [999, 998] {
+            sqlx::query("INSERT INTO user (id, email, password, first_name, last_name, organisation_id, roles) VALUES (?, ?, ?, ?, ?, NULL, '[]')")
+                .bind(id)
+                .bind(format!("user{}@test.com", id))
+                .bind("hash")
+                .bind("User")
+                .bind(format!("{}", id))
+                .execute(&pool).await.unwrap();
+        }
+
+        // Insérer des données seulement pour user 998 (pas pour 999)
+        sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, 50.0, DATE_SUB(NOW(), INTERVAL 1 DAY))")
+            .bind(998)
+            .execute(&pool).await.unwrap();
+
+        let mock_account = Account::User(User::new(
+            user_id,
+            "test@test.com".to_string(),
+            "John".to_string(),
+            "Doe".to_string(),
+            None
+        ));
+        session.insert("account", mock_account).await.unwrap();
+
+        let result = my_data(State(pool), session).await;
+
+        assert!(result.0.success);
+        // User 999 n'a pas de données, donc my_average est None
+        assert!(result.0.my_average_daily_carbon_footprint.is_none());
+        // Mais il y a une moyenne globale
+        assert!(result.0.average_daily_carbon_footprint.is_some());
+        // Le message doit être None car my_average est None
+        assert!(result.0.message_average_footprint.is_none());
+    }
+
+    // Test 11: tester les erreurs SQL dans get_daily_consumption
+    #[sqlx::test]
+    async fn test_my_data_with_sql_error_on_daily_consumption(pool: MySqlPool) {
+        use backend::controllers::my_data_controller::get_daily_consumption;
+        let user_id = 999;
+
+        // Créer un utilisateur
+        sqlx::query("INSERT INTO user (id, email, password, first_name, last_name, organisation_id, roles) VALUES (?, ?, ?, ?, ?, NULL, '[]')")
+            .bind(user_id)
+            .bind("test@test.com")
+            .bind("hash")
+            .bind("John")
+            .bind("Doe")
+            .execute(&pool).await.unwrap();
+
+        // Supprimer la table pour causer une erreur SQL
+        sqlx::query("DROP TABLE monitored_website").execute(&pool).await.unwrap();
+
+        let result = get_daily_consumption(&pool, user_id).await;
+
+        // Doit retourner une erreur
+        assert!(result.is_err());
+    }
+
+    // Test 12: tester les erreurs SQL dans get_weekly_consumption
+    #[sqlx::test]
+    async fn test_my_data_with_sql_error_on_weekly_consumption(pool: MySqlPool) {
+        use backend::controllers::my_data_controller::get_weekly_consumption;
+        let user_id = 999;
+
+        // Créer un utilisateur
+        sqlx::query("INSERT INTO user (id, email, password, first_name, last_name, organisation_id, roles) VALUES (?, ?, ?, ?, ?, NULL, '[]')")
+            .bind(user_id)
+            .bind("test@test.com")
+            .bind("hash")
+            .bind("John")
+            .bind("Doe")
+            .execute(&pool).await.unwrap();
+
+        // Supprimer la table pour causer une erreur SQL
+        sqlx::query("DROP TABLE monitored_website").execute(&pool).await.unwrap();
+
+        let result = get_weekly_consumption(&pool, user_id).await;
+
+        // Doit retourner une erreur
+        assert!(result.is_err());
+    }
+
+    // Test 13: tester les erreurs SQL dans get_monthly_consumption
+    #[sqlx::test]
+    async fn test_my_data_with_sql_error_on_monthly_consumption(pool: MySqlPool) {
+        use backend::controllers::my_data_controller::get_monthly_consumption;
+        let user_id = 999;
+
+        // Créer un utilisateur
+        sqlx::query("INSERT INTO user (id, email, password, first_name, last_name, organisation_id, roles) VALUES (?, ?, ?, ?, ?, NULL, '[]')")
+            .bind(user_id)
+            .bind("test@test.com")
+            .bind("hash")
+            .bind("John")
+            .bind("Doe")
+            .execute(&pool).await.unwrap();
+
+        // Supprimer la table pour causer une erreur SQL
+        sqlx::query("DROP TABLE monitored_website").execute(&pool).await.unwrap();
+
+        let result = get_monthly_consumption(&pool, user_id).await;
+
+        // Doit retourner une erreur
+        assert!(result.is_err());
+    }
+
+    // Test 14: tester les erreurs SQL dans get_top5_polluting_sites
+    #[sqlx::test]
+    async fn test_my_data_with_sql_error_on_top_polluting_sites(pool: MySqlPool) {
+        use backend::controllers::my_data_controller::get_top5_polluting_sites;
+        let user_id = 999;
+
+        // Créer un utilisateur
+        sqlx::query("INSERT INTO user (id, email, password, first_name, last_name, organisation_id, roles) VALUES (?, ?, ?, ?, ?, NULL, '[]')")
+            .bind(user_id)
+            .bind("test@test.com")
+            .bind("hash")
+            .bind("John")
+            .bind("Doe")
+            .execute(&pool).await.unwrap();
+
+        // Supprimer la table pour causer une erreur SQL
+        sqlx::query("DROP TABLE monitored_website").execute(&pool).await.unwrap();
+
+        let result = get_top5_polluting_sites(&pool, user_id).await;
+
+        // Doit retourner une erreur
+        assert!(result.is_err());
+    }
 }
 
