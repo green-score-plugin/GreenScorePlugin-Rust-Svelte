@@ -664,7 +664,7 @@ async fn test_calculate_green_score_mo_scale_positive(pool: MySqlPool) -> sqlx::
     // Org 1 Total = 100.0. Avg = 10.0.
     for i in 0..10 {
         let email = format!("user{}@test.com", i);
-        sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (10.0, 1, ?, 'password', 'User', 'Test')")
+        sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (10.0, 1, ?, 'password', 'User', 'Test', '[]')")
             .bind(email)
             .execute(&pool)
             .await?;
