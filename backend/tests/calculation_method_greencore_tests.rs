@@ -251,10 +251,10 @@ async fn test_calculate_green_score_my_data_with_pool(pool: MySqlPool) -> sqlx::
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (200.0, 2, 'user2@test.com', 'password', 'User', 'Two'),
-        (150.0, 3, 'user3@test.com', 'password', 'User', 'Three'),
-        (50.0, 4, 'user4@test.com', 'password', 'User', 'Four')"
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (200.0, 2, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (150.0, 3, 'user3@test.com', 'password', 'User', 'Three', '[]'),
+        (50.0, 4, 'user4@test.com', 'password', 'User', 'Four', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -297,11 +297,11 @@ async fn test_calculate_green_score_my_data_with_null_values(pool: MySqlPool) ->
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (NULL, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (0, 2, 'user2@test.com', 'password', 'User', 'Two'),
-        (-10.0, 3, 'user3@test.com', 'password', 'User', 'Three'),
-        (100.0, 4, 'user4@test.com', 'password', 'User', 'Four'),
-        (200.0, 5, 'user5@test.com', 'password', 'User', 'Five')"
+        (NULL, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (0, 2, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (-10.0, 3, 'user3@test.com', 'password', 'User', 'Three', '[]'),
+        (100.0, 4, 'user4@test.com', 'password', 'User', 'Four', '[]'),
+        (200.0, 5, 'user5@test.com', 'password', 'User', 'Five', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -340,12 +340,12 @@ async fn test_calculate_green_score_mo_all_intermediate_grades(pool: MySqlPool) 
     // t6 = 200 + 1.50 = 201.50
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (100.0, 1, 'user2@test.com', 'password', 'User', 'Two'),
-        (200.0, 2, 'user3@test.com', 'password', 'User', 'Three'),
-        (200.0, 2, 'user4@test.com', 'password', 'User', 'Four'),
-        (300.0, 3, 'user5@test.com', 'password', 'User', 'Five'),
-        (300.0, 3, 'user6@test.com', 'password', 'User', 'Six')"
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (100.0, 1, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (200.0, 2, 'user3@test.com', 'password', 'User', 'Three', '[]'),
+        (200.0, 2, 'user4@test.com', 'password', 'User', 'Four', '[]'),
+        (300.0, 3, 'user5@test.com', 'password', 'User', 'Five', '[]'),
+        (300.0, 3, 'user6@test.com', 'password', 'User', 'Six', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -396,9 +396,9 @@ async fn test_calculate_green_score_my_data_all_intermediate_grades(pool: MySqlP
     // Créer une échelle avec least=50, avg=100
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (50.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (100.0, 2, 'user2@test.com', 'password', 'User', 'Two'),
-        (150.0, 3, 'user3@test.com', 'password', 'User', 'Three')"
+        (50.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (100.0, 2, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (150.0, 3, 'user3@test.com', 'password', 'User', 'Three', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -440,9 +440,9 @@ async fn test_calculate_green_score_mo_single_organization(pool: MySqlPool) -> s
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (200.0, 1, 'user2@test.com', 'password', 'User', 'Two'),
-        (150.0, 1, 'user3@test.com', 'password', 'User', 'Three')"
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (200.0, 1, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (150.0, 1, 'user3@test.com', 'password', 'User', 'Three', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -465,7 +465,7 @@ async fn test_calculate_green_score_my_data_single_user(pool: MySqlPool) -> sqlx
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One')"
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -487,10 +487,10 @@ async fn test_calculate_green_score_mo_extreme_values(pool: MySqlPool) -> sqlx::
 
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (0.001, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (0.001, 1, 'user2@test.com', 'password', 'User', 'Two'),
-        (10000.0, 2, 'user3@test.com', 'password', 'User', 'Three'),
-        (10000.0, 2, 'user4@test.com', 'password', 'User', 'Four')"
+        (0.001, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (0.001, 1, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (10000.0, 2, 'user3@test.com', 'password', 'User', 'Three', '[]'),
+        (10000.0, 2, 'user4@test.com', 'password', 'User', 'Four', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -514,8 +514,8 @@ async fn test_calculate_green_score_my_data_vs_lpc_scale(pool: MySqlPool) -> sql
     // Test que my_data utilise bien l'échelle dynamique avec pool
     sqlx::query(
         "INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (200.0, 2, 'user2@test.com', 'password', 'User', 'Two')"
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (200.0, 2, 'user2@test.com', 'password', 'User', 'Two', '[]')"
     )
     .execute(&pool)
     .await?;
@@ -537,7 +537,7 @@ async fn test_calculate_green_score_mo_with_infinity_values(pool: MySqlPool) -> 
 
     // Insérer des valeurs qui pourraient causer des calculs invalides (division par zéro, etc.)
     // On utilise des valeurs qui donnent avg = 0 pour tester le cas d'erreur
-    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (0.0, 1, 'user1@test.com', 'password', 'User', 'One')")
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (0.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]')")
         .execute(&pool)
         .await?;
 
@@ -566,9 +566,9 @@ async fn test_organizations_global_average_carbon_footprint(pool: MySqlPool) -> 
     // Org 2: avg = 400
     // Global avg = (200 + 400) / 2 = 300
     sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (300.0, 1, 'user2@test.com', 'password', 'User', 'Two'),
-        (400.0, 2, 'user3@test.com', 'password', 'User', 'Three')")
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (300.0, 1, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (400.0, 2, 'user3@test.com', 'password', 'User', 'Three', '[]')")
         .execute(&pool)
         .await?;
 
@@ -597,10 +597,10 @@ async fn test_organizations_least_carbon_footprint(pool: MySqlPool) -> sqlx::Res
     // Org 3: sum = 300
     // Least = 50 (Org 2)
     sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (100.0, 1, 'user2@test.com', 'password', 'User', 'Two'),
-        (50.0, 2, 'user3@test.com', 'password', 'User', 'Three'),
-        (300.0, 3, 'user4@test.com', 'password', 'User', 'Four')")
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (100.0, 1, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (50.0, 2, 'user3@test.com', 'password', 'User', 'Three', '[]'),
+        (300.0, 3, 'user4@test.com', 'password', 'User', 'Four', '[]')")
         .execute(&pool)
         .await?;
 
@@ -618,9 +618,9 @@ async fn test_users_global_average_carbon_footprint(pool: MySqlPool) -> sqlx::Re
 
     // (100 + 200 + 300) / 3 = 200
     sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (200.0, 2, 'user2@test.com', 'password', 'User', 'Two'),
-        (300.0, 3, 'user3@test.com', 'password', 'User', 'Three')")
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (200.0, 2, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (300.0, 3, 'user3@test.com', 'password', 'User', 'Three', '[]')")
         .execute(&pool)
         .await?;
 
@@ -638,9 +638,9 @@ async fn test_users_least_carbon_footprint(pool: MySqlPool) -> sqlx::Result<()> 
 
     // Min is 50
     sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES
-        (100.0, 1, 'user1@test.com', 'password', 'User', 'One'),
-        (50.0, 2, 'user2@test.com', 'password', 'User', 'Two'),
-        (300.0, 3, 'user3@test.com', 'password', 'User', 'Three')")
+        (100.0, 1, 'user1@test.com', 'password', 'User', 'One', '[]'),
+        (50.0, 2, 'user2@test.com', 'password', 'User', 'Two', '[]'),
+        (300.0, 3, 'user3@test.com', 'password', 'User', 'Three', '[]')")
         .execute(&pool)
         .await?;
 
@@ -703,12 +703,12 @@ async fn test_organizations_helper_ignores_nulls(pool: MySqlPool) -> sqlx::Resul
         .await?;
 
     // User with null org
-    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (100.0, NULL, 'user1@test.com', 'password', 'User', 'One')")
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (100.0, NULL, 'user1@test.com', 'password', 'User', 'One', '[]')")
         .execute(&pool)
         .await?;
 
     // Valid user
-    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (50.0, 1, 'user2@test.com', 'password', 'User', 'Two')")
+    sqlx::query("INSERT INTO user (total_carbon_footprint, organisation_id, email, password, first_name, last_name, roles) VALUES (50.0, 1, 'user2@test.com', 'password', 'User', 'Two', '[]')")
         .execute(&pool)
         .await?;
 
@@ -783,6 +783,7 @@ async fn test_calculate_green_score_my_data_with_database_error(pool: MySqlPool)
 
     Ok(())
 }
+
 
 
 
