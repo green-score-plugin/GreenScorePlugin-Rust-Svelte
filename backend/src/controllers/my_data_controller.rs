@@ -37,7 +37,7 @@ pub struct TopPollutingSite {
 
 pub async fn get_top5_polluting_sites(
     pool: &MySqlPool,
-    user_id: i32,
+    user_id: i64,
 ) -> Result<Vec<TopPollutingSite>, sqlx::Error> {
     let results = sqlx::query_as::<_, (String, f64)>(
         "SELECT
@@ -66,7 +66,7 @@ pub async fn get_top5_polluting_sites(
 
 pub async fn get_daily_consumption(
     pool: &MySqlPool,
-    user_id: i32,
+    user_id: i64,
 ) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
     let results = sqlx::query_as::<_, (String, f64)>(
         "SELECT
@@ -75,7 +75,7 @@ pub async fn get_daily_consumption(
          FROM monitored_website
          WHERE user_id = ?
          AND creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-         GROUP BY DATE(creation_date)
+         GROUP BY DATE(creation_date), day
          ORDER BY DATE(creation_date) ASC"
     )
         .bind(user_id)
@@ -92,7 +92,7 @@ pub async fn get_daily_consumption(
 
 pub async fn get_weekly_consumption(
     pool: &MySqlPool,
-    user_id: i32,
+    user_id: i64,
 ) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
     let results = sqlx::query_as::<_, (i32, i32, f64)>(
         "SELECT
@@ -119,7 +119,7 @@ pub async fn get_weekly_consumption(
 
 pub async fn get_monthly_consumption(
     pool: &MySqlPool,
-    user_id: i32,
+    user_id: i64,
 ) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
     let results = sqlx::query_as::<_, (String, f64)>(
         "SELECT
@@ -260,9 +260,9 @@ pub async fn my_data(
     let (daily_consumption, weekly_consumption, monthly_consumption) =
         if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
             let user_id = account.id();
-            let daily = get_daily_consumption(&pool, user_id as i32).await.unwrap_or_default();
-            let weekly = get_weekly_consumption(&pool, user_id as i32).await.unwrap_or_default();
-            let monthly = get_monthly_consumption(&pool, user_id as i32).await.unwrap_or_default();
+            let daily = get_daily_consumption(&pool, user_id).await.unwrap_or_default();
+            let weekly = get_weekly_consumption(&pool, user_id).await.unwrap_or_default();
+            let monthly = get_monthly_consumption(&pool, user_id).await.unwrap_or_default();
             (daily, weekly, monthly)
         } else {
             (vec![], vec![], vec![])
@@ -275,7 +275,7 @@ pub async fn my_data(
     };
 
     let top_polluting_sites = if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
-        get_top5_polluting_sites(&pool, account.id() as i32).await.unwrap_or_default()
+        get_top5_polluting_sites(&pool, account.id()).await.unwrap_or_default()
     } else {
         vec![]
     };
