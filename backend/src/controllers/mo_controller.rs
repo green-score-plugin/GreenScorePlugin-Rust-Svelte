@@ -103,12 +103,9 @@ async fn organization_name(pool: &MySqlPool, org_id: i64) -> Option<String> {
         .map(|(name,)| name)
 }
 
-// CORRECTION ICI : Retourne Option pour gérer le cas "phantom organization"
 async fn organization_informations(pool: &MySqlPool, org_id: i64, account: &Account) -> Option<MyOrganizationInfos> {
-    // Si l'organisation n'a pas de nom (n'existe pas), on doit renvoyer None pour satisfaire le test.
     let name = organization_name(pool, org_id).await?;
 
-    // Le reste est robuste (valeurs par défaut 0.0)
     let average_daily_carbon_footprint = average_daily_carbon_footprint(pool, org_id).await;
     let total_consumption = total_organization_consumption(pool, org_id).await.unwrap_or(0.0);
 
@@ -178,7 +175,6 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
         None => return error_response(),
     };
 
-    // CORRECTION ICI : On récupère une Option et on l'utilise telle quelle
     let organization_informations = organization_informations(&pool, org_id, account_ref.as_ref().unwrap()).await;
 
     let advices: Vec<String> = {
@@ -190,7 +186,6 @@ pub async fn mo(State(pool): State<MySqlPool>, session: Session) -> Json<MyOrgan
 
     let (letter, env_nomination, equivalents) = if let Some(ref infos_ref) = organization_informations {
         let (l, n) = calculate_green_score(Some(&pool), infos_ref.average_daily_carbon_footprint, "mo".to_string()).await;
-        // Le calcul des équivalents utilise total_consumption qui est safe (0.0 au pire)
         let eqs = equivalent(&pool, infos_ref.total_consumption, 2, account_ref.as_ref()).await;
         let eqs_filtered = match eqs {
             Some(v) if !v.is_empty() => Some(v),
