@@ -87,13 +87,13 @@ mod tests {
         // La requête SQL utilise: creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
         // On utilise DATE_SUB avec 1 heure de marge pour éviter les problèmes de timing entre INSERT et SELECT
         sqlx::query("INSERT INTO monitored_website (user_id, url_domain, carbon_footprint, creation_date) VALUES
-                     (?, 'example.com', 10.0, DATE_SUB(NOW(), INTERVAL 1 HOUR)),
-                     (?, 'test.com', 15.0, DATE_SUB(NOW(), INTERVAL 1 DAY)),
-                     (?, 'example.com', 5.0, DATE_SUB(NOW(), INTERVAL 2 DAY)),
-                     (?, 'other.com', 8.0, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-                     (?, 'site.com', 12.0, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-                     (?, 'domain.com', 20.0, DATE_SUB(NOW(), INTERVAL 5 DAY)),
-                     (?, NULL, 3.0, DATE_SUB(NOW(), INTERVAL 6 DAY))")
+                     (?, 'example.com', 10.0, NOW()),
+                     (?, 'test.com', 15.0, NOW()),
+                     (?, 'example.com', 5.0, NOW()),
+                     (?, 'other.com', 8.0, NOW()),
+                     (?, 'site.com', 12.0, NOW()),
+                     (?, 'domain.com', 20.0, NOW()),
+                     (?, NULL, 3.0, NOW())")
             .bind(user_id)
             .bind(user_id)
             .bind(user_id)
