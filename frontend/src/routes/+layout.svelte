@@ -1,11 +1,11 @@
 <script lang="ts">
     import favicon from "$lib/images/greenscore-logo.png";
     import '../app.css';
+    import '$lib/i18n';
+    import { waitLocale } from 'svelte-i18n';
 
     let { children } = $props();
-    import '$lib/i18n';
 </script>
-
 
 <svelte:head>
     <link rel="icon" href={favicon}/>
@@ -14,4 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 </svelte:head>
 
-{@render children()}
+{#await waitLocale() then}
+    {@render children()}
+{/await}
