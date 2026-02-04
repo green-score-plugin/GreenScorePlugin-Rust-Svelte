@@ -80,9 +80,10 @@ mod tests {
         let org_id = 50;
         let user_id = 99;
 
-        sqlx::query("INSERT INTO organisation (id, organisation_name) VALUES (?, ?)")
+        sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (?, ?, ?)")
             .bind(org_id)
             .bind("Ma Super Entreprise")
+            .bind("X53JSHNL")
             .execute(&pool).await.unwrap();
 
         sqlx::query("INSERT INTO user (id, email, password, organisation_id, roles) VALUES (?, ?, ?, ?, '[]')")
@@ -123,9 +124,10 @@ mod tests {
         let org_id = 60;
         let user_id = 60;
 
-        sqlx::query("INSERT INTO organisation (id, organisation_name) VALUES (?, ?)")
+        sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (?, ?, ?)")
             .bind(org_id)
             .bind("Clean Startup")
+            .bind("CLEAN123")
             .execute(&pool).await.unwrap();
 
         sqlx::query("INSERT INTO user (id, email, password, organisation_id, roles) VALUES (?, ?, ?, ?, '[]')")
