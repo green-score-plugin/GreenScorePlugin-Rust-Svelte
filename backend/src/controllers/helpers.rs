@@ -2,7 +2,7 @@ use serde::Serialize;
 use sqlx::MySqlPool;
 use crate::models::Account;
 
-#[derive(Serialize, sqlx::FromRow)]
+#[derive(Serialize, sqlx::FromRow, Debug)]
 pub struct Equivalent {
     name: String,
     value: f64,

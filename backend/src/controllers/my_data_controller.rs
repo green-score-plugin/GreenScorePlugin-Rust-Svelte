@@ -10,19 +10,19 @@ use crate::models::Account;
 
 #[derive(Serialize)]
 pub struct MyDataResponse {
-    success: bool,
-    my_average_daily_carbon_footprint: Option<f64>,
-    average_daily_carbon_footprint: Option<f64>,
-    message_average_footprint: Option<String>,
-    total_consumption: Option<f64>,
-    letter_green_score: Option<String>,
-    env_nomination: Option<String>,
-    equivalents: Option<Vec<Equivalent>>,
-    daily_consumption: Vec<ConsumptionDataPoint>,
-    weekly_consumption: Vec<ConsumptionDataPoint>,
-    monthly_consumption: Vec<ConsumptionDataPoint>,
-    top_polluting_sites: Vec<TopPollutingSite>,
-    advices: Vec<String>,
+    pub success: bool,
+    pub my_average_daily_carbon_footprint: Option<f64>,
+    pub average_daily_carbon_footprint: Option<f64>,
+    pub message_average_footprint: Option<String>,
+    pub total_consumption: Option<f64>,
+    pub letter_green_score: Option<String>,
+    pub env_nomination: Option<String>,
+    pub equivalents: Option<Vec<Equivalent>>,
+    pub daily_consumption: Vec<ConsumptionDataPoint>,
+    pub weekly_consumption: Vec<ConsumptionDataPoint>,
+    pub monthly_consumption: Vec<ConsumptionDataPoint>,
+    pub top_polluting_sites: Vec<TopPollutingSite>,
+    pub advices: Vec<String>,
 }
 #[derive(Serialize, Debug)]
 pub struct ConsumptionDataPoint {
