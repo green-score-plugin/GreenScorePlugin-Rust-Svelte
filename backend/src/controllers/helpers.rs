@@ -50,7 +50,7 @@ pub async fn equivalent(pool: &MySqlPool, carbon_footprint: f64, nb_results: i32
 
     let result = if use_selection {
         sqlx::query_as::<_, Equivalent>(
-            "SELECT e.name, ROUND(? * e.equivalent, 2) as value, e.icon_thumbnail as icon
+            "SELECT DISTINCT e.name, ROUND(? * e.equivalent, 2) as value, e.icon_thumbnail as icon
              FROM equivalent e
              JOIN user_equivalent ue ON e.id = ue.equivalent_id
              WHERE ue.user_id = ?

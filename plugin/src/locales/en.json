@@ -1,0 +1,31 @@
+{
+  "app_title": "GreenScore Web",
+  "site_current": "Current site:",
+  "site_country_sentence": "In your country ({country}), this page consumes",
+  "negligible_compared": "negligible compared",
+  "average_negligible": "negligible compared to the average",
+  "average_higher": "{mult}x higher than the average",
+  "average_lower": "{mult}x lower than the average",
+  "more_details": "More details",
+  "save_prompt": "Want to save this result?",
+  "login": "Sign in",
+  "no_data": "No data",
+  "corresponds_to": "This corresponds to:",
+  "connect_text": "Sign in",
+  "details_button_info": "More information",
+  "you_are_connected": "You are connected!",
+  "account": "Account",
+  "equivalent": {
+    "lille_nimes": "Trip Lille-Nîmes by car",
+    "paris_berlin": "Trip Paris-Berlin by train",
+    "emails": "Sent emails",
+    "search": "Google searches",
+    "streaming": "Streaming hours",
+    "bus": "Km by bus",
+    "motorbike": "Km by motorbike",
+    "car": "Km by car",
+    "laptop": "Laptop usage hours",
+    "tap_water": "Liters of tap water",
+    "paris_ny": "Paris-New York flight"
+  }
+}

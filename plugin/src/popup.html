@@ -2,14 +2,10 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Popup</title>
-<!--    <script-->
-<!--      src="https://kit.fontawesome.com/5fbdf29340.js"-->
-<!--      crossorigin="anonymous"-->
-<!--    ></script>-->
+    <title data-i18n="app_title">Popup</title>
     <link href="./popup.css" rel="stylesheet" />
-    <script src="popup.js" defer></script>
     <script src="config.js" defer></script>
+    <script src="popup.js" defer></script>
   </head>
 
 
@@ -23,23 +19,42 @@
           alt="GreenScore Logo"
           style="width: 32px; height: 34px"
         />
-        <h1 class="text-2xl font-outfit font-extrabold text-gs-green-950">
+        <h1 class="text-2xl font-outfit font-extrabold text-gs-green-950" data-i18n="app_title">
           GreenScore Web
         </h1>
       </div>
-      <img
-        src="../assets/images/account.svg"
-        alt="Compte"
-        class="cursor-pointer"
-      />
+      <div class="flex items-center gap-3">
+        <div class="flex gap-2">
+          <button
+            id="btn-lang-en"
+            class="transition-all duration-300 hover:scale-110 cursor-pointer opacity-50 grayscale hover:grayscale-0 hover:opacity-100"
+            title="English"
+          >
+            <img src="../assets/images/flags/gb.svg" alt="English" style="width: 24px; height: auto;" class="object-cover rounded shadow-sm" />
+          </button>
+          <button
+            id="btn-lang-fr"
+            class="transition-all duration-300 hover:scale-110 cursor-pointer opacity-50 grayscale hover:grayscale-0 hover:opacity-100"
+            title="Français"
+          >
+            <img src="../assets/images/flags/fr.svg" alt="Français" style="width: 24px; height: auto;" class="object-cover rounded shadow-sm" />
+          </button>
+        </div>
+        <img
+          src="../assets/images/account.svg"
+          alt="Compte"
+          data-i18n-alt="account"
+          class="cursor-pointer"
+        />
+      </div>
 
     </header>
     <div id="main-container">
       <div
         class="flex flex-row font-outfit w-full items-center justify-center p-2"
       >
-        <p class="text-grey-400 text-sm">Site actuel :&nbsp</p>
-        <p id="site-url" class="text-grey-400 text-sm font-bold">*site.fr*</p>
+        <p class="text-grey-400 text-sm" data-i18n="site_current">Site actuel :&nbsp</p>
+        <p id="site-url" class="text-grey-400 text-sm font-bold">Chargement...</p>
       </div>
 
       <div class="flex flex-col gap-6 px-4">
@@ -47,6 +62,7 @@
           <h2
             id="site-country"
             class="text-xl w-2/3 text-center font-extrabold font-outfit text-grey-950"
+            data-i18n="site_country_sentence"
           >
             Dans votre pays (*Pays*), cette page consomme
           </h2>
@@ -59,21 +75,19 @@
                 >0&nbsp;</span
               >
               <div class="flex font-medium gap-0 items-baseline">
-                <span class="text-base">gC0</span>
+                <span class="text-base">gCO</span>
                 <span class="text-xs">2</span>
                 <span class="text-base">e</span>
               </div>
             </div>
             <div class="flex font-outfit font-light text-base text-grey-950">
-              <span>C'est&nbsp;</span>
-              <span class="font-bold" id="average-consumption">0</span>
-              <span>&nbsp;à la moyenne !</span>
+              <p id="average-comparison" class="font-bold text-base" data-i18n="average_negligible">négligeable comparé à la moyenne</p>
             </div>
           </div>
         </div>
 
         <div class="flex flex-col font-outfit gap-2">
-          <p class="text-sm font-light">Cela correspond à :</p>
+          <p class="text-sm font-light" data-i18n="corresponds_to">Cela correspond à :</p>
           <div class="flex gap-3 items-center justify-center">
             <!-- Carte 1 -->
             <div
@@ -83,10 +97,11 @@
                 <img
                   src="../assets/images/account.svg"
                   class="w-5 h-5 object-cover"
+                  alt="equivalent-1"
                 />
                 <p class="text-xl font-extrabold">0.00</p>
               </div>
-              <p class="text-xs">Pas de données</p>
+              <p class="text-xs" data-i18n="no_data">Pas de données</p>
             </div>
             <!-- Carte 2 -->
             <div
@@ -96,10 +111,11 @@
                 <img
                   src="../assets/images/account.svg"
                   class="w-5 h-5 object-cover"
+                  alt="equivalent-2"
                 />
                 <p class="text-xl font-extrabold">0.00</p>
               </div>
-              <p class="text-xs">Pas de données</p>
+              <p class="text-xs" data-i18n="no_data">Pas de données</p>
             </div>
             <!-- Carte 3 -->
             <div
@@ -109,10 +125,11 @@
                 <img
                   src="../assets/images/account.svg"
                   class="w-5 h-5 object-cover"
+                  alt="equivalent-3"
                 />
                 <p class="text-xl font-extrabold">0.00</p>
               </div>
-              <p class="text-xs">Pas de données</p>
+              <p class="text-xs" data-i18n="no_data">Pas de données</p>
             </div>
           </div>
         </div>
@@ -122,14 +139,15 @@
             id="details-button"
             href="#"
             class="flex justify-center items-center py-2 text-white font-outfit font-medium bg-gs-green-950 rounded-lg w-full h-fit"
+            data-i18n="more_details"
           >
             Plus de détails
           </a>
           <div class="flex font-outfit text-sm justify-center">
-            <span class="text-sm text-grey-950"
+            <span class="text-sm text-grey-950" data-i18n="save_prompt"
               >Vous souhaitez enregistrer ce résultat ?&nbsp;</span
             >
-            <a href="#" class="text-[#6D874B] font-bold underline"
+            <a href="#" class="text-[#6D874B] font-bold underline" id="login-link" data-i18n="login"
               >Se connecter</a
             >
           </div>
@@ -138,3 +156,4 @@
     </div>
   </body>
 </html>
+
