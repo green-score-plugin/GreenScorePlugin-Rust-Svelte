@@ -7,6 +7,7 @@ mod tests {
     use tower_sessions::{MemoryStore, Session};
     use backend::controllers::mo_controller::mo;
     use backend::models::{Account, User};
+    use rand::Rng;
 
     // 1. Branche Outer Match: None (Pas de compte en session)
     #[sqlx::test]
@@ -26,17 +27,18 @@ mod tests {
         let store = Arc::new(MemoryStore::default());
         let session = Session::new(Some(Id::default()), store, None);
 
-        let user_id = 10;
+        let mut rng = rand::rng();
+        let user_id: i64 = rng.random_range(1000..9999);
 
         sqlx::query("INSERT INTO user (id, email, password, organisation_id, roles) VALUES (?, ?, ?, NULL, '[]')")
             .bind(user_id)
-            .bind("solo@test.com")
+            .bind(format!("solo_{}@test.com", user_id))
             .bind("hash")
             .execute(&pool).await.unwrap();
 
         let mock_account = Account::User(User::new(
             user_id,
-            "solo@test.com".to_string(),
+            format!("solo_{}@test.com", user_id),
             "Jean".to_string(),
             "Solo".to_string(),
             None
@@ -55,12 +57,16 @@ mod tests {
         let store = Arc::new(MemoryStore::default());
         let session = Session::new(Some(Id::default()), store, None);
 
+        let mut rng = rand::rng();
+        let user_id: i64 = rng.random_range(1000..9999);
+        let org_id: i64 = rng.random_range(1000..9999);
+
         let mock_account = Account::User(User::new(
-            99,
+            user_id,
             "error@test.com".to_string(),
             "Bug".to_string(),
             "Fix".to_string(),
-            Some(1)
+            Some(org_id)
         ));
         session.insert("account", mock_account).await.unwrap();
 
@@ -77,18 +83,19 @@ mod tests {
         let store = Arc::new(MemoryStore::default());
         let session = Session::new(Some(Id::default()), store, None);
 
-        let org_id = 50;
-        let user_id = 99;
+        let mut rng = rand::rng();
+        let org_id: i64 = rng.random_range(1000..9999);
+        let user_id: i64 = rng.random_range(1000..9999);
 
         sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (?, ?, ?)")
             .bind(org_id)
-            .bind("Ma Super Entreprise")
-            .bind("X53JSHNL")
+            .bind(format!("Ma Super Entreprise {}", org_id))
+            .bind(format!("X53JSHNL_{}", org_id))
             .execute(&pool).await.unwrap();
 
         sqlx::query("INSERT INTO user (id, email, password, organisation_id, roles) VALUES (?, ?, ?, ?, '[]')")
             .bind(user_id)
-            .bind("ceo@test.com")
+            .bind(format!("ceo_{}@test.com", user_id))
             .bind("hash")
             .bind(org_id)
             .execute(&pool).await.unwrap();
@@ -102,7 +109,7 @@ mod tests {
 
         let mock_account = Account::User(User::new(
             user_id,
-            "ceo@test.com".to_string(),
+            format!("ceo_{}@test.com", user_id),
             "Jean".to_string(),
             "CEO".to_string(),
             Some(org_id)
@@ -121,26 +128,26 @@ mod tests {
         let store = Arc::new(MemoryStore::default());
         let session = Session::new(Some(Id::default()), store, None);
 
-        let org_id = 60;
-        let user_id = 60;
+        let mut rng = rand::rng();
+        let org_id: i64 = rng.random_range(10000..19999);
+        let user_id: i64 = rng.random_range(10000..19999);
 
         sqlx::query("INSERT INTO organisation (id, organisation_name, organisation_code) VALUES (?, ?, ?)")
             .bind(org_id)
-            .bind("Clean Startup")
-            .bind("CLEAN123")
+            .bind(format!("Clean Startup {}", org_id))
+            .bind(format!("CLEAN{}", org_id))
             .execute(&pool).await.unwrap();
 
         sqlx::query("INSERT INTO user (id, email, password, organisation_id, roles) VALUES (?, ?, ?, ?, '[]')")
             .bind(user_id)
-            .bind("clean@test.com")
+            .bind(format!("clean_{}@test.com", user_id))
             .bind("hash")
             .bind(org_id)
             .execute(&pool).await.unwrap();
 
-        // Correction : Ajout explicite de .to_string()
         let mock_account = Account::User(User::new(
             user_id,
-            "clean@test.com".to_string(),
+            format!("clean_{}@test.com", user_id),
             "Mr".to_string(),
             "Clean".to_string(),
             Some(org_id)
@@ -159,27 +166,28 @@ mod tests {
         let store = Arc::new(MemoryStore::default());
         let session = Session::new(Some(Id::default()), store, None);
 
-        let phantom_org_id = 99999;
-        let user_id = 777;
+        let mut rng = rand::rng();
+        let phantom_org_id: i64 = rng.random_range(90000..99999);
+        let user_id: i64 = rng.random_range(90000..99999);
 
         let mut conn = pool.acquire().await.unwrap();
 
-        sqlx::query("SET FOREIGN_KEY_CHECKS=0").execute(&mut *conn).await.unwrap();
+        sqlx::query("SET FOREIGN_KEY_CHECKS=0")
+            .execute(&mut *conn).await.unwrap();
 
         sqlx::query("INSERT INTO user (id, email, password, organisation_id, roles) VALUES (?, ?, ?, ?, '[]')")
             .bind(user_id)
-            .bind("ghost@test.com")
+            .bind(format!("ghost_{}@test.com", user_id))
             .bind("hash")
-            .bind(phantom_org_id)
+            .bind(phantom_org_id) // ID INEXISTANT
             .execute(&mut *conn).await.unwrap();
 
-        sqlx::query("SET FOREIGN_KEY_CHECKS=1").execute(&mut *conn).await.unwrap();
-
-        drop(conn);
+        sqlx::query("SET FOREIGN_KEY_CHECKS=1")
+            .execute(&mut *conn).await.unwrap();
 
         let mock_account = Account::User(User::new(
             user_id,
-            "ghost@test.com".to_string(),
+            format!("ghost_{}@test.com", user_id),
             "Casper".to_string(),
             "Ghost".to_string(),
             Some(phantom_org_id)
