@@ -49,7 +49,7 @@ async fn get_top5_polluting_sites(pool: &MySqlPool, org_id: i64) -> Vec<TopPollu
         .bind(org_id)
         .fetch_all(pool)
         .await
-        .unwrap_or_default();
+        .expect("Failed to fetch top 5 polluting sites");
 
     results.into_iter()
         .map(|(url_domain, total_footprint)| TopPollutingSite {
@@ -74,7 +74,7 @@ async fn average_daily_carbon_footprint(pool: &MySqlPool, org_id: i64) -> f64 {
         .fetch_one(pool)
         .await
         .map(|(val,)| val)
-        .unwrap_or(0.0)
+        .expect("Failed to fetch average daily carbon footprint")
 }
 
 async fn total_organization_consumption(pool: &MySqlPool, org_id: i64) -> Option<f64> {
@@ -127,7 +127,7 @@ async fn get_daily_consumption(pool: &MySqlPool, org_id: i64) -> Vec<Consumption
         .bind(org_id)
         .fetch_all(pool)
         .await
-        .unwrap_or_default();
+        .expect("Failed to fetch daily consumption");
 
     results.into_iter()
         .map(|(label, value)| ConsumptionDataPoint { label, value: (value * 100.0).round() / 100.0 })
@@ -141,7 +141,7 @@ async fn get_weekly_consumption(pool: &MySqlPool, org_id: i64) -> Vec<Consumptio
         .bind(org_id)
         .fetch_all(pool)
         .await
-        .unwrap_or_default();
+        .expect("Failed to fetch weekly consumption");
 
     results.into_iter()
         .map(|(label, value)| ConsumptionDataPoint { label, value: (value * 100.0).round() / 100.0 })
@@ -155,7 +155,7 @@ async fn get_monthly_consumption(pool: &MySqlPool, org_id: i64) -> Vec<Consumpti
         .bind(org_id)
         .fetch_all(pool)
         .await
-        .unwrap_or_default();
+        .expect("Failed to fetch monthly consumption");
 
     results.into_iter()
         .map(|(label, value)| ConsumptionDataPoint { label, value: (value * 100.0).round() / 100.0 })
