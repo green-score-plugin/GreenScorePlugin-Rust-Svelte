@@ -140,9 +140,39 @@ export const actions = {
 
             const result = await res.json();
 
-            if (!result.success) {
-                return fail(400, { actionType: 'update_info', message: result.message ?? 'errors.update_error' });
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    const sessionValue = (result.token ?? result.session ?? result.sessionValue) as
+                        | string
+                        | undefined
+                        | null;
+
+                    if (sessionValue) {
+                        await setSessionCookie(cookies, sessionValue);
+                    } else {
+                        await setSessionCookie(cookies, res);
+                    }
+                } catch (cookieError) {
+                    console.error('Erreur cookie:', cookieError);
+                }
+
+                return {
+                    actionType: 'update_info',
+                    success: true,
+                    message: 'success.info_updated'
+                };
+            } else {
+                return fail(400, {
+                    actionType: 'update_info',
+                    message: result.message ?? 'errors.update_error'
+                });
             }
+
 
             const token = cookies.get('greenscoreweb_sessions');
             if (token) invalidateCache(token);
@@ -165,7 +195,7 @@ export const actions = {
         const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
 
         if (!codeOrganisation) {
-            return fail(400, { actionType: 'join_orga', message: 'errors.validation_code_required' });
+            return fail(400, { actionType: 'join_orga', message: "errors.validation_code_required" });
         }
 
         try {
@@ -194,9 +224,25 @@ export const actions = {
 
             const token = cookies.get('greenscoreweb_sessions');
             if (token) invalidateCache(token);
+    
+            if (result.success) {
+                const sessionValue = result.token ?? result.session ?? result.sessionValue;
+                if (sessionValue) {
+                    await setSessionCookie(cookies, sessionValue);
+                }
 
-            const sessionValue = result.token ?? result.session ?? result.sessionValue;
-            if (sessionValue) await setSessionCookie(cookies, sessionValue);
+                return {
+                    actionType: 'join_orga',
+                    success: true,
+                    message: 'success.join_organization'
+                };
+            } else {
+                return fail(400, {
+                    actionType: 'join_orga',
+                    message: result.message ?? 'errors.operation_error'
+                });
+            }
+
 
             return { actionType: 'join_orga', success: true, message: 'success.org_joined' };
         } catch {
@@ -266,7 +312,22 @@ export const actions = {
 
             const result = await response.json();
 
-            if (!result.success) {
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    await setSessionCookie(cookies, response);
+                } catch (cookieError) {}
+
+                return {
+                    actionType: 'leave_orga',
+                    success: true,
+                    message: "success.leave_organization"
+                };
+            } else {
                 return fail(400, { actionType: 'leave_orga', message: result.message ?? 'errors.operation_error' });
             }
 
@@ -286,7 +347,7 @@ export const actions = {
         const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
 
         if (!codeOrganisation) {
-            return fail(400, { actionType: 'change_orga', message: 'errors.validation_code_required' });
+            return fail(400, { actionType: 'change_orga', message: "errors.validation_code_required" });
         }
 
         try {
@@ -306,7 +367,30 @@ export const actions = {
 
             const result = await response.json();
 
-            if (!result.success) {
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    const sessionValue = (result.token ?? result.session ?? result.sessionValue) as string | undefined | null;
+                    if (sessionValue) {
+                        const fakeRes = new Response(null, {
+                            headers: { 'set-cookie': `greenscoreweb_sessions=${sessionValue}; Path=/; HttpOnly; SameSite=Lax; Max-Age=3600` }
+                        });
+                        await setSessionCookie(cookies, fakeRes);
+                    } else {
+                        await setSessionCookie(cookies, response);
+                    }
+                } catch (cookieError) {}
+
+                return {
+                    actionType: 'change_orga',
+                    success: true,
+                    message: "success.org_changed"
+                };
+            } else {
                 return fail(400, { actionType: 'change_orga', message: result.message ?? 'errors.operation_error' });
             }
 
