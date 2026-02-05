@@ -9,13 +9,10 @@ const CONFIG = {
 };
 
 (function() {
-  // If browser is already defined (Firefox), do nothing
   if (typeof browser !== "undefined") return;
 
-  // We are in Chrome (or compatible)
   const chromeApi = (typeof chrome !== "undefined") ? chrome : null;
 
-  // If no chrome API either, we can't do anything (not an extension context)
   if (!chromeApi) return;
 
   const polyfill = {
@@ -65,7 +62,6 @@ const CONFIG = {
     }
   };
 
-  // Expose to global scope based on environment
   if (typeof globalThis !== 'undefined') {
       globalThis.browser = polyfill;
   } else if (typeof window !== 'undefined') {
@@ -75,7 +71,6 @@ const CONFIG = {
   }
 })();
 
-// Export pour l'environnement Node/Tests si nécessaire
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
   module.exports = CONFIG;
 }
