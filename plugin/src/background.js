@@ -640,10 +640,18 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   // Point d'entrée principal du listener
   const handleMessage = async () => {
-    const tabs = await browser.tabs.query({
+    let tabs = await browser.tabs.query({
       active: true,
       currentWindow: true,
     });
+
+    if (tabs.length === 0) {
+       // Fallback: try lastFocusedWindow
+       tabs = await browser.tabs.query({
+          active: true,
+          lastFocusedWindow: true
+       });
+    }
 
     if (tabs.length === 0) {
       return { error: "Aucun onglet actif trouvé." };

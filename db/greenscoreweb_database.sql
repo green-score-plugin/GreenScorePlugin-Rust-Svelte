@@ -204,6 +204,7 @@ INSERT INTO `user` (`id`, `organisation_id`, `email`, `roles`, `password`, `firs
 (210, NULL, 'robincby64@gmail.com', '[\"ROLE_USER\"]', '$2y$13$SmZnm6.k.1GUTbcgQiyeHuxTTu6v4qQOhfZW97kQtwTSK34ahuFEG', 'Robin', 'Conchez-Boueytou', 53.65);
 
 
+
 --
 -- Contraintes pour les tables déchargées
 --
