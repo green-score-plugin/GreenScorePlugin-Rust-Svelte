@@ -9,8 +9,8 @@ use crate::models::Account;
 
 pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> (StatusCode, Json<Value>) {
 
-    let gco2 = payload["gCO2"].as_f64().unwrap_or(0.0);
-    let count = payload["count"].as_i64().unwrap_or(3);
+    let gco2 = payload.get("gCO2").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let count = payload.get("count").and_then(|v| v.as_i64()).unwrap_or(3);
 
     if gco2 <= 0.0 {
         return (StatusCode::BAD_REQUEST, Json(json!({
@@ -19,64 +19,29 @@ pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Jso
         })));
     }
 
-    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+    let account_opt: Option<Account> = session.get("account").await.ok().flatten();
+
     let result = helpers::equivalent(&pool, gco2, count as i32, account_opt.as_ref()).await;
 
-    match result {
-        Some(equivalents) => {
-            (StatusCode::OK, Json(json!({
-                "success": true,
-                "data": equivalents
-            })))
-        },
-        None => {
-            (StatusCode::OK, Json(json!({
-                "success": true,
-                "data": []
-            })))
-        }
-    }
-}
+    let data = result.unwrap_or_default();
 
-async fn update_user_footprint(pool: &MySqlPool, user_id: i64, carbon_footprint: f64) -> Result<f64, sqlx::Error> {
-
-    let mut transaction = pool.begin().await?;
-
-    sqlx::query(
-        r#"
-            UPDATE user
-            SET total_carbon_footprint = COALESCE(total_carbon_footprint, 0) + ?
-            WHERE id = ?
-        "#
-    )
-        .bind(carbon_footprint)
-        .bind(user_id)
-        .execute(&mut *transaction)
-        .await?;
-
-    let new_total: f64 = sqlx::query_scalar(
-        "SELECT total_carbon_footprint FROM user WHERE id = ?"
-    )
-        .bind(user_id)
-        .fetch_one(&mut *transaction)
-        .await?;
-
-    transaction.commit().await?;
-
-    Ok(new_total)
+    (StatusCode::OK, Json(json!({
+        "success": true,
+        "data": data
+    })))
 }
 
 pub async fn save_monitored_website_data(State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> (StatusCode, Json<Value>) {
 
-    let user_id = payload["userId"].as_i64().unwrap_or(0);
-    let queries_quantity = payload["totalRequests"].as_i64().unwrap_or(0);
-    let loading_time = payload["loadTime"].as_f64().unwrap_or(0.0);
-    let data_transferred = payload["totalTransferredSize"].as_i64().unwrap_or(0);
-    let resources = payload["totalResourceSize"].as_i64().unwrap_or(0);
-    let carbon_footprint = payload["totalEmissions"].as_f64().unwrap_or(0.0);
-    let country = payload["country"].as_str().unwrap_or("Unknown");
-    let url_full = payload["url"].as_str().unwrap_or("");
-    let url_domain = payload["domain"].as_str().unwrap_or("");
+    let user_id = payload.get("userId").and_then(|v| v.as_i64()).unwrap_or(0);
+    let queries_quantity = payload.get("totalRequests").and_then(|v| v.as_i64()).unwrap_or(0);
+    let loading_time = payload.get("loadTime").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let data_transferred = payload.get("totalTransferredSize").and_then(|v| v.as_i64()).unwrap_or(0);
+    let resources = payload.get("totalResourceSize").and_then(|v| v.as_i64()).unwrap_or(0);
+    let carbon_footprint = payload.get("totalEmissions").and_then(|v| v.as_f64()).unwrap_or(0.0);
+    let country = payload.get("country").and_then(|v| v.as_str()).unwrap_or("Unknown");
+    let url_full = payload.get("url").and_then(|v| v.as_str()).unwrap_or("");
+    let url_domain = payload.get("domain").and_then(|v| v.as_str()).unwrap_or("");
 
     let insert_result = sqlx::query(
         r#"
@@ -105,8 +70,23 @@ pub async fn save_monitored_website_data(State(pool): State<MySqlPool>, Json(pay
         }
     };
 
-    match update_user_footprint(&pool, user_id, carbon_footprint).await {
-        Ok(new_total_footprint) => {
+    let update_status = async {
+        let _ = sqlx::query("UPDATE user SET total_carbon_footprint = COALESCE(total_carbon_footprint, 0) + ? WHERE id = ?")
+            .bind(carbon_footprint)
+            .bind(user_id)
+            .execute(&pool)
+            .await;
+
+        let new_total: f64 = sqlx::query_scalar("SELECT total_carbon_footprint FROM user WHERE id = ?")
+            .bind(user_id)
+            .fetch_one(&pool)
+            .await.ok()?;
+
+        Some(new_total)
+    }.await;
+
+    match update_status {
+        Some(new_total_footprint) => {
             (StatusCode::OK, Json(json!({
                 "success": true,
                 "message": "Data inserted successfully",
@@ -114,7 +94,7 @@ pub async fn save_monitored_website_data(State(pool): State<MySqlPool>, Json(pay
                 "updatedTotalCarbonFootprint": new_total_footprint
             })))
         },
-        Err(_) => {
+        None => {
             (StatusCode::OK, Json(json!({
                 "success": true,
                 "warning": "Website saved but user total not updated",

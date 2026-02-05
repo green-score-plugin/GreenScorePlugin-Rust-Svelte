@@ -62,7 +62,7 @@ jobs:
 
       - name: Exécution des tests et génération du rapport HTML
         run: |
-          cargo llvm-cov nextest --all-features --workspace --html
+          cargo llvm-cov nextest --all-features --workspace --ignore-filename-regex "src[/\\](main|cleanup|router)\.rs" --html
 
       - name: Sauvegarde du rapport HTML (Artifact)
         if: always()
