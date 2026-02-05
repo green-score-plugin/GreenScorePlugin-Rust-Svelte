@@ -13,10 +13,14 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
 
     // Routes publiques
-    const publicRoutes = ['/login', '/inscription', '/inscription-organisation', '/cgu', '/confidentialite', '/', '/derniere-page-consultee', '/plugin'];
-    const isPublicRoute = publicRoutes.some(route =>
+    const publicRoutes = ['/login', '/inscription', '/inscription-organisation', '/cgu', '/confidentialite', '/', '/plugin'];
+    let isPublicRoute = publicRoutes.some(route =>
         event.url.pathname === route || event.url.pathname.startsWith(route + '/')
     );
+
+    if (event.url.pathname === '/derniere-page-consultee' && event.url.search.length > 1) {
+        isPublicRoute = true;
+    }
 
     if (!isPublicRoute && !session) {
         throw redirect(303, '/login');
