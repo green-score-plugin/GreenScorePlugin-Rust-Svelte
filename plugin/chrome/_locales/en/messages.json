@@ -3,10 +3,14 @@
   "current_site_label": { "message": "Current site:" },
   "country_sentence": { "message": "In your country (*Country*), this page consumes" },
   "gco2e_unit": { "message": "gC0" },
+  "its": { "message": "It's" },
   "average_label": { "message": "compared to the average!" },
   "corresponds_label": { "message": "This corresponds to:" },
   "no_data": { "message": "No data" },
   "more_details": { "message": "More details" },
   "save_result": { "message": "Do you want to save this result?" },
-  "login": { "message": "Log in" }
+  "login": { "message": "Log in" },
+  "negligible": { "message": "negligible" },
+  "superior": { "message": "higher" },
+  "inferior": { "message": "lower" }
 }
