@@ -27,6 +27,24 @@
           GreenScore Web
         </h1>
       </div>
+
+      <div class="flex gap-2 items-center mr-4">
+        <button
+                id="lang-en"
+                class="transition-all duration-300 hover:scale-110 cursor-pointer opacity-50 grayscale hover:grayscale-0 hover:opacity-100"
+                title="English"
+        >
+          <img src="../assets/images/flags/gb.svg" alt="English" style="width: 24px; height: auto;" class="object-cover rounded shadow-sm" />
+        </button>
+        <button
+                id="lang-fr"
+                class="transition-all duration-300 hover:scale-110 cursor-pointer opacity-50 grayscale hover:grayscale-0 hover:opacity-100"
+                title="Français"
+        >
+          <img src="../assets/images/flags/fr.svg" alt="Français" style="width: 24px; height: auto;" class="object-cover rounded shadow-sm" />
+        </button>
+      </div>
+
       <img
         src="../assets/images/account.svg"
         alt="Compte"
@@ -38,7 +56,7 @@
       <div
         class="flex flex-row font-outfit w-full items-center justify-center p-2"
       >
-        <p class="text-grey-400 text-sm">Site actuel :&nbsp</p>
+        <p class="text-grey-400 text-sm" data-i18n="current_site">Site actuel :&nbsp</p>
         <p id="site-url" class="text-grey-400 text-sm font-bold">*site.fr*</p>
       </div>
 
@@ -65,15 +83,15 @@
               </div>
             </div>
             <div class="flex font-outfit font-light text-base text-grey-950">
-              <span>C'est&nbsp;</span>
-              <span class="font-bold" id="average-consumption">0</span>
-              <span>&nbsp;à la moyenne !</span>
+              <span data-i18n="its_average">C'est </span>&nbsp;
+              <span class="font-bold" id="average-consumption">0</span>&nbsp;
+              <span data-i18n="average_end">à la moyenne !</span>
             </div>
           </div>
         </div>
 
         <div class="flex flex-col font-outfit gap-2">
-          <p class="text-sm font-light">Cela correspond à :</p>
+          <p class="text-sm font-light" data-i18n="corresponds_label">Cela correspond à :</p>
           <div class="flex gap-3 items-center justify-center">
             <!-- Carte 1 -->
             <div
@@ -126,10 +144,10 @@
             Plus de détails
           </a>
           <div class="flex font-outfit text-sm justify-center">
-            <span class="text-sm text-grey-950"
+            <span class="text-sm text-grey-950" id="login-prompt-msg" data-i18n="save_prompt"
               >Vous souhaitez enregistrer ce résultat ?&nbsp;</span
             >
-            <a href="#" class="text-[#6D874B] font-bold underline"
+            <a href="#" class="text-[#6D874B] font-bold underline" id="login-link-action" data-i18n="sign_in"
               >Se connecter</a
             >
           </div>

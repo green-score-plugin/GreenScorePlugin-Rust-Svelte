@@ -1,0 +1,18 @@
+{
+    "current_site": "Site actuel : ",
+    "country_consumption_intro": "Dans votre pays ({countryName}), cette page consomme",
+    "negligible": "négligeable comparé",
+    "higher": "{mult}x supérieur",
+    "lower": "{mult}x inférieur",
+    "more_details": "Plus de détails",
+    "save_prompt": "Vous souhaitez enregistrer ce résultat ?",
+    "sign_in": "Se connecter",
+    "logged_in": "Vous êtes connecté !",
+    "no_data": "Pas de données",
+    "its_average": "C'est ",
+    "average_end": " à la moyenne !",
+    "corresponds_label": "Cela correspond à :",
+    "data.equivalent.search": "Recherche(s) web",
+    "data.equivalent.tap_water": "Litre(s) d'eau",
+    "data.equivalent.emails": "Email(s)"
+}

@@ -1,4 +1,87 @@
 let gCO2eValue;
+let currentLang = 'fr';
+let translations = {};
+
+const TRANSLATIONS = {
+  fr: {
+    current_site: "Site actuel : ",
+    country_consumption_intro: "Dans votre pays ({countryName}), cette page consomme",
+    negligible: "négligeable comparé",
+    higher: "{mult}x supérieur",
+    lower: "{mult}x inférieur",
+    more_details: "Plus de détails",
+    save_prompt: "Vous souhaitez enregistrer ce résultat ?",
+    sign_in: "Se connecter",
+    logged_in: "Vous êtes connecté !",
+    no_data: "Pas de données",
+    its_average: "C'est ",
+    average_end: " à la moyenne !",
+    corresponds_label: "Cela correspond à :",
+    "data.equivalent.search": "Recherche(s) web",
+    "data.equivalent.tap_water": "Litre(s) d'eau",
+    "data.equivalent.emails": "Email(s)"
+  },
+  en: {
+    current_site: "Current site : ",
+    country_consumption_intro: "In your country ({countryName}), this page consumes",
+    negligible: "negligible compared",
+    higher: "{mult}x higher",
+    lower: "{mult}x lower",
+    more_details: "More details",
+    save_prompt: "Want to save this result ?",
+    sign_in: "Sign in",
+    logged_in: "You are logged in!",
+    no_data: "No data",
+    its_average: "It is ",
+    average_end: " to the average!",
+    corresponds_label: "This corresponds to:",
+    "data.equivalent.search": "Web search",
+    "data.equivalent.tap_water": "Liter(s) of water",
+    "data.equivalent.emails": "Email(s)"
+  }
+};
+
+function initLanguage(forcedLang = null) {
+  // Détermination de la langue
+  if (forcedLang) {
+    currentLang = forcedLang;
+    localStorage.setItem('gs_plugin_lang', forcedLang);
+  } else {
+    const storedLang = localStorage.getItem('gs_plugin_lang');
+    if (storedLang) {
+      currentLang = storedLang;
+    } else {
+      const browserLang = navigator.language.split('-')[0];
+      currentLang = ['fr', 'en'].includes(browserLang) ? browserLang : 'en';
+    }
+  }
+
+  translations = TRANSLATIONS[currentLang];
+
+  updateFlagsUI();
+  applyStaticTranslations();
+
+  if (typeof refreshDynamicTexts === 'function') {
+      refreshDynamicTexts();
+  }
+}
+
+function t(key, params = {}) {
+  let text = (translations && translations[key]) || key;
+  Object.keys(params).forEach(k => {
+    text = text.replace(`{${k}}`, params[k]);
+  });
+  return text;
+}
+
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[key]) {
+        el.textContent = translations[key];
+    }
+  });
+}
 
 async function updateEquivalents() {
   try {
@@ -20,7 +103,7 @@ async function updateEquivalents() {
 
           img.src = equivalent.image || "../assets/images/default.svg";
           valueElement.textContent = equivalent.value;
-          description.textContent = equivalent.name;
+          description.textContent = t(equivalent.name);
         }
       });
     } else {
@@ -35,6 +118,22 @@ async function updateEquivalents() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  await initLanguage();
+
+  const frFlag = document.getElementById('lang-fr');
+  const enFlag = document.getElementById('lang-en');
+
+  if (frFlag) {
+      frFlag.addEventListener('click', () => {
+          if (currentLang !== 'fr') initLanguage('fr');
+      });
+  }
+  if (enFlag) {
+      enFlag.addEventListener('click', () => {
+          if (currentLang !== 'en') initLanguage('en');
+      });
+  }
+
   let isLocalhost = false;
 
   // Écouteur pour le message localhost
@@ -57,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const detailsButton = document.createElement("a");
         detailsButton.id = "details-button";
         detailsButton.className = "flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg";
-        detailsButton.textContent = "Plus d'informations";
+        detailsButton.textContent = t("more_details");
 
         const rawUrl = `${CONFIG.BACKEND.WEBSITE_URL}/#`;
         try {
@@ -137,7 +236,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const AVERAGE_CONSUMPTION = 0.74; // Valeur obtenue sur un calcul de moyenne sur plus de 100 sites
 
       if (gCO2e <= 0) {
-        document.getElementById("average-consumption").textContent = "négligeable comparé";
+        document.getElementById("average-consumption").textContent = t("negligible");
         return;
       }
 
@@ -146,11 +245,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (multiplier > 1) {
         document.getElementById(
           "average-consumption"
-        ).textContent = `${multiplier.toFixed(2)}x supérieur`;
+        ).textContent = t("higher", { mult: multiplier.toFixed(2) });
       } else {
-        document.getElementById("average-consumption").textContent = `${(
-          1 / multiplier
-        ).toFixed(2)}x inférieur`;
+        document.getElementById("average-consumption").textContent = t("lower", { mult: (1 / multiplier).toFixed(2) });
       }
     }
 
@@ -187,16 +284,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (userData.isLoggedIn) {
           const connectedSpan = document.createElement("span");
           connectedSpan.className = "text-sm text-[#6D874B] font-bold";
-          connectedSpan.textContent = "Vous êtes connecté !";
+          connectedSpan.textContent = t("logged_in");
           loginSection.appendChild(connectedSpan);
         } else {
           const promptSpan = document.createElement("span");
           promptSpan.className = "text-sm text-grey-950";
-          promptSpan.textContent = "Vous souhaitez enregistrer ce résultat ?\u00A0";
+          promptSpan.textContent = t("save_prompt") + " ";
 
           const loginLink = document.createElement("a");
-          loginLink.className = "text-[#6D874B] font-bold underline";
-          loginLink.textContent = "Se connecter";
+          loginLink.className = "text-[#6D874B] font-bold underline cursor-pointer";
+          loginLink.textContent = t("sign_in");
 
           try {
             const parsed = new URL(CONFIG.BACKEND.LOGIN_URL);
@@ -213,8 +310,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             loginLink.addEventListener("click", (e) => e.preventDefault());
           }
 
-          loginSection.appendChild(promptSpan);
-          loginSection.appendChild(loginLink);
+          if (typeof refreshDynamicTexts === 'function') {
+              refreshDynamicTexts();
+          }
         }
       }
 
@@ -268,7 +366,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const countryElement = document.getElementById("site-country");
 
           if (countryElement && urlElement) {
-            countryElement.textContent = `Dans votre pays (${response.country}), cette page consomme`;
+            countryElement.textContent = t("country_consumption_intro", { countryName: response.country });
             urlElement.textContent = response.url;
           }
         } else if (response.error) {
@@ -289,3 +387,73 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 });
+
+function updateFlagsUI() {
+    const frFlag = document.getElementById('lang-fr');
+    const enFlag = document.getElementById('lang-en');
+
+    if (frFlag && enFlag) {
+        // Reset styles basics
+        frFlag.style.opacity = '0.5';
+        enFlag.style.opacity = '0.5';
+        frFlag.style.borderBottom = 'none';
+        enFlag.style.borderBottom = 'none';
+
+        // Active style
+        if (currentLang === 'fr') {
+            frFlag.style.opacity = '1';
+            frFlag.style.borderBottom = '2px solid #233430';
+        } else {
+            enFlag.style.opacity = '1';
+            enFlag.style.borderBottom = '2px solid #233430';
+        }
+    }
+}
+
+function refreshDynamicTexts() {
+    updateEquivalents();
+
+    if (typeof gCO2eValue !== 'undefined') {
+        const AVERAGE_CONSUMPTION = 0.74;
+        const avgEl = document.getElementById("average-consumption");
+        if (avgEl) {
+             if (gCO2eValue <= 0) {
+                 avgEl.textContent = t("negligible");
+             } else {
+                  let multiplier = gCO2eValue / AVERAGE_CONSUMPTION;
+                  if (multiplier > 1) {
+                     avgEl.textContent = t("higher", { mult: multiplier.toFixed(2) });
+                  } else {
+                     avgEl.textContent = t("lower", { mult: (1 / multiplier).toFixed(2) });
+                  }
+             }
+        }
+    }
+
+    browser.runtime.sendMessage({ type: "getCountryAndUrl" }).then(response => {
+         if (response && response.country) {
+            const countryElement = document.getElementById("site-country");
+            if (countryElement) countryElement.textContent = t("country_consumption_intro", { countryName: response.country });
+         }
+    });
+
+    const promptSpan = document.getElementById("login-prompt-msg");
+    if (promptSpan) {
+         promptSpan.textContent = t("save_prompt") + " ";
+    }
+
+    const loginLink = document.getElementById("login-link-action");
+    if(loginLink) {
+        loginLink.textContent = t("sign_in");
+    }
+
+    const connectedMsg = document.getElementById("user-connected-msg");
+    if (connectedMsg) {
+        connectedMsg.textContent = t("logged_in");
+    }
+
+    const detailsBtn = document.getElementById("details-button");
+    if (detailsBtn) {
+        detailsBtn.textContent = t("more_details");
+    }
+}
