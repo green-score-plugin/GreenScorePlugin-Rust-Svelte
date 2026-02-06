@@ -1,0 +1,12 @@
+{
+  "extension_name": { "message": "GreenScore Web" },
+  "current_site_label": { "message": "Site actuel :" },
+  "country_sentence": { "message": "Dans votre pays (*Pays*), cette page consomme" },
+  "gco2e_unit": { "message": "gC0" },
+  "average_label": { "message": "à la moyenne !" },
+  "corresponds_label": { "message": "Cela correspond à :" },
+  "no_data": { "message": "Pas de données" },
+  "more_details": { "message": "Plus de détails" },
+  "save_result": { "message": "Vous souhaitez enregistrer ce résultat ?" },
+  "login": { "message": "Se connecter" }
+}
