@@ -35,6 +35,11 @@ async function updateEquivalents() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = chrome.i18n.getMessage(key);
+  });
+
   let isLocalhost = false;
 
   // Écouteur pour le message localhost
