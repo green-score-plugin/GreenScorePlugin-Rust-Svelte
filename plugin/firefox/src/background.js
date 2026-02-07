@@ -347,7 +347,6 @@ browser.webRequest.onBeforeRequest.addListener(
 
     if (!tabData.startTime) {
       tabData.startTime = details.timeStamp;
-      console.log(`[DEBUG] Début de collecte pour l'onglet ${details.tabId}`);
     }
 
     // Initialise le suivi de cette requête spécifique
@@ -408,7 +407,6 @@ browser.webRequest.onCompleted.addListener(
     let resourceSize = requestData.resourceSize || 0;
     let transferredSize = resourceSize;
 
-    // Si on a un encoding, estimer la taille compressée
     if (requestData.encoding && resourceSize > 0) {
       switch (requestData.encoding) {
         case "gzip":
@@ -427,17 +425,6 @@ browser.webRequest.onCompleted.addListener(
 
     tabData.totalTransferredSize += transferredSize;
     tabData.totalResourceSize += resourceSize;
-
-    console.log(`[DEBUG] Requête complétée ${details.requestId}: transferred=${transferredSize}, resource=${resourceSize}, encoding=${requestData.encoding || 'none'}`);
-
-    // Log des totaux tous les 10 requêtes
-    if (tabData.totalRequests % 10 === 0) {
-      console.log(`[DEBUG] Totaux onglet ${details.tabId} après ${tabData.totalRequests} requêtes:`, {
-        totalTransferredSize: tabData.totalTransferredSize,
-        totalResourceSize: tabData.totalResourceSize,
-        url: tabData.currentUrl
-      });
-    }
 
     tabData.requestSizes.delete(details.requestId);
   },
@@ -541,16 +528,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.type === "getgCO2e") {
       const tabData = getTabData(activeTab.id);
-
-      console.log(`[DEBUG getgCO2e] Données de l'onglet ${activeTab.id}:`, {
-        totalTransferredSize: tabData.totalTransferredSize,
-        totalResourceSize: tabData.totalResourceSize,
-        totalRequests: tabData.totalRequests,
-        startTime: tabData.startTime,
-        endTime: tabData.endTime,
-        currentUrl: tabData.currentUrl,
-        carbonIntensity: tabData.carbonIntensity
-      });
 
       try {
         // Récupération du pays si nécessaire
