@@ -5,9 +5,17 @@ const LOCALE_KEY = 'greenscore_plugin_locale';
 let currentMessages = {};
 
 async function loadMessages(locale) {
-  const url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
-  const response = await fetch(url);
-  return await response.json();
+  let url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Locale not found');
+    return await response.json();
+  } catch (e) {
+    const defaultLocale = 'en';
+    url = chrome.runtime.getURL(`_locales/${defaultLocale}/messages.json`);
+    const response = await fetch(url);
+    return await response.json();
+  }
 }
 
 async function getCurrentLocale() {
@@ -127,7 +135,9 @@ async function updateEquivalents() {
 
           img.src = equivalent.image || "../assets/images/default.svg";
           valueElement.textContent = equivalent.value;
-          description.textContent = equivalent.name;
+
+          const translationKey = equivalent.name.replace(/\./g, '_');
+          description.textContent = getI18n(translationKey, equivalent.name);
         }
       });
     } else {
