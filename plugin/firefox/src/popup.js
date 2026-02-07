@@ -2,44 +2,6 @@ let gCO2eValue;
 let currentLang = 'fr';
 let translations = {};
 
-const TRANSLATIONS = {
-  fr: {
-    current_site: "Site actuel : ",
-    country_consumption_intro: "Dans votre pays ({countryName}), cette page consomme",
-    negligible: "négligeable comparé",
-    higher: "{mult}x supérieur",
-    lower: "{mult}x inférieur",
-    more_details: "Plus de détails",
-    save_prompt: "Vous souhaitez enregistrer ce résultat ?",
-    sign_in: "Se connecter",
-    logged_in: "Vous êtes connecté !",
-    no_data: "Pas de données",
-    its_average: "C'est ",
-    average_end: " à la moyenne !",
-    corresponds_label: "Cela correspond à :",
-    "data.equivalent.search": "Recherche(s) web",
-    "data.equivalent.tap_water": "Litre(s) d'eau",
-    "data.equivalent.emails": "Email(s)"
-  },
-  en: {
-    current_site: "Current site : ",
-    country_consumption_intro: "In your country ({countryName}), this page consumes",
-    negligible: "negligible compared",
-    higher: "{mult}x higher",
-    lower: "{mult}x lower",
-    more_details: "More details",
-    save_prompt: "Want to save this result ?",
-    sign_in: "Sign in",
-    logged_in: "You are logged in!",
-    no_data: "No data",
-    its_average: "It is ",
-    average_end: " to the average!",
-    corresponds_label: "This corresponds to:",
-    "data.equivalent.search": "Web search",
-    "data.equivalent.tap_water": "Liter(s) of water",
-    "data.equivalent.emails": "Email(s)"
-  }
-};
 
 function initLanguage(forcedLang = null) {
   // Détermination de la langue
@@ -283,15 +245,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (userData.isLoggedIn) {
           const connectedSpan = document.createElement("span");
+          connectedSpan.id = "user-connected-msg";
           connectedSpan.className = "text-sm text-[#6D874B] font-bold";
           connectedSpan.textContent = t("logged_in");
           loginSection.appendChild(connectedSpan);
         } else {
           const promptSpan = document.createElement("span");
+          promptSpan.id = "login-prompt-msg";
           promptSpan.className = "text-sm text-grey-950";
           promptSpan.textContent = t("save_prompt") + " ";
 
           const loginLink = document.createElement("a");
+          loginLink.id = "login-link-action";
           loginLink.className = "text-[#6D874B] font-bold underline cursor-pointer";
           loginLink.textContent = t("sign_in");
 
@@ -310,9 +275,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             loginLink.addEventListener("click", (e) => e.preventDefault());
           }
 
-          if (typeof refreshDynamicTexts === 'function') {
-              refreshDynamicTexts();
-          }
+          // Ajouter les éléments au DOM
+          loginSection.appendChild(promptSpan);
+          loginSection.appendChild(loginLink);
         }
       }
 

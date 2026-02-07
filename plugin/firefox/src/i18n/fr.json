@@ -12,7 +12,14 @@
     "its_average": "C'est ",
     "average_end": " à la moyenne !",
     "corresponds_label": "Cela correspond à :",
-    "data.equivalent.search": "Recherche(s) web",
-    "data.equivalent.tap_water": "Litre(s) d'eau",
-    "data.equivalent.emails": "Email(s)"
+    "data.equivalent.search": "recherches sur le web",
+    "data.equivalent.tap_water": "litres d'eau du robinet",
+    "data.equivalent.emails": "emails envoyés",
+    "data.equivalent.lille_marseille": "trajet Lille-Marseille en voiture",
+    "data.equivalent.paris_londres": "trajet Paris-Londres en train",
+    "data.equivalent.streaming": "heures de streaming vidéo",
+    "data.equivalent.bus": "km en bus",
+    "data.equivalent.motorbike": "km en moto",
+    "data.equivalent.car": "km en voiture",
+    "data.equivalent.paris_ny": "trajet Paris-New York en avion"
 }
