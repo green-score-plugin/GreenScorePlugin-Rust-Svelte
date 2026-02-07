@@ -1,7 +1,6 @@
 let gCO2eValue;
 
 // === Système i18n dynamique ===
-const LOCALE_KEY = 'greenscore_plugin_locale';
 let currentMessages = {};
 
 async function loadMessages(locale) {
@@ -15,36 +14,6 @@ async function loadMessages(locale) {
     url = chrome.runtime.getURL(`_locales/${defaultLocale}/messages.json`);
     const response = await fetch(url);
     return await response.json();
-  }
-}
-
-async function getCurrentLocale() {
-  const result = await chrome.storage.local.get('locale');
-  return result.locale || chrome.i18n.getUILanguage().split('-')[0] || 'fr';
-}
-
-async function setLocale(locale) {
-  await chrome.storage.local.set({ locale });
-}
-
-async function translatePage(locale) {
-  const messages = await loadMessages(locale);
-  currentMessages = messages;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (messages[key] && messages[key].message) {
-      el.textContent = messages[key].message;
-    }
-  });
-  // Met à jour l'état visuel des boutons
-  document.getElementById('btn-lang-fr')?.classList.remove('opacity-100');
-  document.getElementById('btn-lang-fr')?.classList.add('opacity-50', 'grayscale');
-  document.getElementById('btn-lang-en')?.classList.remove('opacity-100');
-  document.getElementById('btn-lang-en')?.classList.add('opacity-50', 'grayscale');
-  const activeBtn = document.getElementById(`btn-lang-${locale}`);
-  if (activeBtn) {
-    activeBtn.classList.remove('opacity-50', 'grayscale');
-    activeBtn.classList.add('opacity-100');
   }
 }
 
@@ -153,7 +122,7 @@ async function updateEquivalents() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Utilise la langue du navigateur uniquement
-  const browserLocale = chrome.i18n.getUILanguage().split('-')[0] || 'fr';
+  const browserLocale = chrome.i18n.getUILanguage().split('-')[0] || 'en';
   const messages = await loadMessages(browserLocale);
   currentMessages = messages;
   document.querySelectorAll('[data-i18n]').forEach(el => {
