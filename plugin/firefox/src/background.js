@@ -347,6 +347,7 @@ browser.webRequest.onBeforeRequest.addListener(
 
     if (!tabData.startTime) {
       tabData.startTime = details.timeStamp;
+      console.log(`[DEBUG] Début de collecte pour l'onglet ${details.tabId}`);
     }
 
     // Initialise le suivi de cette requête spécifique
@@ -403,26 +404,40 @@ browser.webRequest.onCompleted.addListener(
 
     tabData.endTime = details.timeStamp;
 
-    let transferredSize = details.responseSize || 0;
-    requestData.transferredSize = transferredSize;
+    // Firefox ne fournit pas responseSize, on utilise le resourceSize du Content-Length
+    let resourceSize = requestData.resourceSize || 0;
+    let transferredSize = resourceSize;
 
-    let resourceSize = requestData.resourceSize;
-    if (transferredSize > 0 && !resourceSize) {
+    // Si on a un encoding, estimer la taille compressée
+    if (requestData.encoding && resourceSize > 0) {
       switch (requestData.encoding) {
         case "gzip":
         case "deflate":
-          resourceSize = transferredSize * 3;
+          transferredSize = Math.round(resourceSize / 3);
           break;
         case "br":
-          resourceSize = transferredSize * 5;
+          transferredSize = Math.round(resourceSize / 5);
           break;
         default:
-          resourceSize = transferredSize;
+          transferredSize = resourceSize;
       }
     }
 
+    requestData.transferredSize = transferredSize;
+
     tabData.totalTransferredSize += transferredSize;
     tabData.totalResourceSize += resourceSize;
+
+    console.log(`[DEBUG] Requête complétée ${details.requestId}: transferred=${transferredSize}, resource=${resourceSize}, encoding=${requestData.encoding || 'none'}`);
+
+    // Log des totaux tous les 10 requêtes
+    if (tabData.totalRequests % 10 === 0) {
+      console.log(`[DEBUG] Totaux onglet ${details.tabId} après ${tabData.totalRequests} requêtes:`, {
+        totalTransferredSize: tabData.totalTransferredSize,
+        totalResourceSize: tabData.totalResourceSize,
+        url: tabData.currentUrl
+      });
+    }
 
     tabData.requestSizes.delete(details.requestId);
   },
@@ -526,6 +541,16 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.type === "getgCO2e") {
       const tabData = getTabData(activeTab.id);
+
+      console.log(`[DEBUG getgCO2e] Données de l'onglet ${activeTab.id}:`, {
+        totalTransferredSize: tabData.totalTransferredSize,
+        totalResourceSize: tabData.totalResourceSize,
+        totalRequests: tabData.totalRequests,
+        startTime: tabData.startTime,
+        endTime: tabData.endTime,
+        currentUrl: tabData.currentUrl,
+        carbonIntensity: tabData.carbonIntensity
+      });
 
       try {
         // Récupération du pays si nécessaire

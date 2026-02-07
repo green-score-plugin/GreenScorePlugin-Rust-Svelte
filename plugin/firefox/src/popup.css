@@ -903,3 +903,20 @@ video {
   text-decoration-line: underline;
 }
 
+.flag-btn {
+  cursor: pointer;
+  opacity: 0.5;
+  filter: grayscale(100%);
+  transition: all 0.3s ease;
+}
+
+.flag-btn:hover {
+  opacity: 1;
+  filter: grayscale(0%);
+  transform: scale(1.1);
+}
+
+.flag-btn.flag-active {
+  opacity: 1;
+  filter: grayscale(0%);
+}

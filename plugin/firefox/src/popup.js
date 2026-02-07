@@ -2,9 +2,22 @@ let gCO2eValue;
 let currentLang = 'fr';
 let translations = {};
 
+async function loadTranslations(lang) {
+  try {
+    const response = await fetch(`./i18n/${lang}.json`);
+    if (!response.ok) {
+      throw new Error(`Failed to load translations for ${lang}`);
+    }
+    return await response.json();
+  } catch (error) {
+    if (lang !== 'fr') {
+      return await loadTranslations('fr');
+    }
+    return {};
+  }
+}
 
-function initLanguage(forcedLang = null) {
-  // Détermination de la langue
+async function initLanguage(forcedLang = null) {
   if (forcedLang) {
     currentLang = forcedLang;
     localStorage.setItem('gs_plugin_lang', forcedLang);
@@ -18,9 +31,7 @@ function initLanguage(forcedLang = null) {
     }
   }
 
-  translations = TRANSLATIONS[currentLang];
-
-  updateFlagsUI();
+  translations = await loadTranslations(currentLang);
   applyStaticTranslations();
 
   if (typeof refreshDynamicTexts === 'function') {
@@ -47,12 +58,10 @@ function applyStaticTranslations() {
 
 async function updateEquivalents() {
   try {
-    console.log("Envoi de la requête à background.js...");
     const response = await browser.runtime.sendMessage({
       type: "getEquivalent",
-      count: 3, // Nombre d'équivalents à récupérer
+      count: 3,
     });
-    console.log("Réponse reçue :", response);
 
     if (response && response.success && response.equivalents) {
       const cards = document.querySelectorAll(".comparison-card");
@@ -68,14 +77,8 @@ async function updateEquivalents() {
           description.textContent = t(equivalent.name);
         }
       });
-    } else {
-      console.error(
-        "Erreur dans la réponse reçue :",
-        response ? response.error : "Réponse indéfinie"
-      );
     }
-  } catch (error) {
-    console.error("Erreur dans updateEquivalents :", error);
+  } catch {
   }
 }
 
@@ -85,20 +88,38 @@ document.addEventListener("DOMContentLoaded", async () => {
   const frFlag = document.getElementById('lang-fr');
   const enFlag = document.getElementById('lang-en');
 
-  if (frFlag) {
-      frFlag.addEventListener('click', () => {
-          if (currentLang !== 'fr') initLanguage('fr');
-      });
+  if (currentLang === 'fr') {
+    frFlag?.classList.add('flag-active');
+    enFlag?.classList.remove('flag-active');
+  } else {
+    enFlag?.classList.add('flag-active');
+    frFlag?.classList.remove('flag-active');
   }
+
+  if (frFlag) {
+    frFlag.addEventListener('click', async () => {
+      if (currentLang !== 'fr') {
+        await initLanguage('fr');
+        await updateEquivalents();
+        frFlag.classList.add('flag-active');
+        enFlag.classList.remove('flag-active');
+      }
+    });
+  }
+
   if (enFlag) {
-      enFlag.addEventListener('click', () => {
-          if (currentLang !== 'en') initLanguage('en');
-      });
+    enFlag.addEventListener('click', async () => {
+      if (currentLang !== 'en') {
+        await initLanguage('en');
+        await updateEquivalents();
+        enFlag.classList.add('flag-active');
+        frFlag.classList.remove('flag-active');
+      }
+    });
   }
 
   let isLocalhost = false;
 
-  // Écouteur pour le message localhost
   browser.runtime.onMessage.addListener((message) => {
     if (message.type === "localhostDetected") {
       isLocalhost = true;
@@ -113,7 +134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const title = document.createElement("p");
         title.className = "text-3xl font-bold font-outfit";
-        title.textContent = message.message || ""; // usage de textContent pour éviter l'injection
+        title.textContent = message.message || "";
 
         const detailsButton = document.createElement("a");
         detailsButton.id = "details-button";
@@ -145,7 +166,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Si ce n'est pas localhost, continuer avec le reste des fonctionnalités
   if (!isLocalhost) {
     function getColorClass(gCO2e) {
       const value = Number(gCO2e);
@@ -195,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function updateAverageConsumption(gCO2e) {
-      const AVERAGE_CONSUMPTION = 0.74; // Valeur obtenue sur un calcul de moyenne sur plus de 100 sites
+      const AVERAGE_CONSUMPTION = 0.74;
 
       if (gCO2e <= 0) {
         document.getElementById("average-consumption").textContent = t("negligible");
@@ -220,14 +240,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateColors(gCO2eValue);
         updateAverageConsumption(gCO2eValue);
       } else {
-        console.warn("Pas de valeur gCO2e reçue");
         updateColors(0);
       }
-    } catch (error) {
-      console.error("Erreur récupération gCO2e:", error);
+    } catch {
     }
 
-    // Vérification du statut de connexion
     try {
       const userData = await browser.runtime.sendMessage({
         type: "checkLoginStatus",
@@ -275,13 +292,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             loginLink.addEventListener("click", (e) => e.preventDefault());
           }
 
-          // Ajouter les éléments au DOM
           loginSection.appendChild(promptSpan);
           loginSection.appendChild(loginLink);
         }
       }
 
-      // Gestion du bouton "Plus de détails"
       if (detailsButton) {
         detailsButton.addEventListener("click", async (e) => {
           e.preventDefault();
@@ -292,7 +307,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             })
           }
 
-          // Récupérer les détails actuels
           const response = await browser.runtime.sendMessage({
             type: "getFullDetails",
           });
@@ -300,7 +314,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           let url = CONFIG.BACKEND.DETAILS_URL;
 
           if (!userData.isLoggedIn) {
-            // Construction des paramètres d'URL si non connecté
             const params = new URLSearchParams({
               country: response.country || "",
               url_full: response.urlFull || "",
@@ -312,15 +325,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             url += "?" + params.toString();
           }
 
-          // Ouvrir l'URL dans un nouvel onglet
           browser.tabs.create({ url: url });
         });
       }
-    } catch (error) {
-      console.error(
-        "Erreur lors de la vérification de l'état de connexion:",
-        error
-      );
+    } catch {
     }
 
     browser.runtime
@@ -334,46 +342,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             countryElement.textContent = t("country_consumption_intro", { countryName: response.country });
             urlElement.textContent = response.url;
           }
-        } else if (response.error) {
-          console.error("Erreur :", response.error);
         }
       })
-      .catch((error) => {
-        console.error(
-          "Erreur lors de la récupération du pays ou de l'URL :",
-          error
-        );
+      .catch(() => {
       });
 
     try {
       await updateEquivalents();
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour des équivalents :", error);
+    } catch {
     }
   }
 });
 
-function updateFlagsUI() {
-    const frFlag = document.getElementById('lang-fr');
-    const enFlag = document.getElementById('lang-en');
-
-    if (frFlag && enFlag) {
-        // Reset styles basics
-        frFlag.style.opacity = '0.5';
-        enFlag.style.opacity = '0.5';
-        frFlag.style.borderBottom = 'none';
-        enFlag.style.borderBottom = 'none';
-
-        // Active style
-        if (currentLang === 'fr') {
-            frFlag.style.opacity = '1';
-            frFlag.style.borderBottom = '2px solid #233430';
-        } else {
-            enFlag.style.opacity = '1';
-            enFlag.style.borderBottom = '2px solid #233430';
-        }
-    }
-}
 
 function refreshDynamicTexts() {
     updateEquivalents();
