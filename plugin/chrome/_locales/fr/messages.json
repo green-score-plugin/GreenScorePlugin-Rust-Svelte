@@ -12,5 +12,15 @@
   "login": { "message": "Se connecter" },
   "negligible": { "message": "négligeable comparé" },
   "superior": { "message": "supérieur" },
-  "inferior": { "message": "inférieur" }
+  "inferior": { "message": "inférieur" },
+  "data_equivalent_lille_marseille": { "message": "trajet Lille-Marseille en voiture" },
+  "data_equivalent_paris_londres": { "message": "trajet Paris-Londres en train" },
+  "data_equivalent_emails": { "message": "emails envoyés" },
+  "data_equivalent_search": { "message": "recherches sur le web" },
+  "data_equivalent_streaming": { "message": "heures de streaming vidéo" },
+  "data_equivalent_bus": { "message": "km en bus" },
+  "data_equivalent_motorbike": { "message": "km en moto" },
+  "data_equivalent_car": { "message": "km en voiture" },
+  "data_equivalent_tap_water": { "message": "litres d'eau du robinet" },
+  "data_equivalent_paris_ny": { "message": "trajet Paris-New York en avion" }
 }

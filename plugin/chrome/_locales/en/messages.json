@@ -12,5 +12,15 @@
   "login": { "message": "Log in" },
   "negligible": { "message": "negligible" },
   "superior": { "message": "higher" },
-  "inferior": { "message": "lower" }
+  "inferior": { "message": "lower" },
+  "data_equivalent_lille_marseille": { "message": "Lille-Marseille trip by car" },
+  "data_equivalent_paris_londres": { "message": "Paris-London trip by train" },
+  "data_equivalent_emails": { "message": "emails sent" },
+  "data_equivalent_search": { "message": "web searches" },
+  "data_equivalent_streaming": { "message": "hours of video streaming" },
+  "data_equivalent_bus": { "message": "km by bus" },
+  "data_equivalent_motorbike": { "message": "km by motorbike" },
+  "data_equivalent_car": { "message": "km by car" },
+  "data_equivalent_tap_water": { "message": "liters of tap water" },
+  "data_equivalent_paris_ny": { "message": "Paris-New York trip by plane" }
 }
