@@ -1,5 +1,5 @@
 {
-    "current_site": "Site actuel : ",
+    "current_site": "Site actuel: ",
     "country_consumption_intro": "Dans votre pays ({countryName}), cette page consomme",
     "negligible": "négligeable comparé",
     "higher": "{mult}x supérieur",
