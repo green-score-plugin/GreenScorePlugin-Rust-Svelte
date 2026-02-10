@@ -18,8 +18,7 @@
     "tabs",
     "cookies",
     "webNavigation",
-    "webRequest",
-    "storage"
+    "webRequest"
   ],
 
   "host_permissions": [
