@@ -1,3 +1,5 @@
+use crate::models::user::User;
+
 pub struct UserRepository;
 
 impl UserRepository {
@@ -27,6 +29,17 @@ impl UserRepository {
         .await?;
 
         Ok(result.map(|record| record.id))
+    }
+
+    pub async fn find_by_email(pool: &sqlx::MySqlPool, email: &str) -> Result<Option<(i64, String, String, String, Option<i64>, Option<i64>, bool)>, sqlx::Error> {
+        let result = sqlx::query!(
+            "SELECT id, password_hash, first_name, last_name, organisation_id, service_id ,est_admin FROM users WHERE email = ?"
+        )
+        .fetch_optional(pool)
+        .bind(email)
+        .await?;
+
+        Ok(result.map(|record| (record.id, record.password_hash, record.first_name, record.last_name, record.organisation_id, record.service_id, record.est_admin)))
     }
 
     pub async fn join_organisation(pool: &sqlx::MySqlPool, user_id: i64, organisation_id: i64) -> Result<(), sqlx::Error> {
