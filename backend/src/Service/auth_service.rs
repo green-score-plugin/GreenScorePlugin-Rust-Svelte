@@ -66,4 +66,21 @@ impl AuthService{
 
         Ok((organisation_id, code))
     }
+
+    pub async fn login (pool: &MySqlPool, email: &str, password: &str) -> Result<i64, String> {
+
+        let user_result = UserRepository::find_by_email(pool, email).await.map_err(|_| "db_error")?;
+        let (id, password_hash, first_name, last_name, organisation_id, service_id, est_admin) = match user_result {
+            Some(tuple) => tuple,
+            None => return Err("user_not_found".to_string()),
+        };
+
+        if !bcrypt::verify(password, &password_hash).map_err(|_| "hash_error")? {
+            return Err("invalid_credentials".to_string());
+        }
+
+
+
+
+    }
 }
