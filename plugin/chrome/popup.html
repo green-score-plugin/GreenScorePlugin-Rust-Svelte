@@ -23,22 +23,14 @@
           alt="GreenScore Logo"
           style="width: 32px; height: 34px"
         />
-        <h1 class="text-2xl font-outfit font-extrabold text-gs-green-950">
-          GreenScore Web
-        </h1>
+        <h1 class="text-2xl font-outfit font-extrabold text-gs-green-950" data-i18n="extension_name"></h1>
       </div>
-      <img
-        src="../assets/images/account.svg"
-        alt="Compte"
-        class="cursor-pointer"
-      />
-
     </header>
     <div id="main-container">
       <div
         class="flex flex-row font-outfit w-full items-center justify-center p-2"
       >
-        <p class="text-grey-400 text-sm">Site actuel :&nbsp</p>
+        <p class="text-grey-400 text-sm" data-i18n="current_site_label"></p>&nbsp;
         <p id="site-url" class="text-grey-400 text-sm font-bold">*site.fr*</p>
       </div>
 
@@ -47,9 +39,8 @@
           <h2
             id="site-country"
             class="text-xl w-2/3 text-center font-extrabold font-outfit text-grey-950"
-          >
-            Dans votre pays (*Pays*), cette page consomme
-          </h2>
+            data-i18n="country_sentence"
+          ></h2>
           <div class="flex flex-col justify-center items-center">
             <div
               id="gCO2e-container"
@@ -59,7 +50,7 @@
                 >0&nbsp;</span
               >
               <div class="flex font-medium gap-0 items-baseline">
-                <span class="text-base">gC0</span>
+                <span class="text-base" data-i18n="gco2e_unit"></span>
                 <span class="text-xs">2</span>
                 <span class="text-base">e</span>
               </div>
@@ -73,7 +64,7 @@
         </div>
 
         <div class="flex flex-col font-outfit gap-2">
-          <p class="text-sm font-light">Cela correspond à :</p>
+          <p class="text-sm font-light" data-i18n="corresponds_label"></p>
           <div class="flex gap-3 items-center justify-center">
             <!-- Carte 1 -->
             <div
@@ -86,7 +77,7 @@
                 />
                 <p class="text-xl font-extrabold">0.00</p>
               </div>
-              <p class="text-xs">Pas de données</p>
+              <p class="text-xs" data-i18n="no_data"></p>
             </div>
             <!-- Carte 2 -->
             <div
@@ -99,7 +90,7 @@
                 />
                 <p class="text-xl font-extrabold">0.00</p>
               </div>
-              <p class="text-xs">Pas de données</p>
+              <p class="text-xs" data-i18n="no_data"></p>
             </div>
             <!-- Carte 3 -->
             <div
@@ -112,7 +103,7 @@
                 />
                 <p class="text-xl font-extrabold">0.00</p>
               </div>
-              <p class="text-xs">Pas de données</p>
+              <p class="text-xs" data-i18n="no_data"></p>
             </div>
           </div>
         </div>

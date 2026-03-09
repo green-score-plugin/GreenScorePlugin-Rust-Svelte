@@ -1,5 +1,89 @@
 let gCO2eValue;
 
+// === Système i18n dynamique ===
+let currentMessages = {};
+
+async function loadMessages(locale) {
+  let url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Locale not found');
+    return await response.json();
+  } catch (e) {
+    const defaultLocale = 'en';
+    url = chrome.runtime.getURL(`_locales/${defaultLocale}/messages.json`);
+    const response = await fetch(url);
+    return await response.json();
+  }
+}
+
+function getI18n(key, fallback = '') {
+  return currentMessages[key]?.message || fallback;
+}
+
+function updateLoginSection(isLoggedIn) {
+  const loginSection = document.querySelector(
+    ".flex.font-outfit.text-sm.justify-center"
+  );
+  if (!loginSection) return;
+  while (loginSection.firstChild) {
+    loginSection.removeChild(loginSection.firstChild);
+  }
+  if (isLoggedIn) {
+    const connectedSpan = document.createElement("span");
+    connectedSpan.className = "text-sm text-[#6D874B] font-bold";
+    connectedSpan.textContent = getI18n('connected', 'Vous êtes connecté !');
+    loginSection.appendChild(connectedSpan);
+  } else {
+    const promptSpan = document.createElement("span");
+    promptSpan.className = "text-sm text-grey-950";
+    promptSpan.textContent = getI18n('save_result', 'Vous souhaitez enregistrer ce résultat ?') + "\u00A0";
+    const loginLink = document.createElement("a");
+    loginLink.className = "text-[#6D874B] font-bold underline";
+    loginLink.textContent = getI18n('login', 'Se connecter');
+    try {
+      const parsed = new URL(CONFIG.BACKEND.LOGIN_URL);
+      loginLink.href = parsed.toString();
+      loginLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (loginLink.href && loginLink.href !== "#") {
+          chrome.tabs.create({ url: loginLink.href });
+        }
+      });
+    } catch (err) {
+      loginLink.href = "#";
+      loginLink.setAttribute("aria-disabled", "true");
+      loginLink.addEventListener("click", (e) => e.preventDefault());
+    }
+    loginSection.appendChild(promptSpan);
+    loginSection.appendChild(loginLink);
+  }
+}
+
+function updateCountrySentence(country) {
+  const countryElement = document.getElementById("site-country");
+  if (countryElement) {
+    const template = getI18n('country_sentence', 'Dans votre pays (*Pays*), cette page consomme');
+    countryElement.textContent = template.replace('*Pays*', country).replace('*Country*', country);
+  }
+}
+
+function updateAverageConsumption(gCO2e) {
+  const AVERAGE_CONSUMPTION = 0.74;
+  const avgElem = document.getElementById("average-consumption");
+  if (!avgElem) return;
+  if (gCO2e <= 0) {
+    avgElem.textContent = getI18n('negligible', 'négligeable comparé');
+    return;
+  }
+  let multiplier = gCO2e / AVERAGE_CONSUMPTION;
+  if (multiplier > 1) {
+    avgElem.textContent = `${multiplier.toFixed(2)}x ${getI18n('superior', 'supérieur')}`;
+  } else {
+    avgElem.textContent = `${(1 / multiplier).toFixed(2)}x ${getI18n('inferior', 'inférieur')}`;
+  }
+}
+
 async function updateEquivalents() {
   try {
     console.log("Envoi de la requête à background.js...");
@@ -20,7 +104,9 @@ async function updateEquivalents() {
 
           img.src = equivalent.image || "../assets/images/default.svg";
           valueElement.textContent = equivalent.value;
-          description.textContent = equivalent.name;
+
+          const translationKey = equivalent.name.replace(/\./g, '_');
+          description.textContent = getI18n(translationKey, equivalent.name);
         }
       });
     } else {
@@ -35,6 +121,17 @@ async function updateEquivalents() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Utilise la langue du navigateur uniquement
+  const browserLocale = chrome.i18n.getUILanguage().split('-')[0] || 'en';
+  const messages = await loadMessages(browserLocale);
+  currentMessages = messages;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (messages[key] && messages[key].message) {
+      el.textContent = messages[key].message;
+    }
+  });
+
   let isLocalhost = false;
 
   // Écouteur pour le message localhost
@@ -133,27 +230,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-    function updateAverageConsumption(gCO2e) {
-      const AVERAGE_CONSUMPTION = 0.74; // Valeur obtenue sur un calcul de moyenne sur plus de 100 sites
-
-      if (gCO2e <= 0) {
-        document.getElementById("average-consumption").textContent = "négligeable comparé";
-        return;
-      }
-
-      let multiplier = gCO2e / AVERAGE_CONSUMPTION;
-
-      if (multiplier > 1) {
-        document.getElementById(
-          "average-consumption"
-        ).textContent = `${multiplier.toFixed(2)}x supérieur`;
-      } else {
-        document.getElementById("average-consumption").textContent = `${(
-          1 / multiplier
-        ).toFixed(2)}x inférieur`;
-      }
-    }
-
     try {
       const response = await chrome.runtime.sendMessage({ type: "getgCO2e" });
       if (response && response.gCO2e !== undefined) {
@@ -173,50 +249,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const userData = await chrome.runtime.sendMessage({
         type: "checkLoginStatus",
       });
-      const loginSection = document.querySelector(
-        ".flex.font-outfit.text-sm.justify-center"
-      );
+      window._isLoggedIn = userData.isLoggedIn; // Stocke l'état globalement pour la retraduction
+      updateLoginSection(userData.isLoggedIn);
       const detailsButton = document.getElementById("details-button");
 
-      if (loginSection) {
-
-        while (loginSection.firstChild) {
-          loginSection.removeChild(loginSection.firstChild);
-        }
-
-        if (userData.isLoggedIn) {
-          const connectedSpan = document.createElement("span");
-          connectedSpan.className = "text-sm text-[#6D874B] font-bold";
-          connectedSpan.textContent = "Vous êtes connecté !";
-          loginSection.appendChild(connectedSpan);
-        } else {
-          const promptSpan = document.createElement("span");
-          promptSpan.className = "text-sm text-grey-950";
-          promptSpan.textContent = "Vous souhaitez enregistrer ce résultat ?\u00A0";
-
-          const loginLink = document.createElement("a");
-          loginLink.className = "text-[#6D874B] font-bold underline";
-          loginLink.textContent = "Se connecter";
-
-          try {
-            const parsed = new URL(CONFIG.BACKEND.LOGIN_URL);
-            loginLink.href = parsed.toString();
-            loginLink.addEventListener("click", (e) => {
-              e.preventDefault();
-              if (loginLink.href && loginLink.href !== "#") {
-                chrome.tabs.create({ url: loginLink.href });
-              }
-            });
-          } catch (err) {
-            loginLink.href = "#";
-            loginLink.setAttribute("aria-disabled", "true");
-            loginLink.addEventListener("click", (e) => e.preventDefault());
-          }
-
-          loginSection.appendChild(promptSpan);
-          loginSection.appendChild(loginLink);
-        }
-      }
 
       // Gestion du bouton "Plus de détails"
       if (detailsButton) {
@@ -268,7 +304,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           const countryElement = document.getElementById("site-country");
 
           if (countryElement && urlElement) {
-            countryElement.textContent = `Dans votre pays (${response.country}), cette page consomme`;
+            // Utilise la traduction dynamique pour la phrase du pays
+            const template = getI18n('country_sentence', 'Dans votre pays (*Pays*), cette page consomme');
+            countryElement.textContent = template.replace('*Pays*', response.country).replace('*Country*', response.country);
             urlElement.textContent = response.url;
           }
         } else if (response.error) {
