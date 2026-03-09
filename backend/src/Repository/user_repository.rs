@@ -28,4 +28,15 @@ impl UserRepository {
 
         Ok(result.map(|record| record.id))
     }
+
+    pub async fn join_organisation(pool: &sqlx::MySqlPool, user_id: i64, organisation_id: i64) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE users SET organisation_id = ? AND est_admin = true WHERE id = ?"
+        )
+        .execute(pool)
+        .bind(organisation_id)
+        .bind(user_id)
+        .await?;
+        Ok(())
+    }
 }
