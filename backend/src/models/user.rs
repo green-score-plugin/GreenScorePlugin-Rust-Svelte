@@ -11,5 +11,6 @@ pub struct User {
     pub prenom: String,
     pub nom: String,
     pub est_admin: bool,
+    #[serde(default)]
     pub total_carbon_footprint: f64,
 }
