@@ -90,4 +90,6 @@ INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
                                                                             (1, 'A/R Lille - Nîmes', 0.004, 'car.png'),
                                                                             (3, 'emails', 2000, 'email.png');
 
+
+ALTER TABLE organisation ADD CONSTRAINT UNIQUE (siret);
 SET FOREIGN_KEY_CHECKS = 1;
