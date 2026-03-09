@@ -166,7 +166,9 @@
       "code_help": "Please enter the 8-character code sent by your organization",
       "invite_title": "Invite members!",
       "invite_desc": "Send this code to members of your organization. They can enter it in the section: My Account - My Organization - Join an Organization",
-      "finish_button": "Finish"
+      "finish_button": "Finish",
+      "or": "or",
+      "create_button": "Create my organization"
     },
     "modals": {
       "leave_org_confirm_title": "Confirmation",

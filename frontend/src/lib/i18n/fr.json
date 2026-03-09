@@ -165,7 +165,9 @@
       "code_help": "Merci d'entrer le code à 8 caractères envoyé par votre organisation",
       "invite_title": "Invitez des membres !",
       "invite_desc": "Envoyez ce code aux membres de votre organisation. Ils peuvent le saisir dans la section : mon compte - mon organisation - rejoindre une organisation",
-      "finish_button": "Terminer"
+      "finish_button": "Terminer",
+      "or": "ou",
+      "create_button": "Créer mon organisation"
     },
     "modals": {
       "leave_org_confirm_title": "Confirmation",
