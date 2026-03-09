@@ -187,7 +187,6 @@ CREATE TABLE IF NOT EXISTS `user` (
 `id` int NOT NULL AUTO_INCREMENT,
 `organisation_id` int DEFAULT NULL,
 `email` varchar(180) COLLATE utf8mb4_unicode_ci NOT NULL,
-`roles` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '(DC2Type:json)',
 `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
 `first_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 `last_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
