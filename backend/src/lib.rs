@@ -9,5 +9,23 @@ pub mod controllers {
     pub mod plugin_controller;
     pub mod helpers;
 }
-pub mod models;
+
+pub mod models {
+    pub mod user;
+    pub mod service;
+    pub mod organisation;
+}
+
+pub mod dto {
+    pub mod user_full;
+}
+
+pub mod repository {
+    pub mod user_repository;
+}
+
+pub mod service {
+    pub mod auth_service;
+}
+
 pub mod green_score;
