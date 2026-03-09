@@ -17,13 +17,6 @@ pub struct InscriptionRequest {
     pub firstname: String,
 }
 
-#[derive(Serialize)]
-pub struct InscriptionResponse {
-    pub success: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub message: Option<String>
-}
-
 #[derive(Deserialize)]
 pub struct InscriptionOrgaRequest {
     pub orga_name : String,
@@ -31,8 +24,20 @@ pub struct InscriptionOrgaRequest {
     pub siret : Option<String>,
 }
 
+#[derive(Deserialize)]
+pub struct LoginRequest {
+    pub email: String,
+    pub password: String,
+}
 
-pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
+#[derive(Serialize)]
+pub struct GenericResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>
+}
+
+pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<LoginRequest>) -> Json<Value> {
 
     let row = match sqlx::query_as::<_, (i64, String, String, String)>(
         "SELECT id, email, CAST(password AS CHAR) as password, CAST(roles AS CHAR) as roles  FROM user WHERE email = ?",
@@ -133,14 +138,14 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
     }
 }
 
-pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {
+pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionRequest>) -> Json<GenericResponse> {
     let email = payload.email.trim();
     let password = payload.password.trim();
     let first_name = payload.firstname.trim();
     let last_name = payload.lastname.trim();
 
     if email.is_empty() || password.is_empty() || first_name.is_empty() || last_name.is_empty() {
-        return Json(InscriptionResponse {
+        return Json(GenericResponse {
             success: false,
             message: Some("errors.auth.missing_fields".to_string()),
         });
@@ -148,7 +153,7 @@ pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json
 
     let user_id = match AuthService::inscription(pool, email, password, first_name, last_name).await {
         Ok(id) => id,
-        Err(msg) => return Json(InscriptionResponse { success: false, message: Some(msg) }),
+        Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) }),
     };
 
     let user = User {
@@ -170,14 +175,14 @@ pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json
 
     session.insert("userFull", user_full).await.unwrap();
 
-    Json(InscriptionResponse {
+    Json(GenericResponse {
         success: true,
         message: None,
     })
 
 }
 
-pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionOrgaRequest>) -> Json<InscriptionResponse>
+pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionOrgaRequest>) -> Json<GenericResponse>
 {
 
     let orga_name = payload.orga_name.trim();
@@ -192,7 +197,7 @@ pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload):
 
     let (organisation_id, organisation_code) = match result {
         Ok(tuple) => tuple,
-        Err(msg) => return Json(InscriptionResponse { success: false, message: Some(msg) }),
+        Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) }),
     };
 
     let organisation = Organisation {
@@ -206,7 +211,7 @@ pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload):
 
     session.insert("userFull", user_full).await.unwrap();
 
-    Json(InscriptionResponse {
+    Json(GenericResponse {
         success: true,
         message: None,
     })
