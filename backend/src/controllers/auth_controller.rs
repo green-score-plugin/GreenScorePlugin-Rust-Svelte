@@ -4,8 +4,10 @@ use serde_json::{json, Value};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use serde::{Deserialize, Serialize};
-use rand::Rng;
-use crate::models::{User, Organisation, Account};
+use crate::models::user::User;
+use crate::models::organisation::Organisation;
+use crate::dto::user_full::UserFull;
+use crate::service::auth_service::AuthService;
 
 #[derive(Deserialize)]
 pub struct InscriptionRequest {
@@ -19,9 +21,7 @@ pub struct InscriptionRequest {
 pub struct InscriptionResponse {
     pub success: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub message: Option<String>,
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // pub account: Option<Account>,
+    pub message: Option<String>
 }
 
 #[derive(Deserialize)]
@@ -29,29 +29,8 @@ pub struct InscriptionOrgaRequest {
     pub orga_name : String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub siret : Option<String>,
-    pub email: String,
-    pub password: String,
 }
 
-
-fn hash_password(password: &str) -> Result<String, bcrypt::BcryptError> {
-    bcrypt::hash(password, bcrypt::DEFAULT_COST)
-}
-
-
-fn generate_organisation_code() -> String {
-    const CHARACTERS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    const LENGTH: usize = 8;
-
-    let mut rng = rand::rng();
-
-    (0..LENGTH)
-        .map(|_| {
-            let idx = rng.random_range(0..CHARACTERS.len());
-            CHARACTERS[idx] as char
-        })
-        .collect()
-}
 
 pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
 
@@ -154,163 +133,84 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
     }
 }
 
-pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {
+pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {
     let email = payload.email.trim();
+    let password = payload.password.trim();
+    let first_name = payload.firstname.trim();
+    let last_name = payload.lastname.trim();
 
-    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
-        .bind(email)
-        .fetch_optional(&pool)
-        .await;
-
-    match user_exists {
-        Ok(Some(_)) => {
-            return Json(InscriptionResponse {
-                success: false,
-                message: Some("errors.auth.email_exists".to_string()),
-            });
-        }
-        Err(_) => {
-            return Json(InscriptionResponse {
-                success: false,
-                message: Some("errors.auth.email_verification_error".to_string()),
-            });
-        }
-        Ok(None) => {}
+    if email.is_empty() || password.is_empty() || first_name.is_empty() || last_name.is_empty() {
+        return Json(InscriptionResponse {
+            success: false,
+            message: Some("errors.auth.missing_fields".to_string()),
+        });
     }
 
-    let password_hash = match hash_password(&payload.password) {
-        Ok(hash) => hash,
-        Err(_) => return Json(InscriptionResponse {
-            success: false,
-            message: Some("errors.auth.hash_error".to_string()),
-        }),
+    let user_id = match AuthService::inscription(pool, email, password, first_name, last_name).await {
+        Ok(id) => id,
+        Err(msg) => return Json(InscriptionResponse { success: false, message: Some(msg) }),
     };
 
-    match sqlx::query(
-        "INSERT INTO user (email, roles, password, first_name, last_name) VALUES (?, ?, ?, ?, ?)"
-    )
-        .bind(email)
-        .bind("[\"ROLE_USER\"]")
-        .bind(&password_hash)
-        .bind(payload.firstname.trim())
-        .bind(payload.lastname.trim())
-        .execute(&pool)
-        .await {
-        Ok(result) => {
-            let user_id = result.last_insert_id() as i64;
+    let user = User {
+        id: user_id,
+        id_organisation: None,
+        id_service: None,
+        email: email.to_string(),
+        prenom: first_name.to_string(),
+        nom: last_name.to_string(),
+        est_admin: false,
+        total_carbon_footprint: 0.0,
+    };
 
-            let account = Account::User(User {
-                id: user_id,
-                email: email.to_string(),
-                prenom: payload.firstname.trim().to_string(),
-                nom: payload.lastname.trim().to_string(),
-                id_orga: None,
-            });
+    let user_full = UserFull {
+        user: user.clone(),
+        organisation: None,
+        service: None,
+    };
 
-            session.insert("account", account).await.unwrap();
+    session.insert("userFull", user_full).await.unwrap();
 
-            Json(InscriptionResponse {
-                success: true,
-                message: None,
-            })
-        },
-        Err(_) => Json(InscriptionResponse {
-            success: false,
-            message: Some("errors.auth.registration_error".to_string()),
-        }),
-    }
+    Json(InscriptionResponse {
+        success: true,
+        message: None,
+    })
+
 }
 
-pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Json<Value> {
-    let email = payload.email.trim();
+pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionOrgaRequest>) -> Json<InscriptionResponse>
+{
 
-    let user_exists = sqlx::query("SELECT id FROM user WHERE email = ?")
-        .bind(email)
-        .fetch_optional(&pool)
-        .await;
+    let orga_name = payload.orga_name.trim();
+    let siret = payload.siret.as_ref().map(|s| s.trim().to_string());
 
-    match user_exists {
-        Ok(Some(_)) => {
-            return Json(json!({
-                "success": false,
-                "message": "errors.auth.email_exists"
-            }));
-        }
-        Err(_) => {
-             return Json(json!({
-                "success": false,
-                "message": "errors.auth.email_verification_error"
-            }));
-        }
-        Ok(None) => {}
-    }
 
-    let password_hash = match hash_password(&payload.password) {
-        Ok(hash) => hash,
-        Err(_) => return Json(json!({
-            "success": false,
-            "message": "errors.auth.hash_error"
-        })),
+    let mut user_full = session.get::<UserFull>("userFull").await.unwrap().unwrap();
+
+    let user_id = user_full.user.id;
+
+    let result = AuthService::inscription_orga(pool, orga_name, siret.as_deref(), user_id).await;
+
+    let (organisation_id, organisation_code) = match result {
+        Ok(tuple) => tuple,
+        Err(msg) => return Json(InscriptionResponse { success: false, message: Some(msg) }),
     };
 
-    let organisation_code = generate_organisation_code();
-    let organisation_id: i64;
+    let organisation = Organisation {
+        id: organisation_id,
+        nom: orga_name.to_string(),
+        siret,
+        code: organisation_code,
+    };
 
-    let role : &str = "[\"ROLE_ORGANISATION\"]";
+    user_full.organisation = Some(organisation);
 
-    match sqlx::query(
-        "INSERT INTO user (email, roles, password) VALUES (?, ?, ?)"
-    )
-        .bind(email)
-        .bind(&role)
-        .bind(&password_hash)
-        .execute(&pool)
-        .await {
-        Ok(result) => {
-            let user_id = result.last_insert_id() as i64;
-            let orga_name = payload.orga_name.trim();
-            let siret = payload.siret.as_ref().map(|s| s.trim().to_string());
+    session.insert("userFull", user_full).await.unwrap();
 
-            match sqlx::query(
-                "INSERT INTO organisation (organisation_name, organisation_code, city, siret, admin_id) VALUES (?, ?, ?, ?, ?)"
-            )
-                .bind(orga_name)
-                .bind(&organisation_code)
-                .bind("France")
-                .bind(&siret)
-                .bind(user_id)
-                .execute(&pool)
-                .await {
-                Ok(_res) => { organisation_id = _res.last_insert_id() as i64;},
-                Err(_) => {
-                    let _ = sqlx::query("DELETE FROM user WHERE id = ?").bind(user_id).execute(&pool).await;
-                    return Json(json!({
-                        "success": false,
-                        "message": "errors.auth.org_creation_error"
-                    }));
-                }
-            };
+    Json(InscriptionResponse {
+        success: true,
+        message: None,
+    })
 
-            let account = Account::Organisation(Organisation {
-                id: organisation_id,
-                nom: orga_name.to_string(),
-                siret,
-                code: organisation_code.clone(),
-                admin_id : user_id
-            });
-            session.insert("account", account.clone()).await.unwrap();
-
-
-            Json(json!({
-                "success": true,
-                "account" : account
-            }))
-        },
-        Err(_) => Json(json!({
-            "success": false,
-            "message": "errors.auth.user_creation_error"
-        })),
-    }
 }
 
 pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
