@@ -1,6 +1,6 @@
 <script lang="ts">
-    import AuthBase from '$lib/components/AuthBase.svelte';
-    import InscriptionOrganisationCode from "$lib/components/InscriptionOrganisationCode.svelte";
+    import AuthBase from '$lib/components/auth/AuthBase.svelte';
+    import InscriptionOrganisationCode from "$lib/components/auth/InscriptionOrganisationCode.svelte";
 
     export let subtitle : string = '';
     export let data;

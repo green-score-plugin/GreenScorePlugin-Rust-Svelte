@@ -4,7 +4,7 @@
     import { invalidateAll } from '$app/navigation';
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
     import { t } from 'svelte-i18n';
-    import InscriptionOrganisationForm from "$lib/components/InscriptionOrganisationForm.svelte";
+    import InscriptionOrganisationForm from "$lib/components/auth/InscriptionOrganisationForm.svelte";
 
     export const form: { message?: string, success?: boolean } | null = null;
 
