@@ -29,7 +29,11 @@ export const actions = {
                 return redirect(303, '/');
             }
 
-            return fail(400, { message: result.message || 'Erreur de connexion' });
+            return fail(429, {
+                message: result.message || 'Erreur de connexion',
+                retry_after: result.retry_after ?? null,
+                attempts_remaining: result.attempts_remaining ?? null
+            });
         } catch (error) {
             if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
                 throw error;

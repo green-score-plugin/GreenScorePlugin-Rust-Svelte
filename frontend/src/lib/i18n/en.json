@@ -108,7 +108,9 @@
       "already_have_account": "I already have an account",
       "register_link": "Register",
       "success_deleted": "Success!",
-      "account_deleted_msg": "Your account has been successfully deleted."
+      "account_deleted_msg": "Your account has been successfully deleted.",
+      "retry_after": "Try again in {time}.",
+      "attempts_remaining": "{count} attempt(s) remaining before lockout."
     },
     "register": {
       "user_title": "Register",
@@ -510,6 +512,7 @@
       "hash_error": "Password hashing error",
       "connection_error": "An error occurred during connection",
       "invalid_credentials": "Invalid email or password",
+      "too_many_attempts": "Too many login attempts. Your access is temporarily blocked.",
       "user_retrieval_error": "User retrieval error",
       "email_verification_error": "Email verification error",
       "registration_error": "Registration error",

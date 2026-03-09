@@ -1,10 +1,13 @@
-use axum::extract::State;
+use axum::extract::{ConnectInfo, State};
 use axum::Json;
 use serde_json::{json, Value};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use serde::{Deserialize, Serialize};
 use rand::Rng;
+use std::net::SocketAddr;
+use std::sync::Arc;
+use crate::login_limiter::LoginLimiter;
 use crate::models::{User, Organisation, Account};
 
 #[derive(Deserialize)]
@@ -53,7 +56,24 @@ fn generate_organisation_code() -> String {
         .collect()
 }
 
-pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
+pub async fn login(
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    session: Session,
+    State(pool): State<MySqlPool>,
+    State(limiter): State<Arc<LoginLimiter>>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let ip = addr.ip().to_string();
+
+    // Vérification du rate limiting AVANT toute requête DB
+    if limiter.is_blocked(&ip) {
+        let remaining = limiter.remaining_block_secs(&ip);
+        return Json(json!({
+            "success": false,
+            "message": "errors.auth.too_many_attempts",
+            "retry_after": remaining
+        }));
+    }
 
     let row = match sqlx::query_as::<_, (i64, String, String, String)>(
         "SELECT id, email, CAST(password AS CHAR) as password, CAST(roles AS CHAR) as roles  FROM user WHERE email = ?",
@@ -69,22 +89,30 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
     };
 
     if row.is_none() {
+        // Enregistrer l'échec même si l'email n'existe pas (évite l'énumération)
+        let remaining = limiter.record_failure(&ip);
         return Json(json!({
             "success": false,
             "message": "errors.auth.invalid_credentials",
+            "attempts_remaining": remaining
         }));
     }
 
     let (user_id, email, password_hash, roles) = row.unwrap();
     let password = payload["password"].as_str().unwrap_or("");
     if !bcrypt::verify(password, &password_hash).unwrap_or(false) {
-        Json(json!({
+        let remaining = limiter.record_failure(&ip);
+        return Json(json!({
             "success": false,
             "message": "errors.auth.invalid_credentials",
-        }))
-    } else {
+            "attempts_remaining": remaining
+        }));
+    }
 
-        if roles == "[\"ROLE_USER\"]" {
+    // Connexion réussie : réinitialiser le compteur
+    limiter.reset(&ip);
+
+    if roles == "[\"ROLE_USER\"]" {
             match sqlx::query_as::<_, (String, String, Option<i64>)>(
                 "SELECT first_name, last_name, organisation_id FROM user WHERE email = ?"
             )
@@ -151,7 +179,6 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
             "success": false,
             "message": "errors.auth.invalid_credentials"
         }))
-    }
 }
 
 pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<InscriptionResponse> {

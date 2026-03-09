@@ -108,7 +108,9 @@
       "already_have_account": "J'ai déjà un compte",
       "register_link": "Inscription",
       "success_deleted": "Succès !",
-      "account_deleted_msg": "Votre compte a été supprimé avec succès."
+      "account_deleted_msg": "Votre compte a été supprimé avec succès.",
+      "retry_after": "Réessayez dans {time}.",
+      "attempts_remaining": "Il vous reste {count} tentative(s) avant blocage."
     },
     "register": {
       "user_title": "Inscription",
@@ -521,6 +523,7 @@
       "hash_error": "Erreur de hashage du mot de passe",
       "connection_error": "Une erreur est survenue lors de la connexion",
       "invalid_credentials": "Adresse e-mail ou mot de passe invalide",
+      "too_many_attempts": "Trop de tentatives de connexion. Votre accès est temporairement bloqué.",
       "user_retrieval_error": "Erreur récupération utilisateur",
       "email_verification_error": "Erreur vérification email",
       "registration_error": "Erreur d'inscription",

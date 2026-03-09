@@ -2,11 +2,37 @@
     import imageFond from '$lib/images/register-image1.png';
     import logo from '$lib/images/greenscore-logo.png';
     import { t, locale } from 'svelte-i18n';
+    import { onDestroy } from 'svelte';
 
     export let title: string;
     export let subtitle: string;
-    export let form: { message?: string } | null = null;
+    export let form: { message?: string; retry_after?: number | null; attempts_remaining?: number | null } | null = null;
     export let showModeSwitcher = false;
+
+    let countdown = 0;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    $: if (form?.retry_after) {
+        countdown = form.retry_after;
+        if (interval) clearInterval(interval);
+        interval = setInterval(() => {
+            if (countdown > 0) {
+                countdown -= 1;
+            } else {
+                if (interval) clearInterval(interval);
+            }
+        }, 1000);
+    }
+
+    onDestroy(() => {
+        if (interval) clearInterval(interval);
+    });
+
+    function formatCountdown(secs: number): string {
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${m}:${String(s).padStart(2, '0')}`;
+    }
 </script>
 
 <title>{title} | GreenScore Web</title>
@@ -48,8 +74,14 @@
             </div>
 
             {#if form?.message}
-                <div class="w-full bg-red-50 text-red-700 text-sm font-outfit font-medium border border-red-700 rounded-lg px-6 py-6">
-                    {$t(form.message)}
+                <div class="w-full bg-red-50 text-red-700 text-sm font-outfit font-medium border border-red-700 rounded-lg px-6 py-4 flex flex-col gap-1">
+                    <span>{$t(form.message)}</span>
+                    {#if form.retry_after != null && countdown > 0}
+                        <span class="font-semibold">{$t('auth.login.retry_after', { values: { time: formatCountdown(countdown) } })}</span>
+                    {/if}
+                    {#if form.attempts_remaining != null && form.attempts_remaining > 0}
+                        <span>{$t('auth.login.attempts_remaining', { values: { count: form.attempts_remaining } })}</span>
+                    {/if}
                 </div>
             {/if}
 

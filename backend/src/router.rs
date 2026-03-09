@@ -1,9 +1,33 @@
 use axum::Router;
+use axum::extract::FromRef;
 use crate::controllers::{home_controller, auth_controller, account_controller, plugin_controller, lpc_controller, mo_controller, my_data_controller};
 use axum::routing::{post, get, patch, delete};
 use sqlx::MySqlPool;
+use std::sync::Arc;
+use crate::login_limiter::LoginLimiter;
 
-pub fn create_router(pool: MySqlPool) -> Router {
+#[derive(Clone)]
+pub struct AppState {
+    pub pool: MySqlPool,
+    pub login_limiter: Arc<LoginLimiter>,
+}
+
+// Permet aux handlers qui n'ont besoin que du pool de continuer à utiliser State(pool): State<MySqlPool>
+impl FromRef<AppState> for MySqlPool {
+    fn from_ref(state: &AppState) -> Self {
+        state.pool.clone()
+    }
+}
+
+// Permet aux handlers d'extraire Arc<LoginLimiter> depuis AppState
+impl FromRef<AppState> for Arc<LoginLimiter> {
+    fn from_ref(state: &AppState) -> Self {
+        state.login_limiter.clone()
+    }
+}
+
+pub fn create_router(pool: MySqlPool, login_limiter: Arc<LoginLimiter>) -> Router {
+    let state = AppState { pool, login_limiter };
     Router::new()
         .route("/login", post(auth_controller::login))
         .route("/advice", get(home_controller::get_advice))
@@ -27,5 +51,5 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/plugin/save_monitored_website_data", post(plugin_controller::save_monitored_website_data))
         .route("/account/get_account_all_equivalents", get(account_controller::get_account_all_equivalents))
         .route("/account/update_account_equivalents", patch(account_controller::update_account_equivalents))
-        .with_state(pool)
+        .with_state(state)
 }

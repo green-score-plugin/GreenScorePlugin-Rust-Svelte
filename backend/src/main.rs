@@ -4,13 +4,17 @@ mod session_store;
 mod cleanup;
 pub mod models;
 mod green_score;
+pub mod login_limiter;
 
+use login_limiter::LoginLimiter;
 use session_store::MySqlStore;
 use sqlx::MySqlPool;
 use std::env;
+use std::sync::Arc;
 use axum::http::{header, HeaderValue, Method};
 use tower_sessions::{SessionManagerLayer, Expiry};
 use time::Duration;
+use std::net::SocketAddr;
 use tower_http::cors::CorsLayer;
 
 #[tokio::main]
@@ -21,6 +25,8 @@ async fn main() {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set");
 
     let pool = MySqlPool::connect(&database_url).await.unwrap();
+
+    let login_limiter = Arc::new(LoginLimiter::new());
 
     tokio::spawn(cleanup::cleanup_expired_sessions(pool.clone()));
 
@@ -52,7 +58,7 @@ async fn main() {
         ])
         .allow_credentials(true); // obligatoire pour cookies cross-site
 
-    let app = router::create_router(pool)
+    let app = router::create_router(pool, login_limiter)
         .layer(session_layer)
         .layer(cors);
 
@@ -63,5 +69,5 @@ async fn main() {
 
     println!("Server running at {}", backend_url);
 
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await.unwrap();
 }
