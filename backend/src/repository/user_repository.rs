@@ -83,4 +83,15 @@ impl UserRepository {
 
         Ok(result.map(|row| row.get::<Option<f64>, _>("total_carbon_footprint").unwrap_or(0.0)))
     }
+
+    pub async fn count_user_equivalent(pool: &sqlx::MySqlPool, user_id: i64) -> Result<i64, sqlx::Error> {
+        let result = sqlx::query(
+            "SELECT COUNT(*) FROM user_equivalent WHERE user_id = ?"
+        )
+        .bind(user_id)
+        .fetch_one(pool)
+        .await?;
+
+        Ok(result.get::<i64, _>(0))
+    }
 }
