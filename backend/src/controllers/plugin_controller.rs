@@ -4,14 +4,15 @@ use axum::http::StatusCode;
 use serde_json::{json, Value};
 use sqlx::{MySqlPool};
 use tower_sessions::Session;
-use crate::controllers::helpers;
 use crate::dto::user_full::UserFull;
 use crate::models::monitored_website::MonitoredWebsite;
 use crate::service::monitored_website_service::MonitoredWebsiteService;
+use crate::service::equivalent_service::EquivalentService;
+
 pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> (StatusCode, Json<Value>) {
 
     let gco2 = payload.get("gCO2").and_then(|v| v.as_f64()).unwrap_or(0.0);
-    let count = payload.get("count").and_then(|v| v.as_i64()).unwrap_or(3);
+    let count = payload.get("count").and_then(|v| v.as_u64()).map(|v| v as i32).unwrap_or(3);
 
     if gco2 <= 0.0 {
         return (StatusCode::BAD_REQUEST, Json(json!({
@@ -20,11 +21,11 @@ pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Jso
         })));
     }
 
-    let account_opt: Option<Account> = session.get("account").await.ok().flatten();
+    let user_id: Option<i64> = session.get("user_full").await.ok().flatten().map(|user_full: UserFull| user_full.user.id);
 
-    let result = helpers::equivalent(&pool, gco2, count as i32, account_opt.as_ref()).await;
+    let equivalents = EquivalentService::equivalent(&pool, user_id, count, gco2).await;
 
-    let data = result.unwrap_or_default();
+    let data = equivalents.unwrap_or_default();
 
     (StatusCode::OK, Json(json!({
         "success": true,
@@ -32,7 +33,7 @@ pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Jso
     })))
 }
 
-pub async fn save_monitored_website_data(session: Session, State(pool): State<MySqlPool>, Json(monitored_website): Json<MonitoredWebsite>) -> Json<Value> {
+pub async fn save_monitored_website_data(session: Session, State(pool): State<MySqlPool>, Json(monitored_website): Json<MonitoredWebsite>) -> (StatusCode, Json<Value>) {
 
     let new_total_footprint = MonitoredWebsiteService::save_monitored_website_data(&pool, &monitored_website).await;
 
@@ -49,15 +50,15 @@ pub async fn save_monitored_website_data(session: Session, State(pool): State<My
 
         session.insert("user_full", user_full).await.ok();
 
-        Json(json!({
+        (StatusCode::OK ,Json(json!({
             "success": true,
             "total_carbon_footprint": total
-        }))
+        })))
     }
     else {
-        Json(json!({
+        (StatusCode::BAD_REQUEST ,Json(json!({
             "success": false,
             "error": "User not found in session"
-        }))
+        })))
     }
 }
