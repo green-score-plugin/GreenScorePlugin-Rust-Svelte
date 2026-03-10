@@ -23,6 +23,7 @@ pub mod dto {
 pub mod repository {
     pub mod user_repository;
     pub mod organisation_repository;
+    pub mod service_repository;
 }
 
 pub mod service {
