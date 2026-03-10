@@ -106,6 +106,10 @@ impl AuthService{
             service = ServiceRepository::find_by_id(pool, srv_id).await.map_err(|_| "db_error")?;
         }
 
+        if let Some(ref srv) = service {
+            organisation = OrganisationRepository::find_by_id(pool, srv.id_organisation).await.map_err(|_| "db_error")?;
+        }
+
         let user_full = UserFull {
             user,
             organisation,
