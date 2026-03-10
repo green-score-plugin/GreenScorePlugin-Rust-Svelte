@@ -61,4 +61,26 @@ impl UserRepository {
         .await?;
         Ok(())
     }
+
+    pub async fn update_total_carbon_footprint_by_id(pool: &sqlx::MySqlPool, user_id: i64, carbon_footprint: f64) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE user SET total_carbon_footprint = COALESCE(total_carbon_footprint, 0) + ? WHERE id = ?"
+        )
+        .bind(carbon_footprint)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    pub async fn find_total_carbon_footprint_by_id(pool: &sqlx::MySqlPool, user_id: i64) -> Result<Option<f64>, sqlx::Error> {
+        let result = sqlx::query(
+            "SELECT total_carbon_footprint FROM user WHERE id = ?"
+        )
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await?;
+
+        Ok(result.map(|row| row.get::<Option<f64>, _>("total_carbon_footprint").unwrap_or(0.0)))
+    }
 }
