@@ -1,10 +1,10 @@
 use axum::extract::State;
 use axum::Json;
-use serde::Deserialize;
+use serde::Serialize;
 use sqlx::MySqlPool;
 use crate::models::advice::Advice;
 
-#[derive(Deserialize)]
+#[derive(Serialize)]
 pub struct AdviceResponse {
     success: bool,
     advice: Vec<Advice>
