@@ -31,7 +31,7 @@ impl UserRepository {
         Ok(result.map(|record| record.id))
     }
 
-    pub async fn find_by_email(pool: &sqlx::MySqlPool, email: &str) -> Result<Option<(i64, String, String, String, Option<i64>, Option<i64>, bool)>, sqlx::Error> {
+    pub async fn find_with_password_by_email(pool: &sqlx::MySqlPool, email: &str) -> Result<Option<(i64, String, String, String, Option<i64>, Option<i64>, bool)>, sqlx::Error> {
         let result = sqlx::query!(
             "SELECT id, password_hash, first_name, last_name, organisation_id, service_id ,est_admin FROM users WHERE email = ?"
         )
