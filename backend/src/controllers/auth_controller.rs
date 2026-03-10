@@ -37,105 +37,23 @@ pub struct GenericResponse {
     pub message: Option<String>
 }
 
-pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<LoginRequest>) -> Json<Value> {
+pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<LoginRequest>) -> Json<GenericResponse> {
 
-    let row = match sqlx::query_as::<_, (i64, String, String, String)>(
-        "SELECT id, email, CAST(password AS CHAR) as password, CAST(roles AS CHAR) as roles  FROM user WHERE email = ?",
-    )
-        .bind(payload["email"].as_str().unwrap_or(""))
-        .fetch_optional(&pool)
-        .await {
-        Ok(u) => u,
-        Err(_) => return Json(json!({
-        "success": false,
-        "message": "errors.auth.connection_error"
-        })),
+    let email = payload.email.trim();
+    let password = payload.password.trim();
+
+    let user_full = match AuthService::login(&pool, email, password).await{
+        Ok(user_full) => user_full,
+        Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) })
     };
+    
+    session.insert("userFull", user_full).await.unwrap();
 
-    if row.is_none() {
-        return Json(json!({
-            "success": false,
-            "message": "errors.auth.invalid_credentials",
-        }));
-    }
+    Json(GenericResponse {
+        success: true,
+        message: None,
+    })
 
-    let (user_id, email, password_hash, roles) = row.unwrap();
-    let password = payload["password"].as_str().unwrap_or("");
-    if !bcrypt::verify(password, &password_hash).unwrap_or(false) {
-        Json(json!({
-            "success": false,
-            "message": "errors.auth.invalid_credentials",
-        }))
-    } else {
-
-        if roles == "[\"ROLE_USER\"]" {
-            match sqlx::query_as::<_, (String, String, Option<i64>)>(
-                "SELECT first_name, last_name, organisation_id FROM user WHERE email = ?"
-            )
-                .bind(&email)
-                .fetch_optional(&pool)
-                .await {
-                Ok(Some((first_name, last_name, organisation_id))) => {
-                    let account = Account::User(User { id: user_id, email, prenom: first_name, nom: last_name, id_orga: organisation_id});
-                    session.insert("account", account.clone()).await.unwrap();
-
-                    return Json(json!({
-                        "success": true,
-                        "account": account
-                    }));
-                },
-                Ok(None) => {
-
-                },
-                Err(_) => {
-                    return Json(json!({
-                "success": false,
-                "message": "errors.auth.user_retrieval_error"
-            }));
-                }
-            }
-        }
-
-        if roles == "[\"ROLE_ORGANISATION\"]" {
-            match sqlx::query_as::<_, (i64, String, String, Option<String>)>(
-                "SELECT o.id, o.organisation_name, o.organisation_code, o.siret FROM user u
-             JOIN organisation o ON o.admin_id = u.id
-             WHERE email = ?"
-            )
-                .bind(&email)
-                .fetch_optional(&pool)
-                .await {
-                Ok(Some((organisation_id, organisation_name, organisation_code, siret))) => {
-                    let account = Account::Organisation(Organisation {
-                        id: organisation_id,
-                        nom: organisation_name,
-                        siret,
-                        code: organisation_code,
-                        admin_id: user_id
-                    });
-                    session.insert("account", account).await.unwrap();
-
-                    return Json(json!({
-                    "success" : true
-                }))
-                },
-                Ok(None) => {
-
-                },
-                Err(_) => {
-                    return Json(json!({
-                "success": false,
-                "message": "errors.auth.connection_error"
-            }));
-                }
-            }
-        }
-
-        Json(json!({
-            "success": false,
-            "message": "errors.auth.invalid_credentials"
-        }))
-    }
 }
 
 pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionRequest>) -> Json<GenericResponse> {
