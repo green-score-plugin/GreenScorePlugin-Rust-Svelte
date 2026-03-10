@@ -1,6 +1,5 @@
-use axum::extract::State;
 use axum::Json;
-use serde_json::{json, Value};
+use axum::extract::State;
 use sqlx::MySqlPool;
 use tower_sessions::Session;
 use serde::{Deserialize, Serialize};
@@ -37,6 +36,16 @@ pub struct GenericResponse {
     pub message: Option<String>
 }
 
+#[derive(Serialize)]
+pub struct CurrentAccountResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub user_full: Option<UserFull>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+
 pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<LoginRequest>) -> Json<GenericResponse> {
 
     let email = payload.email.trim();
@@ -46,7 +55,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
         Ok(user_full) => user_full,
         Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) })
     };
-    
+
     session.insert("userFull", user_full).await.unwrap();
 
     Json(GenericResponse {
@@ -56,7 +65,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
 
 }
 
-pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionRequest>) -> Json<GenericResponse> {
+pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<GenericResponse> {
     let email = payload.email.trim();
     let password = payload.password.trim();
     let first_name = payload.firstname.trim();
@@ -69,7 +78,7 @@ pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json
         });
     }
 
-    let user_id = match AuthService::inscription(pool, email, password, first_name, last_name).await {
+    let user_id = match AuthService::inscription(&pool, email, password, first_name, last_name).await {
         Ok(id) => id,
         Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) }),
     };
@@ -100,7 +109,7 @@ pub async fn inscription(session: Session, pool: &MySqlPool, Json(payload): Json
 
 }
 
-pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload): Json<InscriptionOrgaRequest>) -> Json<GenericResponse>
+pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Json<GenericResponse>
 {
 
     let orga_name = payload.orga_name.trim();
@@ -111,7 +120,7 @@ pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload):
 
     let user_id = user_full.user.id;
 
-    let result = AuthService::inscription_orga(pool, orga_name, siret.as_deref(), user_id).await;
+    let result = AuthService::inscription_orga(&pool, orga_name, siret.as_deref(), user_id).await;
 
     let (organisation_id, organisation_code) = match result {
         Ok(tuple) => tuple,
@@ -136,43 +145,29 @@ pub async fn inscription_orga(session: Session, pool: &MySqlPool, Json(payload):
 
 }
 
-pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
-    let account_opt: Option<Account> = session.get("account").await.unwrap_or(None);
+pub async fn get_current_account(session: Session) -> Json<CurrentAccountResponse> {
 
-    if let Some(mut account) = account_opt {
-        if let Account::User(ref mut u) = account {
-            let row_opt = sqlx::query_as::<_, (String, String, String, Option<i64>)>(
-                "SELECT email, first_name, last_name, organisation_id FROM user WHERE id = ?"
-            )
-            .bind(u.id)
-            .fetch_optional(&pool)
-            .await;
+    let user_full_opt: Option<UserFull> = session.get("userFull").await.unwrap_or(None);
 
-            if let Ok(Some((email, first_name, last_name, org_id))) = row_opt {
-                 u.email = email;
-                 u.prenom = first_name;
-                 u.nom = last_name;
-                 u.id_orga = org_id;
-
-                 let _ = session.insert("account", account.clone()).await;
-            }
-        }
-
-        Json(json!({
-            "success": true,
-            "account": account
-        }))
+    if let Some(user_full) = user_full_opt {
+        Json(CurrentAccountResponse {
+            success: true,
+            user_full: Some(user_full),
+            message: None,
+        })
     } else {
-        Json(json!({
-            "success": false,
-            "message": "errors.auth.unauthenticated"
-        }))
+        Json(CurrentAccountResponse {
+            success: false,
+            user_full: None,
+            message: Some("errors.auth.not_logged_in".to_string()),
+        })
     }
 }
 
-pub async fn logout(session: Session) -> Json<Value> {
+pub async fn logout(session: Session) -> Json<GenericResponse> {
     session.delete().await.unwrap();
-    Json(json!({
-        "success": true,
-    }))
+    Json(GenericResponse {
+        success: true,
+        message: None,
+    })
 }
