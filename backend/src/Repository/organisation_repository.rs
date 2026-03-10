@@ -1,6 +1,19 @@
+use crate::models::organisation::Organisation;
 pub struct OrganisationRepository;
 
 impl OrganisationRepository {
+
+    pub async fn find_by_id(pool: &sqlx::MySqlPool, organisation_id: i64) -> Result<Option<Organisation>, sqlx::Error> {
+        let organisation = sqlx::query_as!(
+            Organisation,
+            "SELECT id, organisation_name, organisation_code, siret FROM organisations WHERE id = ?",
+            organisation_id
+        )
+        .fetch_optional(pool)
+        .await?;
+
+        Ok(organisation)
+    }
 
     pub async fn find_id_by_siret(pool: &sqlx::MySqlPool, siret: &str) -> Result<Option<i64>, sqlx::Error> {
         let result = sqlx::query!(
