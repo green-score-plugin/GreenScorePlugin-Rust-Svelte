@@ -14,6 +14,7 @@ pub mod models {
     pub mod service;
     pub mod organisation;
     pub mod advice;
+    pub mod monitored_website;
 }
 
 pub mod dto {
@@ -25,11 +26,13 @@ pub mod repository {
     pub mod organisation_repository;
     pub mod service_repository;
     pub mod advice_repository;
+    pub mod monitored_website_repository;
 }
 
 pub mod service {
     pub mod auth_service;
     pub mod advice_service;
+    pub mod monitored_website_service;
 }
 
 pub mod green_score;
