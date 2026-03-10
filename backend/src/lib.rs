@@ -6,7 +6,6 @@ pub mod controllers {
     pub mod mo_controller;
     pub mod my_data_controller;
     pub mod plugin_controller;
-    pub mod helpers;
 }
 
 pub mod models {
@@ -15,6 +14,7 @@ pub mod models {
     pub mod organisation;
     pub mod advice;
     pub mod monitored_website;
+    pub mod equivalent;
 }
 
 pub mod dto {
@@ -27,12 +27,14 @@ pub mod repository {
     pub mod service_repository;
     pub mod advice_repository;
     pub mod monitored_website_repository;
+    pub mod equivalent_repository;
 }
 
 pub mod service {
     pub mod auth_service;
     pub mod advice_service;
     pub mod monitored_website_service;
+    pub mod equivalent_service;
 }
 
 pub mod green_score;
