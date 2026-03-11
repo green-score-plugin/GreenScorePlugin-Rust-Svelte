@@ -1,4 +1,5 @@
 use crate::models::monitored_website::MonitoredWebsite;
+use crate::dto::lpc_dto::LastPageConsultedInfos;
 pub struct MonitoredWebsiteRepository;
 
 impl MonitoredWebsiteRepository {
@@ -24,5 +25,24 @@ impl MonitoredWebsiteRepository {
         .execute(pool)
         .await?;
         Ok(())
+    }
+
+    pub async fn get_last_search_information_by_user(
+        pool: &sqlx::MySqlPool,
+        user_id: i64,
+    ) -> Result<Option<LastPageConsultedInfos>, sqlx::Error> {
+        let result = sqlx::query_as::<_, LastPageConsultedInfos>(
+            r#"
+            SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country
+            FROM monitored_websites
+            WHERE user_id = ?
+            ORDER BY creation_date DESC
+            LIMIT 1
+            "#,
+        )
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await?;
+        Ok(result)
     }
 }
