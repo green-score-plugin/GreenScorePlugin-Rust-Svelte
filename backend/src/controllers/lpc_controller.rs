@@ -1,134 +1,30 @@
 use axum::extract::{State, Query};
 use axum::Json;
-use serde::{Deserialize, Serialize};
 use sqlx::MySqlPool;
 use tower_sessions::Session;
-use crate::models::Account;
-use crate::green_score::calculate_green_score;
-use crate::controllers::helpers::{advice, equivalent};
-use crate::controllers::helpers::Equivalent;
-
-#[derive(Deserialize)]
-pub struct LpcParams {
-    pub url_full: Option<String>,
-    pub country: Option<String>,
-    #[serde(rename = "totalConsu")]
-    pub total_consu: Option<f64>,
-    #[serde(rename = "pageSize")]
-    pub page_size: Option<f64>,
-    #[serde(rename = "loadingTime")]
-    pub loading_time: Option<f64>,
-    #[serde(rename = "queriesQuantity")]
-    pub queries_quantity: Option<i32>,
-}
-
-#[derive(Serialize)]
-pub struct LastPageConsultedInfos {
-    pub link: String,
-    pub queries_quantity: i32,
-    pub carbon_footprint: f64,
-    pub data_transferred: f64,
-    pub loading_time: f64,
-    pub country: String,
-}
-
-#[derive(Serialize)]
-pub struct LastPageConsultedResponse {
-    pub success: bool,
-    pub lpc_infos: Option<LastPageConsultedInfos>,
-    pub advices: Vec<String>,
-    pub letter: Option<String>,
-    pub env_nomination: Option<String>,
-    pub equivalents: Option<Vec<Equivalent>>,
-}
-
-async fn last_search_informations(State(pool): State<MySqlPool>, session: Session) -> Option<LastPageConsultedInfos> {
-    let account: Option<Account> = session.get("account").await.unwrap_or(None);
-    if let Some(account) = account {
-        let id = account.id();
-        let result = sqlx::query_as::<_, (String, i32, f64, f64, f64, String)>(
-            "SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country FROM monitored_website WHERE user_id = ? ORDER BY creation_date DESC LIMIT 1",
-        )
-            .bind(id)
-            .fetch_one(&pool)
-            .await;
-        match result {
-            Ok((url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country)) => {
-                Some(LastPageConsultedInfos {
-                    link: url_full,
-                    queries_quantity,
-                    carbon_footprint,
-                    data_transferred,
-                    loading_time,
-                    country,
-                })
-            }
-            Err(_) => None,
-        }
-    } else {
-        None
-    }
-}
+use crate::dto::user_full::UserFull;
+use crate::service::monitored_website_service::MonitoredWebsiteService;
+use crate::dto::lpc_dto::LastPageConsultedInfos;
+use crate::dto::lpc_dto::LastPageConsultedResponse;
 
 pub async fn lpc(
     session: Session,
     State(pool): State<MySqlPool>,
-    Query(params): Query<LpcParams>,
+    Query(params): Query<LastPageConsultedInfos>,
 ) -> Json<LastPageConsultedResponse> {
-    let last_search_informations: Option<LastPageConsultedInfos> = if let (
-        Some(url),
-        Some(country),
-        Some(carbon),
-        Some(data),
-        Some(time),
-        Some(queries),
-    ) = (
-        params.url_full,
-        params.country,
-        params.total_consu,
-        params.page_size,
-        params.loading_time,
-        params.queries_quantity,
-    ) {
-        Some(LastPageConsultedInfos {
-            link: url,
-            country,
-            carbon_footprint: carbon,
-            data_transferred: data,
-            loading_time: time,
-            queries_quantity: queries,
-        })
-    } else {
-        last_search_informations(State(pool.clone()), session).await
-    };
 
-    let advices: Vec<String> = {
-        let mut v = Vec::new();
-        v.push(advice(&pool, false).await);
-        v.push(advice(&pool, true).await);
-        v
-    };
+    let user_id: Option<i64> = session.get("user_full").await.ok().flatten().map(|user_full: UserFull| user_full.user.id);
 
-    let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_informations {
-        let (l, n) = calculate_green_score(None, infos.carbon_footprint, "lpc".to_string()).await;
+    let response = MonitoredWebsiteService::lpc(&pool, user_id, Some(params)).await;
 
-        let eqs = equivalent(&pool, infos.carbon_footprint, 2, None).await;
-        let eqs = match eqs {
-            Some(v) if !v.is_empty() => Some(v),
-            _ => None,
-        };
+    Json(response.unwrap_or(LastPageConsultedResponse {
+        success: false,
+        letter: None,
+        env_nomination: None,
+        equivalents: None,
+        advices: vec![],
+        lpc_infos: None,
+    }))
 
-        (Some(l), Some(n), eqs)
-    } else {
-        (None, None, None)
-    };
 
-    Json(LastPageConsultedResponse {
-        success: true,
-        lpc_infos: last_search_informations,
-        advices,
-        letter,
-        env_nomination,
-        equivalents,
-    })
 }
