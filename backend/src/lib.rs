@@ -19,6 +19,7 @@ pub mod models {
 
 pub mod dto {
     pub mod user_full;
+    pub mod lpc_dto;
 }
 
 pub mod repository {
