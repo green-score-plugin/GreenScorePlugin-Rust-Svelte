@@ -3,7 +3,7 @@ use axum::Json;
 use serde::Serialize;
 use sqlx::MySqlPool;
 use crate::models::advice::Advice;
-use crate::service::advice_service::AdiceService;
+use crate::service::advice_service::AdviceService;
 
 #[derive(Serialize)]
 pub struct AdviceResponse {
@@ -12,7 +12,7 @@ pub struct AdviceResponse {
 }
 
 pub async fn get_advice(State(pool): State<MySqlPool>) -> Json<AdviceResponse> {
-    let advice = match AdiceService::get_all_advice(&pool).await {
+    let advice = match AdviceService::get_all_advice(&pool).await {
         Ok(advice) => advice,
         Err(_) => return Json(AdviceResponse { success: false, advice: vec![] })
     };
