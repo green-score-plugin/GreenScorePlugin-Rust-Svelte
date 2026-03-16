@@ -11,6 +11,7 @@ use crate::service::equivalent_service::EquivalentService;
 use crate::dto::update_account_request_dto::UpdateAccountRequest;
 use crate::dto::update_organisation_request_dto::UpdateOrganisationRequest;
 use crate::dto::equivalent_dto::EquivalentSelection;
+use crate::middleware::auth::AuthenticatedUser;
 
 #[derive(Deserialize)]
 pub struct JoinOrgaRequest {
@@ -29,16 +30,9 @@ pub struct AllEquivalentsResponse {
 pub async fn update_account(
     session: Session,
     State(pool): State<MySqlPool>,
+    AuthenticatedUser(mut user_full): AuthenticatedUser,
     Json(payload): Json<UpdateAccountRequest>,
 ) -> Json<Value> {
-    let mut user_full: UserFull = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full,
-        None => return Json(json!({
-            "success": false,
-            "message": "errors.auth.unauthenticated"
-        })),
-    };
-
     let new_user = match UserService::update_user(&pool, user_full.user, payload).await{
         Ok(new_user) => new_user,
         Err(e) => return Json(json!({
@@ -57,15 +51,8 @@ pub async fn update_account(
 
 }
 
-pub async fn delete_account( session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
-
-    let user_id = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full.user.id,
-        None => return Json(json!({
-            "success": false,
-            "message": "errors.auth.unauthenticated"
-        }))
-    };
+pub async fn delete_account( session: Session, State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Json<Value> {
+    let user_id = user_full.user.id;
 
     match UserService::delete_user(&pool, user_id).await {
         Ok(_) => {
@@ -86,16 +73,9 @@ pub async fn delete_account( session: Session, State(pool): State<MySqlPool>) ->
 pub async fn join_organization(
     session: Session,
     State(pool): State<MySqlPool>,
+    AuthenticatedUser(mut user_full): AuthenticatedUser,
     Json(payload): Json<JoinOrgaRequest>,
 ) -> Json<Value> {
-    let mut user_full: UserFull = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full,
-        None => return Json(json!({
-            "success": false,
-            "message": "errors.auth.unauthenticated"
-        }))
-    };
-
     let orga_code = payload.code.clone();
     let orga_id = UserService::join_organization(&pool, orga_code, user_full.user.id).await;
 
@@ -115,15 +95,14 @@ pub async fn join_organization(
     }))
 }
 
-pub async fn get_organisation_member(session: Session, State(pool): State<MySqlPool>) -> Json<Value> {
-    let orga_id: i64 = match session.get::<UserFull>("user_full").await.ok().flatten(){
-        Some(user_full) => user_full.organisation.unwrap().id,
+pub async fn get_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Json<Value> {
+    let orga_id: i64 = match user_full.organisation {
+        Some(org) => org.id,
         None => return Json(json!({
             "success": false,
             "message": "errors.auth.unauthenticated"
         }))
     };
-
 
     let members = UserService::get_organization_members(&pool, orga_id).await.unwrap_or_else(|_| Vec::new());
 
@@ -145,12 +124,7 @@ pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Json(payl
 
 }
 
-pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>, Json(payload) : Json<UpdateOrganisationRequest>) -> Json<Value> {
-    let mut user_full: UserFull = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full,
-        None => return Json(json!({ "success": false, "message": "errors.auth.unauthenticated" })),
-    };
-
+pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>, AuthenticatedUser(mut user_full): AuthenticatedUser, Json(payload) : Json<UpdateOrganisationRequest>) -> Json<Value> {
     let org = match user_full.organisation.as_ref() {
         Some(o) => o,
         None => return Json(json!({ "success": false, "message": "errors.auth.unauthenticated_org" })),
@@ -177,16 +151,8 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
 pub async fn leave_organization(
     session: Session,
     State(pool): State<MySqlPool>,
+    AuthenticatedUser(mut user_full): AuthenticatedUser,
 ) -> Json<Value> {
-
-    let mut user_full: UserFull = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full,
-        None => return Json(json!({
-            "success": false,
-            "message": "errors.auth.unauthenticated"
-        }))
-    };
-
     match UserService::remove_organization_member(&pool, user_full.user.id).await {
         Ok(_) => (),
         Err(e) => return Json(json!({
@@ -205,16 +171,8 @@ pub async fn leave_organization(
 }
 
 pub async fn get_my_organization(
-    session: Session
+    AuthenticatedUser(user_full): AuthenticatedUser
 ) -> Json<Value> {
-    let user_full = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full,
-        None => return Json(json!({
-            "success": false,
-            "message": "errors.auth.unauthenticated"
-        }))
-    };
-
     match user_full.organisation {
         Some(orga) => Json(json!({
             "success": true,
@@ -227,15 +185,8 @@ pub async fn get_my_organization(
     }
 }
 
-pub async fn get_account_all_equivalents(session: Session, State(pool): State<MySqlPool>) -> Json<AllEquivalentsResponse> {
-    let user_id = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full.user.id,
-        None => return Json(AllEquivalentsResponse {
-            success: false,
-            equivalents: None,
-            message: Some("errors.auth.unauthenticated".to_string()),
-        }),
-    };
+pub async fn get_account_all_equivalents(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Json<AllEquivalentsResponse> {
+    let user_id = user_full.user.id;
 
     match EquivalentService::get_all_equivalents_with_selection(&pool, user_id).await {
         Ok(equivalents) => Json(AllEquivalentsResponse {
@@ -251,11 +202,8 @@ pub async fn get_account_all_equivalents(session: Session, State(pool): State<My
     }
 }
 
-pub async fn update_account_equivalents(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Json<Value> {
-     let user_id = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full.user.id,
-        None => return Json(json!({ "success": false, "message": "errors.auth.unauthenticated" })),
-    };
+pub async fn update_account_equivalents(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload): Json<Value>) -> Json<Value> {
+     let user_id = user_full.user.id;
 
     let equivalents: Vec<i64> = match payload["equivalents"].as_array() {
         Some(arr) => {

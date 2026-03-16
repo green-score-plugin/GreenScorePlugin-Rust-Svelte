@@ -12,6 +12,7 @@ use crate::dto::user_full::UserFull;
 use crate::models::equivalent::Equivalent;
 use crate::service::advice_service::AdviceService;
 use crate::service::equivalent_service::EquivalentService;
+use crate::middleware::auth::AuthenticatedUser;
 
 #[derive(Serialize)]
 pub struct MyDataResponse {
@@ -81,16 +82,30 @@ pub async fn get_total_consumption(
 
 pub async fn my_data(
     State(pool): State<MySqlPool>,
-    session: Session,
+    AuthenticatedUser(user_full): AuthenticatedUser,
 )-> Json<MyDataResponse> {
 
-    let user_id: i64 = match session.get::<UserFull>("user_full").await.ok().flatten() {
-        Some(user_full) => user_full.user.id,
-        None => return error_response()
-    };
+    let user_id = user_full.user.id;
 
     let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, user_id).await;
     let average_daily_carbon_footprint = get_average_daily_carbon_footprint(&pool).await;
+
+    let error_response = || Json(MyDataResponse {
+        success: false,
+        my_average_daily_carbon_footprint: None,
+        average_daily_carbon_footprint: None,
+        message_average_footprint: None,
+        total_consumption: None,
+        letter_green_score: None,
+        env_nomination: None,
+        equivalents: None,
+        daily_consumption: vec![],
+        weekly_consumption: vec![],
+        monthly_consumption: vec![],
+        top_polluting_sites: vec![],
+        advices: vec![],
+    });
+
     let message_average_footprint = match (my_average_daily_carbon_footprint, average_daily_carbon_footprint) {
         (Some(user_avg), Some(global_avg)) => {
             if user_avg < global_avg * 0.8 {
