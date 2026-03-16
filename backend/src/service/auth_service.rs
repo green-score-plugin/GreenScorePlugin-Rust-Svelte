@@ -38,7 +38,7 @@ impl AuthService{
         last_name: &str)
         -> Result<i64, String>
     {
-        if UserRepository::find_id_by_email(pool, email).await.map_err(|_| "db_error")?.is_some() {
+        if UserRepository::find_id_by_email(pool, email.parse().unwrap()).await.map_err(|_| "db_error")?.is_some() {
             return Err("email_exists".to_string());
         }
 
