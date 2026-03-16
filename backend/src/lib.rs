@@ -20,6 +20,12 @@ pub mod models {
 pub mod dto {
     pub mod user_full;
     pub mod lpc_dto;
+    pub mod top_polluting_site_dto;
+    pub mod consumption_data_point_dto;
+    pub mod mo_infos_dto;
+    pub mod update_account_request_dto;
+    pub mod equivalent_dto;
+    pub mod update_organisation_request_dto;
 }
 
 pub mod repository {
@@ -36,6 +42,8 @@ pub mod service {
     pub mod advice_service;
     pub mod monitored_website_service;
     pub mod equivalent_service;
+    pub mod organisation_service;
+    pub mod user_service;
 }
 
 pub mod green_score;
