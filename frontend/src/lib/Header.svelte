@@ -85,7 +85,7 @@
                         {#if profileMenuOpen}
                             <!-- Utilisation de l'action pour fermer le menu quand on clique à l'extérieur -->
                             <div use:clickOutside class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
-                                {#if user.role === 'organisation'}
+                                {#if user.organisation}
                                     <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_organization')}</a>
                                 {:else}
                                     <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_account')}</a>
