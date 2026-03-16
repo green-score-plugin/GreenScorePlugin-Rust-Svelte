@@ -1,12 +1,17 @@
 use axum::extract::State;
 use axum::Json;
 use serde::{Serialize};
-use sqlx::MySqlPool;
+use sqlx::{Error, MySqlPool};
 use tower_sessions::Session;
-use crate::controllers::helpers::{advice, equivalent};
-use crate::controllers::helpers::Equivalent;
+use crate::controllers::mo_controller::MyOrganizationResponse;
 use crate::green_score::calculate_green_score;
-use crate::models::Account;
+use crate::service::monitored_website_service::MonitoredWebsiteService;
+use crate::dto::top_polluting_site_dto::TopPollutingSite;
+use crate::dto::consumption_data_point_dto::ConsumptionDataPoint;
+use crate::dto::user_full::UserFull;
+use crate::models::equivalent::Equivalent;
+use crate::service::advice_service::AdviceService;
+use crate::service::equivalent_service::EquivalentService;
 
 #[derive(Serialize)]
 pub struct MyDataResponse {
@@ -23,16 +28,6 @@ pub struct MyDataResponse {
     pub monthly_consumption: Vec<ConsumptionDataPoint>,
     pub top_polluting_sites: Vec<TopPollutingSite>,
     pub advices: Vec<String>,
-}
-#[derive(Serialize, Debug)]
-pub struct ConsumptionDataPoint {
-    pub label: String,
-    pub value: f64,
-}
-#[derive(Serialize, Debug)]
-pub struct TopPollutingSite {
-    pub url_domain: String,
-    pub total_footprint: f64,
 }
 
 pub async fn get_top5_polluting_sites(
@@ -148,30 +143,7 @@ pub async fn get_my_average_daily_carbon_footprint(
     pool: &MySqlPool,
     session: Session
 ) -> Option<f64> {
-    let account: Option<Account> = session.get("account").await.unwrap_or(None);
-    if let Some(account) = account {
-        let user_id = account.id();
-        let result = sqlx::query_as::<_, (String, f64)>(
-            "SELECT CAST(DATE(creation_date) AS CHAR) as day, AVG(carbon_footprint) as daily_average
-     FROM monitored_website
-     WHERE user_id = ?
-     GROUP BY day"
-        )
-            .bind(user_id)
-            .fetch_all(pool)
-            .await;
-
-        match result {
-            Ok(daily_averages) if !daily_averages.is_empty() => {
-                let sum: f64 = daily_averages.iter().map(|(_, avg)| avg).sum();
-                let average = sum / daily_averages.len() as f64;
-                Some((average * 100.0).round() / 100.0)
-            }
-            _ => None,
-        }
-    } else {
-        None
-    }
+    MonitoredWebsiteService::get_my_average_daily_carbon_footprint(pool, user_id).await
 }
 
 pub async fn get_average_daily_carbon_footprint(
@@ -255,24 +227,19 @@ pub async fn my_data(
         (None, None, None)
     };
 
-    let total_consumption = get_total_consumption(&pool, session.clone()).await;
+    let (letter_green_score, env_nomination) = calculate_green_score(&pool, my_average_daily_carbon_footprint.unwrap(), "my_data".to_string()).await;
+    let equivalents: Vec<Equivalent> = EquivalentService::equivalent(&pool, Some(user_id), 2, my_average_daily_carbon_footprint.unwrap()).await.unwrap_or_default();
 
-    let (daily_consumption, weekly_consumption, monthly_consumption) =
-        if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
-            let user_id = account.id();
-            let daily = get_daily_consumption(&pool, user_id).await.unwrap_or_default();
-            let weekly = get_weekly_consumption(&pool, user_id).await.unwrap_or_default();
-            let monthly = get_monthly_consumption(&pool, user_id).await.unwrap_or_default();
-            (daily, weekly, monthly)
-        } else {
-            (vec![], vec![], vec![])
-        };
-    let advices: Vec<String> = {
-        let mut v = Vec::new();
-        v.push(advice(&pool, false).await);
-        v.push(advice(&pool, true).await);
-        v
-    };
+    let total_consumption = get_total_consumption(&pool, user_id).await;
+
+    let daily_consumption = get_daily_consumption(&pool, user_id).await.unwrap_or_default();
+    let weekly_consumption = get_weekly_consumption(&pool, user_id).await.unwrap_or_default();
+    let monthly_consumption = get_monthly_consumption(&pool, user_id).await.unwrap_or_default();
+
+let advices: Vec<String> = vec![
+    AdviceService::get_one_random_advice(&pool, false).await.unwrap_or_default(),
+    AdviceService::get_one_random_advice(&pool, true).await.unwrap_or_default(),
+];
 
     let top_polluting_sites = if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
         get_top5_polluting_sites(&pool, account.id()).await.unwrap_or_default()
@@ -285,13 +252,31 @@ pub async fn my_data(
         average_daily_carbon_footprint,
         message_average_footprint,
         total_consumption,
-        letter_green_score,
-        env_nomination,
-        equivalents,
+        letter_green_score: Some(letter_green_score),
+        env_nomination: Some(env_nomination),
+        equivalents: Some(equivalents),
         daily_consumption,
         weekly_consumption,
         monthly_consumption,
         top_polluting_sites,
         advices,
+    })
+}
+
+fn error_response() -> Json<MyDataResponse> {
+    Json(MyDataResponse {
+        success: false,
+        my_average_daily_carbon_footprint: None,
+        average_daily_carbon_footprint: None,
+        message_average_footprint: None,
+        total_consumption: None,
+        letter_green_score: None,
+        env_nomination: None,
+        equivalents: None,
+        daily_consumption: vec![],
+        weekly_consumption: vec![],
+        monthly_consumption: vec![],
+        top_polluting_sites: vec![],
+        advices: vec![],
     })
 }
