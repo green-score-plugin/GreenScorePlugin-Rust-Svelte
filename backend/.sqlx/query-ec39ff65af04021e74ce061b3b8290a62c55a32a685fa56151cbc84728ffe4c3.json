@@ -1,0 +1,34 @@
+{
+  "db_name": "MySQL",
+  "query": "SELECT data, expires_at FROM sessions WHERE id = ? LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "data",
+        "type_info": {
+          "type": "Blob",
+          "flags": "NOT_NULL | BLOB | BINARY | NO_DEFAULT_VALUE",
+          "max_size": 4294967295
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "expires_at",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "",
+          "max_size": 20
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "ec39ff65af04021e74ce061b3b8290a62c55a32a685fa56151cbc84728ffe4c3"
+}
