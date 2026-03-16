@@ -29,7 +29,8 @@ export const actions = {
 
             if(result.success) {
                 await setSessionCookie(cookies, response);
-                redirect(303,`/inscription-organisation/${result.account.code}`);
+                const code = result.account?.code || result.user_full?.organisation?.code;
+                redirect(303,`/inscription-organisation/${code}`);
             }
 
             return fail(400, { message: result.message || 'Erreur de connexion' });
