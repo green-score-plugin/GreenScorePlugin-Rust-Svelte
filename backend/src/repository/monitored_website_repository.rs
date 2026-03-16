@@ -1,10 +1,11 @@
+use sqlx::{MySqlPool, Error};
 use crate::models::monitored_website::MonitoredWebsite;
 use crate::dto::lpc_dto::LastPageConsultedInfos;
 pub struct MonitoredWebsiteRepository;
 
 impl MonitoredWebsiteRepository {
     pub async fn save_monitored_website_data(
-        pool: &sqlx::MySqlPool,
+        pool: &MySqlPool,
         monitored_website: &MonitoredWebsite,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
@@ -28,7 +29,7 @@ impl MonitoredWebsiteRepository {
     }
 
     pub async fn get_last_search_information_by_user(
-        pool: &sqlx::MySqlPool,
+        pool: &MySqlPool,
         user_id: i64,
     ) -> Result<Option<LastPageConsultedInfos>, sqlx::Error> {
         let result = sqlx::query_as::<_, LastPageConsultedInfos>(
