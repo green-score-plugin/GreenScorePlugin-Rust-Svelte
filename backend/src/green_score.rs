@@ -1,15 +1,9 @@
 use sqlx::MySqlPool;
 
-pub async fn calculate_green_score(pool: Option<&MySqlPool>, carbon_footprint: f64, page: String) -> (String, String) {
+pub async fn calculate_green_score(pool: &MySqlPool, carbon_footprint: f64, page: String) -> (String, String) {
     if page == "mo" || page == "my_data" {
         let mut least: f64 = 0.0;
         let mut avg: f64 = 0.0;
-
-        // Si pas de pool, retourner N/A
-        let pool = match pool {
-            Some(p) => p,
-            None => return ("N/A".to_string(), "N/A".to_string()),
-        };
 
         if page == "mo" {
             avg = match organizations_global_average_carbon_footprint(pool).await {

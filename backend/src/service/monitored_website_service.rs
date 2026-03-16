@@ -7,6 +7,8 @@ use crate::service::advice_service::AdviceService;
 use crate::green_score::calculate_green_score;
 use crate::service::equivalent_service::EquivalentService;
 use crate::dto::lpc_dto::LastPageConsultedResponse;
+use crate::dto::top_polluting_site_dto::TopPollutingSite;
+use crate::dto::consumption_data_point_dto::ConsumptionDataPoint;
 
 pub struct MonitoredWebsiteService;
 

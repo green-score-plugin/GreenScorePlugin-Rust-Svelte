@@ -33,28 +33,8 @@ pub struct MyDataResponse {
 pub async fn get_top5_polluting_sites(
     pool: &MySqlPool,
     user_id: i64,
-) -> Result<Vec<TopPollutingSite>, sqlx::Error> {
-    let results = sqlx::query_as::<_, (String, f64)>(
-        "SELECT
-            url_domain,
-            SUM(carbon_footprint) as total_footprint
-         FROM monitored_website
-         WHERE user_id = ?
-         AND url_domain IS NOT NULL
-         GROUP BY url_domain
-         ORDER BY total_footprint DESC
-         LIMIT 5"
-    )
-        .bind(user_id)
-        .fetch_all(pool)
-        .await?;
-
-    Ok(results.into_iter()
-        .map(|(url_domain, total_footprint)| TopPollutingSite {
-            url_domain,
-            total_footprint: (total_footprint * 100.0).round() / 100.0
-        })
-        .collect())
+) -> Result<Vec<TopPollutingSite>, Error> {
+    MonitoredWebsiteService::get_top5_polluting_sites_by_user(pool, user_id).await
 }
 
 
@@ -241,11 +221,8 @@ let advices: Vec<String> = vec![
     AdviceService::get_one_random_advice(&pool, true).await.unwrap_or_default(),
 ];
 
-    let top_polluting_sites = if let Some(account) = session.get::<Account>("account").await.unwrap_or(None) {
-        get_top5_polluting_sites(&pool, account.id()).await.unwrap_or_default()
-    } else {
-        vec![]
-    };
+    let top_polluting_sites = get_top5_polluting_sites(&pool, user_id).await.unwrap_or_default();
+
     Json(MyDataResponse {
         success: true,
         my_average_daily_carbon_footprint,
