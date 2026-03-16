@@ -17,6 +17,28 @@ CREATE TABLE IF NOT EXISTS `equivalent` (
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `monitored_websites` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `user_id` int DEFAULT NULL,
+    `url_domain` varchar(255) DEFAULT NULL,
+    `url_full` longtext,
+    `queries_quantity` int DEFAULT NULL,
+    `carbon_footprint` double DEFAULT NULL,
+    `data_transferred` double DEFAULT NULL,
+    `resources` longtext,
+    `loading_time` double DEFAULT NULL,
+    `country` varchar(255) DEFAULT NULL,
+    `creation_date` datetime DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `service` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `nom` varchar(255) NOT NULL,
+    `organisation_id` int DEFAULT NULL,
+    PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `sessions` (
                                           `id` varchar(128) NOT NULL,
     `data` longblob NOT NULL,
@@ -45,7 +67,10 @@ CREATE TABLE IF NOT EXISTS `user` (
     `first_name` varchar(255) DEFAULT NULL,
     `last_name` varchar(255) DEFAULT NULL,
     `total_carbon_footprint` double DEFAULT NULL,
+    `service_id` int DEFAULT NULL,
+    `est_admin` tinyint(1) DEFAULT 0,
     PRIMARY KEY (`id`),
+
     KEY `IDX_user_organisation` (`organisation_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
