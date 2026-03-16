@@ -2,7 +2,7 @@ import { BACKEND_URL } from '$lib/config';
 import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ fetch }) => {
     try {
-        const response = await fetch(`${BACKEND_URL}/advice`);
+        const response = await fetch(`${BACKEND_URL}/home/advice`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

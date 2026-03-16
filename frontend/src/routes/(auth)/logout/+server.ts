@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ url, cookies, fetch }) => {
     if (sessionCookie) {
         invalidateCache(sessionCookie);
         try {
-            await fetch(`${BACKEND_URL}/logout`, {
+            await fetch(`${BACKEND_URL}/auth/logout`, {
                 method: 'POST',
                 headers: { cookie: `greenscoreweb_sessions=${sessionCookie}` }
             });

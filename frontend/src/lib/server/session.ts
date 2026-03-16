@@ -22,7 +22,7 @@ export async function getAccount(sessionCookie: string | undefined): Promise<Acc
     }
 
     try {
-        const response = await fetch(`${BACKEND_URL}/get-account`, {
+        const response = await fetch(`${BACKEND_URL}/auth/get-account`, {
             method: 'POST',
             headers: { cookie: `greenscoreweb_sessions=${sessionCookie}` }
         });

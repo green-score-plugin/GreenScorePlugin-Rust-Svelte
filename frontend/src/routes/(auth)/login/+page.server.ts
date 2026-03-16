@@ -14,7 +14,7 @@ export const actions = {
         }
 
         try {
-            const response = await fetch(`${BACKEND_URL}/login`, {
+            const response = await fetch(`${BACKEND_URL}/auth/login`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },

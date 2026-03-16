@@ -32,7 +32,7 @@ export const actions = {
         }
 
         try{
-            const response = await fetch(`${BACKEND_URL}/inscription`, {
+            const response = await fetch(`${BACKEND_URL}/auth/inscription`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
