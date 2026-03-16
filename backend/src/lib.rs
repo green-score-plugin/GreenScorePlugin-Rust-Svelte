@@ -50,3 +50,4 @@ pub mod green_score;
 pub mod router;
 pub mod session_store;
 pub mod cleanup;
+pub mod middleware;
