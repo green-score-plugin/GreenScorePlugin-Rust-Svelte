@@ -4,7 +4,7 @@ use crate::models::service::Service;
 
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserFull {
     pub user: User,
     pub organisation: Option<Organisation>,
