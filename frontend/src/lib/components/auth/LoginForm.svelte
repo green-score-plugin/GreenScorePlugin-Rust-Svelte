@@ -2,8 +2,18 @@
     import validator from 'validator';
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
+    import type { ActionData } from '../../../routes/(auth)/login/$types';
+
+    export let form: ActionData;
 
     let email = '';
+
+    // Pour réagir aux erreurs serveur et arrêter le loading state si besoin
+    $: if (form?.message) {
+        loading = false;
+        // Optionnel : on pourrait afficher un toast ou autre ici si form.message change
+    }
+
     let password = '';
     let loading = false;
     let submitted = false;
