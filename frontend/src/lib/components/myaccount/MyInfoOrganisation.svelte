@@ -6,7 +6,7 @@
     import { t } from 'svelte-i18n';
 
 
-    let organisation = $derived(page.data.user as Organisation);
+    let organisation = $derived(page.data.user.organisation as Organisation);
     let form = $derived(page.form);
     let message = $derived(form?.actionType === 'update_orga' ? form.message : null);
     let isSuccess = $derived(form?.actionType === 'update_orga' && form?.success);
