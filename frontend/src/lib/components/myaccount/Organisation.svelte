@@ -19,7 +19,7 @@
     let showInscriptionOrga = false;
 
     $: user = $page.data.user;
-    $: hasOrga = (!!user?.id_orga && !hasLeftOrga);
+    $: hasOrga = (!!user?.user?.id_organisation && !hasLeftOrga);
 
     $: orgaDetails = $page.data.organisation || null;
 
@@ -66,7 +66,7 @@
         <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-1">
                     <p class="text-xs font-semibold uppercase text-grey-500">{$t('account.organization.name_label')}</p>
-                    <div class="text-xl font-bold text-gs-green-950">{orgaDetails?.name}</div>
+                    <div class="text-xl font-bold text-gs-green-950">{orgaDetails?.nom}</div>
                 </div>
 
                 <div class="w-full flex flex-col gap-2">
@@ -98,7 +98,7 @@
                     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
                         <h2 class="text-xl font-semibold mb-4">{$t('account.modals.leave_org_confirm_title')}</h2>
                         <p class="text-gray-600 mb-6">
-                            {$t('account.modals.leave_org_confirm_desc', { values: { orgName: orgaDetails?.name || 'Inconnue' } })}
+                            {$t('account.modals.leave_org_confirm_desc', { values: { orgName: orgaDetails?.nom || 'Inconnue' } })}
                         </p>
                         <div class="flex justify-end gap-4">
                             <button
