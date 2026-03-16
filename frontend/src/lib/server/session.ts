@@ -1,24 +1,24 @@
 import { BACKEND_URL } from '$lib/config';
-import type { Account } from '$lib/types/account';
+import type { UserFull } from '$lib/types/account';
 import type { Cookies } from '@sveltejs/kit';
 
 interface CacheEntry {
-    account: Account;
+    user: UserFull;
     expires: number;
 }
 
 const cache = new Map<string, CacheEntry>();
 
-function getCacheTTL(account: Account): number {
-    return account.role === 'user' ? 5 * 60 * 1000 : 2 * 60 * 1000;
+function getCacheTTL(user: UserFull): number {
+    return user.organisation ? 2 * 60 * 1000 : 5 * 60 * 1000;
 }
 
-export async function getAccount(sessionCookie: string | undefined): Promise<Account | null> {
+export async function getAccount(sessionCookie: string | undefined): Promise<UserFull | null> {
     if (!sessionCookie) return null;
 
     const cached = cache.get(sessionCookie);
     if (cached && Date.now() < cached.expires) {
-        return cached.account;
+        return cached.user;
     }
 
     try {
@@ -29,12 +29,14 @@ export async function getAccount(sessionCookie: string | undefined): Promise<Acc
 
         if (response.ok) {
             const result = await response.json();
-            if (result.success && result.account) {
+            
+            if (result.success && result.user_full) {
+                const userFull = result.user_full;
                 cache.set(sessionCookie, {
-                    account: result.account,
-                    expires: Date.now() + getCacheTTL(result.account)
+                    user: userFull,
+                    expires: Date.now() + getCacheTTL(userFull)
                 });
-                return result.account;
+                return userFull;
             }
         }
     } catch (_) {
