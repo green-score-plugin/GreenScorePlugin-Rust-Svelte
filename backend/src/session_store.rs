@@ -46,7 +46,7 @@ impl tower_sessions::SessionStore for MySqlStore {
         )
             .execute(&self.pool)
             .await
-            .map_err(|e| SessionError::Backend(e.to_string()))?;
+            .map_err(|e: sqlx::Error| SessionError::Backend(e.to_string()))?;
         Ok(())
     }
 
@@ -68,7 +68,7 @@ impl tower_sessions::SessionStore for MySqlStore {
         )
             .execute(&self.pool)
             .await
-            .map_err(|e| SessionError::Backend(e.to_string()))?;
+            .map_err(|e: sqlx::Error| SessionError::Backend(e.to_string()))?;
         Ok(())
     }
 
@@ -77,7 +77,7 @@ impl tower_sessions::SessionStore for MySqlStore {
         let row = sqlx::query!("SELECT data, expires_at FROM sessions WHERE id = ? LIMIT 1", id_str)
             .fetch_optional(&self.pool)
             .await
-            .map_err(|e| SessionError::Backend(e.to_string()))?;
+            .map_err(|e: sqlx::Error| SessionError::Backend(e.to_string()))?;
 
         if let Some(r) = row {
             if let Some(exp) = r.expires_at {
@@ -101,7 +101,7 @@ impl tower_sessions::SessionStore for MySqlStore {
         sqlx::query!("DELETE FROM sessions WHERE id = ?", id_str)
             .execute(&self.pool)
             .await
-            .map_err(|e| SessionError::Backend(e.to_string()))?;
+            .map_err(|e: sqlx::Error| SessionError::Backend(e.to_string()))?;
         Ok(())
     }
 }
