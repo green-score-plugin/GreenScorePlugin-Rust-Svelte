@@ -56,7 +56,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
         Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) })
     };
 
-    session.insert("userFull", user_full).await.unwrap();
+    session.insert("user_full", user_full).await.unwrap();
 
     Json(GenericResponse {
         success: true,
@@ -100,7 +100,7 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
         service: None,
     };
 
-    session.insert("userFull", user_full).await.unwrap();
+    session.insert("user_full", user_full).await.unwrap();
 
     Json(GenericResponse {
         success: true,
@@ -136,7 +136,7 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
 
     user_full.organisation = Some(organisation);
 
-    session.insert("userFull", user_full).await.unwrap();
+    session.insert("user_full", user_full).await.unwrap();
 
     Json(GenericResponse {
         success: true,
