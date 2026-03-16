@@ -45,4 +45,33 @@ impl EquivalentRepository {
         .await
     }
 
+    pub async fn get_all_equivalents_with_selection(pool: &MySqlPool, user_id: i64) -> Result<Vec<(i64, String, String, bool)>, sqlx::Error> {
+        sqlx::query_as::<_, (i64, String, String, bool)>(
+            "SELECT e.id, e.name, e.icon_thumbnail, (u.user_id IS NOT NULL) AS is_selected
+              FROM equivalent e LEFT JOIN user_equivalent u ON e.id = u.equivalent_id AND u.user_id = ?"
+        )
+            .bind(user_id)
+            .fetch_all(pool)
+            .await
+    }
+
+    pub async fn update_user_equivalents(pool: &MySqlPool, user_id: i64, equivalent_ids: Vec<i64>) -> Result<(), sqlx::Error> {
+        let mut tx = pool.begin().await?;
+
+        sqlx::query("DELETE FROM user_equivalent WHERE user_id = ?")
+            .bind(user_id)
+            .execute(&mut *tx)
+            .await?;
+
+        for equivalent_id in equivalent_ids {
+            sqlx::query("INSERT INTO user_equivalent (user_id, equivalent_id) VALUES (?, ?)")
+                .bind(user_id)
+                .bind(equivalent_id)
+                .execute(&mut *tx)
+                .await?;
+        }
+
+        tx.commit().await?;
+        Ok(())
+    }
 }
