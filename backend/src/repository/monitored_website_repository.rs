@@ -138,12 +138,12 @@ impl MonitoredWebsiteRepository {
     ) -> Result<Vec<ConsumptionDataPoint>, Error> {
         let result = sqlx::query_as::<_, ConsumptionDataPoint>(
             "SELECT
-            DATE_FORMAT(creation_date, '%d/%m') as day,
-            SUM(carbon_footprint) as total
+            DATE_FORMAT(creation_date, '%d/%m') as label,
+            SUM(carbon_footprint) as value
             FROM monitored_website
             WHERE user_id = ?
             AND creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            GROUP BY DATE(creation_date), day
+            GROUP BY DATE(creation_date), label
             ORDER BY DATE(creation_date) ASC"
         )
             .bind(user_id)
@@ -179,8 +179,8 @@ impl MonitoredWebsiteRepository {
     ) -> Result<Vec<ConsumptionDataPoint>, Error> {
         let result = sqlx::query_as::<_, ConsumptionDataPoint>(
             "SELECT
-            DATE_FORMAT(creation_date, '%m/%Y') as month,
-            SUM(carbon_footprint) as total
+            DATE_FORMAT(creation_date, '%m/%Y') as label,
+            SUM(carbon_footprint) as value
             FROM monitored_website
             WHERE user_id = ?
             AND creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
@@ -241,13 +241,13 @@ impl MonitoredWebsiteRepository {
     {
         let result = sqlx::query_as::<_, ConsumptionDataPoint>(
             "SELECT
-            DATE_FORMAT(mw.creation_date, '%d/%m') as day,
-            SUM(mw.carbon_footprint) as total
+            DATE_FORMAT(mw.creation_date, '%d/%m') as label,
+            SUM(mw.carbon_footprint) as value
             FROM monitored_website mw
             JOIN user u ON u.id = mw.user_id
             WHERE u.organisation_id = ?
             AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            GROUP BY DATE(mw.creation_date), day
+            GROUP BY DATE(mw.creation_date), label
             ORDER BY DATE(mw.creation_date) ASC"
         )
             .bind(orga_id)
@@ -259,8 +259,8 @@ impl MonitoredWebsiteRepository {
     pub async fn get_weekly_organization_consumption(pool: &MySqlPool, orga_id: i64) -> Result<Vec<ConsumptionDataPoint>, Error>
     {
         let result = sqlx::query_as::<_, ConsumptionDataPoint>(
-            "SELECT CONCAT('Semaine ', WEEK(mw.creation_date, 1)) as week,
-                        SUM(mw.carbon_footprint) as total
+            "SELECT CONCAT('Semaine ', WEEK(mw.creation_date, 1)) as label,
+                        SUM(mw.carbon_footprint) as value
                   FROM monitored_website mw
                   JOIN user u ON u.id = mw.user_id
                   WHERE u.organisation_id = ?
@@ -278,8 +278,8 @@ impl MonitoredWebsiteRepository {
     pub async fn get_monthly_organization_consumption(pool: &MySqlPool, org_id: i64) -> Result<Vec<ConsumptionDataPoint>, Error>
     {
         let result = sqlx::query_as::<_, ConsumptionDataPoint>(
-            "SELECT DATE_FORMAT(mw.creation_date, '%m/%Y') as month,
-                        SUM(mw.carbon_footprint) as total
+            "SELECT DATE_FORMAT(mw.creation_date, '%m/%Y') as label,
+                        SUM(mw.carbon_footprint) as value
                   FROM monitored_website mw
                   JOIN user u ON u.id = mw.user_id
                   WHERE u.organisation_id = ?
