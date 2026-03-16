@@ -20,7 +20,7 @@
 <div class="xl:px-52 flex flex-col h-full">
     <div class="px-4 lg:px-16 py-8 flex justify-center lg:justify-start items-center gap-x-4">
         <img class="w-[54px] h-auto" src={salutation} alt="Salutation">
-        <h1 class="text-2xl font-bold">{$t('hello')} {#if user.role === "user"}{user.prenom}{:else if user.role === "organisation"}{user.nom}{/if}!</h1>
+        <h1 class="text-2xl font-bold">{$t('hello')} {#if !user.organisation}{user.user.prenom}{:else}{user.organisation.nom}{/if}!</h1>
     </div>
 
     <div class="flex flex-col lg:flex-row px-4 lg:px-16 gap-8 lg:gap-16 mb-2">
@@ -30,17 +30,17 @@
         </div>
         <div class="flex-1 shadow-lg bg-white py-4 px-6">
             {#if activePage === 'my_info'}
-                {#if user.role === 'user' }
+                {#if !user.organisation }
                     <MyInfo />
-                {:else if user.role === 'organisation'}
+                {:else}
                     <MyInfoOrganisation />
                 {/if}
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if user.role === 'user' }
+                {#if !user.organisation }
                     <Organisation />
-                {:else if user.role === 'organisation'}
+                {:else}
                     <GererMembre />
                 {/if}
             {/if}
