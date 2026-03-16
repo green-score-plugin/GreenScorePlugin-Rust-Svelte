@@ -101,7 +101,7 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
     }))
 }
 
-pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Result<Json<GenericResponse>, AppError>
+pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Result<Json<CurrentAccountResponse>, AppError>
 {
     let orga_name = payload.orga_name.trim();
     let siret = payload.siret.as_ref().map(|s| s.trim().to_string());
@@ -125,10 +125,11 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
 
     user_full.organisation = Some(organisation);
 
-    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
-    Ok(Json(GenericResponse {
+    Ok(Json(CurrentAccountResponse {
         success: true,
+        user_full: Some(user_full),
         message: None,
     }))
 }
