@@ -82,9 +82,10 @@ impl tower_sessions::SessionStore for MySqlStore {
         if let Some(r) = row {
             if let Some(exp) = r.expires_at {
                 if exp <= Self::now_unix() {
-                    let _ = sqlx::query!("DELETE FROM sessions WHERE id = ?", id_str)
+                    sqlx::query!("DELETE FROM sessions WHERE id = ?", id_str)
                         .execute(&self.pool)
-                        .await;
+                        .await
+                        .map_err(|e: sqlx::Error| SessionError::Backend(e.to_string()))?;
                     return Ok(None);
                 }
             }
