@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let organisation = null;
     let accountEquivalents = [];
 
-    if (locals.user?.role === 'organisation') {
+    if (locals.user?.organisation) {
         const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
         if (res.ok) {
             try {
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
                 if (data.success) members = data.members;
             } catch {}
         }
-    } else if (locals.user?.role === 'user') {
+    } else if (locals.user?.user) {
         const orgRes = await fetch(`${BACKEND_URL}/account/my-organization`, { method: 'GET', headers, credentials: 'include' });
         if (orgRes.ok) {
             try {
