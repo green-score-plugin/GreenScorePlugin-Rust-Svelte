@@ -13,5 +13,5 @@
     </div>
     <CodeClipboard code={code} />
 
-    <a href="/" class="w-full h-fit rounded-lg bg-gs-green-950 px-1 py-2 font-semibold font-outfit text-center text-white">{$t('account.organization.finish_button')}</a>
+    <a href="/frontend/static" class="w-full h-fit rounded-lg bg-gs-green-950 px-1 py-2 font-semibold font-outfit text-center text-white">{$t('account.organization.finish_button')}</a>
 </div>

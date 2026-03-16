@@ -1,6 +1,6 @@
 <script lang="ts">
-    import AuthBase from '$lib/components/AuthBase.svelte';
-    import LoginForm from '$lib/components/LoginForm.svelte';
+    import AuthBase from '$lib/components/auth/AuthBase.svelte';
+    import LoginForm from '$lib/components/auth/LoginForm.svelte';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';

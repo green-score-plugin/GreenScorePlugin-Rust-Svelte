@@ -17,7 +17,7 @@
 
     $: {
         if ($page.data.user) {
-            user = { ...$page.data.user };
+            user = { ...$page.data.user.user };
         }
     }
 

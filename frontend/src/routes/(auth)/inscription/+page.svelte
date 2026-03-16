@@ -1,6 +1,6 @@
 <script lang="ts">
-    import AuthBase from '$lib/components/AuthBase.svelte';
-    import InscriptionForm from "$lib/components/InscriptionForm.svelte";
+    import AuthBase from '$lib/components/auth/AuthBase.svelte';
+    import InscriptionForm from "$lib/components/auth/InscriptionForm.svelte";
     import { t } from 'svelte-i18n';
 
     export let form;

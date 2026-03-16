@@ -13,16 +13,16 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let organisation = null;
     let accountEquivalents = [];
 
-    if (locals.user?.role === 'organisation') {
-        const res = await fetch(`${BACKEND_URL}/get_organisation_members`, { method: 'POST', headers });
+    if (locals.user?.organisation) {
+        const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
         if (res.ok) {
             try {
                 const data = await res.json();
                 if (data.success) members = data.members;
             } catch {}
         }
-    } else if (locals.user?.role === 'user') {
-        const orgRes = await fetch(`${BACKEND_URL}/get-my-organization`, { method: 'GET', headers, credentials: 'include' });
+    } else if (locals.user?.user) {
+        const orgRes = await fetch(`${BACKEND_URL}/account/my-organization`, { method: 'GET', headers, credentials: 'include' });
         if (orgRes.ok) {
             try {
                 const result = await orgRes.json();
@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
         }
     }
 
-    const equivRes = await fetch(`${BACKEND_URL}/account/get_account_all_equivalents`, { method: 'GET', headers, credentials: 'include' });
+    const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, { method: 'GET', headers, credentials: 'include' });
     if (equivRes.ok) {
         try {
             const result = await equivRes.json();
@@ -49,7 +49,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 export const actions = {
     supprimer: async ({ request, fetch }) => {
         try {
-            const response = await fetch(`${BACKEND_URL}/delete_account`, {
+            const response = await fetch(`${BACKEND_URL}/account/delete`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export const actions = {
         const memberId = data.get('deleteMemberId');
 
         try {
-            const response = await fetch(`${BACKEND_URL}/remove_organisation_member`, {
+            const response = await fetch(`${BACKEND_URL}/account/organization/members/remove`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ export const actions = {
         }
 
         try {
-            const res = await fetch(`${BACKEND_URL}/update_account`, {
+            const res = await fetch(`${BACKEND_URL}/account/update`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,15 +172,6 @@ export const actions = {
                     message: result.message ?? 'errors.update_error'
                 });
             }
-
-
-            const token = cookies.get('greenscoreweb_sessions');
-            if (token) invalidateCache(token);
-
-            const sessionValue = result.token ?? result.session ?? result.sessionValue;
-            if (sessionValue) await setSessionCookie(cookies, sessionValue);
-
-            return { actionType: 'update_info', success: true, message: 'success.info_updated' };
         } catch (err) {
             return fail(500, {
                 actionType: 'update_info',
@@ -199,7 +190,7 @@ export const actions = {
         }
 
         try {
-            const response = await fetch(`${BACKEND_URL}/join_organization`, {
+            const response = await fetch(`${BACKEND_URL}/account/join-organization`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -242,9 +233,6 @@ export const actions = {
                     message: result.message ?? 'errors.operation_error'
                 });
             }
-
-
-            return { actionType: 'join_orga', success: true, message: 'success.org_joined' };
         } catch {
             return fail(500, { actionType: 'join_orga', message: 'errors.org_connection_error' });
         }
@@ -264,7 +252,7 @@ export const actions = {
         }
 
         try {
-            const response = await fetch(`${BACKEND_URL}/update_organisation`, {
+            const response = await fetch(`${BACKEND_URL}/account/organization/update`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -298,7 +286,7 @@ export const actions = {
 
     leave_orga: async ({ fetch, request, cookies }) => {
         try {
-            const response = await fetch(`${BACKEND_URL}/leave_organization`, {
+            const response = await fetch(`${BACKEND_URL}/account/leave-organization`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -330,13 +318,6 @@ export const actions = {
             } else {
                 return fail(400, { actionType: 'leave_orga', message: result.message ?? 'errors.operation_error' });
             }
-
-            const token = cookies.get('greenscoreweb_sessions');
-            if (token) invalidateCache(token);
-
-            await setSessionCookie(cookies, response);
-
-            return { actionType: 'leave_orga', success: true, message: 'success.org_left' };
         } catch {
             return fail(500, { actionType: 'leave_orga', message: 'errors.server_error' });
         }
@@ -351,7 +332,7 @@ export const actions = {
         }
 
         try {
-            const response = await fetch(`${BACKEND_URL}/join_organization`, {
+            const response = await fetch(`${BACKEND_URL}/account/join-organization`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -393,14 +374,6 @@ export const actions = {
             } else {
                 return fail(400, { actionType: 'change_orga', message: result.message ?? 'errors.operation_error' });
             }
-
-            const token = cookies.get('greenscoreweb_sessions');
-            if (token) invalidateCache(token);
-
-            const sessionValue = result.token ?? result.session ?? result.sessionValue;
-            if (sessionValue) await setSessionCookie(cookies, sessionValue);
-
-            return { actionType: 'change_orga', success: true, message: 'success.org_changed' };
         } catch {
             return fail(500, { actionType: 'change_orga', message: 'errors.org_change_error' });
         }
@@ -411,7 +384,7 @@ export const actions = {
         const equivalents = data.getAll('equivalents').map(v => v.toString());
 
         try {
-            const response = await fetch(`${BACKEND_URL}/account/update_account_equivalents`, {
+            const response = await fetch(`${BACKEND_URL}/account/equivalents`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

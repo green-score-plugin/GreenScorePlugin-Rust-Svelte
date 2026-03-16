@@ -99,12 +99,7 @@
       "submit_button": "Connexion",
       "loading": "Connexion...",
       "invalid_email": "Email invalide",
-      "password_requirements": "Le mot de passe doit contenir :",
-      "req_length": "Au moins 8 caractères",
-      "req_uppercase": "Une majuscule",
-      "req_lowercase": "Une minuscule",
-      "req_number": "Un chiffre",
-      "req_special": "Un caractère spécial (#?!@$%^&*-)",
+      "password_required": "Le mot de passe est requis",
       "already_have_account": "J'ai déjà un compte",
       "register_link": "Inscription",
       "success_deleted": "Succès !",
@@ -170,7 +165,9 @@
       "code_help": "Merci d'entrer le code à 8 caractères envoyé par votre organisation",
       "invite_title": "Invitez des membres !",
       "invite_desc": "Envoyez ce code aux membres de votre organisation. Ils peuvent le saisir dans la section : mon compte - mon organisation - rejoindre une organisation",
-      "finish_button": "Terminer"
+      "finish_button": "Terminer",
+      "or": "ou",
+      "create_button": "Créer mon organisation"
     },
     "modals": {
       "leave_org_confirm_title": "Confirmation",

@@ -99,12 +99,7 @@
       "submit_button": "Login",
       "loading": "Logging in...",
       "invalid_email": "Invalid email",
-      "password_requirements": "Password must contain:",
-      "req_length": "At least 8 characters",
-      "req_uppercase": "One uppercase letter",
-      "req_lowercase": "One lowercase letter",
-      "req_number": "One number",
-      "req_special": "One special character (#?!@$%^&*-)",
+      "password_required": "Password is required",
       "already_have_account": "I already have an account",
       "register_link": "Register",
       "success_deleted": "Success!",
@@ -171,7 +166,9 @@
       "code_help": "Please enter the 8-character code sent by your organization",
       "invite_title": "Invite members!",
       "invite_desc": "Send this code to members of your organization. They can enter it in the section: My Account - My Organization - Join an Organization",
-      "finish_button": "Finish"
+      "finish_button": "Finish",
+      "or": "or",
+      "create_button": "Create my organization"
     },
     "modals": {
       "leave_org_confirm_title": "Confirmation",

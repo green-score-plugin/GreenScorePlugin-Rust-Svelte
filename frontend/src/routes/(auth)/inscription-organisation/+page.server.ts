@@ -8,46 +8,29 @@ export const actions = {
         const data = await request.formData();
         const organisationName = data.get('organisationName');
         const siret = data.get('siret');
-        const email = data.get('email');
-        const password = data.get('password');
-        const confirmPassword = data.get('confirmPassword');
-        const agreeTerms = data.get('agreeTerms');
 
-        if(!organisationName || !email || !password) {
+        if(!organisationName) {
             return fail(400, { message: "errors.champs" })
         }
 
-        if(password !== confirmPassword) {
-            return fail(400, { message: "errors.match_password" })
-        }
-
-        const passwordString = password.toString();
-        const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-        if (!passwordRegex.test(passwordString)) {
-            return fail(400, { message: "errors.regex_password" })
-        }
-
-        if(agreeTerms !== 'on') {
-            return fail(400, { message: "errors.cgu" })
-        }
 
         try{
-            const response = await fetch(`${BACKEND_URL}/inscription-organisation`, {
+            const response = await fetch(`${BACKEND_URL}/auth/inscription-organisation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
                     orga_name: organisationName,
                     siret : siret || null,
-                    email,
-                    password })
+                })
             });
 
             const result = await response.json();
 
             if(result.success) {
                 await setSessionCookie(cookies, response);
-                redirect(303,`/inscription-organisation/${result.account.code}`);
+                const code = result.account?.code || result.user_full?.organisation?.code;
+                redirect(303,`/inscription-organisation/${code}`);
             }
 
             return fail(400, { message: result.message || 'Erreur de connexion' });
