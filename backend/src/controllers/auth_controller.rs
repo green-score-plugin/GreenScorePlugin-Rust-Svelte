@@ -7,6 +7,7 @@ use crate::models::user::User;
 use crate::models::organisation::Organisation;
 use crate::dto::user_full::UserFull;
 use crate::service::auth_service::AuthService;
+use crate::error::AppError;
 
 #[derive(Deserialize)]
 pub struct InscriptionRequest {
@@ -46,42 +47,34 @@ pub struct CurrentAccountResponse {
 }
 
 
-pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<LoginRequest>) -> Json<GenericResponse> {
+pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<LoginRequest>) -> Result<Json<GenericResponse>, AppError> {
 
     let email = payload.email.trim();
     let password = payload.password.trim();
 
-    let user_full = match AuthService::login(&pool, email, password).await{
-        Ok(user_full) => user_full,
-        Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) })
-    };
+    let user_full = AuthService::login(&pool, email, password).await
+        .map_err(AppError::AuthError)?;
 
-    session.insert("user_full", user_full).await.unwrap();
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
-    Json(GenericResponse {
+    Ok(Json(GenericResponse {
         success: true,
         message: None,
-    })
-
+    }))
 }
 
-pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Json<GenericResponse> {
+pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionRequest>) -> Result<Json<GenericResponse>, AppError> {
     let email = payload.email.trim();
     let password = payload.password.trim();
     let first_name = payload.firstname.trim();
     let last_name = payload.lastname.trim();
 
     if email.is_empty() || password.is_empty() || first_name.is_empty() || last_name.is_empty() {
-        return Json(GenericResponse {
-            success: false,
-            message: Some("errors.auth.missing_fields".to_string()),
-        });
+        return Err(AppError::BadRequest("errors.auth.missing_fields".to_string()));
     }
 
-    let user_id = match AuthService::inscription(&pool, email, password, first_name, last_name).await {
-        Ok(id) => id,
-        Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) }),
-    };
+    let user_id = AuthService::inscription(&pool, email, password, first_name, last_name).await
+        .map_err(AppError::BadRequest)?;
 
     let user = User {
         id: user_id,
@@ -100,32 +93,28 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
         service: None,
     };
 
-    session.insert("user_full", user_full).await.unwrap();
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
-    Json(GenericResponse {
+    Ok(Json(GenericResponse {
         success: true,
         message: None,
-    })
-
+    }))
 }
 
-pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Json<GenericResponse>
+pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Result<Json<GenericResponse>, AppError>
 {
-
     let orga_name = payload.orga_name.trim();
     let siret = payload.siret.as_ref().map(|s| s.trim().to_string());
 
 
-    let mut user_full = session.get::<UserFull>("userFull").await.unwrap().unwrap();
+    let mut user_full = session.get::<UserFull>("user_full").await
+        .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
+        .ok_or(AppError::AuthError("errors.auth.not_logged_in".to_string()))?;
 
     let user_id = user_full.user.id;
 
-    let result = AuthService::inscription_orga(&pool, orga_name, siret.as_deref(), user_id).await;
-
-    let (organisation_id, organisation_code) = match result {
-        Ok(tuple) => tuple,
-        Err(msg) => return Json(GenericResponse { success: false, message: Some(msg) }),
-    };
+    let (organisation_id, organisation_code) = AuthService::inscription_orga(&pool, orga_name, siret.as_deref(), user_id).await
+        .map_err(AppError::BadRequest)?;
 
     let organisation = Organisation {
         id: organisation_id,
@@ -136,38 +125,33 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
 
     user_full.organisation = Some(organisation);
 
-    session.insert("user_full", user_full).await.unwrap();
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
-    Json(GenericResponse {
+    Ok(Json(GenericResponse {
         success: true,
         message: None,
-    })
-
+    }))
 }
 
-pub async fn get_current_account(session: Session) -> Json<CurrentAccountResponse> {
+pub async fn get_current_account(session: Session) -> Result<Json<CurrentAccountResponse>, AppError> {
 
-    let user_full_opt: Option<UserFull> = session.get("userFull").await.unwrap_or(None);
+    let user_full_opt: Option<UserFull> = session.get("user_full").await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     if let Some(user_full) = user_full_opt {
-        Json(CurrentAccountResponse {
+        Ok(Json(CurrentAccountResponse {
             success: true,
             user_full: Some(user_full),
             message: None,
-        })
+        }))
     } else {
-        Json(CurrentAccountResponse {
-            success: false,
-            user_full: None,
-            message: Some("errors.auth.not_logged_in".to_string()),
-        })
+        Err(AppError::AuthError("errors.auth.not_logged_in".to_string()))
     }
 }
 
-pub async fn logout(session: Session) -> Json<GenericResponse> {
-    session.delete().await.unwrap();
-    Json(GenericResponse {
+pub async fn logout(session: Session) -> Result<Json<GenericResponse>, AppError> {
+    session.delete().await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    Ok(Json(GenericResponse {
         success: true,
         message: None,
-    })
+    }))
 }

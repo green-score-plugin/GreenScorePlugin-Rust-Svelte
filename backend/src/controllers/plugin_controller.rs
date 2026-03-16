@@ -1,6 +1,5 @@
 use axum::Json;
 use axum::extract::State;
-use axum::http::StatusCode;
 use serde_json::{json, Value};
 use sqlx::{MySqlPool};
 use tower_sessions::Session;
@@ -8,57 +7,54 @@ use crate::dto::user_full::UserFull;
 use crate::models::monitored_website::MonitoredWebsite;
 use crate::service::monitored_website_service::MonitoredWebsiteService;
 use crate::service::equivalent_service::EquivalentService;
+use crate::error::AppError;
 
-pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> (StatusCode, Json<Value>) {
+pub async fn get_equivalent(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<Value>) -> Result<Json<Value>, AppError> {
 
     let gco2 = payload.get("gCO2").and_then(|v| v.as_f64()).unwrap_or(0.0);
     let count = payload.get("count").and_then(|v| v.as_u64()).map(|v| v as i32).unwrap_or(3);
 
     if gco2 <= 0.0 {
-        return (StatusCode::BAD_REQUEST, Json(json!({
-            "success": false,
-            "error": "Invalid or missing gCO2 parameter",
-        })));
+        return Err(AppError::BadRequest("Invalid or missing gCO2 parameter".to_string()));
     }
 
-    let user_id: Option<i64> = session.get("user_full").await.ok().flatten().map(|user_full: UserFull| user_full.user.id);
+    let user_id: Option<i64> = session.get("user_full").await
+        .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
+        .and_then(|user_full: UserFull| Some(user_full.user.id));
 
-    let equivalents = EquivalentService::equivalent(&pool, user_id, count, gco2).await;
+    let equivalents = EquivalentService::equivalent(&pool, user_id, count, gco2).await
+        .map_err(AppError::from)?;
 
-    let data = equivalents.unwrap_or_default();
-
-    (StatusCode::OK, Json(json!({
+    Ok(Json(json!({
         "success": true,
-        "data": data
+        "data": equivalents
     })))
 }
 
-pub async fn save_monitored_website_data(session: Session, State(pool): State<MySqlPool>, Json(monitored_website): Json<MonitoredWebsite>) -> (StatusCode, Json<Value>) {
+pub async fn save_monitored_website_data(session: Session, State(pool): State<MySqlPool>, Json(monitored_website): Json<MonitoredWebsite>) -> Result<Json<Value>, AppError> {
 
     let new_total_footprint = MonitoredWebsiteService::save_monitored_website_data(&pool, &monitored_website).await;
 
-    let mut user_full: Option<UserFull> = session.get("user_full").await.ok().flatten();
+    let mut user_full: UserFull = session.get("user_full").await
+        .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
+        .ok_or(AppError::BadRequest("User not found in session".to_string()))?; // Keeping BadRequest as per original code, though Unauthorized might be better?
 
-    if let Some(ref mut user_full) = user_full {
-        let current = user_full.user.total_carbon_footprint;
-        let new_value = new_total_footprint
-            .ok()
-            .flatten()
-            .unwrap_or(current + monitored_website.carbon_footprint);
-        user_full.user.total_carbon_footprint = new_value;
-        let total = user_full.user.total_carbon_footprint;
+    let current = user_full.user.total_carbon_footprint;
+    // logic from original code. save_monitored_website_data returns Result<Option<f64>, Error>.
+    // If it fails, new_total_footprint is Err.
+    let new_value = match new_total_footprint {
+        Ok(Some(val)) => val,
+        Ok(None) => current + monitored_website.carbon_footprint,
+        Err(e) => return Err(AppError::DatabaseError(e)),
+    };
 
-        session.insert("user_full", user_full).await.ok();
+    user_full.user.total_carbon_footprint = new_value;
+    let total = user_full.user.total_carbon_footprint;
 
-        (StatusCode::OK ,Json(json!({
-            "success": true,
-            "total_carbon_footprint": total
-        })))
-    }
-    else {
-        (StatusCode::BAD_REQUEST ,Json(json!({
-            "success": false,
-            "error": "User not found in session"
-        })))
-    }
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+
+    Ok(Json(json!({
+        "success": true,
+        "total_carbon_footprint": total
+    })))
 }

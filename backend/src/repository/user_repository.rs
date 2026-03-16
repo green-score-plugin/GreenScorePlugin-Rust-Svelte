@@ -1,5 +1,3 @@
-use axum::Json;
-use serde_json::{json, Value};
 use sqlx::{MySqlPool, Row, Error};
 use crate::models::user::User;
 

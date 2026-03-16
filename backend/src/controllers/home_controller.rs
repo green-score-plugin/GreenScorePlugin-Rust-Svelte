@@ -4,6 +4,7 @@ use serde::Serialize;
 use sqlx::MySqlPool;
 use crate::models::advice::Advice;
 use crate::service::advice_service::AdviceService;
+use crate::error::AppError;
 
 #[derive(Serialize)]
 pub struct AdviceResponse {
@@ -11,11 +12,9 @@ pub struct AdviceResponse {
     advice: Vec<Advice>
 }
 
-pub async fn get_advice(State(pool): State<MySqlPool>) -> Json<AdviceResponse> {
-    let advice = match AdviceService::get_all_advice(&pool).await {
-        Ok(advice) => advice,
-        Err(_) => return Json(AdviceResponse { success: false, advice: vec![] })
-    };
+pub async fn get_advice(State(pool): State<MySqlPool>) -> Result<Json<AdviceResponse>, AppError> {
+    let advice = AdviceService::get_all_advice(&pool).await
+        .map_err(AppError::from)?;
 
-    Json(AdviceResponse { success: true, advice })
+    Ok(Json(AdviceResponse { success: true, advice }))
 }

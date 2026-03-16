@@ -51,3 +51,4 @@ pub mod router;
 pub mod session_store;
 pub mod cleanup;
 pub mod middleware;
+pub mod error;

@@ -11,6 +11,7 @@ use sqlx::MySqlPool;
 use crate::dto::consumption_data_point_dto::ConsumptionDataPoint;
 use crate::dto::mo_infos_dto::MyOrganizationInfos;
 use crate::middleware::auth::AuthenticatedUser;
+use crate::error::AppError;
 
 #[derive(Serialize)]
 pub struct MyOrganizationResponse {
@@ -27,63 +28,45 @@ pub struct MyOrganizationResponse {
 }
 
 
-pub async fn mo(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Json<MyOrganizationResponse> {
+pub async fn mo(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Result<Json<MyOrganizationResponse>, AppError> {
 
-    let organization = match user_full.organisation {
-        Some(org) => org,
-         None => return Json(MyOrganizationResponse {
-            success: false,
-            mo_infos: None,
-            advices: vec![],
-            letter: None,
-            env_nomination: None,
-            equivalents: None,
-            daily_consumption: vec![],
-            weekly_consumption: vec![],
-            monthly_consumption: vec![],
-            top_polluting_sites: vec![],
-        })
-    };
+    let organization = user_full.organisation.ok_or(AppError::NotFound("User is not in an organization".to_string()))?;
 
     let organization_id = organization.id;
     let user_id = user_full.user.id;
 
-    let organization_informations = OrganisationService::organization_informations(&pool, organization_id, user_id).await.ok();
+    let organization_informations = OrganisationService::organization_informations(&pool, organization_id, user_id).await
+        .map_err(AppError::from)?;
 
     let advices: Vec<String> = vec![
         AdviceService::get_one_random_advice(&pool, false).await.unwrap_or_default(),
         AdviceService::get_one_random_advice(&pool, true).await.unwrap_or_default(),
     ];
 
-    let (letter, env_nomination, equivalents) = if let Some(ref infos) = organization_informations {
-        let (l, n) = calculate_green_score(&pool, infos.average_daily_carbon_footprint, "mo".to_string()).await;
+    let (letter, env_nomination) = calculate_green_score(&pool, organization_informations.average_daily_carbon_footprint, "mo".to_string()).await;
 
-        let eqs = EquivalentService::equivalent(&pool, Some(user_id), 2, infos.total_consumption).await;
-        let eqs = match eqs {
-            Ok(v) if !v.is_empty() => Some(v),
-            _ => None,
-        };
+    let equivalents = EquivalentService::equivalent(&pool, Some(user_id), 2, organization_informations.total_consumption).await
+        .ok();
 
-        (Some(l), Some(n), eqs)
-    } else {
-        (None, None, None)
-    };
+    let daily_consumption = OrganisationService::get_daily_organization_consumption(&pool, organization_id).await
+        .map_err(AppError::from)?;
+    let weekly_consumption = OrganisationService::get_weekly_organization_consumption(&pool, organization_id).await
+        .map_err(AppError::from)?;
+    let monthly_consumption = OrganisationService::get_monthly_organization_consumption(&pool, organization_id).await
+        .map_err(AppError::from)?;
+    let top_polluting_sites = OrganisationService::get_top5_polluting_sites_by_organization(&pool, organization_id).await
+        .map_err(AppError::from)?;
 
-    let daily_consumption = OrganisationService::get_daily_organization_consumption(&pool, organization_id).await.unwrap_or_default();
-    let weekly_consumption = OrganisationService::get_weekly_organization_consumption(&pool, organization_id).await.unwrap_or_default();
-    let monthly_consumption = OrganisationService::get_monthly_organization_consumption(&pool, organization_id).await.unwrap_or_default();
-    let top_polluting_sites = OrganisationService::get_top5_polluting_sites_by_organization(&pool, organization_id).await.unwrap_or_default();
-
-    Json(MyOrganizationResponse {
+    Ok(Json(MyOrganizationResponse {
         success: true,
-        mo_infos: organization_informations,
+        mo_infos: Some(organization_informations),
         advices,
-        letter,
-        env_nomination,
+        letter: Some(letter),
+        env_nomination: Some(env_nomination),
         equivalents,
         daily_consumption,
         weekly_consumption,
         monthly_consumption,
         top_polluting_sites
-    })
+    }))
 }
