@@ -14,7 +14,14 @@ impl EquivalentService {
         let carbon_footprint_in_kg = carbon_footprint / 1000.0;
 
         match user_id {
-            Some(id) => EquivalentRepository::get_n_user_equivalent(pool, id, n, carbon_footprint_in_kg).await,
+            Some(id) => {
+                let user_equivs = EquivalentRepository::get_n_user_equivalent(pool, id, n, carbon_footprint_in_kg).await?;
+                if user_equivs.is_empty() {
+                    EquivalentRepository::get_n_equivalent(pool, n, carbon_footprint_in_kg).await
+                } else {
+                    Ok(user_equivs)
+                }
+            },
             None => EquivalentRepository::get_n_equivalent(pool, n, carbon_footprint_in_kg).await,
         }
     }
