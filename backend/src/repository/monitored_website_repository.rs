@@ -10,7 +10,7 @@ impl MonitoredWebsiteRepository {
     pub async fn save_monitored_website_data(
         pool: &MySqlPool,
         monitored_website: &MonitoredWebsite,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), Error> {
         sqlx::query(
             r#"
             INSERT INTO monitored_websites (url_domain, user_id, queries_quantity, data_transferred, resources, loading_time, carbon_footprint, url_full, country)
@@ -34,7 +34,7 @@ impl MonitoredWebsiteRepository {
     pub async fn get_last_search_information_by_user(
         pool: &MySqlPool,
         user_id: i64,
-    ) -> Result<Option<LastPageConsultedInfos>, sqlx::Error> {
+    ) -> Result<Option<LastPageConsultedInfos>, Error> {
         let result = sqlx::query_as::<_, LastPageConsultedInfos>(
             r#"
             SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country
@@ -44,9 +44,9 @@ impl MonitoredWebsiteRepository {
             LIMIT 1
             "#,
         )
-        .bind(user_id)
-        .fetch_optional(pool)
-        .await?;
+            .bind(user_id)
+            .fetch_optional(pool)
+            .await?;
         Ok(result)
     }
 

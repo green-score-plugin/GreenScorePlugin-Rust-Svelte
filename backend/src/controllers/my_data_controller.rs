@@ -37,91 +37,31 @@ pub async fn get_top5_polluting_sites(
     MonitoredWebsiteService::get_top5_polluting_sites_by_user(pool, user_id).await
 }
 
-
-
 pub async fn get_daily_consumption(
     pool: &MySqlPool,
     user_id: i64,
-) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
-    let results = sqlx::query_as::<_, (String, f64)>(
-        "SELECT
-            DATE_FORMAT(creation_date, '%d/%m') as day,
-            SUM(carbon_footprint) as total
-         FROM monitored_website
-         WHERE user_id = ?
-         AND creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-         GROUP BY DATE(creation_date), day
-         ORDER BY DATE(creation_date) ASC"
-    )
-        .bind(user_id)
-        .fetch_all(pool)
-        .await?;
-
-    Ok(results.into_iter()
-        .map(|(label, value)| ConsumptionDataPoint {
-            label,
-            value: (value * 100.0).round() / 100.0
-        })
-        .collect())
+) -> Result<Vec<ConsumptionDataPoint>, Error> {
+    MonitoredWebsiteService::get_daily_consumption_by_user(pool, user_id).await
 }
 
 pub async fn get_weekly_consumption(
     pool: &MySqlPool,
     user_id: i64,
-) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
-    let results = sqlx::query_as::<_, (i32, i32, f64)>(
-        "SELECT
-            CAST(YEAR(creation_date) AS SIGNED) as year,
-            CAST(WEEK(creation_date, 1) AS SIGNED) as week,
-            SUM(carbon_footprint) as total
-         FROM monitored_website
-         WHERE user_id = ?
-         AND creation_date >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
-         GROUP BY year, week
-         ORDER BY year, week ASC"
-    )
-        .bind(user_id)
-        .fetch_all(pool)
-        .await?;
-
-    Ok(results.into_iter()
-        .map(|(_, week, value)| ConsumptionDataPoint {
-            label: format!("S{}", week),
-            value: (value * 100.0).round() / 100.0
-        })
-        .collect())
+) -> Result<Vec<ConsumptionDataPoint>, Error> {
+    MonitoredWebsiteService::get_weekly_consumption_by_user(pool, user_id).await
 }
 
 pub async fn get_monthly_consumption(
     pool: &MySqlPool,
     user_id: i64,
-) -> Result<Vec<ConsumptionDataPoint>, sqlx::Error> {
-    let results = sqlx::query_as::<_, (String, f64)>(
-        "SELECT
-            DATE_FORMAT(creation_date, '%m/%Y') as month,
-            SUM(carbon_footprint) as total
-         FROM monitored_website
-         WHERE user_id = ?
-         AND creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-         GROUP BY YEAR(creation_date), MONTH(creation_date)
-         ORDER BY YEAR(creation_date), MONTH(creation_date) ASC"
-    )
-        .bind(user_id)
-        .fetch_all(pool)
-        .await?;
-
-    Ok(results.into_iter()
-        .map(|(label, value)| ConsumptionDataPoint {
-            label,
-            value: (value * 100.0).round() / 100.0
-        })
-        .collect())
+) -> Result<Vec<ConsumptionDataPoint>, Error> {
+    MonitoredWebsiteService::get_monthly_consumption_by_user(pool, user_id).await
 }
 
 
 pub async fn get_my_average_daily_carbon_footprint(
     pool: &MySqlPool,
-    session: Session
+    user_id: i64
 ) -> Option<f64> {
     MonitoredWebsiteService::get_my_average_daily_carbon_footprint(pool, user_id).await
 }
@@ -129,47 +69,14 @@ pub async fn get_my_average_daily_carbon_footprint(
 pub async fn get_average_daily_carbon_footprint(
     pool: &MySqlPool,
 ) -> Option<f64> {
-    let result = sqlx::query_as::<_, (String, f64)>(
-        "SELECT
-            CAST(DATE(creation_date) AS CHAR) as day,
-            AVG(carbon_footprint) as daily_average
-         FROM monitored_website
-         GROUP BY day"
-    )
-        .fetch_all(pool)
-        .await;
-
-    match result {
-        Ok(daily_averages) if !daily_averages.is_empty() => {
-            let sum: f64 = daily_averages.iter().map(|(_, avg)| avg).sum();
-            let average = sum / daily_averages.len() as f64;
-            Some((average * 100.0).round() / 100.0)
-        }
-        _ => None,
-    }
+    MonitoredWebsiteService::get_average_daily_carbon_footprint(pool).await
 }
 
 pub async fn get_total_consumption(
     pool: &MySqlPool,
-    session: Session
+    user_id: i64
 ) -> Option<f64> {
-    let account: Option<Account> = session.get("account").await.unwrap_or(None);
-    if let Some(account) = account {
-        let user_id = account.id();
-        let result = sqlx::query_scalar::<_, f64>(
-            "SELECT SUM(carbon_footprint) FROM monitored_website WHERE user_id = ?"
-        )
-            .bind(user_id)
-            .fetch_one(pool)
-            .await;
-
-        match result {
-            Ok(total) => Some((total * 100.0).round() / 100.0),
-            Err(_) => None,
-        }
-    } else {
-        None
-    }
+    MonitoredWebsiteService::get_total_consumption_by_user(pool, user_id).await
 }
 
 pub async fn my_data(
@@ -177,9 +84,12 @@ pub async fn my_data(
     session: Session,
 )-> Json<MyDataResponse> {
 
-    let account: Option<Account> = session.get("account").await.unwrap_or(None);
+    let user_id: i64 = match session.get::<UserFull>("user_full").await.ok().flatten() {
+        Some(user_full) => user_full.user.id,
+        None => return error_response()
+    };
 
-    let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, session.clone()).await;
+    let my_average_daily_carbon_footprint = get_my_average_daily_carbon_footprint(&pool, user_id).await;
     let average_daily_carbon_footprint = get_average_daily_carbon_footprint(&pool).await;
     let message_average_footprint = match (my_average_daily_carbon_footprint, average_daily_carbon_footprint) {
         (Some(user_avg), Some(global_avg)) => {
@@ -192,19 +102,6 @@ pub async fn my_data(
             }
         }
         _ => None,
-    };
-
-    let (letter_green_score, env_nomination, equivalents) = if let Some(avg) = my_average_daily_carbon_footprint {
-        let (l, n) = calculate_green_score(Some(&pool), avg, "my_data".to_string()).await;
-        let eqs = equivalent(&pool, avg, 2,account.as_ref()).await;
-        let eqs = match eqs {
-            Some(v) if !v.is_empty() => Some(v),
-            _ => None,
-        };
-
-        (Some(l), Some(n), eqs)
-    } else {
-        (None, None, None)
     };
 
     let (letter_green_score, env_nomination) = calculate_green_score(&pool, my_average_daily_carbon_footprint.unwrap(), "my_data".to_string()).await;
