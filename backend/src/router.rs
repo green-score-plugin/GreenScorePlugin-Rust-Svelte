@@ -8,7 +8,6 @@ pub fn create_router(pool: MySqlPool) -> Router {
     let auth_routes = Router::new()
         .route("/login", post(auth_controller::login))
         .route("/inscription", post(auth_controller::inscription))
-        .route("/inscription-organisation", post(auth_controller::inscription_orga))
         .route("/get-account", post(auth_controller::get_current_account))
         .route("/logout", post(auth_controller::logout));
 
@@ -22,6 +21,7 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/join-organization", patch(account_controller::join_organization))
         .route("/leave-organization", post(account_controller::leave_organization))
         .route("/my-organization", get(account_controller::get_my_organization))
+        .route("/organization/create", post(account_controller::create_organization))
         .route("/organization/members", post(account_controller::get_organisation_member))
         .route("/organization/members/remove", post(account_controller::remove_organisation_member))
         .route("/organization/update", patch(account_controller::update_organisation))
