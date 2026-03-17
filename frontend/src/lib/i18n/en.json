@@ -103,7 +103,8 @@
       "already_have_account": "I already have an account",
       "register_link": "Register",
       "success_deleted": "Success!",
-      "account_deleted_msg": "Your account has been successfully deleted."
+      "account_deleted_msg": "Your account has been successfully deleted.",
+      "sign_in": "Sign in"
     },
     "register": {
       "user_title": "Register",

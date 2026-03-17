@@ -41,7 +41,7 @@ impl From<sqlx::Error> for AppError {
 
 impl From<String> for AppError {
     fn from(err: String) -> Self {
-        AppError::InternalServerError("errors.server_error".to_string())
+        AppError::InternalServerError(err)
     }
 }
 

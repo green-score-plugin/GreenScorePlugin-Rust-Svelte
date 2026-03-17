@@ -103,7 +103,8 @@
       "already_have_account": "J'ai déjà un compte",
       "register_link": "Inscription",
       "success_deleted": "Succès !",
-      "account_deleted_msg": "Votre compte a été supprimé avec succès."
+      "account_deleted_msg": "Votre compte a été supprimé avec succès.",
+      "sign_in": "Se connecter"
     },
     "register": {
       "user_title": "Inscription",
