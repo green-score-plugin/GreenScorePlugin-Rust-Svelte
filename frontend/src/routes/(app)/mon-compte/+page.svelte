@@ -7,11 +7,16 @@
     import {page} from "$app/state";
     import { t } from 'svelte-i18n';
     import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
-    import type {User, Organisation} from "$lib/types/account.ts";
+    import type {User, Organisation, UserFull} from "$lib/types/account.ts";
 
     let activePage = $state("my_info");
-    let user = $derived(page.data.userFull.user as User);
-    let organisation = $derived(page.data.userFull.organisation as Organisation)
+
+    let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
+    let user = $derived(userFull.user as User);
+    let organisation = $derived(userFull.organisation as Organisation)
+
+    $inspect(userFull);
+    $inspect(activePage);
 </script>
 
 <svelte:head>
@@ -35,12 +40,28 @@
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if organisation }
-                    <GererOrganisation />
-                {:else}
+                {#if user.est_admin === true }
                     <GererMembre />
+                {:else}
+                    <GererOrganisation />
                 {/if}
             {/if}
         </div>
+    </div>
+    <!-- Debug section to view all user info -->
+    <div class="px-4 lg:px-16 pb-8 flex flex-col gap-4">
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos utilisateur (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(userFull, null, 2)}</pre>
+        </details>
+
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos organisation (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(organisation, null, 2)}</pre>
+        </details>
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos organisation (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(activePage, null, 2)}</pre>
+        </details>
     </div>
 </div>
