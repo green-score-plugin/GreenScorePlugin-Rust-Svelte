@@ -67,7 +67,7 @@ impl UserRepository {
         is_admin: bool
     ) -> Result<(), Error> {
         sqlx::query(
-            "UPDATE user SET organisation_id = ?, est_admin ? true WHERE id = ?"
+            "UPDATE user SET organisation_id = ?, est_admin = ? WHERE id = ?"
         )
         .bind(organisation_id)
         .bind(is_admin)
