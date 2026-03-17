@@ -4,10 +4,10 @@ use sqlx::MySqlPool;
 use tower_sessions::Session;
 use serde::{Deserialize, Serialize};
 use crate::models::user::User;
-use crate::models::organisation::Organisation;
 use crate::dto::user_full::UserFull;
 use crate::service::auth_service::AuthService;
 use crate::error::AppError;
+use crate::dto::current_account_response::CurrentAccountResponse;
 
 #[derive(Deserialize)]
 pub struct InscriptionRequest {
@@ -35,15 +35,6 @@ pub struct GenericResponse {
     pub success: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>
-}
-
-#[derive(Serialize)]
-pub struct CurrentAccountResponse {
-    pub success: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_full: Option<UserFull>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub message: Option<String>,
 }
 
 
@@ -97,39 +88,6 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 
     Ok(Json(GenericResponse {
         success: true,
-        message: None,
-    }))
-}
-
-pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Result<Json<CurrentAccountResponse>, AppError>
-{
-    let orga_name = payload.orga_name.trim();
-    let siret = payload.siret.as_ref().map(|s| s.trim().to_string());
-
-
-    let mut user_full = session.get::<UserFull>("user_full").await
-        .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
-        .ok_or(AppError::AuthError("errors.auth.not_logged_in".to_string()))?;
-
-    let user_id = user_full.user.id;
-
-    let (organisation_id, organisation_code) = AuthService::inscription_orga(&pool, orga_name, siret.as_deref(), user_id).await
-        .map_err(AppError::BadRequest)?;
-
-    let organisation = Organisation {
-        id: organisation_id,
-        nom: orga_name.to_string(),
-        siret,
-        code: organisation_code,
-    };
-
-    user_full.organisation = Some(organisation);
-
-    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
-
-    Ok(Json(CurrentAccountResponse {
-        success: true,
-        user_full: Some(user_full),
         message: None,
     }))
 }
