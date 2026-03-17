@@ -116,7 +116,8 @@ impl OrganisationService {
             .await
             .map_err(|_| "insert_error")?;
 
-        UserRepository::join_organisation(pool, user_id, organisation_id)
+        let is_admin: bool = true;
+        UserRepository::join_organisation(pool, user_id, organisation_id, is_admin)
             .await
             .map_err(|_| "join_error")?;
 

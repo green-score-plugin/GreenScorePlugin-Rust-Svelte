@@ -63,12 +63,14 @@ impl UserRepository {
     pub async fn join_organisation(
         pool: &MySqlPool,
         user_id: i64,
-        organisation_id: i64
+        organisation_id: i64,
+        is_admin: bool
     ) -> Result<(), Error> {
         sqlx::query(
-            "UPDATE user SET organisation_id = ?, est_admin = true WHERE id = ?"
+            "UPDATE user SET organisation_id = ?, est_admin ? true WHERE id = ?"
         )
         .bind(organisation_id)
+        .bind(is_admin)
         .bind(user_id)
         .execute(pool)
         .await?;
