@@ -414,9 +414,6 @@ export const actions = {
             return fail(400, { message: "errors.champs" })
         }
 
-        console.log(organisationName);
-        console.log(siret);
-
         try{
             let body = JSON.stringify({
                 organization_name: organisationName,
@@ -434,8 +431,6 @@ export const actions = {
 
             const result = await response.json();
 
-            console.log(result);
-
             if(result.success) {
                 await setSessionCookie(cookies, response);
                 const code = result.account?.code || result.user_full?.organisation?.code;
@@ -447,7 +442,6 @@ export const actions = {
             if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
                 throw error;
             }
-            console.log(error);
             return fail(500, { message: 'errors.server_error' });
         }
     }
