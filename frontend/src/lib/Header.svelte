@@ -128,8 +128,8 @@
                 <li><a href="/derniere-page">{$t('header.last_visited_page')}</a></li>
 
                 {#if user}
-                    <li><a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_account')}</a></li>
-                    <li><a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.logout')}</a></li>
+                    <li><a href="/mon-compte">{$t('header.manage_account')}</a></li>
+                    <li><a href="/logout">{$t('header.logout')}</a></li>
                 {:else}
                     <li><a href="/login">{$t('header.login')}</a></li>
                 {/if}
