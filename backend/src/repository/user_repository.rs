@@ -66,7 +66,7 @@ impl UserRepository {
         organisation_id: i64
     ) -> Result<(), Error> {
         sqlx::query(
-            "UPDATE user SET organisation_id = ? AND est_admin = true WHERE id = ?"
+            "UPDATE user SET organisation_id = ?, est_admin = true WHERE id = ?"
         )
         .bind(organisation_id)
         .bind(user_id)
