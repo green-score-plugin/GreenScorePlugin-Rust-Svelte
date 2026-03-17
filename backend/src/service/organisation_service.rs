@@ -1,3 +1,4 @@
+use rand::Rng;
 use sqlx::MySqlPool;
 use sqlx::Error;
 use crate::dto::consumption_data_point_dto::ConsumptionDataPoint;
@@ -9,6 +10,7 @@ use crate::dto::mo_infos_dto::MyOrganizationInfos;
 use crate::dto::top_polluting_site_dto::TopPollutingSite;
 use crate::dto::update_organisation_request_dto::UpdateOrganisationRequest;
 use crate::models::organisation::Organisation;
+use crate::repository::user_repository::UserRepository;
 
 pub struct OrganisationService;
 
@@ -81,5 +83,43 @@ impl OrganisationService {
             code: current_org.code.clone(),
             siret: payload.siret,
         })
+    }
+
+    fn generate_organisation_code() -> String {
+        const CHARACTERS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const LENGTH: usize = 8;
+
+        let mut rng = rand::rng();
+
+        (0..LENGTH)
+            .map(|_| {
+                let idx = rng.random_range(0..CHARACTERS.len());
+                CHARACTERS[idx] as char
+            })
+            .collect()
+    }
+
+    pub async fn inscription_orga(
+        pool: &MySqlPool,
+        organisation_name: &str,
+        siret: Option<String>,
+        user_id: i64
+    ) -> Result<(i64, String), String>
+    {
+        if OrganisationRepository::find_id_by_siret(pool, organisation_name).await.map_err(|_| "db_error")?.is_some() {
+            return Err("organisation_exists".to_string());
+        }
+
+        let code = Self::generate_organisation_code();
+
+        let organisation_id = OrganisationRepository::insert_organisation(pool, organisation_name, &code, siret)
+            .await
+            .map_err(|_| "insert_error")?;
+
+        UserRepository::join_organisation(pool, user_id, organisation_id)
+            .await
+            .map_err(|_| "join_error")?;
+
+        Ok((organisation_id, code))
     }
 }
