@@ -119,8 +119,11 @@
 
     <!-- Mobile menu -->
     {#if mobileMenuOpen}
+        <!-- Backdrop -->
+        <div class="absolute top-24 left-0 w-full h-[calc(100vh-6rem)] bg-black/50 z-40 lg:hidden"></div>
+
         <!-- Ajouter l'action pour fermer le menu mobile quand on clique à l'extérieur -->
-        <div use:clickOutside class="absolute top-24 left-0 w-full bg-white py-5 z-10 lg:hidden">
+        <div use:clickOutside class="absolute top-24 left-0 w-full bg-white py-5 z-50 lg:hidden shadow-xl">
             <ul class="flex flex-col font-outfit font-medium text-grey-950 items-center gap-4 text-lg">
                 <li><a href="/">{$t('header.home')}</a></li>
                 <li><a href="/mes-donnees">{$t('header.my_data')}</a></li>
