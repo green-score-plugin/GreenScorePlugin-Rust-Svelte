@@ -1,46 +1,65 @@
 <script lang="ts">
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
+    import type {User} from '$lib/types/account.ts';
 
-    let submitted = false;
-    let loading = false;
-    let submittedPassword = '';
-    let submittedPasswordConfirm = '';
+    let submitted = $state(false);
+    let loading = $state(false);
+    let submittedPassword = $state('');
+    let submittedPasswordConfirm = $state('');
 
-    let user = { prenom: '', nom: '', email: '' };
-    let password = '';
-    let passwordConfirm = '';
+    let password = $state('');
+    let passwordConfirm = $state('');
 
-    let successMessage = '';
-    let errorMessage = '';
+    let successMessage = $state('');
+    let errorMessage = $state('');
 
-    $: {
-        if ($page.data.user) {
-            user = { ...$page.data.user.user };
-        }
-    }
+    let user = $derived(page.data.userFull.user as User);
 
-    $: {
-        if ($page.form?.actionType === 'update_info') {
-            if ($page.form?.success) {
-                successMessage = $t($page.form.message || 'auth.register.success_register');
-                errorMessage = '';
-                password = '';
-                passwordConfirm = '';
-                submitted = false;
-            } else if ($page.form?.message) {
-                errorMessage = $t($page.form.message);
-                successMessage = '';
-            }
-        }
-    }
+
     const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/
 
-    $: passwordValid = (password === '' && passwordConfirm === '') ||
-        (password === passwordConfirm && passwordRegex.test(password));
+    let passwordValid = $derived((password === '' && passwordConfirm === '') ||
+        (password === passwordConfirm && passwordRegex.test(password)));
 
-    $: showPasswordError = submitted && !passwordValid;
+    let showPasswordError = $derived(submitted && !passwordValid);
+
+    const handleSubmit = ({ cancel }: { cancel: () => void }) => {
+        if (!passwordValid) {
+            submittedPassword = password;
+            submittedPasswordConfirm = passwordConfirm;
+            submitted = true;
+            cancel();
+            return;
+        }
+
+        loading = true;
+        successMessage = '';
+        errorMessage = '';
+
+        return async ({ result, update }: { result: any, update: any }) => {
+            await update();
+            loading = false;
+
+            if (result.type === 'success' || result.type === 'failure') {
+                const data = result.data;
+
+                if (data && data.actionType === 'update_info') {
+                    if (data.success) {
+                        successMessage = $t((data.message as string) || 'auth.register.success_register');
+                        errorMessage = '';
+                        password = '';
+                        passwordConfirm = '';
+                        submitted = false;
+                    } else if (data.message) {
+                        errorMessage = $t(data.message as string);
+                        successMessage = '';
+                    }
+                }
+            }
+        };
+    };
 
     const noAutofill = { autocomplete: 'nop' } as any;
 
@@ -55,24 +74,7 @@
         method="POST"
         action="?/modifier"
         autocomplete="off"
-        use:enhance={({ cancel }) => {
-            if (!passwordValid) {
-                submittedPassword = password;
-                submittedPasswordConfirm = passwordConfirm;
-                submitted = true;
-                cancel();
-                return;
-            }
-
-            loading = true;
-            successMessage = '';
-            errorMessage = '';
-
-            return async ({ update }) => {
-                await update();
-                loading = false;
-            };
-        }}
+        use:enhance={handleSubmit}
         class="flex flex-col gap-4"
 >
     <h1 class="text-2xl font-bold py-2">{$t('account.info.title')}</h1>
@@ -161,7 +163,7 @@
                     name="password"
                     type="password"
                     bind:value={password}
-                    on:input={handlePasswordInput}
+                    oninput={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder={$t ('account.info.password_label')}
                     autocomplete="new-password"
@@ -174,7 +176,7 @@
                     id="passwordConfirm"
                     type="password"
                     bind:value={passwordConfirm}
-                    on:input={handlePasswordInput}
+                    oninput={handlePasswordInput}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
                     placeholder={$t ('account.info.confirm_password_label')}
                     autocomplete="new-password"
