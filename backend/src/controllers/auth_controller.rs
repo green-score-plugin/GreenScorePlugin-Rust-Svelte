@@ -54,9 +54,9 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
 
     let user_full = AuthService::login(&pool, email, password).await
         .map_err(|e| match e.as_str() {
-            "invalid_credentials" | "user_not_found" => AppError::AuthError("Identifiant ou mot de passe incorrect".to_string()),
-            "db_error" => AppError::InternalServerError("Problème de connexion à la base de données".to_string()),
-            _ => AppError::InternalServerError("Une erreur interne est survenue".to_string()),
+            "invalid_credentials" | "user_not_found" => AppError::AuthError("errors.auth.invalid_credentials".to_string()),
+            "db_error" => AppError::InternalServerError("errors.db_error".to_string()),
+            _ => AppError::InternalServerError("errors.server_error".to_string()),
         })?;
 
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;

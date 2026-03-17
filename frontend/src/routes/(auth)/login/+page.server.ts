@@ -36,7 +36,7 @@ export const actions = {
         }
 
         if (attempt && attempt.count >= MAX_ATTEMPTS) {
-            return fail(429, { message: 'Trop de tentatives, veuillez réessayer dans 15 minutes' });
+            return fail(429, { message: 'errors.too_many_attempts' });
         }
 
         const data = await request.formData();

@@ -486,7 +486,8 @@
     "validation_fields_required": "First name, last name, and email are required",
     "validation_password_complexity": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character (#?!@$%^&*-)",
     "validation_code_required": "Organization code is required",
-    "validation_code_invalid": "Invalid code",
+    "session_error": "Session error",
+    "too_many_attempts": "Too many attempts, please try again in 15 minutes",
     "org_change_error": "Server error while changing organization",
     "no_changes": "No changes to be made",
     "db_error": "Database error",
@@ -511,7 +512,8 @@
       "email_verification_error": "Email verification error",
       "registration_error": "Registration error",
       "org_creation_error": "Organization creation error",
-      "user_creation_error": "User creation error"
+      "user_creation_error": "User creation error",
+      "missing_fields": "All fields are required"
     }
   },
   "success": {

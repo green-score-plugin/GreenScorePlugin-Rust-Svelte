@@ -77,7 +77,7 @@ impl AuthService{
         let user_result = UserRepository::find_with_password_by_email(pool, email).await.map_err(|_| "db_error")?;
         let (id, password_hash, first_name, last_name, organisation_id, service_id, est_admin) = match user_result {
             Some(tuple) => tuple,
-            None => return Err("invalid_credentials".to_string()), // Était "user_not_found"
+            None => return Err("invalid_credentials".to_string()),
         };
 
         if !bcrypt::verify(password, &password_hash).map_err(|_| "hash_error")? {
