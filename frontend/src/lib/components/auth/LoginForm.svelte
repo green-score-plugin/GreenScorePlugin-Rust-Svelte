@@ -8,10 +8,8 @@
 
     let email = '';
 
-    // Pour réagir aux erreurs serveur et arrêter le loading state si besoin
     $: if (form?.message) {
         loading = false;
-        // Optionnel : on pourrait afficher un toast ou autre ici si form.message change
     }
 
     let password = '';

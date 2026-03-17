@@ -26,12 +26,10 @@ export const actions = {
         const clientIp = getClientAddress();
         const now = Date.now();
 
-        // Nettoyage périodique (10% des requêtes)
         if (Math.random() < 0.1) cleanupAttempts();
 
         let attempt = loginAttempts.get(clientIp);
 
-        // Si une entrée existe mais est expirée, on la supprime
         if (attempt && now - attempt.firstAttemptTime > WINDOW_MS) {
             loginAttempts.delete(clientIp);
             attempt = undefined;
@@ -61,13 +59,11 @@ export const actions = {
 
 
             if (result.success) {
-                // Succès : réinitialiser le compteur pour cette IP
                 loginAttempts.delete(clientIp);
                 setSessionCookie(cookies, response);
                 return redirect(303, '/');
             }
 
-            // Échec : incrémenter le compteur
             if (!attempt) {
                 loginAttempts.set(clientIp, { count: 1, firstAttemptTime: now });
             } else {
