@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from '$app/state';
+    import { afterNavigate } from '$app/navigation';
     import { t, locale } from 'svelte-i18n';
     import greenScoreLogo from '$lib/images/greenscore-logo.png';
 
@@ -7,6 +8,11 @@
 
     let profileMenuOpen = $state(false);
     let mobileMenuOpen = $state(false);
+
+    afterNavigate(() => {
+        mobileMenuOpen = false;
+        profileMenuOpen = false;
+    });
 
     function toggleProfileMenu() {
         profileMenuOpen = !profileMenuOpen;
@@ -24,11 +30,11 @@
             }
         };
 
-        document.addEventListener('click', handle, true);
+        document.addEventListener('click', handle);
 
         return {
             destroy() {
-                document.removeEventListener('click', handle, true);
+                document.removeEventListener('click', handle);
             }
         };
     }
