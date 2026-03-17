@@ -69,10 +69,12 @@ pub async fn join_organization(
     Json(payload): Json<JoinOrgaRequest>,
 ) -> Result<Json<Value>, AppError> {
     let orga_code = payload.code.clone();
-    let orga_id = UserService::join_organization(&pool, orga_code, user_full.user.id).await
+    let orga: Option<Organisation> = UserService::join_organization(&pool, orga_code, user_full.user.id).await
          .map_err(AppError::BadRequest)?;
+    let organisation = orga.unwrap();
 
-    user_full.user.id_organisation = Some(orga_id);
+    user_full.user.id_organisation = Some(organisation.id);
+    user_full.organisation = Some(organisation);
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
@@ -131,6 +133,7 @@ pub async fn leave_organization(
         .map_err(|e| AppError::InternalServerError(format!("Erreur quitter organisation: {}", e)))?;
 
     user_full.user.id_organisation = None;
+    user_full.organisation = None;
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
