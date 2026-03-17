@@ -7,6 +7,7 @@ use crate::models::user::User;
 use crate::models::organisation::Organisation;
 use crate::dto::user_full::UserFull;
 use crate::service::auth_service::AuthService;
+use crate::service::service_service::ServiceService;
 use crate::error::AppError;
 
 #[derive(Deserialize)]
@@ -22,6 +23,11 @@ pub struct InscriptionOrgaRequest {
     pub orga_name : String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub siret : Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct ServiceCreationRequest {
+    pub service_name: String,
 }
 
 #[derive(Deserialize)]
@@ -124,6 +130,34 @@ pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, J
     };
 
     user_full.organisation = Some(organisation);
+
+    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+
+    Ok(Json(CurrentAccountResponse {
+        success: true,
+        user_full: Some(user_full),
+        message: None,
+    }))
+}
+
+pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<ServiceCreationRequest>) -> Result<Json<CurrentAccountResponse>, AppError>
+{
+    let service_name = payload.service_name.trim();
+
+    let mut user_full = session.get::<UserFull>("user_full").await
+        .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
+        .ok_or(AppError::AuthError("errors.auth.not_logged_in".to_string()))?;
+
+    let service_id = ServiceService::create_service(&pool, user_full.organisation.as_ref().unwrap().id, service_name).await
+        .map_err(AppError::BadRequest)?;
+
+    let service = crate::models::service::Service {
+        id: service_id,
+        id_organisation: user_full.organisation.as_ref().unwrap().id,
+        nom: service_name.to_string(),
+    };
+
+    user_full.service = Some(service);
 
     session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 

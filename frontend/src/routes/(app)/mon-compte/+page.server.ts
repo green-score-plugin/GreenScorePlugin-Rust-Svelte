@@ -404,5 +404,35 @@ export const actions = {
         } catch {
             return fail(500, { actionType: 'modification_equivalents', message: 'errors.server_error' });
         }
+    },
+    create_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const serviceName = data.get('serviceName')?.toString().trim();
+
+        if (!serviceName) {
+            return fail(400, { actionType: 'create_service', message: 'errors.validation_service_name_required' });
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/organization/create_services`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ name: serviceName })
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                return fail(400, { actionType: 'create_service', message: result.message ?? 'errors.create_service_error' });
+            }
+
+            return { actionType: 'create_service', success: true, message: 'success.service_created' };
+        } catch {
+            return fail(500, { actionType: 'create_service', message: 'errors.server_error' });
+        }
     }
 } satisfies Actions;

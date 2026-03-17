@@ -9,6 +9,7 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/login", post(auth_controller::login))
         .route("/inscription", post(auth_controller::inscription))
         .route("/inscription-organisation", post(auth_controller::inscription_orga))
+        .route("/create_service", post(auth_controller::create_service))
         .route("/get-account", post(auth_controller::get_current_account))
         .route("/logout", post(auth_controller::logout));
 

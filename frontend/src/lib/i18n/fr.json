@@ -131,9 +131,25 @@
       "my_info": "Mon compte",
       "my_equivalents": "Mes équivalents",
       "my_organization": "Mon organisation",
+      "services": "Service",
       "manage_organization": "Gérer mon organisation",
       "delete_account": "Supprimer le compte",
       "delete_organization": "Supprimer l'organisation"
+    },
+    "service": {
+      "title": "Mon Service",
+      "no_service": "Vous n'êtes rattaché à aucun service.",
+      "name_label": "Nom du service",
+      "leave_button": "Quitter le service",
+      "create_title": "Créer un service",
+      "create_button": "Créer le service",
+      "create_placeholder": "Nom du service",
+      "join_title": "Rejoindre un service",
+      "join_button": "Rejoindre",
+      "join_placeholder": "Sélectionnez un service",
+      "success_created": "Service créé avec succès",
+      "success_joined": "Service rejoint avec succès",
+      "success_left": "Vous avez quitté le service"
     },
     "info": {
       "title": "Mes informations",

@@ -3,6 +3,7 @@
     import MyInfo from '$lib/components/myaccount/MyInfo.svelte';
     import MyInfoOrganisation from "$lib/components/myaccount/MyInfoOrganisation.svelte";
     import Organisation from '$lib/components/myaccount/Organisation.svelte';
+    import Service from '$lib/components/myaccount/Service.svelte';
     import GererMembre from '$lib/components/myaccount/GererMembre.svelte';
     import salutation from '$lib/images/salutation.png';
     import {page} from "$app/state";
@@ -11,6 +12,10 @@
 
     let activePage = $state("my_info");
     let user = $derived(page.data.user);
+    let organisation = $derived(page.data.organisation);
+
+    $inspect(user);
+    $inspect(organisation);
 </script>
 
 <svelte:head>
@@ -43,7 +48,26 @@
                 {:else}
                     <GererMembre />
                 {/if}
+                {:else if activePage === 'services'}
+                {#if user.admin === 'false' }
+                    <Service />
+                {:else}
+                    <Service />
+                {/if}
             {/if}
         </div>
+    </div>
+
+    <!-- Debug section to view all user info -->
+    <div class="px-4 lg:px-16 pb-8 flex flex-col gap-4">
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos utilisateur (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(user, null, 2)}</pre>
+        </details>
+
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos organisation (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(organisation, null, 2)}</pre>
+        </details>
     </div>
 </div>

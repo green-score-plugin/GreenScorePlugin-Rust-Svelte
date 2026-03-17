@@ -17,4 +17,17 @@ impl ServiceRepository {
         Ok(service)
     }
 
+    pub async fn create_service(pool: &MySqlPool, service_name: &str, organisation_id: i64) -> Result<i64, sqlx::Error>
+    {
+        let result = sqlx::query(
+            "INSERT INTO service (nom, organisation_id) VALUES (?, ?)"
+        )
+        .bind(service_name)
+        .bind(organisation_id)
+        .execute(pool)
+        .await?;
+
+        Ok(result.last_insert_id() as i64)
+    }
+
 }
