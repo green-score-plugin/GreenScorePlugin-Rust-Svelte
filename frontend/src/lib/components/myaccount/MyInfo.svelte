@@ -15,7 +15,11 @@
     let successMessage = $state('');
     let errorMessage = $state('');
 
-    let user = $derived(page.data.userFull.user as User);
+    let user = $state({ ...page.data.userFull.user } as User);
+
+    $effect(() => {
+        user = { ...page.data.userFull.user };
+    });
 
 
     const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/
