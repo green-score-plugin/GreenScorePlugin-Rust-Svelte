@@ -2,6 +2,13 @@
 const tabNetworkData = new Map();
 const lastSentData = new Map();
 
+//Cache pour utilisateur
+const USER_CACHE_TTL = 900000;
+let userCache = {
+  data: null,
+  timestamp: 0
+}
+
 // Information nécessaire pour appeler les APIs
 const token = "t6MlBacdjBPFv";
 const carbonIntensityUrl =
@@ -134,7 +141,14 @@ async function getUserId() {
 
     if (!sessionCookie) {
       console.log("Pas de cookie de session trouvé");
+      userCache.data = null;
       return null;
+    }
+
+    const now = Date.now();
+    if (userCache.data && (now - userCache.timestamp < USER_CACHE_TTL)) {
+      console.log("Utilisation des données utilisateur en cache");
+      return userCache.data;
     }
 
     const response = await fetch(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/get-account`, {
@@ -151,6 +165,10 @@ async function getUserId() {
     }
 
     const userData = await response.json();
+
+    userCache.data = userData.account;
+    userCache.timestamp = now;
+
     return userData.account;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID:", error);
