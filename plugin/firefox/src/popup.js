@@ -154,10 +154,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
+    // Lance toutes les requêtes en parallèle
+    const [gCO2eResponse, userData, countryResponse] = await Promise.all([
+      browser.runtime.sendMessage({ type: "getgCO2e" }),
+      browser.runtime.sendMessage({ type: "checkLoginStatus" }),
+      browser.runtime.sendMessage({ type: "getCountryAndUrl" })
+    ]);
+
+    // 1. Gestion de gCO2e
     try {
-      const response = await browser.runtime.sendMessage({ type: "getgCO2e" });
-      if (response && response.gCO2e !== undefined) {
-        gCO2eValue = parseFloat(response.gCO2e).toFixed(2);
+      if (gCO2eResponse && gCO2eResponse.gCO2e !== undefined) {
+        gCO2eValue = parseFloat(gCO2eResponse.gCO2e).toFixed(2);
         updateColors(gCO2eValue);
         updateAverageConsumption(gCO2eValue);
       } else {
@@ -165,14 +172,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateColors(0);
       }
     } catch (error) {
-      console.error("Erreur récupération gCO2e:", error);
+       console.error("Erreur récupération gCO2e:", error);
     }
 
-    // Vérification du statut de connexion
+    // 2. Vérification du statut de connexion
     try {
-      const userData = await browser.runtime.sendMessage({
-        type: "checkLoginStatus",
-      });
       const loginSection = document.querySelector(
         ".flex.font-outfit.text-sm.justify-center"
       );
@@ -260,28 +264,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
     }
 
-    browser.runtime
-      .sendMessage({ type: "getCountryAndUrl" })
-      .then((response) => {
-        if (response && response.country && response.url) {
-          const urlElement = document.getElementById("site-url");
-          const countryElement = document.getElementById("site-country");
+    // 3. Gestion Pays/URL
+    if (countryResponse && countryResponse.country && countryResponse.url) {
+      const urlElement = document.getElementById("site-url");
+      const countryElement = document.getElementById("site-country");
 
-          if (countryElement && urlElement) {
-            countryElement.textContent = `Dans votre pays (${response.country}), cette page consomme`;
-            urlElement.textContent = response.url;
-          }
-        } else if (response.error) {
-          console.error("Erreur :", response.error);
-        }
-      })
-      .catch((error) => {
-        console.error(
-          "Erreur lors de la récupération du pays ou de l'URL :",
-          error
-        );
-      });
+      if (countryElement && urlElement) {
+        countryElement.textContent = `Dans votre pays (${countryResponse.country}), cette page consomme`;
+        urlElement.textContent = countryResponse.url;
+      }
+    } else if (countryResponse && countryResponse.error) {
+       console.error("Erreur pays :", countryResponse.error);
+    }
 
+    // 4. Equivalents
     try {
       await updateEquivalents();
     } catch (error) {

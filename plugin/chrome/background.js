@@ -9,7 +9,7 @@ const USER_CACHE_TTL = 900000;
 let userCache = {
   data: null,
   timestamp: 0
-}
+};
 
 
 // Information nécessaire pour appeler les APIs
