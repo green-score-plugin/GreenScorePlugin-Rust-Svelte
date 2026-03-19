@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 use sqlx::MySqlPool;
 use crate::models::user::User;
 use crate::models::organisation::Organisation;
