@@ -8,15 +8,20 @@
     import {page} from "$app/state";
     import { t } from 'svelte-i18n';
     import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
-    import type {User, Organisation} from "$lib/types/account.ts";
+    import type {User, Organisation, UserFull} from "$lib/types/account.ts";
 
 
     let activePage = $state("my_info");
-    let user = $derived(page.data.userFull.user as User);
-    let organisation = $derived(page.data.userFull.organisation as Organisation)
+    let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
+    let user = $derived(userFull.user as User);
+    let organisation = $derived(userFull.organisation as Organisation)
 
     $inspect(user);
     $inspect(organisation);
+
+
+    $inspect(userFull);
+    $inspect(activePage);
 </script>
 
 <svelte:head>
@@ -40,7 +45,9 @@
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if organisation }
+                {#if user.est_admin === true }
+                    <GererMembre />
+                {:else}
                     <GererOrganisation />
                 {:else}
                     <GererMembre />

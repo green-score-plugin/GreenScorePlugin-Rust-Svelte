@@ -2,14 +2,12 @@
     import { enhance } from '$app/forms';
     import {page} from "$app/state";
     import { t } from 'svelte-i18n';
-    import type {User} from "$lib/types/account.ts";
+    import type {User, UserFull} from "$lib/types/account.ts";
 
 
     let { activePage = $bindable() } = $props();
     let showDeleteModal = $state(false);
     let submitted = $state(false);
-
-    const user = $derived(page.data.userFull.user as User);
 
 
 </script>
@@ -97,6 +95,13 @@
         <span class="text-base whitespace-nowrap">{$t('account.menu.delete_account')}</span>
     </button>
 </div>
+
+{#if activePage === 'debug'}
+    <div class="p-4 bg-gray-100 rounded mt-4 border border-gray-300 text-xs font-mono overflow-auto">
+        <p>UserFull Debug:</p>
+        <pre>{JSON.stringify(userFull, null, 2)}</pre>
+    </div>
+{/if}
 
 {#if showDeleteModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
