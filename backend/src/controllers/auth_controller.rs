@@ -98,39 +98,6 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
     }))
 }
 
-pub async fn inscription_orga(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<InscriptionOrgaRequest>) -> Result<Json<CurrentAccountResponse>, AppError>
-{
-    let orga_name = payload.orga_name.trim();
-    let siret = payload.siret.as_ref().map(|s| s.trim().to_string());
-
-
-    let mut user_full = session.get::<UserFull>("user_full").await
-        .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
-        .ok_or(AppError::AuthError("errors.auth.not_logged_in".to_string()))?;
-
-    let user_id = user_full.user.id;
-
-    let (organisation_id, organisation_code) = AuthService::inscription_orga(&pool, orga_name, siret.as_deref(), user_id).await
-        .map_err(AppError::BadRequest)?;
-
-    let organisation = Organisation {
-        id: organisation_id,
-        nom: orga_name.to_string(),
-        siret,
-        code: organisation_code,
-    };
-
-    user_full.organisation = Some(organisation);
-
-    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
-
-    Ok(Json(CurrentAccountResponse {
-        success: true,
-        user_full: Some(user_full),
-        message: None,
-    }))
-}
-
 pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<ServiceCreationRequest>) -> Result<Json<CurrentAccountResponse>, AppError>
 {
     let service_name = payload.service_name.trim();
@@ -139,12 +106,16 @@ pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Jso
         .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
         .ok_or(AppError::AuthError("errors.auth.not_logged_in".to_string()))?;
 
-    let service_id = ServiceService::create_service(&pool, user_full.organisation.as_ref().unwrap().id, service_name).await
+    let organisation_id = user_full.organisation.as_ref()
+        .map(|org| org.id)
+        .ok_or(AppError::BadRequest("User must be in an organization to create a service".to_string()))?;
+
+    let service_id = ServiceService::create_service(&pool, organisation_id, service_name).await
         .map_err(AppError::BadRequest)?;
 
     let service = crate::models::service::Service {
         id: service_id,
-        id_organisation: user_full.organisation.as_ref().unwrap().id,
+        id_organisation: organisation_id,
         nom: service_name.to_string(),
     };
 

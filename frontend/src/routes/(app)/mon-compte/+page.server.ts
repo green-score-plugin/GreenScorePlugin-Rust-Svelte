@@ -414,14 +414,14 @@ export const actions = {
         }
 
         try {
-            const response = await fetch(`${BACKEND_URL}/account/organization/create_services`, {
+            const response = await fetch(`${BACKEND_URL}/auth/create_service`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
                 },
                 credentials: 'include',
-                body: JSON.stringify({ name: serviceName })
+                body: JSON.stringify({ service_name: serviceName })
             });
 
             const result = await response.json();

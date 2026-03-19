@@ -135,6 +135,21 @@
       "delete_account": "Delete Account",
       "delete_organization": "Delete Organization"
     },
+    "service": {
+      "title": "My Service",
+      "no_service": "You are not attached to any service.",
+      "name_label": "Service Name",
+      "leave_button": "Leave Service",
+      "create_title": "Create a Service",
+      "create_button": "Create Service",
+      "create_placeholder": "Service Name",
+      "join_title": "Join a Service",
+      "join_button": "Join",
+      "join_placeholder": "Select a Service",
+      "success_created": "Service created successfully",
+      "success_joined": "Service joined successfully",
+      "success_left": "You have left the service"
+    },
     "info": {
       "title": "My Information",
       "button_validate": "Validate",
@@ -487,6 +502,7 @@
     "validation_password_complexity": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character (#?!@$%^&*-)",
     "validation_code_required": "Organization code is required",
     "validation_code_invalid": "Invalid code",
+    "validation_service_name_required": "Service name is required",
     "org_change_error": "Server error while changing organization",
     "no_changes": "No changes to be made",
     "db_error": "Database error",
@@ -512,7 +528,8 @@
       "registration_error": "Registration error",
       "org_creation_error": "Organization creation error",
       "user_creation_error": "User creation error"
-    }
+    },
+    "service_exists": "A service with this name already exists in your organization."
   },
   "success": {
     "member_deleted": "Member deleted successfully",
