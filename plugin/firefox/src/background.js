@@ -16,6 +16,10 @@ let countryCache = {
   timestamp: 0
 };
 
+// Cache pour l'intensité carbone (clé: countryCode, valeur: {value, timestamp})
+const CARBON_CACHE_TTL = 3600000; // 1 heure
+const carbonIntensityCache = new Map();
+
 
 // Information nécessaire pour appeler les APIs
 const token = "t6MlBacdjBPFv";
@@ -61,6 +65,23 @@ function isLocalDomain(url) {
 // Récupérer l'intensité carbone pour un pays
 async function getLatestCarbonIntensity(countryCode) {
   try {
+    // Vérification du cache
+    const now = Date.now();
+    if (carbonIntensityCache.has(countryCode)) {
+      const cachedData = carbonIntensityCache.get(countryCode);
+      if (now - cachedData.timestamp < CARBON_CACHE_TTL) {
+        console.log(`Intensité carbone (Cache) pour ${countryCode}: ${cachedData.value}`);
+        // Mise à jour de l'onglet actif avec la donnée en cache
+        browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+            if (tabs.length > 0) {
+              const tabData = getTabData(tabs[0].id);
+              tabData.carbonIntensity = cachedData.value;
+            }
+        });
+        return cachedData.value;
+      }
+    }
+  
     const response = await fetch(`${carbonIntensityUrl}?zone=${countryCode}`, {
       method: "GET",
       headers: {
@@ -77,6 +98,13 @@ async function getLatestCarbonIntensity(countryCode) {
     console.log(
       `Intensité carbone pour la zone ${countryCode}: ${data.carbonIntensity} gCO₂/kWh`
     );
+
+    // Mise en cache
+    carbonIntensityCache.set(countryCode, {
+      value: data.carbonIntensity,
+      timestamp: now
+    });
+
     browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       if (tabs.length > 0) {
         const tabData = getTabData(tabs[0].id);
@@ -336,7 +364,10 @@ function initializeListeners() {
     if (tabData && tabData.currentUrl) {
       await handleUrlChange(tabId, tabData.currentUrl, true);
     }
+    // Nettoyage complet pour éviter les fuites de mémoire
     tabNetworkData.delete(tabId);
+    lastSentData.delete(tabId);
+    lastProcessedUrls.delete(tabId);
   });
 }
 
