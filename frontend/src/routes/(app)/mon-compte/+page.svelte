@@ -1,18 +1,19 @@
 <script lang="ts">
     import LeftMenu from '$lib/components/myaccount/LeftMenu.svelte';
     import MyInfo from '$lib/components/myaccount/MyInfo.svelte';
-    import MyInfoOrganisation from "$lib/components/myaccount/MyInfoOrganisation.svelte";
-    import Organisation from '$lib/components/myaccount/Organisation.svelte';
+    import GererOrganisation from '$lib/components/myaccount/GererOrganisation.svelte';
     import Service from '$lib/components/myaccount/Service.svelte';
     import GererMembre from '$lib/components/myaccount/GererMembre.svelte';
     import salutation from '$lib/images/salutation.png';
     import {page} from "$app/state";
     import { t } from 'svelte-i18n';
     import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
+    import type {User, Organisation} from "$lib/types/account.ts";
+
 
     let activePage = $state("my_info");
-    let user = $derived(page.data.user);
-    let organisation = $derived(page.data.organisation);
+    let user = $derived(page.data.userFull.user as User);
+    let organisation = $derived(page.data.userFull.organisation as Organisation)
 
     $inspect(user);
     $inspect(organisation);
@@ -25,7 +26,7 @@
 <div class="xl:px-52 flex flex-col h-full">
     <div class="px-4 lg:px-16 py-8 flex justify-center lg:justify-start items-center gap-x-4">
         <img class="w-[54px] h-auto" src={salutation} alt="Salutation">
-        <h1 class="text-2xl font-bold">{$t('hello')} {#if !user.organisation}{user.user.prenom}{:else}{user.organisation.nom}{/if}!</h1>
+        <h1 class="text-2xl font-bold">{$t('hello')} {user.prenom}!</h1>
     </div>
 
     <div class="flex flex-col lg:flex-row px-4 lg:px-16 gap-8 lg:gap-16 mb-2">
@@ -35,16 +36,12 @@
         </div>
         <div class="flex-1 shadow-lg bg-white py-4 px-6">
             {#if activePage === 'my_info'}
-                {#if !user.organisation }
-                    <MyInfo />
-                {:else}
-                    <MyInfoOrganisation />
-                {/if}
+                <MyInfo />
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if !user.organisation }
-                    <Organisation />
+                {#if organisation }
+                    <GererOrganisation />
                 {:else}
                     <GererMembre />
                 {/if}

@@ -2,13 +2,14 @@
     import { enhance } from '$app/forms';
     import {page} from "$app/state";
     import { t } from 'svelte-i18n';
+    import type {User} from "$lib/types/account.ts";
 
 
     let { activePage = $bindable() } = $props();
     let showDeleteModal = $state(false);
     let submitted = $state(false);
 
-    const user = $derived(page.data?.user);
+    const user = $derived(page.data.userFull.user as User);
 
 
 </script>
@@ -67,7 +68,7 @@
         <rect x="17.4941" y="20.2788" width="2.66274" height="2.66274" rx="0.5" fill="white" stroke="black"/>
         <rect x="9.43652" y="2.69775" width="2.66274" height="2.66274" rx="0.5" fill="white" stroke="black"/>
         </svg>
-        {#if !user.organisation }{$t('account.menu.my_organization')} {:else} {$t('account.menu.manage_organization')} {/if}
+        {$t('account.menu.my_organization')}
     </button>
 
     <!--{#if user.organisation != null && user.admin === 'true'}-->
@@ -93,7 +94,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
         </svg>
-        <span class="text-base whitespace-nowrap">{#if !user.organisation }{$t('account.menu.delete_account')}{:else}{$t('account.menu.delete_organization')}{/if}</span>
+        <span class="text-base whitespace-nowrap">{$t('account.menu.delete_account')}</span>
     </button>
 </div>
 

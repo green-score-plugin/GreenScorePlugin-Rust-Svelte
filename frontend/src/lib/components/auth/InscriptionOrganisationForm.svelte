@@ -22,7 +22,7 @@
     }
 </script>
 
-<form method="POST" on:submit={handleSubmit} use:enhance={() => {
+<form method="POST" action="?/create_organization" on:submit={handleSubmit} use:enhance={() => {
     loading = true;
     return async ({ update }) => {
         await update();
@@ -33,7 +33,7 @@
     <!-- Nom Organisation -->
     <div class="w-full text-grey-700 font-outfit font-semibold text-xs">
         <label for="organisationName" class="block mb-1">{$t('auth.register.org_name')}</label>
-        <input bind:value={organisationName} id="organisationName" type="text" name="organisationName"
+        <input bind:value={organisationName} id="organisation_name" type="text" name="organisationName"
                class="px-3 py-1.5 text-sm border rounded-lg w-full focus:outline-none {submitted && errors.organisationName ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="Mon Organisation">
         {#if submitted && errors.organisationName} <span class="text-red-500 text-xs mt-0.5 block">{$t('auth.register.org_name_required')}</span> {/if}
     </div>

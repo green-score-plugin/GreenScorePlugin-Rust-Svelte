@@ -4,11 +4,11 @@ use sqlx::MySqlPool;
 use tower_sessions::Session;
 use serde::{Deserialize, Serialize};
 use crate::models::user::User;
-use crate::models::organisation::Organisation;
 use crate::dto::user_full::UserFull;
 use crate::service::auth_service::AuthService;
 use crate::service::service_service::ServiceService;
 use crate::error::AppError;
+use crate::dto::current_account_response::CurrentAccountResponse;
 
 #[derive(Deserialize)]
 pub struct InscriptionRequest {
@@ -41,15 +41,6 @@ pub struct GenericResponse {
     pub success: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>
-}
-
-#[derive(Serialize)]
-pub struct CurrentAccountResponse {
-    pub success: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub user_full: Option<UserFull>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub message: Option<String>,
 }
 
 
