@@ -8,12 +8,12 @@ tokio = { version = "1", features = ["full"] }
 axum = "0.8.7"
 serde_json = "1.0"
 tower-sessions = "0.14.0"
-sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "macros", "mysql", "sqlite"] }
+sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "runtime-tokio-rustls", "macros", "mysql", "sqlite"] }
 async-trait = "0.1.89"
 dotenvy = "0.15.7"
 time = "0.3.44"
 bcrypt = "0.17.1"
-tower-http = { version = "0.6.6", features = ["cors"] }
+tower-http = { version = "0.6.6", features = ["cors", "trace"] }
 serde = { version = "1.0.228", features = ["derive"] }
 rand = "0.9.2"
-
+console-subscriber = "0.5.0"
