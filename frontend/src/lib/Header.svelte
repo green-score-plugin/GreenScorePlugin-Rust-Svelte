@@ -4,7 +4,7 @@
     import type { User} from "$lib/types/account.ts";
     import greenScoreLogo from '$lib/images/greenscore-logo.png';
 
-    let user = $derived(page.data.userFull.user as User);
+    let user = $derived(page.data.userFull?.user as User);
 
     let profileMenuOpen = $state(false);
     let mobileMenuOpen = $state(false);
