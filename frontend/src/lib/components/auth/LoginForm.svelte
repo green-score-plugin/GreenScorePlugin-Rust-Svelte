@@ -2,8 +2,16 @@
     import validator from 'validator';
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
+    import type { ActionData } from '../../../routes/(auth)/login/$types';
+
+    export let form: ActionData;
 
     let email = '';
+
+    $: if (form?.message) {
+        loading = false;
+    }
+
     let password = '';
     let loading = false;
     let submitted = false;

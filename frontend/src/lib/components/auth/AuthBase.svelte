@@ -49,7 +49,7 @@
 
             {#if form?.message}
                 <div class="w-full bg-red-50 text-red-700 text-sm font-outfit font-medium border border-red-700 rounded-lg px-6 py-6">
-                    {$t(form.message)}
+                    {$t(form.message, { default: form.message })}
                 </div>
             {/if}
 
