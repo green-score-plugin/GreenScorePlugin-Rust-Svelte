@@ -5,8 +5,15 @@ const tabNetworkData = new Map();
 const lastSentData = new Map();
 
 //Cache pour utilisateur
-const USER_CACHE_TTL = 900000;
+const USER_CACHE_TTL = 900000 // 15 minutes;
 let userCache = {
+  data: null,
+  timestamp: 0
+};
+
+// Cache pour le pays
+const COUNTRY_CACHE_TTL = 3600000; // 1 heure
+let countryCache = {
   data: null,
   timestamp: 0
 };
@@ -341,6 +348,12 @@ initializeListeners();
 // Récupérer le pays selon la géolocalisation
 async function fetchCountry() {
   try {
+    const now = Date.now();
+    if (countryCache.data && (now - countryCache.timestamp < COUNTRY_CACHE_TTL)) {
+      console.log("Utilisation des données pays en cache");
+      return countryCache.data;
+    }
+
     const response = await fetch("https://ipwhois.app/json/");
     if (!response.ok) {
       throw new Error(`API responded with status ${response.status}`);
@@ -351,7 +364,12 @@ async function fetchCountry() {
       throw new Error(`API error: ${data.message}`);
     }
 
-    return { country: data.country, countryCode: data.country_code };
+    const result = { country: data.country, countryCode: data.country_code };
+    
+    countryCache.data = result;
+    countryCache.timestamp = now;
+    
+    return result;
   } catch (error) {
     console.error("Erreur lors de la récupération du pays:", error);
     return { country: "Unknown", countryCode: null };
