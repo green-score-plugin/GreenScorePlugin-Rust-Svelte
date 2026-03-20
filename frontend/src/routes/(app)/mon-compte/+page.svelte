@@ -18,7 +18,7 @@
     let organisation = $derived(userFull.organisation as Organisation)
     let service = $derived(userFull.service)
     let services = $derived((page.form?.updatedServices as any[]) ?? (page.data.services as any[]));
-    
+
 </script>
 
 <svelte:head>
