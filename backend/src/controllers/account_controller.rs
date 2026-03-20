@@ -212,6 +212,7 @@ pub async fn create_organization(
     };
 
     user_full.organisation = Some(organisation);
+    user_full.user.est_admin = true;
 
     session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
