@@ -1,10 +1,12 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
+    import { page } from '$app/state';
 
-    let organisationName = '', siret = '';
-    let loading = false;
-    let submitted = false;
+    let organisationName = $state('');
+    let siret = $state('');
+    let loading = $state(false);
+    let submitted = $state(false);
 
     function formatSiret(value: string) {
         const raw = value.replace(/\D/g, '').substring(0, 14);
@@ -23,14 +25,16 @@
         input.value = formatted;
     }
 
-    $: cleanSiret = siret.replace(/\s/g, '');
+    let cleanSiret = $derived(siret.replace(/\s/g, ''));
 
-    $: isSiretValid = cleanSiret === '' || /^\d{14}$/.test(cleanSiret);
+    let isSiretValid = $derived(cleanSiret === '' || /^\d{14}$/.test(cleanSiret));
 
-    $: errors = {
+    let errors = $derived({
         organisationName: !organisationName.trim(),
         siret: !isSiretValid
-    };
+    });
+
+    let serverError = $derived(page.form?.message);
 
 </script>
 
@@ -61,6 +65,12 @@
     };
 }} class="flex flex-col gap-3 max-w-full overflow-hidden">
 
+    {#if serverError}
+        <div class="px-3 py-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg">
+            {$t(serverError)}
+        </div>
+    {/if}
+
     <!-- Nom Organisation -->
     <div class="w-full text-grey-700 font-outfit font-semibold text-xs">
         <label for="organisationName" class="block mb-1">{$t('auth.register.org_name')}</label>
@@ -72,7 +82,7 @@
     <!-- SIRET (Optionnel) -->
     <div class="w-full text-grey-700 font-outfit font-semibold text-xs">
         <label for="siret" class="block mb-1">{$t('auth.register.siret')}</label>
-        <input value={siret} on:input={handleSiretInput} id="siret" type="text" name="siret"
+        <input value={siret} oninput={handleSiretInput} id="siret" type="text" name="siret"
                class="px-3 py-1.5 text-sm border rounded-lg w-full focus:outline-none {submitted && errors.siret ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder="123 456 789 00012">
         {#if submitted && errors.siret} <span class="text-red-500 text-xs mt-0.5 block">{$t('errors.validation_siret_format')}</span> {/if}
     </div>

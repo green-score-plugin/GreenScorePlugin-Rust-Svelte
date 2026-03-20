@@ -201,6 +201,16 @@ pub async fn create_organization(
 
     let user_id = user_full.user.id;
 
+    if let Some(ref s) = siret {
+        let exists = OrganisationService::find_id_by_siret(&pool, s.clone()).await
+            .map_err(AppError::DatabaseError)?
+            .is_some();
+
+        if exists {
+            return Err(AppError::BadRequest("errors.org_siret_exists".to_string()));
+        }
+    }
+
     let (organisation_id, organisation_code) = OrganisationService::inscription_orga(&pool, orga_name, siret.clone(), user_id).await
         .map_err(AppError::BadRequest)?;
 

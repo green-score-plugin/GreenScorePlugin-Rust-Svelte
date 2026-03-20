@@ -16,6 +16,9 @@ pub struct OrganisationService;
 
 impl OrganisationService {
 
+    pub async fn find_id_by_siret(pool: &MySqlPool, siret: String) -> Result<Option<i64>, Error> {
+        OrganisationRepository::find_id_by_siret(pool, &siret).await
+    }
     pub async fn organization_informations(pool: &MySqlPool, orga_id: i64, user_id: i64) -> Result<MyOrganizationInfos, Error>
     {
         let name: String = OrganisationRepository::organization_name(pool, orga_id).await.unwrap_or(None).unwrap_or_else(|| "Organisation inconnue".to_string());
