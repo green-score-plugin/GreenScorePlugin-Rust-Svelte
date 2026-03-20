@@ -12,6 +12,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let members = [];
     let organisation = null;
     let accountEquivalents = [];
+    let services = [];
 
     if (locals.user?.organisation) {
         const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
@@ -21,6 +22,20 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
                 if (data.success) members = data.members;
             } catch {}
         }
+
+        const servicesRes = await fetch(`${BACKEND_URL}/account/organization/services`, { method: 'GET', headers, credentials: 'include' });
+        if (servicesRes.ok) {
+            try {
+                const data = await servicesRes.json();
+                if (data.success) services = data.services;
+                console.log('Services loaded in load function:', services?.length ?? 0);
+            } catch (e) {
+                console.error('Error parsing services:', e);
+            }
+        } else {
+            console.error('Failed to load services:', servicesRes.status);
+        }
+
     } else if (locals.user?.user) {
         const orgRes = await fetch(`${BACKEND_URL}/account/my-organization`, { method: 'GET', headers, credentials: 'include' });
         if (orgRes.ok) {
@@ -28,6 +43,20 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
                 const result = await orgRes.json();
                 if (result.success && result.organisation) {
                     organisation = result.organisation;
+                    console.log('Organisation found in fallback:', organisation?.id);
+
+                    const servicesRes = await fetch(`${BACKEND_URL}/account/organization/services`, { method: 'GET', headers, credentials: 'include' });
+                    if (servicesRes.ok) {
+                        try {
+                            const data = await servicesRes.json();
+                            if (data.success) {
+                                services = data.services;
+                                console.log('Services loaded via fallback:', services?.length ?? 0);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing services in fallback:', e);
+                        }
+                    }
                 }
             } catch {}
         }
@@ -43,7 +72,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
         } catch {}
     }
 
-    return { members, organisation, accountEquivalents };
+    return { members, organisation, accountEquivalents, services };
 };
 
 export const actions = {
@@ -426,11 +455,19 @@ export const actions = {
 
             const result = await response.json();
 
+             console.log('Create service result:', result.success, 'Services count:', result.services?.length);
+
             if (!result.success) {
                 return fail(400, { actionType: 'create_service', message: result.message ?? 'errors.create_service_error' });
             }
 
-            return { actionType: 'create_service', success: true, message: 'success.service_created' };
+            return {
+                actionType: 'create_service',
+                success: true,
+                message: 'success.service_created',
+                updatedServices: result.services,
+                updatedUser: result.user_full
+            };
         } catch {
             return fail(500, { actionType: 'create_service', message: 'errors.server_error' });
         }

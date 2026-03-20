@@ -131,25 +131,27 @@
       "my_info": "Mon compte",
       "my_equivalents": "Mes équivalents",
       "my_organization": "Mon organisation",
-      "services": "Service",
+      "services": "Services",
       "manage_organization": "Gérer mon organisation",
       "delete_account": "Supprimer le compte",
       "delete_organization": "Supprimer l'organisation"
     },
     "service": {
-      "title": "Mon Service",
+      "title": "Gestion des services",
       "no_service": "Vous n'êtes rattaché à aucun service.",
       "name_label": "Nom du service",
       "leave_button": "Quitter le service",
-      "create_title": "Créer un service",
+      "create_title": "Créer un nouveau service",
       "create_button": "Créer le service",
       "create_placeholder": "Nom du service",
       "join_title": "Rejoindre un service",
       "join_button": "Rejoindre",
       "join_placeholder": "Sélectionnez un service",
-      "success_created": "Service créé avec succès",
       "success_joined": "Service rejoint avec succès",
-      "success_left": "Vous avez quitté le service"
+      "success_left": "Vous avez quitté le service",
+      "list_title": "Liste des services de l'organisation",
+      "no_services": "Aucun service trouvé pour cette organisation.",
+      "name": "Nom du service"
     },
     "info": {
       "title": "Mes informations",
@@ -552,7 +554,7 @@
     "org_left": "Vous avez quitté l'organisation.",
     "org_changed": "Vous avez changé d'organisation avec succès.",
     "join_organization": "Vous avez rejoint l'organisation avec succès.",
-    "leave_organization": "Vous avez quitté l'organisation.\n",
+    "leave_organization": "Vous avez quitté l'organisation.",
     "service_created": "Service créé avec succès"
   },
   "data": {

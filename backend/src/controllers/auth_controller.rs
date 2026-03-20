@@ -110,34 +110,39 @@ pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Jso
         .map(|org| org.id)
         .ok_or(AppError::BadRequest("User must be in an organization to create a service".to_string()))?;
 
-    let service_id = ServiceService::create_service(&pool, organisation_id, service_name).await
+    let services = ServiceService::create_service(&pool, organisation_id, service_name).await
         .map_err(AppError::BadRequest)?;
 
-    let service = crate::models::service::Service {
-        id: service_id,
-        id_organisation: organisation_id,
-        nom: service_name.to_string(),
-    };
-
-    user_full.service = Some(service);
+    if let Some(service) = services.iter().find(|s| s.nom == service_name) {
+        user_full.service = Some(service.clone());
+    }
 
     session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(CurrentAccountResponse {
         success: true,
         user_full: Some(user_full),
+        services: Some(services),
         message: None,
     }))
 }
 
-pub async fn get_current_account(session: Session) -> Result<Json<CurrentAccountResponse>, AppError> {
+pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>) -> Result<Json<CurrentAccountResponse>, AppError> {
 
     let user_full_opt: Option<UserFull> = session.get("user_full").await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     if let Some(user_full) = user_full_opt {
+        let mut services = None;
+        if let Some(org) = &user_full.organisation {
+             if let Ok(s) = ServiceService::get_organisation_services(&pool, org.id).await {
+                 services = Some(s);
+             }
+        }
+
         Ok(Json(CurrentAccountResponse {
             success: true,
             user_full: Some(user_full),
+            services,
             message: None,
         }))
     } else {

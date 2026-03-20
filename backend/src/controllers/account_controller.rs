@@ -8,6 +8,7 @@ use crate::dto::user_full::UserFull;
 use crate::service::user_service::UserService;
 use crate::service::organisation_service::OrganisationService;
 use crate::service::equivalent_service::EquivalentService;
+use crate::service::service_service::ServiceService;
 use crate::dto::update_account_request_dto::UpdateAccountRequest;
 use crate::dto::update_organisation_request_dto::UpdateOrganisationRequest;
 use crate::dto::equivalent_dto::EquivalentSelection;
@@ -91,6 +92,18 @@ pub async fn get_organisation_member(State(pool): State<MySqlPool>, Authenticate
     Ok(Json(json!({
         "success": true,
         "members": members
+    })))
+}
+
+pub async fn get_organisation_services(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Result<Json<Value>, AppError> {
+    let orga_id: i64 = user_full.organisation.ok_or(AppError::AuthError("errors.auth.unauthenticated".to_string()))?.id;
+
+    let services = ServiceService::get_organisation_services(&pool, orga_id).await
+        .map_err(AppError::InternalServerError)?;
+
+    Ok(Json(json!({
+        "success": true,
+        "services": services
     })))
 }
 
@@ -219,5 +232,6 @@ pub async fn create_organization(
         success: true,
         user_full: Some(user_full),
         message: None,
+        services: None,
     }))
 }

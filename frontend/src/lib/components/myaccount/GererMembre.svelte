@@ -68,7 +68,7 @@
 </script>
 
 <div class="flex flex-col gap-4">
-    <h1 class="font-outfit text-2xl font-semibold">Membres</h1>
+    <h1 class="font-outfit text-2xl fsont-semibold">Membres</h1>
 
     {#if members.length > 0}
         <div class="w-full font-outfit">

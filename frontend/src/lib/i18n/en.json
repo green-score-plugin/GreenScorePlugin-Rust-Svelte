@@ -131,16 +131,17 @@
       "my_info": "My Account",
       "my_equivalents": "My Equivalents",
       "my_organization": "My Organization",
+      "services": "Services",
       "manage_organization": "Manage My Organization",
       "delete_account": "Delete Account",
       "delete_organization": "Delete Organization"
     },
     "service": {
-      "title": "My Service",
+      "title": "Service Management",
       "no_service": "You are not attached to any service.",
       "name_label": "Service Name",
       "leave_button": "Leave Service",
-      "create_title": "Create a Service",
+      "create_title": "Create a new Service",
       "create_button": "Create Service",
       "create_placeholder": "Service Name",
       "join_title": "Join a Service",
@@ -148,7 +149,10 @@
       "join_placeholder": "Select a Service",
       "success_created": "Service created successfully",
       "success_joined": "Service joined successfully",
-      "success_left": "You have left the service"
+      "success_left": "You have left the service",
+      "list_title": "Organization Services List",
+      "no_services": "No services found for this organization.",
+      "name": "Service Name"
     },
     "info": {
       "title": "My Information",
@@ -540,7 +544,10 @@
     "org_left": "You have left the organization.",
     "org_changed": "You have successfully changed your organization.",
     "join_organization": "You have successfully joined the organization.",
-    "leave_organization": "You have successfully left the organization."
+    "leave_organization": "You have successfully left the organization.",
+    "service_created": "Service successfully created"
+
+
   },
   "data": {
     "advice": {
