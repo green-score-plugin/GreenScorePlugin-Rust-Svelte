@@ -35,14 +35,14 @@ impl AuthService{
         Ok(user_id)
     }
 
-    pub async fn login (pool: &MySqlPool, email: &str, password: &str) -> Result<UserFull, String> {
-        let user_result = UserRepository::find_with_password_by_email(pool, email).await.map_err(|_| "db_error")?;
+    pub async fn login (pool: &MySqlPool, email: &str, password: &str) -> Result<UserFull, AppError> {
+        let user_result = UserRepository::find_with_password_by_email(pool, email).await.map_err(AppError::DatabaseError)?;
         let (id, password_hash, first_name, last_name, organisation_id, service_id, est_admin) = match user_result {
             Some(tuple) => tuple,
             None => return Err(AppError::AuthError("errors.auth.invalid_credentials".to_string())),
         };
 
-        if !bcrypt::verify(password, &password_hash).map_err(|_| AppError::InternalServerError("errors.auth.hash_error".to_string()))? {
+        if !bcrypt::verify(password, &password_hash).map_err(|e| AppError::InternalServerError(e.to_string()))? {
             return Err(AppError::AuthError("errors.auth.invalid_credentials".to_string()));
         }
 
