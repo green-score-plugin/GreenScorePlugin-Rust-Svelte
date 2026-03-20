@@ -18,12 +18,7 @@
     let organisation = $derived(userFull.organisation as Organisation)
     let service = $derived(userFull.service)
     let services = $derived((page.form?.updatedServices as any[]) ?? (page.data.services as any[]));
-
-    $inspect(services);
-    $inspect(user);
-    $inspect(organisation);
-
-    $inspect(userFull);
+    
 </script>
 
 <svelte:head>
@@ -59,25 +54,5 @@
                 {/if}
             {/if}
         </div>
-    </div>
-
-    <!-- Debug section to view all user info -->
-    <div class="px-4 lg:px-16 pb-8 flex flex-col gap-4">
-        <details class="bg-white p-4 rounded shadow-lg">
-            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos utilisateur (Debug)</summary>
-            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(user, null, 2)}</pre>
-        </details>
-
-        <details class="bg-white p-4 rounded shadow-lg">
-            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos organisation (Debug)</summary>
-            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(organisation, null, 2)}</pre>
-        </details>
-
-        <details class="bg-white p-4 rounded shadow-lg">
-            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos service (Debug)</summary>
-            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(service, null, 2)}</pre>
-            <h4 class="mt-4 font-bold">Liste des Services de l'Organisation:</h4>
-            <pre class="mt-2 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(services, null, 2)}</pre>
-        </details>
     </div>
 </div>
