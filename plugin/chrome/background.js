@@ -72,7 +72,6 @@ async function getLatestCarbonIntensity(countryCode) {
     if (carbonIntensityCache.has(countryCode)) {
       const cachedData = carbonIntensityCache.get(countryCode);
       if (now - cachedData.timestamp < CARBON_CACHE_TTL) {
-        console.log(`Intensité carbone (Cache) pour ${countryCode}: ${cachedData.value}`);
         // Mise à jour de l'onglet actif avec la donnée en cache
         chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
             if (tabs.length > 0) {

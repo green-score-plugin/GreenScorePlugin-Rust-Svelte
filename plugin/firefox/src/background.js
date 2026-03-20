@@ -22,7 +22,7 @@ const carbonIntensityCache = new Map();
 
 
 // Information nécessaire pour appeler les APIs
-const token = "t6MlBacdjBPFv";
+const token  = "t6MlBacdjBPFv";
 const carbonIntensityUrl =
   "https://api.electricitymap.org/v3/carbon-intensity/latest";
 
@@ -70,7 +70,7 @@ async function getLatestCarbonIntensity(countryCode) {
     if (carbonIntensityCache.has(countryCode)) {
       const cachedData = carbonIntensityCache.get(countryCode);
       if (now - cachedData.timestamp < CARBON_CACHE_TTL) {
-        console.log(`Intensité carbone (Cache) pour ${countryCode}: ${cachedData.value}`);
+
         // Mise à jour de l'onglet actif avec la donnée en cache
         browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
             if (tabs.length > 0) {
