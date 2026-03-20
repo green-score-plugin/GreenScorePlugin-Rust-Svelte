@@ -22,7 +22,7 @@ const carbonIntensityCache = new Map();
 
 
 // Information nécessaire pour appeler les APIs
-const token  = "t6MlBacdjBPFv";
+const token  = CONFIG.BACKEND.ELECTRICITY_MAP_API_KEY;
 const carbonIntensityUrl =
   "https://api.electricitymap.org/v3/carbon-intensity/latest";
 

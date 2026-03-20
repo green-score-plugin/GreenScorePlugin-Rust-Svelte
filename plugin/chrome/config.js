@@ -10,7 +10,8 @@ const CONFIG = {
       BASE_URL, // URL du site Greenscore
       
       LOGIN_URL: `${BASE_URL}/login`, // URL de la page de connexion
-      DETAILS_URL: `${BASE_URL}/derniere-page-consultee` // URL de la page de détails
+      DETAILS_URL: `${BASE_URL}/derniere-page-consultee`, // URL de la page de détails
+      ELECTRICITY_MAP_API_KEY: "tW8gg9MwDNv8ij0nho2h"
     }
   };
   
