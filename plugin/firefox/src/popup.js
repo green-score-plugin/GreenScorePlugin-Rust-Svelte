@@ -1,13 +1,67 @@
 let gCO2eValue;
+let currentLang = 'fr';
+let translations = {};
+
+async function loadTranslations(lang) {
+  try {
+    const response = await fetch(`./i18n/${lang}.json`);
+    if (!response.ok) {
+      throw new Error(`Failed to load translations for ${lang}`);
+    }
+    return await response.json();
+  } catch (error) {
+    if (lang !== 'fr') {
+      return await loadTranslations('fr');
+    }
+    return {};
+  }
+}
+
+async function initLanguage(forcedLang = null) {
+  if (forcedLang) {
+    currentLang = forcedLang;
+    localStorage.setItem('gs_plugin_lang', forcedLang);
+  } else {
+    const storedLang = localStorage.getItem('gs_plugin_lang');
+    if (storedLang) {
+      currentLang = storedLang;
+    } else {
+      const browserLang = navigator.language.split('-')[0];
+      currentLang = ['fr', 'en'].includes(browserLang) ? browserLang : 'en';
+    }
+  }
+
+  translations = await loadTranslations(currentLang);
+  applyStaticTranslations();
+
+  if (typeof refreshDynamicTexts === 'function') {
+      refreshDynamicTexts();
+  }
+}
+
+function t(key, params = {}) {
+  let text = (translations && translations[key]) || key;
+  Object.keys(params).forEach(k => {
+    text = text.replace(`{${k}}`, params[k]);
+  });
+  return text;
+}
+
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[key]) {
+        el.textContent = translations[key];
+    }
+  });
+}
 
 async function updateEquivalents() {
   try {
-    console.log("Envoi de la requête à background.js...");
     const response = await browser.runtime.sendMessage({
       type: "getEquivalent",
-      count: 3, // Nombre d'équivalents à récupérer
+      count: 3,
     });
-    console.log("Réponse reçue :", response);
 
     if (response && response.success && response.equivalents) {
       const cards = document.querySelectorAll(".comparison-card");
@@ -20,24 +74,52 @@ async function updateEquivalents() {
 
           img.src = equivalent.image || "../assets/images/default.svg";
           valueElement.textContent = equivalent.value;
-          description.textContent = equivalent.name;
+          description.textContent = t(equivalent.name);
         }
       });
-    } else {
-      console.error(
-        "Erreur dans la réponse reçue :",
-        response ? response.error : "Réponse indéfinie"
-      );
     }
-  } catch (error) {
-    console.error("Erreur dans updateEquivalents :", error);
+  } catch {
   }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  await initLanguage();
+
+  const frFlag = document.getElementById('lang-fr');
+  const enFlag = document.getElementById('lang-en');
+
+  if (currentLang === 'fr') {
+    frFlag?.classList.add('flag-active');
+    enFlag?.classList.remove('flag-active');
+  } else {
+    enFlag?.classList.add('flag-active');
+    frFlag?.classList.remove('flag-active');
+  }
+
+  if (frFlag) {
+    frFlag.addEventListener('click', async () => {
+      if (currentLang !== 'fr') {
+        await initLanguage('fr');
+        await updateEquivalents();
+        frFlag.classList.add('flag-active');
+        enFlag.classList.remove('flag-active');
+      }
+    });
+  }
+
+  if (enFlag) {
+    enFlag.addEventListener('click', async () => {
+      if (currentLang !== 'en') {
+        await initLanguage('en');
+        await updateEquivalents();
+        enFlag.classList.add('flag-active');
+        frFlag.classList.remove('flag-active');
+      }
+    });
+  }
+
   let isLocalhost = false;
 
-  // Écouteur pour le message localhost
   browser.runtime.onMessage.addListener((message) => {
     if (message.type === "localhostDetected") {
       isLocalhost = true;
@@ -52,12 +134,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const title = document.createElement("p");
         title.className = "text-3xl font-bold font-outfit";
-        title.textContent = message.message || ""; // usage de textContent pour éviter l'injection
+        title.textContent = message.message || "";
 
         const detailsButton = document.createElement("a");
         detailsButton.id = "details-button";
         detailsButton.className = "flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg";
-        detailsButton.textContent = "Plus d'informations";
+        detailsButton.textContent = t("more_details");
 
         const rawUrl = `${CONFIG.BACKEND.BASE_URL}/#`;
         try {
@@ -84,7 +166,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Si ce n'est pas localhost, continuer avec le reste des fonctionnalités
   if (!isLocalhost) {
     function getColorClass(gCO2e) {
       const value = Number(gCO2e);
@@ -134,10 +215,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function updateAverageConsumption(gCO2e) {
-      const AVERAGE_CONSUMPTION = 0.74; // Valeur obtenue sur un calcul de moyenne sur plus de 100 sites
+      const AVERAGE_CONSUMPTION = 0.74;
 
       if (gCO2e <= 0) {
-        document.getElementById("average-consumption").textContent = "négligeable comparé";
+        document.getElementById("average-consumption").textContent = t("negligible");
         return;
       }
 
@@ -146,11 +227,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (multiplier > 1) {
         document.getElementById(
           "average-consumption"
-        ).textContent = `${multiplier.toFixed(2)}x supérieur`;
+        ).textContent = t("higher", { mult: multiplier.toFixed(2) });
       } else {
-        document.getElementById("average-consumption").textContent = `${(
-          1 / multiplier
-        ).toFixed(2)}x inférieur`;
+        document.getElementById("average-consumption").textContent = t("lower", { mult: (1 / multiplier).toFixed(2) });
       }
     }
 
@@ -168,7 +247,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateColors(gCO2eValue);
         updateAverageConsumption(gCO2eValue);
       } else {
-        console.warn("Pas de valeur gCO2e reçue");
         updateColors(0);
       }
     } catch (error) {
@@ -190,17 +268,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (userData.isLoggedIn) {
           const connectedSpan = document.createElement("span");
+          connectedSpan.id = "user-connected-msg";
           connectedSpan.className = "text-sm text-[#6D874B] font-bold";
-          connectedSpan.textContent = "Vous êtes connecté !";
+          connectedSpan.textContent = t("logged_in");
           loginSection.appendChild(connectedSpan);
         } else {
           const promptSpan = document.createElement("span");
+          promptSpan.id = "login-prompt-msg";
           promptSpan.className = "text-sm text-grey-950";
-          promptSpan.textContent = "Vous souhaitez enregistrer ce résultat ?\u00A0";
+          promptSpan.textContent = t("save_prompt") + " ";
 
           const loginLink = document.createElement("a");
-          loginLink.className = "text-[#6D874B] font-bold underline";
-          loginLink.textContent = "Se connecter";
+          loginLink.id = "login-link-action";
+          loginLink.className = "text-[#6D874B] font-bold underline cursor-pointer";
+          loginLink.textContent = t("sign_in");
 
           try {
             const parsed = new URL(CONFIG.BACKEND.LOGIN_URL);
@@ -222,7 +303,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
 
-      // Gestion du bouton "Plus de détails"
       if (detailsButton) {
         detailsButton.addEventListener("click", async (e) => {
           e.preventDefault();
@@ -233,7 +313,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             })
           }
 
-          // Récupérer les détails actuels
           const response = await browser.runtime.sendMessage({
             type: "getFullDetails",
           });
@@ -241,7 +320,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           let url = CONFIG.BACKEND.DETAILS_URL;
 
           if (!userData.isLoggedIn) {
-            // Construction des paramètres d'URL si non connecté
             const params = new URLSearchParams({
               country: response.country || "",
               url_full: response.urlFull || "",
@@ -253,15 +331,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             url += "?" + params.toString();
           }
 
-          // Ouvrir l'URL dans un nouvel onglet
           browser.tabs.create({ url: url });
         });
       }
-    } catch (error) {
-      console.error(
-        "Erreur lors de la vérification de l'état de connexion:",
-        error
-      );
+    } catch {
     }
 
     // 3. Gestion Pays/URL
@@ -269,19 +342,68 @@ document.addEventListener("DOMContentLoaded", async () => {
       const urlElement = document.getElementById("site-url");
       const countryElement = document.getElementById("site-country");
 
-      if (countryElement && urlElement) {
-        countryElement.textContent = `Dans votre pays (${countryResponse.country}), cette page consomme`;
-        urlElement.textContent = countryResponse.url;
-      }
-    } else if (countryResponse && countryResponse.error) {
-       console.error("Erreur pays :", countryResponse.error);
-    }
+          if (countryElement && urlElement) {
+            countryElement.textContent = t("country_consumption_intro", { countryName: response.country });
+            urlElement.textContent = response.url;
+          }
+        }
+      })
+      .catch(() => {
+      });
 
     // 4. Equivalents
     try {
       await updateEquivalents();
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour des équivalents :", error);
+    } catch {
     }
   }
 });
+
+
+function refreshDynamicTexts() {
+    updateEquivalents();
+
+    if (typeof gCO2eValue !== 'undefined') {
+        const AVERAGE_CONSUMPTION = 0.74;
+        const avgEl = document.getElementById("average-consumption");
+        if (avgEl) {
+             if (gCO2eValue <= 0) {
+                 avgEl.textContent = t("negligible");
+             } else {
+                  let multiplier = gCO2eValue / AVERAGE_CONSUMPTION;
+                  if (multiplier > 1) {
+                     avgEl.textContent = t("higher", { mult: multiplier.toFixed(2) });
+                  } else {
+                     avgEl.textContent = t("lower", { mult: (1 / multiplier).toFixed(2) });
+                  }
+             }
+        }
+    }
+
+    browser.runtime.sendMessage({ type: "getCountryAndUrl" }).then(response => {
+         if (response && response.country) {
+            const countryElement = document.getElementById("site-country");
+            if (countryElement) countryElement.textContent = t("country_consumption_intro", { countryName: response.country });
+         }
+    });
+
+    const promptSpan = document.getElementById("login-prompt-msg");
+    if (promptSpan) {
+         promptSpan.textContent = t("save_prompt") + " ";
+    }
+
+    const loginLink = document.getElementById("login-link-action");
+    if(loginLink) {
+        loginLink.textContent = t("sign_in");
+    }
+
+    const connectedMsg = document.getElementById("user-connected-msg");
+    if (connectedMsg) {
+        connectedMsg.textContent = t("logged_in");
+    }
+
+    const detailsBtn = document.getElementById("details-button");
+    if (detailsBtn) {
+        detailsBtn.textContent = t("more_details");
+    }
+}

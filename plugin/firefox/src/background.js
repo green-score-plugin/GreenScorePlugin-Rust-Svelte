@@ -471,23 +471,25 @@ browser.webRequest.onCompleted.addListener(
 
     tabData.endTime = details.timeStamp;
 
-    let transferredSize = details.responseSize || 0;
-    requestData.transferredSize = transferredSize;
+    // Firefox ne fournit pas responseSize, on utilise le resourceSize du Content-Length
+    let resourceSize = requestData.resourceSize || 0;
+    let transferredSize = resourceSize;
 
-    let resourceSize = requestData.resourceSize;
-    if (transferredSize > 0 && !resourceSize) {
+    if (requestData.encoding && resourceSize > 0) {
       switch (requestData.encoding) {
         case "gzip":
         case "deflate":
-          resourceSize = transferredSize * 3;
+          transferredSize = Math.round(resourceSize / 3);
           break;
         case "br":
-          resourceSize = transferredSize * 5;
+          transferredSize = Math.round(resourceSize / 5);
           break;
         default:
-          resourceSize = transferredSize;
+          transferredSize = resourceSize;
       }
     }
+
+    requestData.transferredSize = transferredSize;
 
     tabData.totalTransferredSize += transferredSize;
     tabData.totalResourceSize += resourceSize;
