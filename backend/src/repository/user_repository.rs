@@ -138,9 +138,9 @@ impl UserRepository {
         updates.push("last_name = ?".to_string());
         params.push(new_user.nom.clone());
 
-        if new_password.is_some() {
+        if let Some(new_password) = new_password {
             updates.push("password = ?".to_string());
-            params.push(new_password.unwrap());
+            params.push(new_password);
         }
 
         query.push_str(&updates.join(", "));
@@ -180,7 +180,7 @@ impl UserRepository {
 
     pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<User>, Error> {
         let result = sqlx::query_as::<_, User>(
-            "SELECT * FROM user WHERE organisation_id = ? AND est_admin = true"
+            "SELECT * FROM user WHERE organisation_id = ?"
         )
             .bind(orga_id)
             .fetch_all(pool)

@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let organisation = null;
     let accountEquivalents = [];
 
-    if (locals.user?.organisation) {
+    if (locals.user?.organisation && locals.user.user.est_admin) {
         const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
         if (res.ok) {
             try {
