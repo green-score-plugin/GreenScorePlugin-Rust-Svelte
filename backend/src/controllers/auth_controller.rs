@@ -43,8 +43,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
     let email = payload.email.trim();
     let password = payload.password.trim();
 
-    let user_full = AuthService::login(&pool, email, password).await
-        .map_err(AppError::AuthError)?;
+    let user_full = AuthService::login(&pool, email, password).await?;
 
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 

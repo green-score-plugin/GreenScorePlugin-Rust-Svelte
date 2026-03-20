@@ -103,7 +103,8 @@
       "already_have_account": "J'ai déjà un compte",
       "register_link": "Inscription",
       "success_deleted": "Succès !",
-      "account_deleted_msg": "Votre compte a été supprimé avec succès."
+      "account_deleted_msg": "Votre compte a été supprimé avec succès.",
+      "sign_in": "Se connecter"
     },
     "register": {
       "user_title": "Inscription",
@@ -498,7 +499,8 @@
     "validation_fields_required": "Prénom, nom et email requis",
     "validation_password_complexity": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)",
     "validation_code_required": "Le code de l'organisation est requis",
-    "validation_code_invalid": "Code invalide",
+    "session_error": "Erreur de session",
+    "too_many_attempts": "Trop de tentatives, veuillez réessayer dans 15 minutes",
     "org_change_error": "Erreur serveur lors du changement d'organisation",
     "no_changes": "Aucune modification à effectuer",
     "db_error": "Erreur base de données",
@@ -522,7 +524,8 @@
       "email_verification_error": "Erreur vérification email",
       "registration_error": "Erreur d'inscription",
       "org_creation_error": "Erreur création organisation",
-      "user_creation_error": "Erreur création utilisateur"
+      "user_creation_error": "Erreur création utilisateur",
+      "missing_fields": "Tous les champs sont requis"
     }
   },
   "success": {

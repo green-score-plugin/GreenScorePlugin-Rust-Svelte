@@ -6,6 +6,7 @@ use crate::dto::user_full::UserFull;
 use crate::repository::user_repository::UserRepository;
 use crate::repository::organisation_repository::OrganisationRepository;
 use crate::repository::service_repository::ServiceRepository;
+use crate::error::AppError;
 
 pub struct AuthService;
 
@@ -38,11 +39,11 @@ impl AuthService{
         let user_result = UserRepository::find_with_password_by_email(pool, email).await.map_err(|_| "db_error")?;
         let (id, password_hash, first_name, last_name, organisation_id, service_id, est_admin) = match user_result {
             Some(tuple) => tuple,
-            None => return Err("user_not_found".to_string()),
+            None => return Err(AppError::AuthError("errors.auth.invalid_credentials".to_string())),
         };
 
-        if !bcrypt::verify(password, &password_hash).map_err(|_| "hash_error")? {
-            return Err("invalid_credentials".to_string());
+        if !bcrypt::verify(password, &password_hash).map_err(|_| AppError::InternalServerError("errors.auth.hash_error".to_string()))? {
+            return Err(AppError::AuthError("errors.auth.invalid_credentials".to_string()));
         }
 
         let user = User {
@@ -60,15 +61,15 @@ impl AuthService{
         let mut service: Option<Service> = None;
 
         if let Some(org_id) = organisation_id {
-            organisation = OrganisationRepository::find_by_id(pool, org_id).await.map_err(|_| "db_error")?;
+            organisation = OrganisationRepository::find_by_id(pool, org_id).await.map_err(AppError::DatabaseError)?;
         }
 
         if let Some(srv_id) = service_id {
-            service = ServiceRepository::find_by_id(pool, srv_id).await.map_err(|_| "db_error")?;
+            service = ServiceRepository::find_by_id(pool, srv_id).await.map_err(AppError::DatabaseError)?;
         }
 
         if let Some(ref srv) = service {
-            organisation = OrganisationRepository::find_by_id(pool, srv.id_organisation).await.map_err(|_| "db_error")?;
+            organisation = OrganisationRepository::find_by_id(pool, srv.id_organisation).await.map_err(AppError::DatabaseError)?;
         }
 
         let user_full = UserFull {
