@@ -48,4 +48,19 @@
             {/if}
         </div>
     </div>
+    <div class="px-4 lg:px-16 pb-8 flex flex-col gap-4">
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos utilisateur (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(userFull, null, 2)}</pre>
+        </details>
+
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos organisation (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(organisation, null, 2)}</pre>
+        </details>
+        <details class="bg-white p-4 rounded shadow-lg">
+            <summary class="cursor-pointer font-bold text-gray-700">Voir toutes les infos organisation (Debug)</summary>
+            <pre class="mt-4 p-4 bg-gray-100 rounded overflow-x-auto text-sm">{JSON.stringify(activePage, null, 2)}</pre>
+        </details>
+    </div>
 </div>

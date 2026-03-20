@@ -408,10 +408,14 @@ export const actions = {
 
     create_organization: async ({ request, fetch, cookies })=> {        const data = await request.formData();
         const organisationName = data.get('organisationName');
-        const siret = data.get('siret');
+        const siret = data.get('siret')?.toString();
 
         if(!organisationName) {
             return fail(400, { message: "errors.champs" })
+        }
+
+        if (siret && !/^\d{14}$/.test(siret)) {
+            return fail(400, { message: 'errors.validation_siret_format' });
         }
 
         try{
