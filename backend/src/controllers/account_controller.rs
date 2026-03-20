@@ -7,6 +7,7 @@ use tower_sessions::Session;
 use crate::dto::user_full::UserFull;
 use crate::service::user_service::UserService;
 use crate::service::organisation_service::OrganisationService;
+use crate::service::auth_service::AuthService;
 use crate::service::equivalent_service::EquivalentService;
 use crate::service::service_service::ServiceService;
 use crate::dto::update_account_request_dto::UpdateAccountRequest;
@@ -125,7 +126,7 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
         return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
     }
 
-    let updated_org = OrganisationService::update_organisation(&pool, org, payload).await
+    let updated_org = OrganisationService::update_organisation_details(&pool, org, payload).await
         .map_err(AppError::BadRequest)?;
 
     user_full.organisation = Some(updated_org.clone());
@@ -210,11 +211,11 @@ pub async fn create_organization(
     let orga_name = payload["organization_name"].as_str()
         .ok_or(AppError::BadRequest("Missing organization_name".to_string()))?;
 
-    let siret: Option<String> = Some(payload["siret"].to_string());
+    let siret = payload["siret"].as_str().map(|s| s.to_string());
 
     let user_id = user_full.user.id;
 
-    let (organisation_id, organisation_code) = OrganisationService::inscription_orga(&pool, orga_name, siret.clone(), user_id).await
+    let (organisation_id, organisation_code) = AuthService::inscription_orga(&pool, orga_name, siret.as_deref(), user_id).await
         .map_err(AppError::BadRequest)?;
 
     let organisation = Organisation {
