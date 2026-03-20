@@ -197,7 +197,7 @@ pub async fn create_organization(
     let orga_name = payload["organization_name"].as_str()
         .ok_or(AppError::BadRequest("Missing organization_name".to_string()))?;
 
-    let siret: Option<String> = Some(payload["siret"].to_string());
+    let siret: Option<String> = payload["siret"].as_str().map(|s| s.to_string());
 
     let user_id = user_full.user.id;
 
