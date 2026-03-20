@@ -9,7 +9,7 @@
     import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
     import type {User, Organisation, UserFull} from "$lib/types/account.ts";
 
-    let activePage = $state("my_info");
+    let activePage = $state(page.url.searchParams.get('tab') ?? "my_info");
 
     let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
     let user = $derived(userFull.user as User);
