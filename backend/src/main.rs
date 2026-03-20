@@ -7,10 +7,13 @@ use axum::http::{header, HeaderValue, Method};
 use tower_sessions::{SessionManagerLayer, Expiry};
 use time::Duration;
 use tower_http::cors::CorsLayer;
+use tower_http::trace::TraceLayer;
 
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
+
+    console_subscriber::init();
 
     let backend_url = env::var("BACKEND_URL").unwrap_or("localhost:3000".to_string());
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set");
@@ -23,7 +26,7 @@ async fn main() {
     let session_layer = SessionManagerLayer::new(store)
         .with_secure(false)
         .with_http_only(true)
-        .with_same_site(tower_sessions::cookie::SameSite::Lax) // ✅ Change en Lax
+        .with_same_site(tower_sessions::cookie::SameSite::Lax)
         .with_name("greenscoreweb_sessions")
         .with_expiry(Expiry::OnInactivity(Duration::seconds(3600)));
 
@@ -49,7 +52,8 @@ async fn main() {
 
     let app = router::create_router(pool)
         .layer(session_layer)
-        .layer(cors);
+        .layer(cors)
+        .layer(TraceLayer::new_for_http());
 
 
     let listener = tokio::net::TcpListener::bind(backend_url.clone())

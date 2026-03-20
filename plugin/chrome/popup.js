@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         detailsButton.className = "flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg";
         detailsButton.textContent = "Plus d'informations";
 
-        const rawUrl = `${CONFIG.BACKEND.WEBSITE_URL}/#`;
+        const rawUrl = `${CONFIG.BACKEND.BASE_URL}/#`;
         try {
           const parsed = new URL(rawUrl);
           detailsButton.href = parsed.toString();
@@ -230,10 +230,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
+    // Lance toutes les requêtes en parallèle
+    const [gCO2eResponse, userData, countryResponse] = await Promise.all([
+      chrome.runtime.sendMessage({ type: "getgCO2e" }),
+      chrome.runtime.sendMessage({ type: "checkLoginStatus" }),
+      chrome.runtime.sendMessage({ type: "getCountryAndUrl" })
+    ]);
+
+    // 1. Gestion de gCO2e
     try {
-      const response = await chrome.runtime.sendMessage({ type: "getgCO2e" });
-      if (response && response.gCO2e !== undefined) {
-        gCO2eValue = parseFloat(response.gCO2e).toFixed(2);
+      if (gCO2eResponse && gCO2eResponse.gCO2e !== undefined) {
+        gCO2eValue = parseFloat(gCO2eResponse.gCO2e).toFixed(2);
         updateColors(gCO2eValue);
         updateAverageConsumption(gCO2eValue);
       } else {
@@ -241,39 +248,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateColors(0);
       }
     } catch (error) {
-      console.error("Erreur récupération gCO2e:", error);
+      console.error("Erreur gCO2e processing:", error);
     }
 
-    // Vérification du statut de connexion
+    // 2. Gestion du Login
     try {
-      const userData = await chrome.runtime.sendMessage({
-        type: "checkLoginStatus",
-      });
-      window._isLoggedIn = userData.isLoggedIn; // Stocke l'état globalement pour la retraduction
+      window._isLoggedIn = userData.isLoggedIn; 
       updateLoginSection(userData.isLoggedIn);
       const detailsButton = document.getElementById("details-button");
 
-
-      // Gestion du bouton "Plus de détails"
       if (detailsButton) {
         detailsButton.addEventListener("click", async (e) => {
           e.preventDefault();
 
           if (userData.isLoggedIn) {
-            await chrome.runtime.sendMessage({
-              type: "sendDataToDB"
-            })
+            await chrome.runtime.sendMessage({ type: "sendDataToDB" });
           }
 
-          // Récupérer les détails actuels
-          const response = await chrome.runtime.sendMessage({
-            type: "getFullDetails",
-          });
+
+          const response = await chrome.runtime.sendMessage({ type: "getFullDetails" });
 
           let url = CONFIG.BACKEND.DETAILS_URL;
 
           if (!userData.isLoggedIn) {
-            // Construction des paramètres d'URL si non connecté
             const params = new URLSearchParams({
               country: response.country || "",
               url_full: response.urlFull || "",
@@ -284,42 +281,28 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
             url += "?" + params.toString();
           }
-
-          // Ouvrir l'URL dans un nouvel onglet
           chrome.tabs.create({ url: url });
         });
       }
     } catch (error) {
-      console.error(
-        "Erreur lors de la vérification de l'état de connexion:",
-        error
-      );
+       console.error("Erreur login processing:", error);
     }
 
-    chrome.runtime
-      .sendMessage({ type: "getCountryAndUrl" })
-      .then((response) => {
-        if (response && response.country && response.url) {
-          const urlElement = document.getElementById("site-url");
-          const countryElement = document.getElementById("site-country");
+    // 3. Gestion Pays/URL
+    if (countryResponse && countryResponse.country && countryResponse.url) {
+      const urlElement = document.getElementById("site-url");
+      const countryElement = document.getElementById("site-country");
 
-          if (countryElement && urlElement) {
-            // Utilise la traduction dynamique pour la phrase du pays
-            const template = getI18n('country_sentence', 'Dans votre pays (*Pays*), cette page consomme');
-            countryElement.textContent = template.replace('*Pays*', response.country).replace('*Country*', response.country);
-            urlElement.textContent = response.url;
-          }
-        } else if (response.error) {
-          console.error("Erreur :", response.error);
-        }
-      })
-      .catch((error) => {
-        console.error(
-          "Erreur lors de la récupération du pays ou de l'URL :",
-          error
-        );
-      });
+      if (countryElement && urlElement) {
+        const template = getI18n('country_sentence', 'Dans votre pays (*Pays*), cette page consomme');
+        countryElement.textContent = template.replace('*Pays*', countryResponse.country).replace('*Country*', countryResponse.country);
+        urlElement.textContent = countryResponse.url;
+      }
+    } else if (countryResponse && countryResponse.error) {
+       console.error("Erreur pays :", countryResponse.error);
+    }
 
+    // 4. Equivalents (indépendant, peut être lancé en parallèle aussi)
     try {
       await updateEquivalents();
     } catch (error) {

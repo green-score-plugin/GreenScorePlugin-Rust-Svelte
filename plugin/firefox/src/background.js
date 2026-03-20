@@ -2,8 +2,27 @@
 const tabNetworkData = new Map();
 const lastSentData = new Map();
 
+//Cache pour utilisateur
+const USER_CACHE_TTL = 900000;
+let userCache = {
+  data: null,
+  timestamp: 0
+}
+
+// Cache pour le pays
+const COUNTRY_CACHE_TTL = 3600000; // 1 heure
+let countryCache = {
+  data: null,
+  timestamp: 0
+};
+
+// Cache pour l'intensité carbone (clé: countryCode, valeur: {value, timestamp})
+const CARBON_CACHE_TTL = 3600000; // 1 heure
+const carbonIntensityCache = new Map();
+
+
 // Information nécessaire pour appeler les APIs
-const token = "t6MlBacdjBPFv";
+const token  = CONFIG.BACKEND.ELECTRICITY_MAP_API_KEY;
 const carbonIntensityUrl =
   "https://api.electricitymap.org/v3/carbon-intensity/latest";
 
@@ -46,6 +65,23 @@ function isLocalDomain(url) {
 // Récupérer l'intensité carbone pour un pays
 async function getLatestCarbonIntensity(countryCode) {
   try {
+    // Vérification du cache
+    const now = Date.now();
+    if (carbonIntensityCache.has(countryCode)) {
+      const cachedData = carbonIntensityCache.get(countryCode);
+      if (now - cachedData.timestamp < CARBON_CACHE_TTL) {
+
+        // Mise à jour de l'onglet actif avec la donnée en cache
+        browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+            if (tabs.length > 0) {
+              const tabData = getTabData(tabs[0].id);
+              tabData.carbonIntensity = cachedData.value;
+            }
+        });
+        return cachedData.value;
+      }
+    }
+  
     const response = await fetch(`${carbonIntensityUrl}?zone=${countryCode}`, {
       method: "GET",
       headers: {
@@ -62,6 +98,13 @@ async function getLatestCarbonIntensity(countryCode) {
     console.log(
       `Intensité carbone pour la zone ${countryCode}: ${data.carbonIntensity} gCO₂/kWh`
     );
+
+    // Mise en cache
+    carbonIntensityCache.set(countryCode, {
+      value: data.carbonIntensity,
+      timestamp: now
+    });
+
     browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       if (tabs.length > 0) {
         const tabData = getTabData(tabs[0].id);
@@ -134,7 +177,14 @@ async function getUserId() {
 
     if (!sessionCookie) {
       console.log("Pas de cookie de session trouvé");
+      userCache.data = null;
       return null;
+    }
+
+    const now = Date.now();
+    if (userCache.data && (now - userCache.timestamp < USER_CACHE_TTL)) {
+      console.log("Utilisation des données utilisateur en cache");
+      return userCache.data;
     }
 
     const response = await fetch(`${CONFIG.BACKEND.PLUGIN_BACKEND_URL}/get-account`, {
@@ -151,6 +201,10 @@ async function getUserId() {
     }
 
     const userData = await response.json();
+
+    userCache.data = userData.account;
+    userCache.timestamp = now;
+
     return userData.account;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID:", error);
@@ -310,7 +364,10 @@ function initializeListeners() {
     if (tabData && tabData.currentUrl) {
       await handleUrlChange(tabId, tabData.currentUrl, true);
     }
+    // Nettoyage complet pour éviter les fuites de mémoire
     tabNetworkData.delete(tabId);
+    lastSentData.delete(tabId);
+    lastProcessedUrls.delete(tabId);
   });
 }
 
@@ -320,6 +377,12 @@ initializeListeners();
 // Récupérer le pays selon la géolocalisation
 async function fetchCountry() {
   try {
+    const now = Date.now();
+    if (countryCache.data && (now - countryCache.timestamp < COUNTRY_CACHE_TTL)) {
+      console.log("Utilisation des données pays en cache");
+      return countryCache.data;
+    }
+
     const response = await fetch("https://ipwhois.app/json/");
     if (!response.ok) {
       throw new Error(`API responded with status ${response.status}`);
@@ -330,7 +393,12 @@ async function fetchCountry() {
       throw new Error(`API error: ${data.message}`);
     }
 
-    return { country: data.country, countryCode: data.country_code };
+    const result = { country: data.country, countryCode: data.country_code };
+    
+    countryCache.data = result;
+    countryCache.timestamp = now;
+    
+    return result;
   } catch (error) {
     console.error("Erreur lors de la récupération du pays:", error);
     return { country: "Unknown", countryCode: null };
@@ -403,23 +471,25 @@ browser.webRequest.onCompleted.addListener(
 
     tabData.endTime = details.timeStamp;
 
-    let transferredSize = details.responseSize || 0;
-    requestData.transferredSize = transferredSize;
+    // Firefox ne fournit pas responseSize, on utilise le resourceSize du Content-Length
+    let resourceSize = requestData.resourceSize || 0;
+    let transferredSize = resourceSize;
 
-    let resourceSize = requestData.resourceSize;
-    if (transferredSize > 0 && !resourceSize) {
+    if (requestData.encoding && resourceSize > 0) {
       switch (requestData.encoding) {
         case "gzip":
         case "deflate":
-          resourceSize = transferredSize * 3;
+          transferredSize = Math.round(resourceSize / 3);
           break;
         case "br":
-          resourceSize = transferredSize * 5;
+          transferredSize = Math.round(resourceSize / 5);
           break;
         default:
-          resourceSize = transferredSize;
+          transferredSize = resourceSize;
       }
     }
+
+    requestData.transferredSize = transferredSize;
 
     tabData.totalTransferredSize += transferredSize;
     tabData.totalResourceSize += resourceSize;

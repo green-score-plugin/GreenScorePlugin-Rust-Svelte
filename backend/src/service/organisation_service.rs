@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 use sqlx::MySqlPool;
 use sqlx::Error;
 use crate::dto::consumption_data_point_dto::ConsumptionDataPoint;
