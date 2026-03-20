@@ -4,6 +4,7 @@
     import { invalidateAll } from '$app/navigation';
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
     import { t } from 'svelte-i18n';
+    import InscriptionOrganisationForm from "$lib/components/auth/InscriptionOrganisationForm.svelte";
 
     export const form: { message?: string, success?: boolean } | null = null;
 
@@ -15,9 +16,10 @@
     let hasLeftOrga = false;
     let showConfirmModal = false;
     let showChangeModal = false;
+    let showInscriptionOrga = false;
 
     $: user = $page.data.user;
-    $: hasOrga = (!!user?.id_orga && !hasLeftOrga);
+    $: hasOrga = (!!user?.user?.id_organisation && !hasLeftOrga);
 
     $: orgaDetails = $page.data.organisation || null;
 
@@ -64,7 +66,7 @@
         <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-1">
                     <p class="text-xs font-semibold uppercase text-grey-500">{$t('account.organization.name_label')}</p>
-                    <div class="text-xl font-bold text-gs-green-950">{orgaDetails?.name}</div>
+                    <div class="text-xl font-bold text-gs-green-950">{orgaDetails?.nom}</div>
                 </div>
 
                 <div class="w-full flex flex-col gap-2">
@@ -96,7 +98,7 @@
                     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg max-h-[90vh] overflow-auto">
                         <h2 class="text-xl font-semibold mb-4">{$t('account.modals.leave_org_confirm_title')}</h2>
                         <p class="text-gray-600 mb-6">
-                            {$t('account.modals.leave_org_confirm_desc', { values: { orgName: orgaDetails?.name || 'Inconnue' } })}
+                            {$t('account.modals.leave_org_confirm_desc', { values: { orgName: orgaDetails?.nom || 'Inconnue' } })}
                         </p>
                         <div class="flex justify-end gap-4">
                             <button
@@ -183,46 +185,68 @@
             {/if}
 
     {:else}
-        <form
-                method="POST"
-                action="?/join_orga"
-                use:enhance={() => {
-                    submitted = true;
-                    errorMessage = '';
-                    successMessage = '';
-                    return async ({ update }) => {
-                        await update();
-                        submitted = false;
-                    };
-                }}
-                class="flex flex-col gap-4">
+        {#if showInscriptionOrga}
+            <InscriptionOrganisationForm />
+        {:else}
+            <form
+                    method="POST"
+                    action="?/join_orga"
+                    use:enhance={() => {
+                        submitted = true;
+                        errorMessage = '';
+                        successMessage = '';
+                        return async ({ update }) => {
+                            await update();
+                            submitted = false;
+                        };
+                    }}
+                    class="flex flex-col gap-4">
 
-            <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
-                <div class="w-full flex flex-col">
-                    <label for="codeOrganisation">{$t('account.organization.code_label')}</label>
-                    <input
-                            id="codeOrganisation"
-                            name="codeOrganisation"
-                            type="text"
-                            bind:value={codeOrganisation}
-                            placeholder={$t('account.organization.code_placeholder')}
-                            class="px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">{$t('account.organization.code_help')}</p>
+                <div class="flex gap-4 w-full text-grey-700 font-outfit font-semibold text-sm sm:flex-row">
+                    <div class="w-full flex flex-col">
+                        <label for="codeOrganisation">{$t('account.organization.code_label')}</label>
+                        <input
+                                id="codeOrganisation"
+                                name="codeOrganisation"
+                                type="text"
+                                bind:value={codeOrganisation}
+                                placeholder={$t('account.organization.code_placeholder')}
+                                class="px-4 py-2 border border-grey-200 rounded-lg text-grey-700 w-full focus:outline-none"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">{$t('account.organization.code_help')}</p>
+                    </div>
                 </div>
-            </div>
 
-            <button
-                    type="submit"
-                    disabled={submitted}
-                    class="w-full h-fit rounded-lg bg-gs-green-950 px-1 py-2 font-semibold font-outfit text-white
+                <button
+                        type="submit"
+                        disabled={submitted}
+                        class="w-full h-fit rounded-lg bg-gs-green-950 px-1 py-2 font-semibold font-outfit text-white
+                        cursor-pointer
+                        hover:bg-gs-green-800
+                        active:bg-gs-green-700
+                        transition-colors duration-150 ease-in-out disabled:opacity-50"
+                >
+                    {#if submitted}{$t('account.organization.join_loading')}{:else}{$t('account.organization.join_button')}{/if}
+                </button>
+
+                <div class="flex items-center">
+                    <hr class="flex-grow border-grey-200" />
+                    <span class="text-xs mx-2 text-grey-500 font-semibold">{$t('account.organization.or')}</span>
+                    <hr class="flex-grow border-grey-200" />
+                </div>
+
+                <button
+                    type="button"
+                    class="w-full h-fit rounded-lg bg-blue-600 px-1 py-2 font-semibold font-outfit text-white
                     cursor-pointer
-                    hover:bg-gs-green-800
-                    active:bg-gs-green-700
-                    transition-colors duration-150 ease-in-out disabled:opacity-50"
-            >
-                {#if submitted}{$t('account.organization.join_loading')}{:else}{$t('account.organization.join_button')}{/if}
-            </button>
-        </form>
+                    hover:bg-blue-700
+                    active:bg-blue-800
+                    transition-colors duration-150 ease-in-out"
+                    on:click={() => { showInscriptionOrga = true; }}
+                >
+                    {$t('account.organization.create_button')}
+                </button>
+            </form>
+        {/if}
     {/if}
 </div>

@@ -103,5 +103,4 @@
         {$t('auth.register.user_title')}
     </button>
 
-    <a href="/inscription-organisation" class="text-grey-950 font-outfit font-semibold text-sm text-center">{$t('auth.register.switch_to_org')}</a>
 </form>

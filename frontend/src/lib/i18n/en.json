@@ -99,16 +99,12 @@
       "submit_button": "Login",
       "loading": "Logging in...",
       "invalid_email": "Invalid email",
-      "password_requirements": "Password must contain:",
-      "req_length": "At least 8 characters",
-      "req_uppercase": "One uppercase letter",
-      "req_lowercase": "One lowercase letter",
-      "req_number": "One number",
-      "req_special": "One special character (#?!@$%^&*-)",
+      "password_required": "Password is required",
       "already_have_account": "I already have an account",
       "register_link": "Register",
       "success_deleted": "Success!",
-      "account_deleted_msg": "Your account has been successfully deleted."
+      "account_deleted_msg": "Your account has been successfully deleted.",
+      "sign_in": "Sign in"
     },
     "register": {
       "user_title": "Register",
@@ -171,7 +167,9 @@
       "code_help": "Please enter the 8-character code sent by your organization",
       "invite_title": "Invite members!",
       "invite_desc": "Send this code to members of your organization. They can enter it in the section: My Account - My Organization - Join an Organization",
-      "finish_button": "Finish"
+      "finish_button": "Finish",
+      "or": "or",
+      "create_button": "Create my organization"
     },
     "modals": {
       "leave_org_confirm_title": "Confirmation",
@@ -489,7 +487,8 @@
     "validation_fields_required": "First name, last name, and email are required",
     "validation_password_complexity": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character (#?!@$%^&*-)",
     "validation_code_required": "Organization code is required",
-    "validation_code_invalid": "Invalid code",
+    "session_error": "Session error",
+    "too_many_attempts": "Too many attempts, please try again in 15 minutes",
     "org_change_error": "Server error while changing organization",
     "no_changes": "No changes to be made",
     "db_error": "Database error",
@@ -514,7 +513,8 @@
       "email_verification_error": "Email verification error",
       "registration_error": "Registration error",
       "org_creation_error": "Organization creation error",
-      "user_creation_error": "User creation error"
+      "user_creation_error": "User creation error",
+      "missing_fields": "All fields are required"
     }
   },
   "success": {

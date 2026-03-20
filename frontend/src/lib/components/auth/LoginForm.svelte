@@ -2,18 +2,24 @@
     import validator from 'validator';
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
+    import type { ActionData } from '../../../routes/(auth)/login/$types';
+
+    export let form: ActionData;
 
     let email = '';
+
+    $: if (form?.message) {
+        loading = false;
+    }
+
     let password = '';
     let loading = false;
     let submitted = false;
 
-    const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
-
     $: emailValid = !submitted || validator.isEmail(email);
-    $: passwordValid = !submitted || passwordRegex.test(password);
+    $: passwordValid = !submitted || password.trim().length > 0;
 
-    $: isFormValid = validator.isEmail(email) && passwordRegex.test(password);
+    $: isFormValid = validator.isEmail(email) && password.trim().length > 0;
 </script>
 
 <form method="POST" use:enhance={({ cancel }) => {
@@ -57,16 +63,7 @@
                 placeholder={$t('auth.login.password_placeholder')}
         >
         {#if !passwordValid}
-            <div class="text-red-500 text-sm mt-1">
-                <p class="font-semibold mb-1">{$t('auth.login.password_requirements')}</p>
-                <ul class="list-disc list-inside space-y-0.5 ml-1">
-                    <li>{$t('auth.login.req_length')}</li>
-                    <li>{$t('auth.login.req_uppercase')}</li>
-                    <li>{$t('auth.login.req_lowercase')}</li>
-                    <li>{$t('auth.login.req_number')}</li>
-                    <li>{$t('auth.login.req_special')}</li>
-                </ul>
-            </div>
+            <span class="text-red-500 text-sm">{$t('auth.login.password_required')}</span>
         {/if}
     </div>
 

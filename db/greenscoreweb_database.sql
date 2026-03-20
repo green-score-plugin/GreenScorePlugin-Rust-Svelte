@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : lun. 12 jan. 2026 à 20:34
+-- Généré le : lun. 16 mars 2026 à 12:26
 -- Version du serveur : 8.3.0
 -- Version de PHP : 8.3.6
 
@@ -29,12 +29,12 @@ SET time_zone = "+00:00";
 
 DROP TABLE IF EXISTS `advice`;
 CREATE TABLE IF NOT EXISTS `advice` (
-`id` int NOT NULL AUTO_INCREMENT,
-`is_dev` tinyint(1) NOT NULL,
-`advice` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-`title` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-`icon` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-PRIMARY KEY (`id`)
+  `id` int NOT NULL AUTO_INCREMENT,
+  `is_dev` tinyint(1) NOT NULL,
+  `advice` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -91,11 +91,11 @@ INSERT INTO `advice` (`id`, `is_dev`, `advice`, `title`, `icon`) VALUES
 
 DROP TABLE IF EXISTS `equivalent`;
 CREATE TABLE IF NOT EXISTS `equivalent` (
-`id` int NOT NULL AUTO_INCREMENT,
-`name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-`equivalent` double NOT NULL,
-`icon_thumbnail` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-PRIMARY KEY (`id`)
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `equivalent` double NOT NULL,
+  `icon_thumbnail` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -122,20 +122,21 @@ INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
 
 DROP TABLE IF EXISTS `monitored_website`;
 CREATE TABLE IF NOT EXISTS `monitored_website` (
-`id` int NOT NULL AUTO_INCREMENT,
-`user_id` int DEFAULT NULL,
-`url_domain` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-`url_full` longtext COLLATE utf8mb4_unicode_ci,
-`queries_quantity` int DEFAULT NULL,
-`carbon_footprint` double DEFAULT NULL,
-`data_transferred` double DEFAULT NULL,
-`resources` longtext COLLATE utf8mb4_unicode_ci,
-`loading_time` double DEFAULT NULL,
-`country` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-`creation_date` datetime DEFAULT CURRENT_TIMESTAMP,
-PRIMARY KEY (`id`),
-KEY `IDX_7458B0D5A76ED395` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=153 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
+  `url_domain` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `url_full` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `queries_quantity` int DEFAULT NULL,
+  `carbon_footprint` double DEFAULT NULL,
+  `data_transferred` double DEFAULT NULL,
+  `resources` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `loading_time` double DEFAULT NULL,
+  `country` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creation_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `IDX_7458B0D5A76ED395` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5014 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
 -- --------------------------------------------------------
@@ -146,14 +147,27 @@ KEY `IDX_7458B0D5A76ED395` (`user_id`)
 
 DROP TABLE IF EXISTS `organisation`;
 CREATE TABLE IF NOT EXISTS `organisation` (
-`id` int NOT NULL AUTO_INCREMENT,
-`organisation_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-`organisation_code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-`city` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-`siret` varchar(14) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=126 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `organisation_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `organisation_code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `siret` varchar(14) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `service`
+--
+
+DROP TABLE IF EXISTS `service`;
+CREATE TABLE IF NOT EXISTS `service` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nom` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `id_organisation` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_organisation` (`id_organisation`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -163,18 +177,11 @@ PRIMARY KEY (`id`)
 
 DROP TABLE IF EXISTS `sessions`;
 CREATE TABLE IF NOT EXISTS `sessions` (
-`id` varchar(128) NOT NULL,
-`data` longblob NOT NULL,
-`expires_at` bigint DEFAULT NULL,
-PRIMARY KEY (`id`)
+  `id` varchar(128) NOT NULL,
+  `data` longblob NOT NULL,
+  `expires_at` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Déchargement des données de la table `sessions`
---
-
-INSERT INTO `sessions` (`id`, `data`, `expires_at`) VALUES
-('tNQ_fYInLH2q_kZazJA4Vw', 0x7b226964223a3131353933363534313131343833333138383335373634313638383736393036313936373032382c2264617461223a7b226163636f756e74223a7b22636f6465223a224a36345834555056222c226964223a3237382c226e6f6d223a2274657374222c22726f6c65223a226f7267616e69736174696f6e222c227369726574223a6e756c6c7d7d2c226578706972795f64617465223a5b323032362c31322c32312c33342c342c383039363630302c302c302c305d7d, 1768253644);
 
 -- --------------------------------------------------------
 
@@ -184,26 +191,35 @@ INSERT INTO `sessions` (`id`, `data`, `expires_at`) VALUES
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
-`id` int NOT NULL AUTO_INCREMENT,
-`organisation_id` int DEFAULT NULL,
-`email` varchar(180) COLLATE utf8mb4_unicode_ci NOT NULL,
-`roles` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '(DC2Type:json)',
-`password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-`first_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-`last_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-`total_carbon_footprint` double DEFAULT NULL,
-PRIMARY KEY (`id`),
-KEY `IDX_8D93D6499E6B1585` (`organisation_id`)
-)ENGINE=InnoDB;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `organisation_id` int DEFAULT NULL,
+  `service_id` int DEFAULT NULL,
+  `email` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `first_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `est_admin` tinyint(1) NOT NULL DEFAULT '0',
+  `total_carbon_footprint` double NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `IDX_8D93D6499E6B1585` (`organisation_id`),
+  KEY `id_service` (`service_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1005 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+-- --------------------------------------------------------
 
 --
--- Déchargement des données de la table `user`
+-- Structure de la table `user_equivalent`
 --
 
-INSERT INTO `user` (`id`, `organisation_id`, `email`, `roles`, `password`, `first_name`, `last_name`, `total_carbon_footprint`) VALUES
-(210, NULL, 'robincby64@gmail.com', '[\"ROLE_USER\"]', '$2y$13$SmZnm6.k.1GUTbcgQiyeHuxTTu6v4qQOhfZW97kQtwTSK34ahuFEG', 'Robin', 'Conchez-Boueytou', 53.65);
-
-
+DROP TABLE IF EXISTS `user_equivalent`;
+CREATE TABLE IF NOT EXISTS `user_equivalent` (
+  `user_id` int NOT NULL,
+  `equivalent_id` int NOT NULL,
+  PRIMARY KEY (`user_id`,`equivalent_id`),
+  KEY `IDX_5D8A3F6FA76ED395` (`user_id`),
+  KEY `IDX_5D8A3F6F7C455263` (`equivalent_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Contraintes pour les tables déchargées
@@ -213,25 +229,27 @@ INSERT INTO `user` (`id`, `organisation_id`, `email`, `roles`, `password`, `firs
 -- Contraintes pour la table `monitored_website`
 --
 ALTER TABLE `monitored_website`
-ADD CONSTRAINT `FK_7458B0D5A76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL;
-
+  ADD CONSTRAINT `FK_7458B0D5A76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL;
 
 --
--- Contraintes pour la table `organisation`
+-- Contraintes pour la table `service`
 --
-
-ALTER TABLE `organisation`
-ADD `admin_id` INT NULL,
-ADD CONSTRAINT `FK_organisation_admin`FOREIGN KEY (`admin_id`) REFERENCES `user`(`id`) ON DELETE CASCADE;
-
+ALTER TABLE `service`
+  ADD CONSTRAINT `service_ibfk_1` FOREIGN KEY (`id_organisation`) REFERENCES `organisation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `user`
 --
 ALTER TABLE `user`
-ADD CONSTRAINT `FK_user_organisation`FOREIGN KEY (`organisation_id`) REFERENCES `organisation`(`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `FK_user_organisation` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-
+--
+-- Contraintes pour la table `user_equivalent`
+--
+ALTER TABLE `user_equivalent`
+  ADD CONSTRAINT `FK_5D8A3F6F7C455263` FOREIGN KEY (`equivalent_id`) REFERENCES `equivalent` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_5D8A3F6FA76ED395` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

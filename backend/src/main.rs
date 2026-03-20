@@ -1,11 +1,6 @@
-mod router;
-mod controllers;
-mod session_store;
-mod cleanup;
-pub mod models;
-mod green_score;
-
-use session_store::MySqlStore;
+use backend::session_store::MySqlStore;
+use backend::router;
+use backend::cleanup;
 use sqlx::MySqlPool;
 use std::env;
 use axum::http::{header, HeaderValue, Method};

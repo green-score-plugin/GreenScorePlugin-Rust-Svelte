@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         detailsButton.className = "flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg";
         detailsButton.textContent = t("more_details");
 
-        const rawUrl = `${CONFIG.BACKEND.WEBSITE_URL}/#`;
+        const rawUrl = `${CONFIG.BACKEND.BASE_URL}/#`;
         try {
           const parsed = new URL(rawUrl);
           detailsButton.href = parsed.toString();
@@ -233,22 +233,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
+    // Lance toutes les requêtes en parallèle
+    const [gCO2eResponse, userData, countryResponse] = await Promise.all([
+      browser.runtime.sendMessage({ type: "getgCO2e" }),
+      browser.runtime.sendMessage({ type: "checkLoginStatus" }),
+      browser.runtime.sendMessage({ type: "getCountryAndUrl" })
+    ]);
+
+    // 1. Gestion de gCO2e
     try {
-      const response = await browser.runtime.sendMessage({ type: "getgCO2e" });
-      if (response && response.gCO2e !== undefined) {
-        gCO2eValue = parseFloat(response.gCO2e).toFixed(2);
+      if (gCO2eResponse && gCO2eResponse.gCO2e !== undefined) {
+        gCO2eValue = parseFloat(gCO2eResponse.gCO2e).toFixed(2);
         updateColors(gCO2eValue);
         updateAverageConsumption(gCO2eValue);
       } else {
         updateColors(0);
       }
-    } catch {
+    } catch (error) {
+       console.error("Erreur récupération gCO2e:", error);
     }
 
+    // 2. Vérification du statut de connexion
     try {
-      const userData = await browser.runtime.sendMessage({
-        type: "checkLoginStatus",
-      });
       const loginSection = document.querySelector(
         ".flex.font-outfit.text-sm.justify-center"
       );
@@ -331,12 +337,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch {
     }
 
-    browser.runtime
-      .sendMessage({ type: "getCountryAndUrl" })
-      .then((response) => {
-        if (response && response.country && response.url) {
-          const urlElement = document.getElementById("site-url");
-          const countryElement = document.getElementById("site-country");
+    // 3. Gestion Pays/URL
+    if (countryResponse && countryResponse.country && countryResponse.url) {
+      const urlElement = document.getElementById("site-url");
+      const countryElement = document.getElementById("site-country");
 
           if (countryElement && urlElement) {
             countryElement.textContent = t("country_consumption_intro", { countryName: response.country });
@@ -347,6 +351,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       .catch(() => {
       });
 
+    // 4. Equivalents
     try {
       await updateEquivalents();
     } catch {
