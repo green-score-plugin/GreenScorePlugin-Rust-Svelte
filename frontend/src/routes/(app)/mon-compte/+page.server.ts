@@ -431,7 +431,14 @@ export const actions = {
 
             const result = await response.json();
 
+
             if(result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+
                 await setSessionCookie(cookies, response);
                 const code = result.account?.code || result.user_full?.organisation?.code;
                 redirect(303,`/inscription-organisation/${code}`);
