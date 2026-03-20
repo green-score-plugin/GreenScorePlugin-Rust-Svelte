@@ -71,7 +71,7 @@ export const actions = {
 
     supprimer_membre: async ({ request, fetch }) => {
         const data = await request.formData();
-        const memberId = data.get('deleteMemberId');
+        const memberId = parseInt(data.get('deleteMemberId')?.toString() || '0', 10);
 
         try {
             const response = await fetch(`${BACKEND_URL}/account/organization/members/remove`, {
@@ -84,7 +84,7 @@ export const actions = {
             });
 
             const result = await response.json();
-
+            console.log(result)
             if (result.success) {
                 return { success: true, message: 'success.member_deleted' };
             }
