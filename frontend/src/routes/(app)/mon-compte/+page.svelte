@@ -8,6 +8,7 @@
     import { t } from 'svelte-i18n';
     import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
     import type {User, Organisation, UserFull} from "$lib/types/account.ts";
+    import MyInfoOrganisation from "$lib/components/myaccount/MyInfoOrganisation.svelte";
 
     let activePage = $state(page.url.searchParams.get('tab') ?? "my_info");
 
@@ -40,8 +41,11 @@
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if user.est_admin === true }
-                    <GererMembre />
+                {#if user.est_admin === true}
+                    <div class="flex flex-col gap-6">
+                        <MyInfoOrganisation />
+                        <GererMembre />
+                    </div>
                 {:else}
                     <GererOrganisation />
                 {/if}
