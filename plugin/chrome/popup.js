@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         detailsButton.className = "flex justify-center items-center py-2 px-4 text-white font-outfit font-medium bg-gs-green-950 rounded-lg";
         detailsButton.textContent = "Plus d'informations";
 
-        const rawUrl = `${CONFIG.BACKEND.WEBSITE_URL}/#`;
+        const rawUrl = `${CONFIG.BACKEND.BASE_URL}/#`;
         try {
           const parsed = new URL(rawUrl);
           detailsButton.href = parsed.toString();

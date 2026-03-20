@@ -7,7 +7,7 @@ const CONFIG = {
       
       DOMAIN: BASE_DOMAIN, // Utilisé pour récupérer l'ID utilisateur
       
-      WEBSITE_URL: BASE_URL, // URL du site Greenscore
+      BASE_URL, // URL du site Greenscore
       
       LOGIN_URL: `${BASE_URL}/login`, // URL de la page de connexion
       DETAILS_URL: `${BASE_URL}/derniere-page-consultee` // URL de la page de détails
