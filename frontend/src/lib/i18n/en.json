@@ -182,7 +182,9 @@
       "confirm": "Confirm",
       "delete_confirm_title": "Confirm Deletion",
       "delete_confirm_desc": "Are you sure you want to delete your user account?",
-      "delete": "Delete"
+      "delete": "Delete",
+      "delete_member_title": "Delete Member",
+      "delete_member_desc": "Are you sure you want to delete this member from the organization?"
     }
   },
   "dashboard": {
