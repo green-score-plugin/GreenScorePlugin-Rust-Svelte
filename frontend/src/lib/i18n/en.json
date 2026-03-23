@@ -534,12 +534,11 @@
       "email_verification_error": "Email verification error",
       "registration_error": "Registration error",
       "org_creation_error": "Organization creation error",
-      "user_creation_error": "User creation error"
-    },
-    "service_exists": "A service with this name already exists in your organization.",
       "user_creation_error": "User creation error",
       "missing_fields": "All fields are required"
     },
+    "service_exists": "A service with this name already exists in your organization."
+  },
   "success": {
     "member_deleted": "Member deleted successfully",
     "info_updated": "Your information has been updated successfully",

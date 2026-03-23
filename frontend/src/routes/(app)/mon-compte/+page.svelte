@@ -2,7 +2,7 @@
     import LeftMenu from '$lib/components/myaccount/LeftMenu.svelte';
     import MyInfo from '$lib/components/myaccount/MyInfo.svelte';
     import GererOrganisation from '$lib/components/myaccount/GererOrganisation.svelte';
-    import Service from '$lib/components/myaccount/Service.svelte';
+    import CreateService from '$lib/components/myaccount/CreateService.svelte';
     import MyService from '$lib/components/myaccount/MyService.svelte';
     import GererMembre from '$lib/components/myaccount/GererMembre.svelte';
     import salutation from '$lib/images/salutation.png';
@@ -49,7 +49,7 @@
                 {/if}
                 {:else if activePage === 'services'}
                 {#if user.est_admin === true }
-                    <Service />
+                    <CreateService />
                     <MyService {services} />
                 {/if}
             {/if}

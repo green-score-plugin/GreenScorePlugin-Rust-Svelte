@@ -38,8 +38,5 @@
                 </table>
             </div>
         </div>
-        <div class="mt-2 text-xs text-gray-400 text-right">
-            Total: {services.length} services
-        </div>
     {/if}
 </div>
