@@ -3,9 +3,10 @@
     import { afterNavigate } from '$app/navigation';
     import { t, locale } from 'svelte-i18n';
     import { slide, fade } from 'svelte/transition';
+    import type { User} from "$lib/types/account.ts";
     import greenScoreLogo from '$lib/images/greenscore-logo.png';
 
-    let user = $derived(page.data.user);
+    let user = $derived(page.data.userFull?.user as User);
 
     let profileMenuOpen = $state(false);
     let mobileMenuOpen = $state(false);
@@ -92,9 +93,7 @@
                         {#if profileMenuOpen}
                             <!-- Utilisation de l'action pour fermer le menu quand on clique à l'extérieur -->
                             <div use:clickOutside class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
-                                {#if user.organisation}
-                                    <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_organization')}</a>
-                                {:else}
+                                {#if user}
                                     <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_account')}</a>
                                 {/if}
                                 <a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.logout')}</a>
