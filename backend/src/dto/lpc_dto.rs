@@ -1,6 +1,6 @@
 use crate::models::equivalent::Equivalent;
 use serde::{Deserialize, Serialize};
-#[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow, PartialEq)]
 pub struct LastPageConsultedInfos {
     pub link: String,
     pub queries_quantity: i32,
@@ -10,7 +10,7 @@ pub struct LastPageConsultedInfos {
     pub country: String,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 pub struct LastPageConsultedResponse {
     pub success: bool,
     pub lpc_infos: Option<LastPageConsultedInfos>,
