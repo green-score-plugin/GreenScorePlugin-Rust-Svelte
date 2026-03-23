@@ -173,3 +173,4 @@ pub async fn users_least_carbon_footprint(pool: &MySqlPool) -> Result<Option<f64
 
     Ok(row)
 }
+
