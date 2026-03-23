@@ -76,6 +76,5 @@ async fn test_lpc_controller_integration(pool: MySqlPool) {
         .fetch_one(&pool)
         .await
         .unwrap();
-
     assert_eq!(count, 1, "Should have inserted one record into monitored_websites");
 }
