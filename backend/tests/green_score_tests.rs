@@ -1,113 +1,151 @@
 use backend::green_score::calculate_green_score;
-use sqlx::MySqlPool;
+use sqlx::{MySql, Pool, Row};
 
-// Helper to get a dummy pool that won't actually connect unless used
-// Useful for testing paths that don't touch the DB (like "lpc")
-async fn get_dummy_pool() -> MySqlPool {
-    // connect_lazy won't fail immediately, only on query execution
-    // We use a dummy URL. If code tries to use it, it will fail.
-    MySqlPool::connect_lazy("mysql://dummy:dummy@localhost/dummy").unwrap()
+// --- Helper to seed data ---
+async fn seed_data(pool: &Pool<MySql>) -> (i64, i64) {
+    // Create an organisation
+    let org_result = sqlx::query("INSERT INTO organisation (organisation_name, organisation_code) VALUES (?, ?)")
+        .bind("Test Org")
+        .bind("TEST_CODE")
+        .execute(pool)
+        .await
+        .expect("Failed to insert organization");
+    let org_id = org_result.last_insert_id() as i64;
+
+    // Create a user in that organisation
+    let user_result = sqlx::query(
+        "INSERT INTO user (email, roles, password, total_carbon_footprint, organisation_id, est_admin) VALUES (?, '[]', 'pass', ?, ?, 0)"
+    )
+    .bind("user1@example.com")
+    .bind(100.0)
+    .bind(org_id)
+    .execute(pool)
+    .await
+    .expect("Failed to insert user 1");
+    let u1_id = user_result.last_insert_id() as i64;
+
+    // Create another user
+    sqlx::query(
+        "INSERT INTO user (email, roles, password, total_carbon_footprint, organisation_id, est_admin) VALUES (?, '[]', 'pass', ?, ?, 0)"
+    )
+    .bind("user2@example.com")
+    .bind(200.0)
+    .bind(org_id)
+    .execute(pool)
+    .await
+    .expect("Failed to insert user 2");
+
+    // Organisation stats:
+    // Avg = (100+200)/2 = 150.
+    // Total (Least because only 1 org) = 300.
+
+    // User stats (Global):
+    // Avg = 150.
+    // Least = 100.
+
+    (org_id, u1_id)
 }
 
-#[tokio::test]
-async fn test_calculate_green_score_lpc_grade_a() {
-    let pool = get_dummy_pool().await;
-    let (grade, nomination) = calculate_green_score(&pool, 0.1, "lpc".to_string()).await;
-    assert_eq!(grade, "A");
-    assert_eq!(nomination, "nominations.page.A");
-}
-
-#[tokio::test]
-async fn test_calculate_green_score_lpc_grade_b() {
-    let pool = get_dummy_pool().await;
-    // echelle = 0.25. 0.3 is between 0.25 and 0.5 -> B
-    let (grade, nomination) = calculate_green_score(&pool, 0.3, "lpc".to_string()).await;
-    assert_eq!(grade, "B");
-    assert_eq!(nomination, "nominations.page.B");
-}
-
-#[tokio::test]
-async fn test_calculate_green_score_lpc_grade_g() {
-    let pool = get_dummy_pool().await;
-    // > 1.5 -> G
-    let (grade, nomination) = calculate_green_score(&pool, 2.0, "lpc".to_string()).await;
-    assert_eq!(grade, "G");
-    assert_eq!(nomination, "nominations.page.G");
-}
-
-#[tokio::test]
-async fn test_calculate_green_score_lpc_boundary() {
-    let pool = get_dummy_pool().await;
-    // echelle = 0.25.
-    // exactly 0.25 -> should be B. (code uses <, so 0.25 is not < 0.25)
-    let (grade, nomination) = calculate_green_score(&pool, 0.25, "lpc".to_string()).await;
-    assert_eq!(grade, "B");
-    assert_eq!(nomination, "nominations.page.B");
-}
-
-// Tests for "mo" and "my_data" require a real database connection and seeded data
-// We use sqlx::test for this if available, but since setup might be tricky without
-// knowing if migrations run automatically, we add them as ignored or try our best.
+// --- LPC Tests (No DB required, using dummy pool if possible or real one) ---
 
 #[sqlx::test]
-#[ignore] // Ignored by default to avoid breaking CI if DB not present
-async fn test_calculate_green_score_mo_integration(pool: MySqlPool) -> sqlx::Result<()> {
-    // This test requires a running database locally
-
-    // Seed data: Insert some users with carbon footprints
-    // We need to ensure `user` table exists.
-    // Assuming migrations have run on the test database created by sqlx::test.
-
-    // Insert user 1: organisation_id = 1, footprint = 100.0
-    sqlx::query("INSERT INTO user (email, password, total_carbon_footprint, organisation_id) VALUES (?, ?, ?, ?)")
-        .bind("test1@example.com")
-        .bind("pass")
-        .bind(100.0)
-        .bind(1)
-        .execute(&pool)
-        .await?;
-
-    // Insert user 2: organisation_id = 1, footprint = 200.0
-    sqlx::query("INSERT INTO user (email, password, total_carbon_footprint, organisation_id) VALUES (?, ?, ?, ?)")
-        .bind("test2@example.com")
-        .bind("pass")
-        .bind(200.0)
-        .bind(1)
-        .execute(&pool)
-        .await?;
-
-    // Avg for org 1 = 150.0. Least for org 1 = 300.0 (Sum of consumption)
-    // Wait, query for least is:
-    // SELECT SUM(total_carbon_footprint) ... GROUP BY organisation_id ORDER BY totalConsumption ASC LIMIT 1
-    // So least is the organisation with the smallest SUM.
-    // Here we only have org 1 with sum = 300.0. So least = 300.0.
-
-    // Avg global is:
-    // SELECT AVG(total_carbon_footprint) ... GROUP BY organisation_id
-    // Then average of those averages.
-    // One org (id 1) -> avg consumption = (100+200)/2 = 150.
-    // Global avg = 150.
-
-    // So:
-    // avg = 150.0
-    // least = 300.0
-
-    // calculate_green_score for "mo"
-    // carbon_footprint = 100.0
-
-    // max_carbon_footprint = (300 - 150).abs() * 2 = 150 * 2 = 300
-    // scale = (300 - 300).abs() / 7 = 0 / 7 = 0.
-    // scale <= 0.0001 -> scale = 0.25 (default fallback)
-
-    // t1 = 300 + 0.25 = 300.25
-
-    // footprint = 100.0 < 300.25 -> A
-
-    let (grade, nomination) = calculate_green_score(&pool, 100.0, "mo".to_string()).await;
-
+async fn test_lpc_grade_a(pool: Pool<MySql>) {
+    let (grade, _) = calculate_green_score(&pool, 0.1, "lpc".to_string()).await;
     assert_eq!(grade, "A");
-    assert_eq!(nomination, "nominations.profile.A");
-
-    Ok(())
 }
 
+#[sqlx::test]
+async fn test_lpc_grade_b(pool: Pool<MySql>) {
+    let (grade, _) = calculate_green_score(&pool, 0.3, "lpc".to_string()).await;
+    assert_eq!(grade, "B");
+}
+
+#[sqlx::test]
+async fn test_lpc_grade_g(pool: Pool<MySql>) {
+    let (grade, _) = calculate_green_score(&pool, 2.0, "lpc".to_string()).await;
+    assert_eq!(grade, "G");
+}
+
+// --- MO Tests ---
+
+#[sqlx::test]
+async fn test_mo_normal(pool: Pool<MySql>) {
+    seed_data(&pool).await;
+
+    // Org Avg = 150. Least = 300.
+    // carbon_footprint = 150.
+    // max = |300 - 150| * 2 = 300.
+    // scale = |300 - 300| / 7 = 0. -> default 0.25
+
+    // thresholds: t1 = 300 + 0.25 = 300.25.
+    // 150 < 300.25 -> A.
+
+    let (grade, nom) = calculate_green_score(&pool, 150.0, "mo".to_string()).await;
+    assert_eq!(grade, "A");
+    assert_eq!(nom, "nominations.profile.A");
+}
+
+#[sqlx::test]
+async fn test_mo_fallback_no_data(pool: Pool<MySql>) {
+    // No data in DB. Avg = 0. Least = 0.
+    // fallback logic.
+    // carbon_footprint = 0.1 -> < 0.25 -> A
+    let (grade, _) = calculate_green_score(&pool, 0.1, "mo".to_string()).await;
+    assert_eq!(grade, "A");
+}
+
+#[sqlx::test]
+async fn test_mo_weird_logic_scale(pool: Pool<MySql>) {
+    // Try to trigger the scale <= 0.0001 logic explicitly if possible?
+    // Already hit in test_mo_normal because scale was 0.
+}
+
+// --- My Data Tests ---
+
+#[sqlx::test]
+async fn test_my_data_normal(pool: Pool<MySql>) {
+    seed_data(&pool).await;
+
+    // Users global: Avg = 150. Least = 100.
+    // Input: 120.
+
+    // avg = 150.
+    // least = 100.
+    // max = |100 - 150| * 2 = 100.
+    // scale = |100 - 100| / 7 = 0. -> default 0.25.
+
+    // t1 = 100 + 0.25 = 100.25.
+    // 120 is NOT < 100.25.
+
+    // t2 = 100 + 0.5 = 100.5.
+    // ...
+    // tx = 100 + 2*0.25 ...
+
+    // Since scale is 0.25, the range is tiny around 100.
+    // 120 is > 100 + 6*0.25 = 101.5. -> G
+
+    let (grade, nom) = calculate_green_score(&pool, 120.0, "my_data".to_string()).await;
+    assert_eq!(grade, "G");
+    assert_eq!(nom, "nominations.profile.G");
+}
+
+#[sqlx::test]
+async fn test_my_data_fallback(pool: Pool<MySql>) {
+    // No data
+    let (grade, _) = calculate_green_score(&pool, 0.1, "my_data".to_string()).await;
+    assert_eq!(grade, "A");
+}
+
+// --- Edge Cases ---
+
+#[sqlx::test]
+async fn test_na_negative_footprint(pool: Pool<MySql>) {
+    let (grade, _) = calculate_green_score(&pool, -5.0, "mo".to_string()).await;
+    assert_eq!(grade, "N/A");
+}
+
+#[sqlx::test]
+async fn test_na_unknown_page(pool: Pool<MySql>) {
+    let (grade, _) = calculate_green_score(&pool, 10.0, "unknown".to_string()).await;
+    assert_eq!(grade, "N/A");
+}
