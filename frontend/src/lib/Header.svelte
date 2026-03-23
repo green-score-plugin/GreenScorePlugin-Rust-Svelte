@@ -2,11 +2,11 @@
     import { page } from '$app/state';
     import { afterNavigate } from '$app/navigation';
     import { t, locale } from 'svelte-i18n';
-    import type { User} from "$lib/types/account.ts";
     import { slide, fade } from 'svelte/transition';
+    import type { User} from "$lib/types/account.ts";
     import greenScoreLogo from '$lib/images/greenscore-logo.png';
 
-    let user = $derived(page.data.userFull.user as User);
+    let user = $derived(page.data.userFull?.user as User);
 
     let profileMenuOpen = $state(false);
     let mobileMenuOpen = $state(false);
@@ -93,9 +93,7 @@
                         {#if profileMenuOpen}
                             <!-- Utilisation de l'action pour fermer le menu quand on clique à l'extérieur -->
                             <div use:clickOutside class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-20">
-                                {#if user.organisation}
-                                    <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_organization')}</a>
-                                {:else}
+                                {#if user}
                                     <a href="/mon-compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_account')}</a>
                                 {/if}
                                 <a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.logout')}</a>
@@ -121,17 +119,20 @@
 
     <!-- Mobile menu -->
     {#if mobileMenuOpen}
+        <!-- Backdrop -->
+        <div transition:fade={{ duration: 200 }} class="absolute top-24 left-0 w-full h-[calc(100vh-6rem)] bg-black/50 z-40 lg:hidden"></div>
+
         <!-- Ajouter l'action pour fermer le menu mobile quand on clique à l'extérieur -->
-        <div use:clickOutside class="absolute top-24 left-0 w-full bg-white py-5 z-10 lg:hidden">
+        <div transition:slide={{ duration: 300 }} use:clickOutside class="absolute top-24 left-0 w-full bg-white py-5 z-50 lg:hidden shadow-xl">
             <ul class="flex flex-col font-outfit font-medium text-grey-950 items-center gap-4 text-lg">
-                <li><a href="/">{$t('header.informations')}</a></li>
+                <li><a href="/">{$t('header.home')}</a></li>
                 <li><a href="/mes-donnees">{$t('header.my_data')}</a></li>
                 <li><a href="/mon-organisation">{$t('header.my_organization')}</a></li>
                 <li><a href="/derniere-page">{$t('header.last_visited_page')}</a></li>
 
                 {#if user}
-                    <li><a href="/mon_compte" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.manage_account')}</a></li>
-                    <li><a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">{$t('header.logout')}</a></li>
+                    <li><a href="/mon-compte">{$t('header.manage_account')}</a></li>
+                    <li><a href="/logout">{$t('header.logout')}</a></li>
                 {:else}
                     <li><a href="/login">{$t('header.login')}</a></li>
                 {/if}

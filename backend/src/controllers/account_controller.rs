@@ -7,7 +7,6 @@ use tower_sessions::Session;
 use crate::dto::user_full::UserFull;
 use crate::service::user_service::UserService;
 use crate::service::organisation_service::OrganisationService;
-use crate::service::auth_service::AuthService;
 use crate::service::equivalent_service::EquivalentService;
 use crate::service::service_service::ServiceService;
 use crate::dto::update_account_request_dto::UpdateAccountRequest;
@@ -108,8 +107,12 @@ pub async fn get_organisation_services(State(pool): State<MySqlPool>, Authentica
     })))
 }
 
-pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Json(payload) : Json<Value>) -> Result<Json<Value>, AppError> {
+pub async fn remove_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload) : Json<Value>) -> Result<Json<Value>, AppError> {
     let user_id = payload["userId"].as_i64().ok_or(AppError::BadRequest("Missing userId".into()))?;
+
+    if user_id == user_full.user.id {
+        return Err(AppError::InternalServerError("User already exists".to_string()));
+    }
 
     UserService::remove_organization_member(&pool, user_id).await
         .map_err(AppError::from)?;
@@ -211,11 +214,21 @@ pub async fn create_organization(
     let orga_name = payload["organization_name"].as_str()
         .ok_or(AppError::BadRequest("Missing organization_name".to_string()))?;
 
-    let siret = payload["siret"].as_str().map(|s| s.to_string());
+    let siret: Option<String> = payload["siret"].as_str().map(|s| s.to_string());
 
     let user_id = user_full.user.id;
 
-    let (organisation_id, organisation_code) = AuthService::inscription_orga(&pool, orga_name, siret.as_deref(), user_id).await
+    if let Some(ref s) = siret {
+        let exists = OrganisationService::find_id_by_siret(&pool, s.clone()).await
+            .map_err(AppError::DatabaseError)?
+            .is_some();
+
+        if exists {
+            return Err(AppError::BadRequest("errors.org_siret_exists".to_string()));
+        }
+    }
+
+    let (organisation_id, organisation_code) = OrganisationService::inscription_orga(&pool, orga_name, siret.clone(), user_id).await
         .map_err(AppError::BadRequest)?;
 
     let organisation = Organisation {
@@ -226,6 +239,7 @@ pub async fn create_organization(
     };
 
     user_full.organisation = Some(organisation);
+    user_full.user.est_admin = true;
 
     session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 

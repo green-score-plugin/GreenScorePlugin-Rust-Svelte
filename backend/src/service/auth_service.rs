@@ -4,7 +4,6 @@ use crate::models::organisation::Organisation;
 use crate::models::service::Service;
 use crate::dto::user_full::UserFull;
 use crate::repository::user_repository::UserRepository;
-use crate::service::organisation_service::OrganisationService;
 use crate::repository::organisation_repository::OrganisationRepository;
 use crate::repository::service_repository::ServiceRepository;
 use crate::error::AppError;
@@ -36,32 +35,6 @@ impl AuthService{
         Ok(user_id)
     }
 
-    pub async fn inscription_orga(
-        pool: &MySqlPool,
-        organisation_name: &str,
-        siret: Option<&str>,
-        user_id: i64
-    ) -> Result<(i64, String), String>
-    {
-        if OrganisationRepository::find_id_by_siret(pool, organisation_name).await.map_err(|_| "db_error")?.is_some() {
-            return Err("organisation_exists".to_string());
-        }
-
-        let code = OrganisationService::generate_organisation_code();
-
-        let siret_string = siret.map(|s| s.to_string());
-        let organisation_id = OrganisationRepository::insert_organisation(pool, organisation_name, &code, siret_string)
-            .await
-            .map_err(|_| "insert_error")?;
-
-        let is_admin = true;
-        UserRepository::join_organisation(pool, user_id, organisation_id, is_admin)
-            .await
-            .map_err(|_| "join_error")?;
-
-        Ok((organisation_id, code))
-    }
-
     pub async fn login (pool: &MySqlPool, email: &str, password: &str) -> Result<UserFull, AppError> {
         let user_result = UserRepository::find_with_password_by_email(pool, email).await.map_err(AppError::DatabaseError)?;
         let (id, password_hash, first_name, last_name, organisation_id, service_id, est_admin) = match user_result {
@@ -69,7 +42,7 @@ impl AuthService{
             None => return Err(AppError::AuthError("errors.auth.invalid_credentials".to_string())),
         };
 
-        if !bcrypt::verify(password, &password_hash).map_err(|_| AppError::InternalServerError("errors.auth.hash_error".to_string()))? {
+        if !bcrypt::verify(password, &password_hash).map_err(|e| AppError::InternalServerError(e.to_string()))? {
             return Err(AppError::AuthError("errors.auth.invalid_credentials".to_string()));
         }
 

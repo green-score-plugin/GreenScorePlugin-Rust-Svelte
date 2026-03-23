@@ -10,15 +10,15 @@
     import { t } from 'svelte-i18n';
     import UserEquivalent from "$lib/components/myaccount/UserEquivalent.svelte";
     import type {User, Organisation, UserFull} from "$lib/types/account.ts";
+    import MyInfoOrganisation from "$lib/components/myaccount/MyInfoOrganisation.svelte";
 
+    let activePage = $state(page.url.searchParams.get('tab') ?? "my_info");
 
-    let activePage = $state("my_info");
     let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
     let user = $derived(userFull.user as User);
     let organisation = $derived(userFull.organisation as Organisation)
     let service = $derived(userFull.service)
     let services = $derived((page.form?.updatedServices as any[]) ?? (page.data.services as any[]));
-
 </script>
 
 <svelte:head>
@@ -42,16 +42,17 @@
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if user.est_admin === true }
-                    <GererMembre />
+                {#if user.est_admin === true}
+                    <div class="flex flex-col gap-6">
+                        <MyInfoOrganisation />
+                        <GererMembre />
+                    </div>
                 {:else}
                     <GererOrganisation />
                 {/if}
-                {:else if activePage === 'services'}
-                {#if user.est_admin === true }
+                {:else if user.est_admin === true }
                     <CreateService />
                     <MyService {services} />
-                {/if}
             {/if}
         </div>
     </div>

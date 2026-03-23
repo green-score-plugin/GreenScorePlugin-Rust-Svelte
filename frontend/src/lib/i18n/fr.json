@@ -199,7 +199,9 @@
       "confirm": "Confirmer",
       "delete_confirm_title": "Confirmer la suppression",
       "delete_confirm_desc": "Êtes-vous sûr de vouloir supprimer votre compte utilisateur ?",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "delete_member_title": "Supprimer le membre",
+      "delete_member_desc": "Êtes-vous sûr de vouloir supprimer ce membre de l'organisation ?"
     }
   },
   "dashboard": {

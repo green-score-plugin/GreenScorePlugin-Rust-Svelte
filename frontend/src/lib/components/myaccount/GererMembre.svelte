@@ -5,11 +5,13 @@
     import { enhance } from '$app/forms';
     import type { SubmitFunction } from '@sveltejs/kit';
     import { t } from 'svelte-i18n';
+    import type {User} from "$lib/types/account.ts";
 
     let showDeleteModal = $state(false);
     let deletingMemberId: number | null = $state(null);
 
     let organisation = $derived(page.data.userFull.organisation as Organisation);
+    let user = $derived(page.data.userFull.user as User);
     let members = $state(page.data.members || []);
 
     $effect(() => {
@@ -68,7 +70,7 @@
 </script>
 
 <div class="flex flex-col gap-4">
-    <h1 class="font-outfit text-2xl fsont-semibold">Membres</h1>
+    <h1 class="font-outfit text-2xl font-semibold">Membres</h1>
 
     {#if members.length > 0}
         <div class="w-full font-outfit">
@@ -91,15 +93,17 @@
                             <p class="text-sm font-medium text-gray-950">{ member.nom } { member.prenom }</p>
                             <p class="text-xs text-gray-500">{ member.email }</p>
                         </div>
-                        <button
-                                class="hover:scale-110 transition-transform duration-200 text-red-600 p-1 cursor-pointer"
-                                aria-label="Delete"
-                                onclick={() => { showDeleteModal = true; deletingMemberId = member.id; }}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M18 12.998H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2"/>
-                            </svg>
-                        </button>
+                        {#if user.id !== member.id}
+                            <button
+                                    class="hover:scale-110 transition-transform duration-200 text-red-600 p-1 cursor-pointer"
+                                    aria-label="Delete"
+                                    onclick={() => { showDeleteModal = true; deletingMemberId = member.id; }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M18 12.998H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2"/>
+                                </svg>
+                            </button>
+                        {/if}
                     </div>
                 {/each}
 

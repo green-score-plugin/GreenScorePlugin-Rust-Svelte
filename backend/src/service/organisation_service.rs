@@ -10,11 +10,15 @@ use crate::dto::mo_infos_dto::MyOrganizationInfos;
 use crate::dto::top_polluting_site_dto::TopPollutingSite;
 use crate::dto::update_organisation_request_dto::UpdateOrganisationRequest;
 use crate::models::organisation::Organisation;
+use crate::repository::user_repository::UserRepository;
 
 pub struct OrganisationService;
 
 impl OrganisationService {
 
+    pub async fn find_id_by_siret(pool: &MySqlPool, siret: String) -> Result<Option<i64>, Error> {
+        OrganisationRepository::find_id_by_siret(pool, &siret).await
+    }
     pub async fn organization_informations(pool: &MySqlPool, orga_id: i64, user_id: i64) -> Result<MyOrganizationInfos, Error>
     {
         let name: String = OrganisationRepository::organization_name(pool, orga_id).await.unwrap_or(None).unwrap_or_else(|| "Organisation inconnue".to_string());
@@ -81,6 +85,32 @@ impl OrganisationService {
             code: current_org.code.clone(),
             siret: payload.siret,
         })
+    }
+
+    pub async fn inscription_orga(
+        pool: &MySqlPool,
+        organisation_name: &str,
+        siret: Option<String>,
+        user_id: i64
+    ) -> Result<(i64, String), String>
+    {
+        if OrganisationRepository::find_id_by_siret(pool, organisation_name).await.map_err(|_| "db_error")?.is_some() {
+            return Err("organisation_exists".to_string());
+        }
+
+        let code = OrganisationService::generate_organisation_code();
+
+        let siret_string = siret.map(|s| s.to_string());
+        let organisation_id = OrganisationRepository::insert_organisation(pool, organisation_name, &code, siret_string)
+            .await
+            .map_err(|_| "insert_error")?;
+
+        let is_admin = true;
+        UserRepository::join_organisation(pool, user_id, organisation_id, is_admin)
+            .await
+            .map_err(|_| "join_error")?;
+
+        Ok((organisation_id, code))
     }
 
     pub fn generate_organisation_code() -> String {

@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let accountEquivalents = [];
     let services = [];
 
-    if (locals.user?.organisation) {
+    if (locals.user?.organisation && locals.user.user.est_admin) {
         const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
         if (res.ok) {
             try {
@@ -100,7 +100,7 @@ export const actions = {
 
     supprimer_membre: async ({ request, fetch }) => {
         const data = await request.formData();
-        const memberId = data.get('deleteMemberId');
+        const memberId = parseInt(data.get('deleteMemberId')?.toString() || '0', 10);
 
         try {
             const response = await fetch(`${BACKEND_URL}/account/organization/members/remove`, {
@@ -475,10 +475,14 @@ export const actions = {
 
     create_organization: async ({ request, fetch, cookies })=> {        const data = await request.formData();
         const organisationName = data.get('organisationName');
-        const siret = data.get('siret');
+        const siret = data.get('siret')?.toString();
 
         if(!organisationName) {
             return fail(400, { message: "errors.champs" })
+        }
+
+        if (siret && !/^\d{14}$/.test(siret)) {
+            return fail(400, { message: 'errors.validation_siret_format' });
         }
 
         try{
@@ -498,7 +502,14 @@ export const actions = {
 
             const result = await response.json();
 
+
             if(result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+
                 await setSessionCookie(cookies, response);
                 const code = result.account?.code || result.user_full?.organisation?.code;
                 redirect(303,`/inscription-organisation/${code}`);
