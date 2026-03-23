@@ -6,44 +6,6 @@ use backend::middleware::auth::AuthenticatedUser;
 use axum::extract::{Query, State};
 use sqlx::{MySqlPool, Row};
 
-// --- Helper to setup DB schema ---
-async fn ensure_tables(pool: &MySqlPool) {
-    sqlx::query("
-        CREATE TABLE IF NOT EXISTS monitored_websites (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            user_id INT,
-            url_domain VARCHAR(255),
-            url_full TEXT,
-            queries_quantity INT,
-            carbon_footprint DOUBLE,
-            data_transferred DOUBLE,
-            loading_time DOUBLE,
-            country VARCHAR(255),
-            creation_date DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ").execute(pool).await.ok();
-
-    // We also need advice and equivalents tables for the service to work fully and return data
-    sqlx::query("
-         CREATE TABLE IF NOT EXISTS advice (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            advice TEXT NOT NULL,
-            title VARCHAR(255) DEFAULT '',
-            icon VARCHAR(255) DEFAULT '',
-            is_dev BOOLEAN NOT NULL DEFAULT 0
-        )
-    ").execute(pool).await.ok();
-
-    sqlx::query("
-        CREATE TABLE IF NOT EXISTS equivalent (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            equivalent DOUBLE NOT NULL,
-            icon_thumbnail VARCHAR(255) DEFAULT ''
-        )
-    ").execute(pool).await.ok();
-}
-
 fn create_dummy_user_full(id: i64) -> UserFull {
     UserFull {
         user: User {
@@ -63,11 +25,15 @@ fn create_dummy_user_full(id: i64) -> UserFull {
 
 #[sqlx::test]
 async fn test_lpc_controller_integration(pool: MySqlPool) {
-    ensure_tables(&pool).await;
+    // Run migrations from the migrations folder
+    sqlx::migrate!("./migrations")
+        .run(&pool)
+        .await
+        .expect("Failed to migrate database");
 
     // Seed some data for advice and equivalents so we get a rich response
-    sqlx::query("INSERT INTO advice (advice, is_dev) VALUES ('Dev advice', 1)").execute(&pool).await.ok();
-    sqlx::query("INSERT INTO advice (advice, is_dev) VALUES ('User advice', 0)").execute(&pool).await.ok();
+    sqlx::query("INSERT INTO advice (advice, is_dev, title, icon) VALUES ('Dev advice', 1, '', '')").execute(&pool).await.ok();
+    sqlx::query("INSERT INTO advice (advice, is_dev, title, icon) VALUES ('User advice', 0, '', '')").execute(&pool).await.ok();
     sqlx::query("INSERT INTO equivalent (name, equivalent, icon_thumbnail) VALUES ('Car', 0.5, 'car.png')").execute(&pool).await.ok();
 
     let authenticated_user = AuthenticatedUser(create_dummy_user_full(1));
@@ -113,4 +79,3 @@ async fn test_lpc_controller_integration(pool: MySqlPool) {
 
     assert_eq!(count, 1, "Should have inserted one record into monitored_websites");
 }
-
