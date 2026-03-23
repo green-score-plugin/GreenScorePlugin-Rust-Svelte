@@ -94,8 +94,12 @@ pub async fn get_organisation_member(State(pool): State<MySqlPool>, Authenticate
     })))
 }
 
-pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Json(payload) : Json<Value>) -> Result<Json<Value>, AppError> {
+pub async fn remove_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload) : Json<Value>) -> Result<Json<Value>, AppError> {
     let user_id = payload["userId"].as_i64().ok_or(AppError::BadRequest("Missing userId".into()))?;
+
+    if user_id == user_full.user.id {
+        return Err(AppError::InternalServerError("User already exists".to_string()));
+    }
 
     UserService::remove_organization_member(&pool, user_id).await
         .map_err(AppError::from)?;
