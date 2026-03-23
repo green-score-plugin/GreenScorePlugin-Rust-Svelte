@@ -6,10 +6,10 @@ use crate::models::advice::Advice;
 use crate::service::advice_service::AdviceService;
 use crate::error::AppError;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct AdviceResponse {
-    success: bool,
-    advice: Vec<Advice>
+    pub success: bool,
+    pub advice: Vec<Advice>
 }
 
 pub async fn get_advice(State(pool): State<MySqlPool>) -> Result<Json<AdviceResponse>, AppError> {
