@@ -73,8 +73,7 @@ pub async fn join_organization(
          .map_err(AppError::BadRequest)?;
     let organisation = orga.unwrap();
 
-    user_full.user.id_organisation = Some(organisation.id);
-    user_full.organisation = Some(organisation);
+    user_full.organisation = Some(vec![organisation]);
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
