@@ -85,6 +85,7 @@ impl OrganisationService {
             nom: new_name.clone(),
             code: current_org.code.clone(),
             siret: payload.siret,
+            est_admin: current_org.est_admin,
         })
     }
 
