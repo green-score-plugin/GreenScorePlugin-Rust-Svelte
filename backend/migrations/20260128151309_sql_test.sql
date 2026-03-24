@@ -123,8 +123,12 @@ INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
     (9, 'data.equivalent.tap_water', 7692, 'faucet.png'),
     (10, 'data.equivalent.paris_ny', 0.0007, 'new-york.png');
 
-INSERT INTO `user` (email, roles, password, first_name, last_name, total_carbon_footprint, est_admin)
-VALUES ('test@example.com', '["ROLE_USER"]', 'password', 'Test', 'User', 0.0, 0)
+INSERT INTO `user` (id, email, roles, password, first_name, last_name, total_carbon_footprint, est_admin)
+VALUES (1, 'test@example.com', '["ROLE_USER"]', 'password', 'Test', 'User', 0.0, 0);
+
+INSERT INTO `user_equivalent` (`user_id`, `equivalent_id`) VALUES
+(1, 1),
+(1, 3);
 
 ALTER TABLE organisation ADD CONSTRAINT UNIQUE (siret);
 SET FOREIGN_KEY_CHECKS = 1;
