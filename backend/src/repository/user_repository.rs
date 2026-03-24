@@ -41,9 +41,9 @@ impl UserRepository {
     pub async fn find_with_password_by_email(
         pool: &MySqlPool,
         email: &str
-    ) -> Result<Option<(i64, String, String, String, Option<i64>, Option<i64>, bool)>, Error> {
+    ) -> Result<Option<(i64, String, String, String, Option<i64>)>, Error> {
         let result = sqlx::query(
-            "SELECT id, password, first_name, last_name, organisation_id, service_id ,est_admin FROM user WHERE email = ?"
+            "SELECT id, password, first_name, last_name, service_id FROM user WHERE email = ?"
         )
         .bind(email)
         .fetch_optional(pool)
@@ -54,9 +54,7 @@ impl UserRepository {
             row.get::<String, _>("password"),
             row.get::<String, _>("first_name"),
             row.get::<String, _>("last_name"),
-            row.get::<Option<i64>, _>("organisation_id"),
             row.get::<Option<i64>, _>("service_id"),
-            row.get::<bool, _>("est_admin"),
         )))
     }
 

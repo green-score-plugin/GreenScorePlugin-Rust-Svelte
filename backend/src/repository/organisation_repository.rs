@@ -28,6 +28,20 @@ impl OrganisationRepository {
         Ok(result.map(|row| row.get::<i64, _>("id")))
     }
 
+    pub async fn find_all_by_user_id(pool: &MySqlPool, user_id: i64) -> Result<Vec<Organisation>, sqlx::Error> {
+        let organisations = sqlx::query_as::<_, Organisation>(
+            "SELECT o.id, o.organisation_name, o.organisation_code, o.siret
+             FROM organisation o
+             JOIN organisation_user ou ON o.id = ou.organisation_id
+             WHERE uo.user_id = ?"
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+
+        Ok(organisations)
+    }
+
     pub async fn insert_organisation(pool: &MySqlPool,
                                  organisation_name: &str,
                                  organisation_code: &str,

@@ -37,7 +37,7 @@ impl AuthService{
 
     pub async fn login (pool: &MySqlPool, email: &str, password: &str) -> Result<UserFull, AppError> {
         let user_result = UserRepository::find_with_password_by_email(pool, email).await.map_err(AppError::DatabaseError)?;
-        let (id, password_hash, first_name, last_name, organisation_id, service_id, est_admin) = match user_result {
+        let (id, password_hash, first_name, last_name, service_id) = match user_result {
             Some(tuple) => tuple,
             None => return Err(AppError::AuthError("errors.auth.invalid_credentials".to_string())),
         };
@@ -48,33 +48,28 @@ impl AuthService{
 
         let user = User {
             id,
-            id_organisation: organisation_id,
             id_service: service_id,
             email: email.to_string(),
             prenom: first_name,
             nom: last_name,
-            est_admin,
             total_carbon_footprint: 0.0,
         };
 
-        let mut organisation: Option<Organisation> = None;
         let mut service: Option<Service> = None;
-
-        if let Some(org_id) = organisation_id {
-            organisation = OrganisationRepository::find_by_id(pool, org_id).await.map_err(AppError::DatabaseError)?;
-        }
+        let mut organisations: Option<Vec<Organisation>> = Some(OrganisationRepository::find_all_by_user_id(pool, id).await.map_err(AppError::DatabaseError)?);
 
         if let Some(srv_id) = service_id {
             service = ServiceRepository::find_by_id(pool, srv_id).await.map_err(AppError::DatabaseError)?;
         }
 
         if let Some(ref srv) = service {
-            organisation = OrganisationRepository::find_by_id(pool, srv.id_organisation).await.map_err(AppError::DatabaseError)?;
+            let org_opt = OrganisationRepository::find_by_id(pool, srv.id_organisation).await.map_err(AppError::DatabaseError)?;
+            organisations = org_opt.map(|o| vec![o]);
         }
 
         let user_full = UserFull {
             user,
-            organisation,
+            organisation: organisations,
             service,
         };
 
