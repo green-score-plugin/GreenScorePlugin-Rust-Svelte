@@ -29,7 +29,7 @@ export const actions = {
 
             if(result.success) {
                 await setSessionCookie(cookies, response);
-                const code = result.account?.code || result.user_full?.organisation?.code;
+                const code = result.account?.code || result.user_full?.organisation?.[0]?.code;
                 redirect(303,`/inscription-organisation/${code}`);
             }
 

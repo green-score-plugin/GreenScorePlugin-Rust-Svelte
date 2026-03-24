@@ -14,7 +14,8 @@
 
     let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
     let user = $derived(userFull.user as User);
-    let organisation = $derived(userFull.organisation as Organisation)
+
+    let organisation = $derived(userFull.organisation?.[0] as Organisation | undefined)
 
     $inspect(userFull);
     $inspect(activePage);
@@ -41,7 +42,7 @@
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if user.est_admin === true}
+                {#if organisation?.est_admin === true}
                     <div class="flex flex-col gap-6">
                         <MyInfoOrganisation />
                         <GererMembre />

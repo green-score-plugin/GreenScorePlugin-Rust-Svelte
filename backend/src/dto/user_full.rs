@@ -7,6 +7,6 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserFull {
     pub user: User,
-    pub organisation: Option<Vec<Organisation>>,
+    pub organisation: Vec<Organisation>,
     pub service: Option<Service>
 }

@@ -10,7 +10,7 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>();
 
 function getCacheTTL(user: UserFull): number {
-    return user.organisation ? 2 * 60 * 1000 : 5 * 60 * 1000;
+    return (user.organisation && user.organisation.length > 0) ? 2 * 60 * 1000 : 5 * 60 * 1000;
 }
 
 export async function getAccount(sessionCookie: string | undefined): Promise<UserFull | null> {

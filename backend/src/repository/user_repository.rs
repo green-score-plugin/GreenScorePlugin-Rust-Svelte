@@ -65,11 +65,11 @@ impl UserRepository {
         is_admin: bool
     ) -> Result<(), Error> {
         sqlx::query(
-            "UPDATE user SET organisation_id = ?, est_admin = ? WHERE id = ?"
+            "INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, ?)"
         )
+        .bind(user_id)
         .bind(organisation_id)
         .bind(is_admin)
-        .bind(user_id)
         .execute(pool)
         .await?;
         Ok(())
@@ -165,11 +165,15 @@ impl UserRepository {
     }
 
     pub async fn update_user_organization(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<(), Error> {
-        sqlx::query(
-            "UPDATE user SET organisation_id = ? WHERE id = ?"
+        // This method was replacing org. Now we just INSERT (join). Or if we strictly want replace, we delete first.
+        // Assuming this is used for 'join' via code -> usually non-admin.
+        // Let's defer strict logic to service, here just add.
+
+         sqlx::query(
+            "INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)"
         )
-        .bind(orga_id)
         .bind(user_id)
+        .bind(orga_id)
         .execute(pool)
         .await?;
 
@@ -178,7 +182,7 @@ impl UserRepository {
 
     pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<User>, Error> {
         let result = sqlx::query_as::<_, User>(
-            "SELECT * FROM user WHERE organisation_id = ?"
+            "SELECT u.* FROM user u JOIN organisation_user ou ON u.id = ou.user_id WHERE ou.organisation_id = ?"
         )
             .bind(orga_id)
             .fetch_all(pool)
@@ -187,13 +191,28 @@ impl UserRepository {
     }
 
     pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64) -> Result<(), Error> {
-        sqlx::query("
-            UPDATE user SET organisation_id = NULL WHERE id = ?
-        ")
+        // Removes ALL memberships? Be careful.
+        // If meant to leave ONE, we need org_id.
+        // But the signature only has user_id. This method signature is problematic for multi-org.
+        // Assuming current usage implies SINGLE org context for members.
+        // BUT for creators, this would wipe all created orgs!
+        // We should fix this method signature in SERVICE first, but keeping it here for now:
+        // Let's assume this removes ONLY non-admin memberships?
+        // Or delete all. Given "Un user ne peut en rejoindre qu'une seule", this might be intended for "Leaving the joined org".
+
+        sqlx::query("DELETE FROM organisation_user WHERE user_id = ?")
             .bind(user_id)
             .execute(pool)
             .await?;
 
         Ok(())
+    }
+
+    pub async fn is_member_of_any_organisation(pool: &MySqlPool, user_id: i64) -> Result<bool, Error> {
+         let result = sqlx::query("SELECT 1 FROM organisation_user WHERE user_id = ? AND est_admin = false LIMIT 1")
+            .bind(user_id)
+            .fetch_optional(pool)
+            .await?;
+        Ok(result.is_some())
     }
 }

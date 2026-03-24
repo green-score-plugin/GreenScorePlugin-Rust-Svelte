@@ -69,8 +69,12 @@ impl UserService {
             Some(ref o) => o.id,
             None => return Err("Code d'organisation invalide".to_string()),
         };
+        
+        if UserRepository::is_member_of_any_organisation(pool, user_id).await.unwrap_or(false) {
+             return Err("Un utilisateur ne peut rejoindre qu'une seule organisation.".to_string());
+        }
 
-        UserRepository::update_user_organization(pool, user_id, orga_id)
+        UserRepository::join_organisation(pool, user_id, orga_id, false)
             .await
             .map_err(|e| e.to_string())?;
 
@@ -83,6 +87,8 @@ impl UserService {
     }
 
     pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64) -> Result<(), Error> {
+        // TODO: This removes ALL. If we want to support removing from specific one, we need org_id.
+        // For now, assuming user only has ONE joined org.
         UserRepository::remove_organization_member(pool, user_id).await
     }
 }

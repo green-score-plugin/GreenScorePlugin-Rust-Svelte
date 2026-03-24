@@ -68,18 +68,16 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 
     let user = User {
         id: user_id,
-        id_organisation: None,
         id_service: None,
         email: email.to_string(),
         prenom: first_name.to_string(),
         nom: last_name.to_string(),
-        est_admin: false,
         total_carbon_footprint: 0.0,
     };
 
     let user_full = UserFull {
         user: user.clone(),
-        organisation: None,
+        organisation: vec![],
         service: None,
     };
 

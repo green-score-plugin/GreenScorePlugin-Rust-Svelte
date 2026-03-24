@@ -13,7 +13,9 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let organisation = null;
     let accountEquivalents = [];
 
-    if (locals.user?.organisation && locals.user.user.est_admin) {
+    const isAdmin = locals.user?.organisation?.some(o => o.est_admin) ?? false;
+
+    if (locals.user?.organisation && isAdmin) {
         const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
         if (res.ok) {
             try {
@@ -433,7 +435,7 @@ export const actions = {
                 body: body
             });
 
-            const result = await response.json();
+            const result = await response.clone().json();
 
 
             if(result.success) {
@@ -443,8 +445,14 @@ export const actions = {
                 }
 
 
-                await setSessionCookie(cookies, response);
-                const code = result.account?.code || result.user_full?.organisation?.code;
+                const sessionValue = result.token ?? result.session ?? result.sessionValue;
+                if (sessionValue) {
+                    await setSessionCookie(cookies, sessionValue);
+                } else {
+                    await setSessionCookie(cookies, response);
+                }
+                
+                const code = result.account?.code || result.user_full?.organisation?.[0]?.code;
                 redirect(303,`/inscription-organisation/${code}`);
             }
 
