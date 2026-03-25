@@ -17,20 +17,6 @@ CREATE TABLE IF NOT EXISTS `equivalent` (
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `monitored_websites` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `user_id` int DEFAULT NULL,
-    `url_domain` varchar(255) DEFAULT NULL,
-    `url_full` longtext,
-    `queries_quantity` int DEFAULT NULL,
-    `carbon_footprint` double DEFAULT NULL,
-    `data_transferred` double DEFAULT NULL,
-    `resources` longtext,
-    `loading_time` double DEFAULT NULL,
-    `country` varchar(255) DEFAULT NULL,
-    `creation_date` datetime DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `service` (
     `id` int NOT NULL AUTO_INCREMENT,
@@ -76,9 +62,9 @@ CREATE TABLE IF NOT EXISTS `user` (
 
 -- 3. Tables avec clés étrangères vers User
 CREATE TABLE IF NOT EXISTS `monitored_website` (
-                                                   `id` int NOT NULL AUTO_INCREMENT,
-                                                   `user_id` int DEFAULT NULL,
-                                                   `url_domain` varchar(255) DEFAULT NULL,
+    `id` int NOT NULL AUTO_INCREMENT,
+    `user_id` int DEFAULT NULL,
+    `url_domain` varchar(255) DEFAULT NULL,
     `url_full` longtext,
     `queries_quantity` int DEFAULT NULL,
     `carbon_footprint` double DEFAULT NULL,
@@ -93,9 +79,9 @@ CREATE TABLE IF NOT EXISTS `monitored_website` (
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `user_equivalent` (
-                                                 `user_id` int NOT NULL,
-                                                 `equivalent_id` int NOT NULL,
-                                                 PRIMARY KEY (`user_id`,`equivalent_id`),
+     `user_id` int NOT NULL,
+     `equivalent_id` int NOT NULL,
+     PRIMARY KEY (`user_id`,`equivalent_id`),
     CONSTRAINT `FK_ue_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
     CONSTRAINT `FK_ue_equivalent` FOREIGN KEY (`equivalent_id`) REFERENCES `equivalent` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -131,4 +117,9 @@ INSERT INTO `user_equivalent` (`user_id`, `equivalent_id`) VALUES
 (1, 3);
 
 ALTER TABLE organisation ADD CONSTRAINT UNIQUE (siret);
+
+-- Utilisateur par défaut pour les tests
+INSERT INTO `user` (`email`, `roles`, `password`, `first_name`, `last_name`, `total_carbon_footprint`, `est_admin`)
+VALUES ('test_default@example.com', '["ROLE_USER"]', 'password_secure', 'Default', 'User', 0.0, 0);
+
 SET FOREIGN_KEY_CHECKS = 1;

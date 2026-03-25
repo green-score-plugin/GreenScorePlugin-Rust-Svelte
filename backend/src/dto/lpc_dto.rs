@@ -2,7 +2,7 @@ use crate::models::equivalent::Equivalent;
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone, sqlx::FromRow)]
 pub struct LastPageConsultedInfos {
-    pub link: String,
+    pub url_full: String,
     pub queries_quantity: i32,
     pub carbon_footprint: f64,
     pub data_transferred: f64,

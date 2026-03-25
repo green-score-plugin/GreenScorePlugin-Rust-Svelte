@@ -13,7 +13,7 @@ impl MonitoredWebsiteRepository {
     ) -> Result<(), Error> {
         sqlx::query(
             r#"
-            INSERT INTO monitored_websites (url_domain, user_id, queries_quantity, data_transferred, resources, loading_time, carbon_footprint, url_full, country)
+            INSERT INTO monitored_website (url_domain, user_id, queries_quantity, data_transferred, resources, loading_time, carbon_footprint, url_full, country)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             "#,
         )
@@ -38,7 +38,7 @@ impl MonitoredWebsiteRepository {
         let result = sqlx::query_as::<_, LastPageConsultedInfos>(
             r#"
             SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country
-            FROM monitored_websites
+            FROM monitored_website
             WHERE user_id = ?
             ORDER BY creation_date DESC
             LIMIT 1
@@ -184,7 +184,7 @@ impl MonitoredWebsiteRepository {
             FROM monitored_website
             WHERE user_id = ?
             AND creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-            GROUP BY YEAR(creation_date), MONTH(creation_date)
+            GROUP BY YEAR(creation_date), MONTH(creation_date), label
             ORDER BY YEAR(creation_date), MONTH(creation_date) ASC"
         )
             .bind(user_id)
@@ -265,7 +265,7 @@ impl MonitoredWebsiteRepository {
                   JOIN user u ON u.id = mw.user_id
                   WHERE u.organisation_id = ?
                         AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
-                  GROUP BY WEEK(mw.creation_date, 1)
+                  GROUP BY WEEK(mw.creation_date, 1), label
                   ORDER BY WEEK(mw.creation_date, 1) ASC"
         )
             .bind(orga_id)
@@ -284,7 +284,7 @@ impl MonitoredWebsiteRepository {
                   JOIN user u ON u.id = mw.user_id
                   WHERE u.organisation_id = ?
                         AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-                  GROUP BY MONTH(mw.creation_date), YEAR(mw.creation_date)
+                  GROUP BY MONTH(mw.creation_date), YEAR(mw.creation_date), label
                   ORDER BY YEAR(mw.creation_date), MONTH(mw.creation_date) ASC"
         )
             .bind(org_id)
