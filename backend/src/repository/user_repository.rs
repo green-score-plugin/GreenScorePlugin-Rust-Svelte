@@ -187,6 +187,17 @@ impl UserRepository {
     }
 
     pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<(), Error> {
+        sqlx::query(
+            "UPDATE user u
+             JOIN service s ON u.service_id = s.id
+             SET u.service_id = NULL
+             WHERE u.id = ? AND s.id_organisation = ?"
+        )
+        .bind(user_id)
+        .bind(orga_id)
+        .execute(pool)
+        .await?;
+
         sqlx::query("DELETE FROM organisation_user WHERE user_id = ? AND organisation_id = ?")
             .bind(user_id)
             .bind(orga_id)

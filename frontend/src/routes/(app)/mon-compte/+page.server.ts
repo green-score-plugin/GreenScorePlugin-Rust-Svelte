@@ -16,11 +16,13 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
     const orgIdParam = url.searchParams.get('orgId');
     let targetOrgId = orgIdParam ? parseInt(orgIdParam) : null;
 
-    if (!targetOrgId && locals.user?.organisation?.length > 0) {
-        targetOrgId = locals.user.organisation[0].id;
+    const userOrgs = locals.user?.organisation;
+
+    if (!targetOrgId && userOrgs && userOrgs.length > 0) {
+        targetOrgId = userOrgs[0].id;
     }
 
-    const targetOrg = locals.user?.organisation?.find(o => o.id === targetOrgId);
+    const targetOrg = userOrgs?.find(o => o.id === targetOrgId);
 
     if (targetOrg) {
         if (targetOrg.est_admin) {
@@ -216,7 +218,13 @@ export const actions = {
             const result = await response.json();
 
             if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
                 const sessionValue = result.token ?? result.session ?? result.sessionValue;
+
                 if (sessionValue) {
                     await setSessionCookie(cookies, sessionValue);
                 }
@@ -233,7 +241,10 @@ export const actions = {
             } else {
                 return fail(400, { actionType: 'join_orga', message: result.message ?? 'errors.operation_error' });
             }
-        } catch {
+        } catch (error) {
+            if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
+                throw error;
+            }
             return fail(500, { actionType: 'join_orga', message: 'errors.org_connection_error' });
         }
     },
@@ -262,6 +273,10 @@ export const actions = {
                 credentials: 'include',
                 body: JSON.stringify({ id, name: organisationName, siret })
             });
+
+            if (!response.ok) {
+                return fail(response.status, { actionType: 'update_orga', message: 'errors.communication_error' });
+            }
 
             const result = await response.json();
 
@@ -316,15 +331,14 @@ export const actions = {
                     await setSessionCookie(cookies, response);
                 } catch (cookieError) {}
 
-                return {
-                    actionType: 'leave_orga',
-                    success: true,
-                    message: "success.leave_organization"
-                };
+                redirect(303, '?tab=organisation&action=new');
             } else {
                 return fail(400, { actionType: 'leave_orga', message: result.message ?? 'errors.operation_error' });
             }
-        } catch {
+        } catch (error) {
+            if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
+                throw error;
+            }
             return fail(500, { actionType: 'leave_orga', message: 'errors.server_error' });
         }
     },

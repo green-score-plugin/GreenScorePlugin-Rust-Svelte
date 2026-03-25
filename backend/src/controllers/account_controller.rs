@@ -106,8 +106,13 @@ pub async fn get_organisation_member(State(pool): State<MySqlPool>, Authenticate
 }
 
 pub async fn remove_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload) : Json<Value>) -> Result<Json<Value>, AppError> {
-    let user_id = payload["userId"].as_i64().ok_or(AppError::BadRequest("Missing userId".into()))?;
-    let orga_id = payload["organisationId"].as_i64().ok_or(AppError::BadRequest("Missing organisationId".into()))?;
+    let user_id = payload.get("userId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid userId".into()))?;
+
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
 
     if user_id == user_full.user.id {
         return Err(AppError::InternalServerError("User already exists".to_string()));
@@ -157,7 +162,9 @@ pub async fn leave_organization(
     AuthenticatedUser(mut user_full): AuthenticatedUser,
     Json(payload): Json<Value>
 ) -> Result<Json<Value>, AppError> {
-    let orga_id = payload["organisationId"].as_i64().ok_or(AppError::BadRequest("Missing organisationId".into()))?;
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
 
     if !user_full.organisation.iter().any(|o| o.id == orga_id) {
         return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
@@ -167,6 +174,14 @@ pub async fn leave_organization(
         .map_err(|e| AppError::InternalServerError(format!("Erreur quitter organisation: {}", e)))?;
 
     user_full.organisation.retain(|o| o.id != orga_id);
+
+    if let Some(ref s) = user_full.service {
+        if s.id_organisation == orga_id {
+            user_full.service = None;
+            user_full.user.id_service = None;
+        }
+    }
+
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
