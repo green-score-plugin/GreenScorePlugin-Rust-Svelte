@@ -28,6 +28,7 @@ pub struct InscriptionOrgaRequest {
 #[derive(Deserialize)]
 pub struct ServiceCreationRequest {
     pub service_name: String,
+    pub organisation_id: i64,
 }
 
 #[derive(Deserialize)]
@@ -74,18 +75,16 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 
     let user = User {
         id: user_id,
-        id_organisation: None,
         id_service: None,
         email: email.to_string(),
         prenom: first_name.to_string(),
         nom: last_name.to_string(),
-        est_admin: false,
         total_carbon_footprint: 0.0,
     };
 
     let user_full = UserFull {
         user: user.clone(),
-        organisation: None,
+        organisation: vec![],
         service: None,
     };
 
@@ -100,14 +99,21 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
 pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Json(payload): Json<ServiceCreationRequest>) -> Result<Json<CurrentAccountResponse>, AppError>
 {
     let service_name = payload.service_name.trim();
+    let organisation_id = payload.organisation_id;
 
     let mut user_full = session.get::<UserFull>("user_full").await
         .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
         .ok_or(AppError::AuthError("errors.auth.not_logged_in".to_string()))?;
 
-    let organisation_id = user_full.organisation.as_ref()
-        .map(|org| org.id)
-        .ok_or(AppError::BadRequest("User must be in an organization to create a service".to_string()))?;
+    // Verify user belongs to organisation and is admin?
+    // Usually only admin can create service.
+    // Check if user is in the organisation
+    let org = user_full.organisation.iter().find(|o| o.id == organisation_id)
+        .ok_or(AppError::AuthError("errors.auth.unauthenticated_org".to_string()))?;
+
+    if !org.est_admin {
+        return Err(AppError::AuthError("errors.auth.forbidden".to_string()));
+    }
 
     let services = ServiceService::create_service(&pool, organisation_id, service_name).await
         .map_err(AppError::BadRequest)?;
@@ -132,7 +138,7 @@ pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>
 
     if let Some(user_full) = user_full_opt {
         let mut services = None;
-        if let Some(org) = &user_full.organisation {
+        if let Some(org) = user_full.organisation.first() {
              if let Ok(s) = ServiceService::get_organisation_services(&pool, org.id).await {
                  services = Some(s);
              }

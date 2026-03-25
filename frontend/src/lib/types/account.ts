@@ -5,7 +5,6 @@ export interface User {
     email: string;
     prenom: string;
     nom: string;
-    est_admin: boolean;
     total_carbon_footprint: number;
 }
 
@@ -14,6 +13,7 @@ export interface Organisation {
     nom: string;
     code: string;
     siret?: string;
+    est_admin: boolean; 
 }
 
 export interface Service {
@@ -24,6 +24,6 @@ export interface Service {
 
 export interface UserFull {
     user: User;
-    organisation?: Organisation;
+    organisation: Organisation[];
     service?: Service;
 }

@@ -70,7 +70,11 @@ impl UserService {
             None => return Err("Code d'organisation invalide".to_string()),
         };
 
-        UserRepository::update_user_organization(pool, user_id, orga_id)
+        if UserRepository::is_member_of_organisation(pool, user_id, orga_id).await.unwrap_or(false) {
+             return Err("Déjà membre de cette organisation".to_string());
+        }
+
+        UserRepository::join_organisation(pool, user_id, orga_id, false)
             .await
             .map_err(|e| e.to_string())?;
 
@@ -82,7 +86,7 @@ impl UserService {
         UserRepository::get_organization_members(pool, orga_id).await
     }
 
-    pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64) -> Result<(), Error> {
-        UserRepository::remove_organization_member(pool, user_id).await
+    pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<(), Error> {
+        UserRepository::remove_organization_member(pool, user_id, orga_id).await
     }
 }

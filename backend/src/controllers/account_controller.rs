@@ -55,7 +55,7 @@ pub async fn delete_account( session: Session, State(pool): State<MySqlPool>, Au
     UserService::delete_user(&pool, user_id).await
         .map_err(|e| AppError::DatabaseError(e))?;
 
-    session.remove::<UserFull>("user_full").await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.remove::<UserFull>("user_full").await map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
@@ -72,20 +72,31 @@ pub async fn join_organization(
     let orga_code = payload.code.clone();
     let orga: Option<Organisation> = UserService::join_organization(&pool, orga_code, user_full.user.id).await
          .map_err(AppError::BadRequest)?;
-    let organisation = orga.unwrap();
 
-    user_full.user.id_organisation = Some(organisation.id);
-    user_full.organisation = Some(organisation);
+
+    let mut organisation = orga.unwrap();
+    organisation.est_admin = false;
+    let org_id = organisation.id;
+
+    user_full.organisation.push(organisation);
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
-        "message": "success.org_joined"
+        "message": "success.org_joined",
+        "organisation_id": org_id
     })))
 }
 
-pub async fn get_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Result<Json<Value>, AppError> {
-    let orga_id: i64 = user_full.organisation.ok_or(AppError::AuthError("errors.auth.unauthenticated".to_string()))?.id;
+pub async fn get_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload): Json<Value>) -> Result<Json<Value>, AppError> {
+
+    let orga_id = payload.get("organisation_id").and_then(|v| v.as_i64())
+        .or_else(|| user_full.organisation.first().map(|o| o.id))
+        .ok_or(AppError::AuthError("errors.auth.unauthenticated".to_string()))?;
+
+    if !user_full.organisation.iter().any(|o| o.id == orga_id) {
+        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    }
 
     let members = UserService::get_organization_members(&pool, orga_id).await.unwrap_or_else(|_| Vec::new());
 
@@ -95,8 +106,14 @@ pub async fn get_organisation_member(State(pool): State<MySqlPool>, Authenticate
     })))
 }
 
-pub async fn get_organisation_services(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Result<Json<Value>, AppError> {
-    let orga_id: i64 = user_full.organisation.ok_or(AppError::AuthError("errors.auth.unauthenticated".to_string()))?.id;
+pub async fn get_organisation_services(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload): Json<Value>) -> Result<Json<Value>, AppError> {
+    let orga_id = payload.get("organisation_id").and_then(|v| v.as_i64())
+        .or_else(|| user_full.organisation.first().map(|o| o.id))
+        .ok_or(AppError::AuthError("errors.auth.unauthenticated".to_string()))?;
+
+    if !user_full.organisation.iter().any(|o| o.id == orga_id) {
+        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    }
 
     let services = ServiceService::get_organisation_services(&pool, orga_id).await
         .map_err(AppError::InternalServerError)?;
@@ -108,13 +125,23 @@ pub async fn get_organisation_services(State(pool): State<MySqlPool>, Authentica
 }
 
 pub async fn remove_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload) : Json<Value>) -> Result<Json<Value>, AppError> {
-    let user_id = payload["userId"].as_i64().ok_or(AppError::BadRequest("Missing userId".into()))?;
+    let user_id = payload.get("userId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid userId".into()))?;
+
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
 
     if user_id == user_full.user.id {
         return Err(AppError::InternalServerError("User already exists".to_string()));
     }
 
-    UserService::remove_organization_member(&pool, user_id).await
+    if !user_full.organisation.iter().any(|o| o.id == orga_id && o.est_admin) {
+        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    }
+
+    UserService::remove_organization_member(&pool, user_id, orga_id).await
         .map_err(AppError::from)?;
 
     Ok(Json(json!({
@@ -123,16 +150,23 @@ pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Authentic
 }
 
 pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>, AuthenticatedUser(mut user_full): AuthenticatedUser, Json(payload) : Json<UpdateOrganisationRequest>) -> Result<Json<Value>, AppError> {
-    let org = user_full.organisation.as_ref().ok_or(AppError::AuthError("errors.auth.unauthenticated_org".to_string()))?;
+    let org_id = payload.id;
+    let idx = if let Some(id) = org_id {
+        user_full.organisation.iter().position(|o| o.id == id && o.est_admin)
+    } else {
+        user_full.organisation.iter().position(|o| o.est_admin)
+    };
 
-    if !user_full.user.est_admin {
-        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    if idx.is_none() {
+         return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
     }
+    let idx = idx.unwrap();
+    let org = &user_full.organisation[idx];
 
     let updated_org = OrganisationService::update_organisation_details(&pool, org, payload).await
         .map_err(AppError::BadRequest)?;
 
-    user_full.organisation = Some(updated_org.clone());
+    user_full.organisation[idx] = updated_org.clone();
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
@@ -145,12 +179,28 @@ pub async fn leave_organization(
     session: Session,
     State(pool): State<MySqlPool>,
     AuthenticatedUser(mut user_full): AuthenticatedUser,
+    Json(payload): Json<Value>
 ) -> Result<Json<Value>, AppError> {
-    UserService::remove_organization_member(&pool, user_full.user.id).await
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
+
+    if !user_full.organisation.iter().any(|o| o.id == orga_id) {
+        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    }
+
+    UserService::remove_organization_member(&pool, user_full.user.id, orga_id).await
         .map_err(|e| AppError::InternalServerError(format!("Erreur quitter organisation: {}", e)))?;
 
-    user_full.user.id_organisation = None;
-    user_full.organisation = None;
+    user_full.organisation.retain(|o| o.id != orga_id);
+
+    if let Some(ref s) = user_full.service {
+        if s.id_organisation == orga_id {
+            user_full.service = None;
+            user_full.user.id_service = None;
+        }
+    }
+
     session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
@@ -162,7 +212,7 @@ pub async fn leave_organization(
 pub async fn get_my_organization(
     AuthenticatedUser(user_full): AuthenticatedUser
 ) -> Result<Json<Value>, AppError> {
-    let orga = user_full.organisation.ok_or(AppError::NotFound("organisation not found".to_string()))?;
+    let orga = user_full.organisation.first().ok_or(AppError::NotFound("organisation not found".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
@@ -236,10 +286,10 @@ pub async fn create_organization(
         nom: orga_name.to_string(),
         siret,
         code: organisation_code,
+        est_admin: true
     };
 
-    user_full.organisation = Some(organisation);
-    user_full.user.est_admin = true;
+    user_full.organisation.push(organisation);
 
     session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 

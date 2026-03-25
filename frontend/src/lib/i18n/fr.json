@@ -536,6 +536,7 @@
     "match_password": "Les mots de passe ne correspondent pas",
     "cgu": "You must accept the terms and conditions of use.",
     "match_user": "Email et mot de passe requis",
+    "validation_code_invalid": "Le code de l'organisation est invalide",
     "auth": {
       "unauthenticated": "Non authentifié",
       "email_exists": "Cet email est déjà utilisé",

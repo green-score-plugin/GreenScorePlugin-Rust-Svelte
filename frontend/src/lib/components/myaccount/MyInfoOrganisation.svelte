@@ -5,7 +5,7 @@
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
 
-    let organisation = $derived(page.data.userFull.organisation as Organisation);
+    let { organisation } = $props();
     let form = $derived(page.form);
     let message = $derived(form?.actionType === 'update_orga' ? form.message : null);
     let isSuccess = $derived(form?.actionType === 'update_orga' && form?.success);
@@ -69,6 +69,7 @@
 >
 
     <h1 class="text-2xl font-bold py-2">{$t('account.info.title')}</h1>
+    <input type="hidden" name="id" value={organisation?.id} />
 
     {#if message}
         <div class={`px-4 py-3 rounded-lg border text-sm ${

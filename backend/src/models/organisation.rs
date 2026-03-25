@@ -6,5 +6,6 @@ pub struct Organisation {
     pub nom: String,
     #[sqlx(rename = "organisation_code")]
     pub code: String,
-    pub siret: Option<String>
+    pub siret: Option<String>,
+    pub est_admin: bool
 }

@@ -3,7 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { BACKEND_URL } from '$lib/config';
 import { setSessionCookie, invalidateCache } from '$lib/server/session.ts';
 
-export const load: PageServerLoad = async ({ fetch, request, locals }) => {
+export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
     const headers = {
         'Content-Type': 'application/json',
         'Cookie': request.headers.get('cookie') || ''
@@ -14,52 +14,32 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let accountEquivalents = [];
     let services = [];
 
-    if (locals.user?.organisation && locals.user.user.est_admin) {
-        const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
-        if (res.ok) {
-            try {
-                const data = await res.json();
-                if (data.success) members = data.members;
-            } catch {}
-        }
+    const orgIdParam = url.searchParams.get('orgId');
+    let targetOrgId = orgIdParam ? parseInt(orgIdParam) : null;
 
-        const servicesRes = await fetch(`${BACKEND_URL}/account/organization/services`, { method: 'GET', headers, credentials: 'include' });
-        if (servicesRes.ok) {
-            try {
-                const data = await servicesRes.json();
-                if (data.success) services = data.services;
-                console.log('Services loaded in load function:', services?.length ?? 0);
-            } catch (e) {
-                console.error('Error parsing services:', e);
+    const userOrgs = locals.user?.organisation;
+
+    if (!targetOrgId && userOrgs && userOrgs.length > 0) {
+        targetOrgId = userOrgs[0].id;
+    }
+
+    const targetOrg = userOrgs?.find(o => o.id === targetOrgId);
+
+    if (targetOrg) {
+        if (targetOrg.est_admin) {
+            const res = await fetch(`${BACKEND_URL}/account/organization/members`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ organisation_id: targetOrgId })
+            });
+            if (res.ok) {
+                try {
+                    const data = await res.json();
+                    if (data.success) members = data.members;
+                } catch {}
             }
-        } else {
-            console.error('Failed to load services:', servicesRes.status);
         }
-
-    } else if (locals.user?.user) {
-        const orgRes = await fetch(`${BACKEND_URL}/account/my-organization`, { method: 'GET', headers, credentials: 'include' });
-        if (orgRes.ok) {
-            try {
-                const result = await orgRes.json();
-                if (result.success && result.organisation) {
-                    organisation = result.organisation;
-                    console.log('Organisation found in fallback:', organisation?.id);
-
-                    const servicesRes = await fetch(`${BACKEND_URL}/account/organization/services`, { method: 'GET', headers, credentials: 'include' });
-                    if (servicesRes.ok) {
-                        try {
-                            const data = await servicesRes.json();
-                            if (data.success) {
-                                services = data.services;
-                                console.log('Services loaded via fallback:', services?.length ?? 0);
-                            }
-                        } catch (e) {
-                            console.error('Error parsing services in fallback:', e);
-                        }
-                    }
-                }
-            } catch {}
-        }
+        organisation = targetOrg;
     }
 
     const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, { method: 'GET', headers, credentials: 'include' });
@@ -101,6 +81,7 @@ export const actions = {
     supprimer_membre: async ({ request, fetch }) => {
         const data = await request.formData();
         const memberId = parseInt(data.get('deleteMemberId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
 
         try {
             const response = await fetch(`${BACKEND_URL}/account/organization/members/remove`, {
@@ -109,7 +90,7 @@ export const actions = {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
                 },
-                body: JSON.stringify({ userId: memberId })
+                body: JSON.stringify({ userId: memberId, organisationId })
             });
 
             const result = await response.json();
@@ -238,17 +219,20 @@ export const actions = {
 
             const result = await response.json();
 
-            if (!result.success) {
-                return fail(400, { actionType: 'join_orga', message: result.message ?? 'errors.operation_error' });
-            }
-
-            const token = cookies.get('greenscoreweb_sessions');
-            if (token) invalidateCache(token);
-    
             if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
                 const sessionValue = result.token ?? result.session ?? result.sessionValue;
+
                 if (sessionValue) {
                     await setSessionCookie(cookies, sessionValue);
+                }
+
+                if (result.organisation_id) {
+                     redirect(303, `?tab=organisation&orgId=${result.organisation_id}`);
                 }
 
                 return {
@@ -257,12 +241,12 @@ export const actions = {
                     message: 'success.join_organization'
                 };
             } else {
-                return fail(400, {
-                    actionType: 'join_orga',
-                    message: result.message ?? 'errors.operation_error'
-                });
+                return fail(400, { actionType: 'join_orga', message: result.message ?? 'errors.operation_error' });
             }
-        } catch {
+        } catch (error) {
+            if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
+                throw error;
+            }
             return fail(500, { actionType: 'join_orga', message: 'errors.org_connection_error' });
         }
     },
@@ -271,6 +255,7 @@ export const actions = {
         const data = await request.formData();
         const organisationName = data.get('organisationName')?.toString();
         const siret = data.get('siret')?.toString();
+        const id = data.get('id') ? parseInt(data.get('id')!.toString()) : null;
 
         if (!organisationName) {
             return fail(400, { actionType: 'update_orga', message: 'errors.validation_org_name_required' });
@@ -288,8 +273,12 @@ export const actions = {
                     'Cookie': request.headers.get('cookie') || ''
                 },
                 credentials: 'include',
-                body: JSON.stringify({ name: organisationName, siret })
+                body: JSON.stringify({ id, name: organisationName, siret })
             });
+
+            if (!response.ok) {
+                return fail(response.status, { actionType: 'update_orga', message: 'errors.communication_error' });
+            }
 
             const result = await response.json();
 
@@ -314,14 +303,19 @@ export const actions = {
     },
 
     leave_orga: async ({ fetch, request, cookies }) => {
+        const data = await request.formData();
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
         try {
             const response = await fetch(`${BACKEND_URL}/account/leave-organization`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
-                }
+                },
+                body: JSON.stringify({ organisationId })
             });
+
 
             if (!response.ok) {
                 return fail(response.status, { actionType: 'leave_orga', message: 'errors.org_leave_error' });
@@ -339,15 +333,14 @@ export const actions = {
                     await setSessionCookie(cookies, response);
                 } catch (cookieError) {}
 
-                return {
-                    actionType: 'leave_orga',
-                    success: true,
-                    message: "success.leave_organization"
-                };
+                redirect(303, '?tab=organisation&action=new');
             } else {
                 return fail(400, { actionType: 'leave_orga', message: result.message ?? 'errors.operation_error' });
             }
-        } catch {
+        } catch (error) {
+            if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
+                throw error;
+            }
             return fail(500, { actionType: 'leave_orga', message: 'errors.server_error' });
         }
     },
@@ -500,7 +493,7 @@ export const actions = {
                 body: body
             });
 
-            const result = await response.json();
+            const result = await response.clone().json();
 
 
             if(result.success) {
@@ -510,8 +503,14 @@ export const actions = {
                 }
 
 
-                await setSessionCookie(cookies, response);
-                const code = result.account?.code || result.user_full?.organisation?.code;
+                const sessionValue = result.token ?? result.session ?? result.sessionValue;
+                if (sessionValue) {
+                    await setSessionCookie(cookies, sessionValue);
+                } else {
+                    await setSessionCookie(cookies, response);
+                }
+
+                const code = result.account?.code || result.user_full?.organisation?.[0]?.code;
                 redirect(303,`/inscription-organisation/${code}`);
             }
 
