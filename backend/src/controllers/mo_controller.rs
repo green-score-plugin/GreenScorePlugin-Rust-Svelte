@@ -30,7 +30,7 @@ pub struct MyOrganizationResponse {
 
 pub async fn mo(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Result<Json<MyOrganizationResponse>, AppError> {
 
-    let organization = user_full.organisation.ok_or(AppError::NotFound("User is not in an organization".to_string()))?;
+    let organization = user_full.organisation.first().ok_or(AppError::NotFound("User is not in an organization".to_string()))?;
 
     let organization_id = organization.id;
     let user_id = user_full.user.id;
