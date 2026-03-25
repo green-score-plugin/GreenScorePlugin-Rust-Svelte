@@ -13,7 +13,7 @@ impl MonitoredWebsiteRepository {
     ) -> Result<(), Error> {
         sqlx::query(
             r#"
-            INSERT INTO monitored_websites (url_domain, user_id, queries_quantity, data_transferred, resources, loading_time, carbon_footprint, url_full, country)
+            INSERT INTO monitored_website (url_domain, user_id, queries_quantity, data_transferred, resources, loading_time, carbon_footprint, url_full, country)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             "#,
         )
@@ -38,7 +38,7 @@ impl MonitoredWebsiteRepository {
         let result = sqlx::query_as::<_, LastPageConsultedInfos>(
             r#"
             SELECT url_full, queries_quantity, carbon_footprint, data_transferred, loading_time, country
-            FROM monitored_websites
+            FROM monitored_website
             WHERE user_id = ?
             ORDER BY creation_date DESC
             LIMIT 1
