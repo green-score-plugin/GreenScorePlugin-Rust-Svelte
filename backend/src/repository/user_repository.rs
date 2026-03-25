@@ -12,7 +12,7 @@ impl UserRepository {
         last_name: &str
     ) -> Result<i64, Error> {
         let result = sqlx::query(
-            "INSERT INTO user (email, password, first_name, last_name) VALUES (?, ?, ?, ?)"
+            "INSERT INTO user (email, password, first_name, last_name, total_carbon_footprint) VALUES (?, ?, ?, ?, 0.0)"
         )
         .bind(email)
         .bind(password_hash)
