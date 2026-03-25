@@ -24,14 +24,13 @@ fn create_dummy_user_full(id: i64) -> UserFull {
 }
 
 #[sqlx::test]
-async fn test_lpc_controller_integration(pool: MySqlPool) {
-    // Run migrations from the migrations folder
+async fn devrait_retourner_succes_et_enregistrer_donnees_pour_lpc(pool: MySqlPool) {
+    // GIVEN
     sqlx::migrate!("./migrations")
         .run(&pool)
         .await
-        .expect("Failed to migrate database");
+        .expect("Echec de la migration de la base de données");
 
-    // Seed some data for advice and equivalents so we get a rich response
     sqlx::query("INSERT INTO advice (advice, is_dev, title, icon) VALUES ('Dev advice', 1, '', '')").execute(&pool).await.ok();
     sqlx::query("INSERT INTO advice (advice, is_dev, title, icon) VALUES ('User advice', 0, '', '')").execute(&pool).await.ok();
     sqlx::query("INSERT INTO equivalent (name, equivalent, icon_thumbnail) VALUES ('Car', 0.5, 'car.png')").execute(&pool).await.ok();
@@ -47,34 +46,32 @@ async fn test_lpc_controller_integration(pool: MySqlPool) {
         country: "FR".to_string(),
     };
 
+    // WHEN
     let result = lpc_controller::lpc(
         State(pool.clone()),
         authenticated_user,
         Query(params.clone()),
     ).await;
 
-    assert!(result.is_ok());
+    // THEN
+    assert!(result.is_ok(), "Le contrôleur devrait retourner un résultat Ok");
 
     let response = result.unwrap().0;
 
-    // Check general success
-    assert!(response.success);
+    assert!(response.success, "La réponse devrait indiquer un succès");
 
-    // Check if the input info was returned
-    assert!(response.lpc_infos.is_some());
+    assert!(response.lpc_infos.is_some(), "Les informations LPC devraient être présentes");
     let returned_info = response.lpc_infos.unwrap();
-    assert_eq!(returned_info.link, params.link);
-    assert_eq!(returned_info.carbon_footprint, params.carbon_footprint);
+    assert_eq!(returned_info.link, params.link, "Le lien retourné devrait correspondre à l'entrée");
+    assert_eq!(returned_info.carbon_footprint, params.carbon_footprint, "L'empreinte carbone retournée devrait correspondre");
 
-    // Check computed fields
-    assert_eq!(response.letter, Some("A".to_string())); // 0.1 is A
-    assert!(response.env_nomination.is_some());
+    assert_eq!(response.letter, Some("A".to_string()), "Le grade devrait être A pour une empreinte de 0.1");
+    assert!(response.env_nomination.is_some(), "Une nomination environnementale devrait être retournée");
 
-    // Check side effects: Data should be inserted into monitored_websites
     let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM monitored_websites WHERE user_id = ?")
         .bind(1)
         .fetch_one(&pool)
         .await
-        .unwrap();
-    assert_eq!(count, 1, "Should have inserted one record into monitored_websites");
+        .unwrap_or(0);
+    assert_eq!(count, 1, "Devrait avoir inséré un enregistrement dans monitored_websites");
 }
