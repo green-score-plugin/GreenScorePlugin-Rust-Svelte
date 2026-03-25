@@ -98,9 +98,23 @@ INSERT INTO `advice` (`id`, `is_dev`, `advice`, `title`, `icon`) VALUES
 -- (Ajoute ici le reste de tes INSERT pour que les tests aient accès aux conseils)
 
 INSERT INTO `equivalent` (`id`, `name`, `equivalent`, `icon_thumbnail`) VALUES
-                                                                            (1, 'A/R Lille - Nîmes', 0.004, 'car.png'),
-                                                                            (3, 'emails', 2000, 'email.png');
+    (1, 'data.equivalent.lille_marseille', 0.004, 'car.png'),
+    (2, 'data.equivalent.paris_londres', 0.73, 'train-paris-londres.png'),
+    (3, 'data.equivalent.emails', 2000, 'email.png'),
+    (4, 'data.equivalent.search', 5000, 'search.png'),
+    (5, 'data.equivalent.streaming', 17.86, 'youtube.png'),
+    (6, 'data.equivalent.bus', 36, 'bus.png'),
+    (7, 'data.equivalent.motorbike', 4.54, 'motorbike.png'),
+    (8, 'data.equivalent.car', 4.54, 'car.png'),
+    (9, 'data.equivalent.tap_water', 7692, 'faucet.png'),
+    (10, 'data.equivalent.paris_ny', 0.0007, 'new-york.png');
 
+INSERT INTO `user` (id, email, roles, password, first_name, last_name, total_carbon_footprint, est_admin)
+VALUES (1, 'test@example.com', '["ROLE_USER"]', 'password', 'Test', 'User', 0.0, 0);
+
+INSERT INTO `user_equivalent` (`user_id`, `equivalent_id`) VALUES
+(1, 1),
+(1, 3);
 
 ALTER TABLE organisation ADD CONSTRAINT UNIQUE (siret);
 
