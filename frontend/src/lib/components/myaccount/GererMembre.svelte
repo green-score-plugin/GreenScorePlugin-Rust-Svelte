@@ -1,15 +1,17 @@
 <script lang="ts">
     import { page } from "$app/state";
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
-    import type { Organisation } from "$lib/types/account";
+    import type {Organisation} from "$lib/types/account";
     import { enhance } from '$app/forms';
     import type { SubmitFunction } from '@sveltejs/kit';
     import { t } from 'svelte-i18n';
+    import type {User} from "$lib/types/account.ts";
 
     let showDeleteModal = $state(false);
     let deletingMemberId: number | null = $state(null);
 
-    let user = $derived(page.data.user as Organisation);
+    let organisation = $derived(page.data.userFull.organisation as Organisation);
+    let user = $derived(page.data.userFull.user as User);
     let members = $state(page.data.members || []);
 
     $effect(() => {
@@ -27,7 +29,6 @@
                 members = members.filter((m: any) => m.id !== deletingMemberId);
                 showDeleteModal = false;
                 deletingMemberId = null;
-                // Add a toast or notification if needed, using result.data.message
             }
         };
     };
@@ -92,15 +93,17 @@
                             <p class="text-sm font-medium text-gray-950">{ member.nom } { member.prenom }</p>
                             <p class="text-xs text-gray-500">{ member.email }</p>
                         </div>
-                        <button
-                                class="hover:scale-110 transition-transform duration-200 text-red-600 p-1 cursor-pointer"
-                                aria-label="Delete"
-                                onclick={() => { showDeleteModal = true; deletingMemberId = member.id; }}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M18 12.998H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2"/>
-                            </svg>
-                        </button>
+                        {#if user.id !== member.id}
+                            <button
+                                    class="hover:scale-110 transition-transform duration-200 text-red-600 p-1 cursor-pointer"
+                                    aria-label="Delete"
+                                    onclick={() => { showDeleteModal = true; deletingMemberId = member.id; }}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M18 12.998H6a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2"/>
+                                </svg>
+                            </button>
+                        {/if}
                     </div>
                 {/each}
 
@@ -114,7 +117,7 @@
     {:else}
         <div class="flex flex-col gap-4">
             <p class="text-sm text-gray-500">Vous n'avez pas encore ajouté de membres...</p>
-            <CodeClipboard code={user.code} />
+            <CodeClipboard code={organisation.code} />
         </div>
     {/if}
 </div>

@@ -2,6 +2,7 @@ use sqlx::{Error, MySqlPool};
 use crate::models::user::User;
 use crate::repository::user_repository::UserRepository;
 use crate::dto::update_account_request_dto::UpdateAccountRequest;
+use crate::models::organisation::Organisation;
 use crate::repository::organisation_repository::OrganisationRepository;
 
 pub struct UserService;
@@ -59,18 +60,21 @@ impl UserService {
         UserRepository::delete_user(&pool, user_id).await
     }
 
-    pub async fn join_organization(pool: &MySqlPool, orga_code: String, user_id: i64) -> Result<i64, String> {
+    pub async fn join_organization(pool: &MySqlPool, orga_code: String, user_id: i64) -> Result<Option<Organisation>, String> {
         let orga = OrganisationRepository::find_organization_by_code(pool, orga_code)
             .await
             .map_err(|e| e.to_string())?;
 
-        let orga_id = orga.ok_or("errors.org_code_invalid".to_string())?.id;
+        let orga_id = match orga {
+            Some(ref o) => o.id,
+            None => return Err("Code d'organisation invalide".to_string()),
+        };
 
         UserRepository::update_user_organization(pool, user_id, orga_id)
             .await
             .map_err(|e| e.to_string())?;
 
-        Ok(orga_id)
+        Ok(orga)
 
     }
 

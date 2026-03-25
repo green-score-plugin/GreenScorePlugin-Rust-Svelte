@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let organisation = null;
     let accountEquivalents = [];
 
-    if (locals.user?.organisation) {
+    if (locals.user?.organisation && locals.user.user.est_admin) {
         const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
         if (res.ok) {
             try {
@@ -71,7 +71,7 @@ export const actions = {
 
     supprimer_membre: async ({ request, fetch }) => {
         const data = await request.formData();
-        const memberId = data.get('deleteMemberId');
+        const memberId = parseInt(data.get('deleteMemberId')?.toString() || '0', 10);
 
         try {
             const response = await fetch(`${BACKEND_URL}/account/organization/members/remove`, {
@@ -403,6 +403,57 @@ export const actions = {
             return { actionType: 'modification_equivalents', success: true, message: 'account.equivalent.message.success' };
         } catch {
             return fail(500, { actionType: 'modification_equivalents', message: 'errors.server_error' });
+        }
+    },
+
+    create_organization: async ({ request, fetch, cookies })=> {        const data = await request.formData();
+        const organisationName = data.get('organisationName');
+        const siret = data.get('siret')?.toString();
+
+        if(!organisationName) {
+            return fail(400, { message: "errors.champs" })
+        }
+
+        if (siret && !/^\d{14}$/.test(siret)) {
+            return fail(400, { message: 'errors.validation_siret_format' });
+        }
+
+        try{
+            let body = JSON.stringify({
+                organization_name: organisationName,
+                siret : siret || null,
+            });
+            const response = await fetch(`${BACKEND_URL}/account/organization/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: body
+            });
+
+            const result = await response.json();
+
+
+            if(result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+
+                await setSessionCookie(cookies, response);
+                const code = result.account?.code || result.user_full?.organisation?.code;
+                redirect(303,`/inscription-organisation/${code}`);
+            }
+
+            return fail(400, { message: result.message || 'Erreur de connexion' });
+        }catch (error) {
+            if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
+                throw error;
+            }
+            return fail(500, { message: 'errors.server_error' });
         }
     }
 } satisfies Actions;
