@@ -298,7 +298,7 @@ async fn devrait_retourner_get_my_average_daily_carbon_footprint(pool: MySqlPool
     let mut found_today = false;
     let mut found_yesterday = false;
 
-    for (day, avg) in result {
+    for (_day, avg) in result {
         // day est une String "YYYY-MM-DD"
         if avg == 15.0 { found_today = true; }
         if avg == 5.0 { found_yesterday = true; }
@@ -311,15 +311,13 @@ async fn devrait_retourner_get_my_average_daily_carbon_footprint(pool: MySqlPool
 #[sqlx::test]
 async fn devrait_retourner_get_average_daily_carbon_footprint_global(pool: MySqlPool) {
     // GIVEN
-    let user1: i64 = 1; // Créé par la migration
+    let user1: i64 = 1;
     let user2: i64 = 2;
 
-    // Création du user 2 manquant
-    sqlx::query("INSERT INTO user (id, email, roles, password) VALUES (?, 'user2@test.com', '[]', 'pwd')")
+    let _ = sqlx::query("INSERT IGNORE INTO user (id, email, roles, password) VALUES (?, 'user2@test.com', '[]', 'pwd')")
         .bind(user2)
         .execute(&pool)
-        .await
-        .unwrap();
+        .await;
 
     insert_measure(&pool, user1, 10.0, "NOW()").await;
     insert_measure(&pool, user2, 20.0, "NOW()").await;
@@ -401,3 +399,4 @@ async fn devrait_retourner_get_monthly_organization_consumption(pool: MySqlPool)
     assert_eq!(result[0].value, 100.0);
     assert_eq!(result[1].value, 200.0);
 }
+
