@@ -2,6 +2,20 @@ use backend::repository::monitored_website_repository::MonitoredWebsiteRepositor
 use backend::models::monitored_website::MonitoredWebsite;
 use sqlx::MySqlPool;
 
+// Helper pour insérer rapidement des données de test
+async fn insert_measure(pool: &MySqlPool, user_id: i64, footprint: f64, date_sql: &str) {
+    let query = format!(
+        "INSERT INTO monitored_website (user_id, carbon_footprint, creation_date, url_domain) VALUES (?, ?, {}, 'generated.com')",
+        date_sql
+    );
+    sqlx::query(&query)
+        .bind(user_id)
+        .bind(footprint)
+        .execute(pool)
+        .await
+        .unwrap();
+}
+
 #[sqlx::test]
 async fn devrait_sauvegarder_save_monitored_website_data(pool: MySqlPool) {
     // GIVEN
@@ -232,12 +246,10 @@ async fn devrait_retourner_average_daily_carbon_footprint_for_organization(pool:
 async fn devrait_retourner_get_weekly_consumption_by_user(pool: MySqlPool) {
     // GIVEN
     let user_id: i64 = 1;
-    // Insertion manuelle pour contrôler la date (aujourd'hui et il y a 2 semaines)
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, NOW())")
-        .bind(user_id).bind(10.0).execute(&pool).await.unwrap();
 
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, DATE_SUB(NOW(), INTERVAL 2 WEEK))")
-        .bind(user_id).bind(20.0).execute(&pool).await.unwrap();
+    // Insertion simplifiée via helper
+    insert_measure(&pool, user_id, 10.0, "NOW()").await;
+    insert_measure(&pool, user_id, 20.0, "DATE_SUB(NOW(), INTERVAL 2 WEEK)").await;
 
     // WHEN
     let result = MonitoredWebsiteRepository::get_weekly_consumption_by_user(&pool, user_id).await.unwrap();
@@ -254,13 +266,9 @@ async fn devrait_retourner_get_weekly_consumption_by_user(pool: MySqlPool) {
 async fn devrait_retourner_get_monthly_consumption_by_user(pool: MySqlPool) {
     // GIVEN
     let user_id: i64 = 1;
-    // Ce mois-ci
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, NOW())")
-        .bind(user_id).bind(5.0).execute(&pool).await.unwrap();
 
-    // Il y a 2 mois
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, DATE_SUB(NOW(), INTERVAL 2 MONTH))")
-        .bind(user_id).bind(15.0).execute(&pool).await.unwrap();
+    insert_measure(&pool, user_id, 5.0, "NOW()").await;
+    insert_measure(&pool, user_id, 15.0, "DATE_SUB(NOW(), INTERVAL 2 MONTH)").await;
 
     // WHEN
     let result = MonitoredWebsiteRepository::get_monthly_consumption_by_user(&pool, user_id).await.unwrap();
@@ -275,15 +283,10 @@ async fn devrait_retourner_get_monthly_consumption_by_user(pool: MySqlPool) {
 async fn devrait_retourner_get_my_average_daily_carbon_footprint(pool: MySqlPool) {
     // GIVEN
     let user_id: i64 = 1;
-    // 2 entrées aujourd'hui : 10 et 20 -> moyenne 15
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, NOW())")
-        .bind(user_id).bind(10.0).execute(&pool).await.unwrap();
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, NOW())")
-        .bind(user_id).bind(20.0).execute(&pool).await.unwrap();
 
-    // 1 entrée hier : 5 -> moyenne 5
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, DATE_SUB(NOW(), INTERVAL 1 DAY))")
-        .bind(user_id).bind(5.0).execute(&pool).await.unwrap();
+    insert_measure(&pool, user_id, 10.0, "NOW()").await;
+    insert_measure(&pool, user_id, 20.0, "NOW()").await;
+    insert_measure(&pool, user_id, 5.0, "DATE_SUB(NOW(), INTERVAL 1 DAY)").await;
 
     // WHEN
     let result = MonitoredWebsiteRepository::get_my_average_daily_carbon_footprint(&pool, user_id).await.unwrap();
@@ -318,12 +321,8 @@ async fn devrait_retourner_get_average_daily_carbon_footprint_global(pool: MySql
         .await
         .unwrap();
 
-    // User 1 : 10.0 aujourd'hui
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, NOW())")
-        .bind(user1).bind(10.0).execute(&pool).await.unwrap();
-    // User 2 : 20.0 aujourd'hui
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (?, ?, NOW())")
-        .bind(user2).bind(20.0).execute(&pool).await.unwrap();
+    insert_measure(&pool, user1, 10.0, "NOW()").await;
+    insert_measure(&pool, user2, 20.0, "NOW()").await;
 
     // Moyenne globale pour aujourd'hui = (10+20)/2 = 15.0
 
@@ -349,12 +348,8 @@ async fn devrait_retourner_get_daily_organization_consumption(pool: MySqlPool) {
     sqlx::query("INSERT INTO user (id, organisation_id, email, roles, password) VALUES (11, ?, 'u2@test.com', '[]', 'pwd')")
         .bind(org_id).execute(&pool).await.unwrap();
 
-    // Conso User 1 aujourd'hui : 10
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (10, 10.0, NOW())")
-        .execute(&pool).await.unwrap();
-    // Conso User 2 aujourd'hui : 20
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (11, 20.0, NOW())")
-        .execute(&pool).await.unwrap();
+    insert_measure(&pool, 10, 10.0, "NOW()").await;
+    insert_measure(&pool, 11, 20.0, "NOW()").await;
 
     // WHEN
     let result = MonitoredWebsiteRepository::get_daily_organization_consumption(&pool, org_id).await.unwrap();
@@ -373,12 +368,8 @@ async fn devrait_retourner_get_weekly_organization_consumption(pool: MySqlPool) 
     sqlx::query("INSERT INTO user (id, organisation_id, email, roles, password) VALUES (20, ?, 'u3@test.com', '[]', 'pwd')")
         .bind(org_id).execute(&pool).await.unwrap();
 
-    // Semaine courante
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (20, 100.0, NOW())")
-        .execute(&pool).await.unwrap();
-    // Semaine -2
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (20, 50.0, DATE_SUB(NOW(), INTERVAL 2 WEEK))")
-        .execute(&pool).await.unwrap();
+    insert_measure(&pool, 20, 100.0, "NOW()").await;
+    insert_measure(&pool, 20, 50.0, "DATE_SUB(NOW(), INTERVAL 2 WEEK)").await;
 
     // WHEN
     let result = MonitoredWebsiteRepository::get_weekly_organization_consumption(&pool, org_id).await.unwrap();
@@ -399,12 +390,8 @@ async fn devrait_retourner_get_monthly_organization_consumption(pool: MySqlPool)
     sqlx::query("INSERT INTO user (id, organisation_id, email, roles, password) VALUES (30, ?, 'u4@test.com', '[]', 'pwd')")
         .bind(org_id).execute(&pool).await.unwrap();
 
-    // Mois courant
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (30, 200.0, NOW())")
-        .execute(&pool).await.unwrap();
-    // Mois -3
-    sqlx::query("INSERT INTO monitored_website (user_id, carbon_footprint, creation_date) VALUES (30, 100.0, DATE_SUB(NOW(), INTERVAL 3 MONTH))")
-        .execute(&pool).await.unwrap();
+    insert_measure(&pool, 30, 200.0, "NOW()").await;
+    insert_measure(&pool, 30, 100.0, "DATE_SUB(NOW(), INTERVAL 3 MONTH)").await;
 
     // WHEN
     let result = MonitoredWebsiteRepository::get_monthly_organization_consumption(&pool, org_id).await.unwrap();
