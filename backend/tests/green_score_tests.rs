@@ -1,5 +1,5 @@
 use backend::green_score::calculate_green_score;
-use sqlx::{MySql, Pool, Row};
+use sqlx::{MySql, Pool};
 
 // --- Helper to seed data ---
 async fn seed_data(pool: &Pool<MySql>) -> (i64, i64) {
@@ -14,7 +14,7 @@ async fn seed_data(pool: &Pool<MySql>) -> (i64, i64) {
 
     // Create a user in that organisation
     let user_result = sqlx::query(
-        "INSERT INTO user (email, roles, password, total_carbon_footprint, organisation_id, est_admin) VALUES (?, '[]', 'pass', ?, ?, 0)"
+        "INSERT INTO user (email, password, total_carbon_footprint, organisation_id, est_admin) VALUES (?, 'pass', ?, ?, 0)"
     )
     .bind("user1@example.com")
     .bind(100.0)
@@ -26,7 +26,7 @@ async fn seed_data(pool: &Pool<MySql>) -> (i64, i64) {
 
     // Create another user
     sqlx::query(
-        "INSERT INTO user (email, roles, password, total_carbon_footprint, organisation_id, est_admin) VALUES (?, '[]', 'pass', ?, ?, 0)"
+        "INSERT INTO user (email, password, total_carbon_footprint, organisation_id, est_admin) VALUES (?, 'pass', ?, ?, 0)"
     )
     .bind("user2@example.com")
     .bind(200.0)
