@@ -1,5 +1,6 @@
 use sqlx::MySqlPool;
 use backend::repository::equivalent_repository::EquivalentRepository;
+use backend::repository::user_repository::UserRepository;
 
 #[sqlx::test]
 async fn devrait_retourner_3_equivalent_get_n_equivalent(pool: MySqlPool) {
@@ -19,7 +20,20 @@ async fn devrait_retourner_3_equivalent_get_n_equivalent(pool: MySqlPool) {
 #[sqlx::test]
 async fn devrait_retourner_emails_user_equivalent(pool: MySqlPool) {
     // GIVEN
-    let user_id: i64 = 1;
+    // Create a user first
+    let user_id = UserRepository::insert_user(&pool, "eq_test1@example.com", "pwd", "Eq", "Test1")
+        .await
+        .expect("Failed to insert user");
+
+    // Insert user equivalent (assuming equivalent.emails ID is 3)
+    let email_eq_id = 3;
+    sqlx::query("INSERT INTO user_equivalent (user_id, equivalent_id) VALUES (?, ?)")
+        .bind(user_id)
+        .bind(email_eq_id)
+        .execute(&pool)
+        .await
+        .expect("Failed to insert user_equivalent");
+
     let n: i32 = 1;
     let expected: &str = "data.equivalent.emails";
 
@@ -38,11 +52,25 @@ async fn devrait_retourner_emails_user_equivalent(pool: MySqlPool) {
 #[sqlx::test]
 async fn devrait_retourner_2_equivalents_selectionne_get_all_equivalents_with_selection(pool: MySqlPool) {
     // GIVEN
-    let user_id: i64 = 1;
+    // Create a user first
+    let user_id = UserRepository::insert_user(&pool, "eq_test2@example.com", "pwd", "Eq", "Test2")
+        .await
+        .expect("Failed to insert user");
+
     let expected_selected = vec![
         "data.equivalent.lille_marseille",
         "data.equivalent.emails"
     ];
+
+    // Insert user equivalents manually (IDs 1 and 3 based on migration)
+    for eq_id in [1, 3] {
+        sqlx::query("INSERT INTO user_equivalent (user_id, equivalent_id) VALUES (?, ?)")
+            .bind(user_id)
+            .bind(eq_id)
+            .execute(&pool)
+            .await
+            .expect("Failed to insert user_equivalent");
+    }
 
     // WHEN
     let all_equivalents = EquivalentRepository::get_all_equivalents_with_selection(&pool, user_id)
@@ -62,8 +90,12 @@ async fn devrait_retourner_2_equivalents_selectionne_get_all_equivalents_with_se
 #[sqlx::test]
 async fn devrait_mettre_a_jour_les_equivalents_update_user_equivalents(pool: MySqlPool) {
     // GIVEN
+    // Create a user first
+    let user_id = UserRepository::insert_user(&pool, "eq_test3@example.com", "pwd", "Eq", "Test3")
+        .await
+        .expect("Failed to insert user");
+
     let new_equivalents_id = vec![2, 4, 5];
-    let user_id: i64 = 1;
 
     // WHEN
     EquivalentRepository::update_user_equivalents(&pool, user_id, new_equivalents_id.clone())
