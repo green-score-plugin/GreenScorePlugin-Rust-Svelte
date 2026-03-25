@@ -1,7 +1,6 @@
 <script lang="ts">
     import { page } from "$app/state";
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
-    import type {Organisation} from "$lib/types/account";
     import { enhance } from '$app/forms';
     import type { SubmitFunction } from '@sveltejs/kit';
     import { t } from 'svelte-i18n';
@@ -13,6 +12,7 @@
     let { organisation } = $props();
     let user = $derived(page.data.userFull.user as User);
     let members = $state(page.data.members || []);
+    let deleteErrorMessage: string | null = $state(null);
 
     $effect(() => {
         members = page.data.members || [];
@@ -24,11 +24,17 @@
 
 
     const handleDeleteResult: SubmitFunction = () => {
+        deleteErrorMessage = null;
         return async ({ result }) => {
             if (result.type === 'success') {
                 members = members.filter((m: any) => m.id !== deletingMemberId);
                 showDeleteModal = false;
                 deletingMemberId = null;
+            } else if (result.type === 'failure') {
+                // @ts-ignore
+                deleteErrorMessage = result.data?.message ? $t(result.data.message) : $t('errors.unknown_error');
+            } else {
+                 deleteErrorMessage = $t('errors.unknown_error');
             }
         };
     };
@@ -130,9 +136,12 @@
             </svg>
             <h2 class="text-xl font-bold mb-2">{$t('account.modals.delete_member_title')}</h2>
             <p class="text-gray-600 mb-6">{$t('account.modals.delete_member_desc')}</p>
+            {#if deleteErrorMessage}
+                <p class="text-red-500 mb-4 font-medium text-sm">{deleteErrorMessage}</p>
+            {/if}
             <div class="flex justify-center gap-4">
                 <button
-                        onclick={() => { showDeleteModal = false; deletingMemberId = null; }}
+                        onclick={() => { showDeleteModal = false; deletingMemberId = null; deleteErrorMessage = null; }}
                         class="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold cursor-pointer"
                 >
                     {$t('account.modals.cancel')}

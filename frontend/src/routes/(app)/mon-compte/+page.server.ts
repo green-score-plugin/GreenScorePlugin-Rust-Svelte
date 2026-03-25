@@ -80,6 +80,7 @@ export const actions = {
     supprimer_membre: async ({ request, fetch }) => {
         const data = await request.formData();
         const memberId = parseInt(data.get('deleteMemberId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
 
         try {
             const response = await fetch(`${BACKEND_URL}/account/organization/members/remove`, {
@@ -88,7 +89,7 @@ export const actions = {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
                 },
-                body: JSON.stringify({ userId: memberId })
+                body: JSON.stringify({ userId: memberId, organisationId })
             });
 
             const result = await response.json();
