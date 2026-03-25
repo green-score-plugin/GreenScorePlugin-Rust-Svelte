@@ -11,3 +11,4 @@ async fn database_connection_test() {
     assert_eq!(result, 4);
 }
 
+
