@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `equivalent` (
 CREATE TABLE IF NOT EXISTS `service` (
     `id` int NOT NULL AUTO_INCREMENT,
     `nom` varchar(255) NOT NULL,
-    `organisation_id` int DEFAULT NULL,
+    `id_organisation` int DEFAULT NULL,
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
