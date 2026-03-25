@@ -103,7 +103,8 @@
       "already_have_account": "I already have an account",
       "register_link": "Register",
       "success_deleted": "Success!",
-      "account_deleted_msg": "Your account has been successfully deleted."
+      "account_deleted_msg": "Your account has been successfully deleted.",
+      "sign_in": "Sign in"
     },
     "register": {
       "user_title": "Register",
@@ -181,7 +182,9 @@
       "confirm": "Confirm",
       "delete_confirm_title": "Confirm Deletion",
       "delete_confirm_desc": "Are you sure you want to delete your user account?",
-      "delete": "Delete"
+      "delete": "Delete",
+      "delete_member_title": "Delete Member",
+      "delete_member_desc": "Are you sure you want to delete this member from the organization?"
     }
   },
   "dashboard": {
@@ -486,7 +489,8 @@
     "validation_fields_required": "First name, last name, and email are required",
     "validation_password_complexity": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character (#?!@$%^&*-)",
     "validation_code_required": "Organization code is required",
-    "validation_code_invalid": "Invalid code",
+    "session_error": "Session error",
+    "too_many_attempts": "Too many attempts, please try again in 15 minutes",
     "org_change_error": "Server error while changing organization",
     "no_changes": "No changes to be made",
     "db_error": "Database error",
@@ -511,7 +515,8 @@
       "email_verification_error": "Email verification error",
       "registration_error": "Registration error",
       "org_creation_error": "Organization creation error",
-      "user_creation_error": "User creation error"
+      "user_creation_error": "User creation error",
+      "missing_fields": "All fields are required"
     }
   },
   "success": {

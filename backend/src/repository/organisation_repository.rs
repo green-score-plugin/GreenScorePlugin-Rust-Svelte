@@ -31,7 +31,7 @@ impl OrganisationRepository {
     pub async fn insert_organisation(pool: &MySqlPool,
                                  organisation_name: &str,
                                  organisation_code: &str,
-                                 siret: Option<&str>) -> Result<i64, sqlx::Error> {
+                                 siret: Option<String>) -> Result<i64, sqlx::Error> {
         let result = sqlx::query(
             "INSERT INTO organisation (organisation_name, organisation_code, siret) VALUES (?, ?, ?)"
         )

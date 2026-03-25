@@ -5,3 +5,5 @@ SQLX_OFFLINE = "true"
 test-cov = "llvm-cov nextest --html"
 test-quick = "nextest run"
 
+[build]
+rustflags = ["--cfg", "tokio_unstable"]
