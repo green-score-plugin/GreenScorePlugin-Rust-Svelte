@@ -165,10 +165,6 @@ impl UserRepository {
     }
 
     pub async fn update_user_organization(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<(), Error> {
-        // This method was replacing org. Now we just INSERT (join). Or if we strictly want replace, we delete first.
-        // Assuming this is used for 'join' via code -> usually non-admin.
-        // Let's defer strict logic to service, here just add.
-
          sqlx::query(
             "INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)"
         )
@@ -190,22 +186,23 @@ impl UserRepository {
         Ok(result)
     }
 
-    pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64) -> Result<(), Error> {
-        // Removes ALL memberships? Be careful.
-        // If meant to leave ONE, we need org_id.
-        // But the signature only has user_id. This method signature is problematic for multi-org.
-        // Assuming current usage implies SINGLE org context for members.
-        // BUT for creators, this would wipe all created orgs!
-        // We should fix this method signature in SERVICE first, but keeping it here for now:
-        // Let's assume this removes ONLY non-admin memberships?
-        // Or delete all. Given "Un user ne peut en rejoindre qu'une seule", this might be intended for "Leaving the joined org".
-
-        sqlx::query("DELETE FROM organisation_user WHERE user_id = ?")
+    pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<(), Error> {
+        sqlx::query("DELETE FROM organisation_user WHERE user_id = ? AND organisation_id = ?")
             .bind(user_id)
+            .bind(orga_id)
             .execute(pool)
             .await?;
 
         Ok(())
+    }
+
+    pub async fn is_member_of_organisation(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<bool, Error> {
+         let result = sqlx::query("SELECT 1 FROM organisation_user WHERE user_id = ? AND organisation_id = ? LIMIT 1")
+            .bind(user_id)
+            .bind(orga_id)
+            .fetch_optional(pool)
+            .await?;
+        Ok(result.is_some())
     }
 
     pub async fn is_member_of_any_organisation(pool: &MySqlPool, user_id: i64) -> Result<bool, Error> {

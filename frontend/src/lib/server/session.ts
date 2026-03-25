@@ -100,7 +100,7 @@ export async function setSessionCookie(cookies: Cookies, source: Response | stri
 
         }
 
-        console.warn('setSessionCookie: aucun token trouvé ni header Set-Cookie dans la source fournie');
+        
 
     } catch (err) {
         console.error('Erreur dans setSessionCookie:', err);

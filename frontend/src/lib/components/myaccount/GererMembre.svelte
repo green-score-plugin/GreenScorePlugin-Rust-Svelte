@@ -10,7 +10,7 @@
     let showDeleteModal = $state(false);
     let deletingMemberId: number | null = $state(null);
 
-    let organisation = $derived(page.data.userFull.organisation as Organisation);
+    let { organisation } = $props();
     let user = $derived(page.data.userFull.user as User);
     let members = $state(page.data.members || []);
 
@@ -143,6 +143,7 @@
                         action="?/supprimer_membre"
                 >
                     <input type="hidden" name="deleteMemberId" value={deletingMemberId} />
+                    <input type="hidden" name="organisationId" value={organisation.id} />
                     <button
                             type="submit"
                             class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold cursor-pointer"

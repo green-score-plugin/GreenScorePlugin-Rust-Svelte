@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
     import LeftMenu from '$lib/components/myaccount/LeftMenu.svelte';
     import MyInfo from '$lib/components/myaccount/MyInfo.svelte';
     import GererOrganisation from '$lib/components/myaccount/GererOrganisation.svelte';
@@ -15,10 +16,33 @@
     let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
     let user = $derived(userFull.user as User);
 
-    let organisation = $derived(userFull.organisation?.[0] as Organisation | undefined)
+    let orgIdParam = $derived(page.url.searchParams.get('orgId'));
+    let actionParam = $derived(page.url.searchParams.get('action'));
+
+    let selectedOrgId = $derived.by(() => {
+        if (orgIdParam) return parseInt(orgIdParam);
+        if (userFull.organisation?.length > 0) return userFull.organisation[0].id;
+        return null;
+    });
+
+    let selectedOrganisation = $derived(
+        userFull.organisation?.find(o => o.id === selectedOrgId)
+    );
+
+    let isCreatingOrg = $derived(actionParam === 'new' || userFull.organisation?.length === 0);
 
     $inspect(userFull);
     $inspect(activePage);
+
+    function handleOrgChange(event: Event) {
+        const select = event.target as HTMLSelectElement;
+        const val = select.value;
+        if (val === 'new') {
+            goto(`?tab=organisation&action=new`);
+        } else {
+             goto(`?tab=organisation&orgId=${val}`);
+        }
+    }
 </script>
 
 <svelte:head>
@@ -42,13 +66,38 @@
             {:else if activePage === 'user_equivalent'}
                 <UserEquivalent />
             {:else if activePage === 'organisation'}
-                {#if organisation?.est_admin === true}
-                    <div class="flex flex-col gap-6">
-                        <MyInfoOrganisation />
-                        <GererMembre />
+
+                {#if userFull.organisation?.length > 0}
+                    <div class="mb-6 flex items-center justify-between">
+                         <label class="flex items-center gap-2 w-full sm:w-auto">
+                            <span class="font-semibold text-gray-700 whitespace-nowrap">Organisation:</span>
+                            <select
+                                class="px-3 py-2 border border-grey-200 rounded-lg text-grey-700 bg-white focus:outline-none focus:ring-1 focus:ring-gs-green-950 cursor-pointer text-sm font-medium w-full sm:w-auto"
+                                value={isCreatingOrg ? 'new' : selectedOrgId}
+                                onchange={handleOrgChange}
+                            >
+                                {#each userFull.organisation as org}
+                                    <option value={org.id}>{org.nom} {org.est_admin ? '(Admin)' : ''}</option>
+                                {/each}
+                                <option value="new">+ Rejoindre / Créer</option>
+                            </select>
+                        </label>
                     </div>
+                {/if}
+
+                {#if isCreatingOrg}
+                     <GererOrganisation organisation={undefined} />
+                {:else if selectedOrganisation}
+                    {#if selectedOrganisation.est_admin === true}
+                        <div class="flex flex-col gap-6">
+                            <MyInfoOrganisation organisation={selectedOrganisation} />
+                            <GererMembre organisation={selectedOrganisation} />
+                        </div>
+                    {:else}
+                        <GererOrganisation organisation={selectedOrganisation} />
+                    {/if}
                 {:else}
-                    <GererOrganisation />
+                    <p>Organisation introuvable.</p>
                 {/if}
             {/if}
         </div>

@@ -3,7 +3,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { BACKEND_URL } from '$lib/config';
 import { setSessionCookie, invalidateCache } from '$lib/server/session.ts';
 
-export const load: PageServerLoad = async ({ fetch, request, locals }) => {
+export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
     const headers = {
         'Content-Type': 'application/json',
         'Cookie': request.headers.get('cookie') || ''
@@ -13,26 +13,30 @@ export const load: PageServerLoad = async ({ fetch, request, locals }) => {
     let organisation = null;
     let accountEquivalents = [];
 
-    const isAdmin = locals.user?.organisation?.some(o => o.est_admin) ?? false;
+    const orgIdParam = url.searchParams.get('orgId');
+    let targetOrgId = orgIdParam ? parseInt(orgIdParam) : null;
 
-    if (locals.user?.organisation && isAdmin) {
-        const res = await fetch(`${BACKEND_URL}/account/organization/members`, { method: 'POST', headers });
-        if (res.ok) {
-            try {
-                const data = await res.json();
-                if (data.success) members = data.members;
-            } catch {}
+    if (!targetOrgId && locals.user?.organisation?.length > 0) {
+        targetOrgId = locals.user.organisation[0].id;
+    }
+
+    const targetOrg = locals.user?.organisation?.find(o => o.id === targetOrgId);
+
+    if (targetOrg) {
+        if (targetOrg.est_admin) {
+            const res = await fetch(`${BACKEND_URL}/account/organization/members`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ organisation_id: targetOrgId })
+            });
+            if (res.ok) {
+                try {
+                    const data = await res.json();
+                    if (data.success) members = data.members;
+                } catch {}
+            }
         }
-    } else if (locals.user?.user) {
-        const orgRes = await fetch(`${BACKEND_URL}/account/my-organization`, { method: 'GET', headers, credentials: 'include' });
-        if (orgRes.ok) {
-            try {
-                const result = await orgRes.json();
-                if (result.success && result.organisation) {
-                    organisation = result.organisation;
-                }
-            } catch {}
-        }
+        organisation = targetOrg;
     }
 
     const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, { method: 'GET', headers, credentials: 'include' });
@@ -211,17 +215,14 @@ export const actions = {
 
             const result = await response.json();
 
-            if (!result.success) {
-                return fail(400, { actionType: 'join_orga', message: result.message ?? 'errors.operation_error' });
-            }
-
-            const token = cookies.get('greenscoreweb_sessions');
-            if (token) invalidateCache(token);
-    
             if (result.success) {
                 const sessionValue = result.token ?? result.session ?? result.sessionValue;
                 if (sessionValue) {
                     await setSessionCookie(cookies, sessionValue);
+                }
+
+                if (result.organisation_id) {
+                     redirect(303, `?tab=organisation&orgId=${result.organisation_id}`);
                 }
 
                 return {
@@ -230,10 +231,7 @@ export const actions = {
                     message: 'success.join_organization'
                 };
             } else {
-                return fail(400, {
-                    actionType: 'join_orga',
-                    message: result.message ?? 'errors.operation_error'
-                });
+                return fail(400, { actionType: 'join_orga', message: result.message ?? 'errors.operation_error' });
             }
         } catch {
             return fail(500, { actionType: 'join_orga', message: 'errors.org_connection_error' });
@@ -244,6 +242,7 @@ export const actions = {
         const data = await request.formData();
         const organisationName = data.get('organisationName')?.toString();
         const siret = data.get('siret')?.toString();
+        const id = data.get('id') ? parseInt(data.get('id')!.toString()) : null;
 
         if (!organisationName) {
             return fail(400, { actionType: 'update_orga', message: 'errors.validation_org_name_required' });
@@ -261,7 +260,7 @@ export const actions = {
                     'Cookie': request.headers.get('cookie') || ''
                 },
                 credentials: 'include',
-                body: JSON.stringify({ name: organisationName, siret })
+                body: JSON.stringify({ id, name: organisationName, siret })
             });
 
             const result = await response.json();
@@ -287,14 +286,19 @@ export const actions = {
     },
 
     leave_orga: async ({ fetch, request, cookies }) => {
+        const data = await request.formData();
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
         try {
             const response = await fetch(`${BACKEND_URL}/account/leave-organization`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
-                }
+                },
+                body: JSON.stringify({ organisationId })
             });
+
 
             if (!response.ok) {
                 return fail(response.status, { actionType: 'leave_orga', message: 'errors.org_leave_error' });

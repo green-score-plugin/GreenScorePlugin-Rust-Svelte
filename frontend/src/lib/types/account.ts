@@ -24,6 +24,6 @@ export interface Service {
 
 export interface UserFull {
     user: User;
-    organisation: Organisation[]; // Changed to array
+    organisation: Organisation[];
     service?: Service;
 }
