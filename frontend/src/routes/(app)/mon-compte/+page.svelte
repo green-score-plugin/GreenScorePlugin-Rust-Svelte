@@ -14,10 +14,10 @@
     import MyInfoOrganisation from "$lib/components/myaccount/MyInfoOrganisation.svelte";
 
     let activePage = $state(page.url.searchParams.get('tab') ?? "my_info");
+    let activeOrgTab = $state('details');
 
     let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
     let user = $derived(userFull.user as User);
-    let organisation = $derived(userFull.organisation as Organisation)
     let service = $derived(userFull.service)
     let services = $derived((page.form?.updatedServices as any[]) ?? (page.data.services as any[]));
 
@@ -43,9 +43,9 @@
         const select = event.target as HTMLSelectElement;
         const val = select.value;
         if (val === 'new') {
-            goto(`?tab=organisation&action=new`);
+            goto(`?tab=organisation&action=new`); // Fixed: use backticks for template literal
         } else {
-             goto(`?tab=organisation&orgId=${val}`);
+             goto(`?tab=organisation&orgId=${val}`); // Fixed: use backticks
         }
     }
 </script>
@@ -78,13 +78,14 @@
                             <span class="font-semibold text-gray-700 whitespace-nowrap">Organisation:</span>
                             <select
                                 class="px-3 py-2 border border-grey-200 rounded-lg text-grey-700 bg-white focus:outline-none focus:ring-1 focus:ring-gs-green-950 cursor-pointer text-sm font-medium w-full sm:w-auto"
-                                value={isCreatingOrg ? 'new' : selectedOrgId}
                                 onchange={handleOrgChange}
                             >
                                 {#each userFull.organisation as org}
-                                    <option value={org.id}>{org.nom} {org.est_admin ? '(Admin)' : ''}</option>
+                                    <option value={org.id} selected={!isCreatingOrg && selectedOrgId === org.id}>
+                                        {org.nom} {org.est_admin ? '(Admin)' : ''}
+                                    </option>
                                 {/each}
-                                <option value="new">+ Rejoindre / Créer</option>
+                                <option value="new" selected={isCreatingOrg}>+ Rejoindre / Créer</option>
                             </select>
                         </label>
                     </div>
@@ -94,12 +95,41 @@
                      <GererOrganisation organisation={undefined} />
                 {:else if selectedOrganisation}
                     {#if selectedOrganisation.est_admin === true}
-                        <div class="flex flex-col gap-6">
-                            <MyInfoOrganisation organisation={selectedOrganisation} />
-                            <GererMembre organisation={selectedOrganisation} />
-                            <CreateService organisationId={selectedOrganisation.id} />
-                            <MyService {services} />
+                        <!-- Tabs Navigation -->
+                        <div class="border-b border-gray-200 mb-6">
+                            <nav class="-mb-px flex gap-8" aria-label="Tabs">
+                                <button
+                                        onclick={() => activeOrgTab = 'details'}
+                                        class="{activeOrgTab === 'details'
+                                            ? 'border-gs-green-950 text-gs-green-950'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                                            whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors font-outfit"
+                                >
+                                    {$t('account.menu.my_organization')}
+                                </button>
+                                <button
+                                        onclick={() => activeOrgTab = 'services'}
+                                        class="{activeOrgTab === 'services'
+                                            ? 'border-gs-green-950 text-gs-green-950'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                                            whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors font-outfit"
+                                >
+                                    {$t('account.menu.services')}
+                                </button>
+                            </nav>
                         </div>
+
+                        {#if activeOrgTab === 'details'}
+                            <div class="flex flex-col gap-6 animate-in fade-in duration-300">
+                                <MyInfoOrganisation organisation={selectedOrganisation} />
+                                <GererMembre organisation={selectedOrganisation} />
+                            </div>
+                        {:else}
+                            <div class="flex flex-col gap-6 animate-in fade-in duration-300">
+                                <CreateService organisationId={selectedOrganisation.id} />
+                                <MyService {services} />
+                            </div>
+                        {/if}
                     {:else}
                         <GererOrganisation organisation={selectedOrganisation} />
                     {/if}

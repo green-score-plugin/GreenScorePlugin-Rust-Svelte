@@ -38,6 +38,18 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
                     if (data.success) members = data.members;
                 } catch {}
             }
+
+            const resServices = await fetch(`${BACKEND_URL}/account/organization/services`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ organisation_id: targetOrgId })
+            });
+            if (resServices.ok) {
+                 try {
+                     const data = await resServices.json();
+                     if (data.success) services = data.services;
+                 } catch {}
+            }
         }
         organisation = targetOrg;
     }
@@ -430,6 +442,7 @@ export const actions = {
     create_service: async ({ request, fetch }) => {
         const data = await request.formData();
         const serviceName = data.get('serviceName')?.toString().trim();
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0');
 
         if (!serviceName) {
             return fail(400, { actionType: 'create_service', message: 'errors.validation_service_name_required' });
@@ -443,7 +456,7 @@ export const actions = {
                     'Cookie': request.headers.get('cookie') || ''
                 },
                 credentials: 'include',
-                body: JSON.stringify({ service_name: serviceName })
+                body: JSON.stringify({ service_name: serviceName, organisation_id: organisationId })
             });
 
             const result = await response.json();

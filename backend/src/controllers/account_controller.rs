@@ -55,7 +55,7 @@ pub async fn delete_account( session: Session, State(pool): State<MySqlPool>, Au
     UserService::delete_user(&pool, user_id).await
         .map_err(|e| AppError::DatabaseError(e))?;
 
-    session.remove::<UserFull>("user_full").await map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.remove::<UserFull>("user_full").await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
