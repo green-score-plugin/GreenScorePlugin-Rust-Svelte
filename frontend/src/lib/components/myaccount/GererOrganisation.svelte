@@ -1,10 +1,8 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
-    import { page } from '$app/state';
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
     import { t } from 'svelte-i18n';
     import InscriptionOrganisationForm from "$lib/components/auth/InscriptionOrganisationForm.svelte";
-    import type {Organisation} from "$lib/types/account.ts";
 
     interface ActionData {
         success?: boolean;
