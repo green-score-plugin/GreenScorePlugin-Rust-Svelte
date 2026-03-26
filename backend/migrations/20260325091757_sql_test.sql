@@ -209,6 +209,22 @@ CREATE TABLE IF NOT EXISTS `user` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `organisation_user`
+--
+
+DROP TABLE IF EXISTS `organisation_user`;
+CREATE TABLE IF NOT EXISTS `organisation_user` (
+  `user_id` int(11) NOT NULL,
+  `organisation_id` int(11) NOT NULL,
+  `est_admin` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`user_id`,`organisation_id`),
+  KEY `IDX_ORG_USER_ORG` (`organisation_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `user_equivalent`
 --
 
@@ -243,6 +259,13 @@ ALTER TABLE `service`
 ALTER TABLE `user`
     ADD CONSTRAINT `FK_user_organisation` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `service` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Contraintes pour la table `organisation_user`
+--
+ALTER TABLE `organisation_user`
+  ADD CONSTRAINT `FK_ORG_USER_USER` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_ORG_USER_ORG` FOREIGN KEY (`organisation_id`) REFERENCES `organisation` (`id`) ON DELETE CASCADE;
 
 --
 -- Contraintes pour la table `user_equivalent`
