@@ -563,7 +563,8 @@ export const actions = {
         }
     },
 
-    create_organization: async ({ request, fetch, cookies })=> {        const data = await request.formData();
+    create_organization: async ({ request, fetch, cookies })=> {
+        const data = await request.formData();
         const organisationName = data.get('organisationName');
         const siret = data.get('siret')?.toString();
 
