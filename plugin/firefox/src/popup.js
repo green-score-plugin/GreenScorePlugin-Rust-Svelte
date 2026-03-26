@@ -342,14 +342,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const urlElement = document.getElementById("site-url");
       const countryElement = document.getElementById("site-country");
 
-          if (countryElement && urlElement) {
-            countryElement.textContent = t("country_consumption_intro", { countryName: response.country });
-            urlElement.textContent = response.url;
-          }
-        }
-      })
-      .catch(() => {
-      });
+      if (countryElement && urlElement) {
+        countryElement.textContent = t("country_consumption_intro", { countryName: countryResponse.country });
+        urlElement.textContent = countryResponse.url;
+      }
+    }
 
     // 4. Equivalents
     try {
