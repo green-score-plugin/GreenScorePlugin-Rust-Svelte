@@ -182,6 +182,8 @@
 
 {#if showDeleteModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-lg text-center">
             <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -219,13 +221,15 @@
 
 {#if showUnassignModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-lg text-center">
              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="23" y1="11" x2="17" y2="11"></line></svg>
             </div>
-            <h2 class="text-xl font-bold mb-2">Retirer du service</h2>
+            <h2 class="text-xl font-bold mb-2">{$t('account.service.unassign_modal.title') || "Retirer du service"}</h2>
             <p class="text-gray-600 mb-6">
-                Voulez-vous vraiment retirer <span class="font-bold">{unassignServiceMemberName}</span> de son service ?
+                {$t('account.service.unassign_modal.description_prefix') || "Voulez-vous vraiment retirer"} <span class="font-bold">{unassignServiceMemberName}</span> {$t('account.service.unassign_modal.description_suffix') || "de son service ?"}.
             </p>
             {#if unassignErrorMessage}
                 <p class="text-red-500 mb-4 font-medium text-sm">{unassignErrorMessage}</p>
@@ -248,7 +252,7 @@
                             type="submit"
                             class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold cursor-pointer"
                         >
-                        Retirer
+                        {$t('account.service.unassign_modal.confirm_button') || "Retirer"}
                     </button>
                 </form>
             </div>

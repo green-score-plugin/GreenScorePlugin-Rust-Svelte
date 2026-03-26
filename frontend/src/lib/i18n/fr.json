@@ -171,6 +171,12 @@
       "delete_modal": {
         "confirmation_prefix": "Voulez-vous vraiment supprimer le service",
         "warning_detail": "Cette action supprimera également le lien entre ce service et les utilisateurs associés."
+      },
+      "unassign_modal": {
+        "title": "Retirer du service",
+        "description_prefix": "Voulez-vous vraiment retirer",
+        "description_suffix": "de son service ?",
+        "confirm_button": "Retirer"
       }
     },
     "info": {

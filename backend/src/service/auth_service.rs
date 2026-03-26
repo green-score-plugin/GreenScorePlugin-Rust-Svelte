@@ -56,7 +56,7 @@ impl AuthService{
         };
 
         let mut service: Option<Service> = None;
-        let mut organisations: Vec<Organisation> = OrganisationRepository::find_all_by_user_id(pool, id).await.map_err(AppError::DatabaseError)?;
+        let organisations: Vec<Organisation> = OrganisationRepository::find_all_by_user_id(pool, id).await.map_err(AppError::DatabaseError)?;
 
         if let Some(srv_id) = service_id {
             service = ServiceRepository::find_by_id(pool, srv_id).await.map_err(AppError::DatabaseError)?;

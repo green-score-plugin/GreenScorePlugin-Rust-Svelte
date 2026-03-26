@@ -172,6 +172,12 @@
       "delete_modal": {
         "confirmation_prefix": "Are you sure you want to delete the service",
         "warning_detail": "This action will also remove the link between this service and the associated users."
+      },
+      "unassign_modal": {
+        "title": "Remove from service",
+        "description_prefix": "Are you sure you want to remove",
+        "description_suffix": "from their service?",
+        "confirm_button": "Remove"
       }
     },
     "info": {

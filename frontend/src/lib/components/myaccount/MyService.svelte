@@ -75,7 +75,7 @@
     {#if assignSuccessMessage}
         <div class="mb-4 flex items-center justify-between px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm shadow-sm">
             <span>{assignSuccessMessage}</span>
-            <button onclick={() => assignSuccessMessage = ''} class="text-green-800 hover:bg-green-100 p-1 rounded-full">
+            <button onclick={() => assignSuccessMessage = ''} class="text-green-800 hover:bg-green-100 p-1 rounded-full" aria-label="Fermer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
@@ -85,7 +85,7 @@
     {#if deleteErrorMessage}
         <div class="mb-4 flex items-center justify-between px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm shadow-sm">
             <span>{deleteErrorMessage}</span>
-            <button onclick={() => deleteErrorMessage = ''} class="text-red-800 hover:bg-red-100 p-1 rounded-full">
+            <button onclick={() => deleteErrorMessage = ''} class="text-red-800 hover:bg-red-100 p-1 rounded-full" aria-label="Fermer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
@@ -93,7 +93,7 @@
     {#if assignErrorMessage}
         <div class="mb-4 flex items-center justify-between px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm shadow-sm">
             <span>{assignErrorMessage}</span>
-            <button onclick={() => assignErrorMessage = ''} class="text-red-800 hover:bg-red-100 p-1 rounded-full">
+            <button onclick={() => assignErrorMessage = ''} class="text-red-800 hover:bg-red-100 p-1 rounded-full" aria-label="Fermer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
