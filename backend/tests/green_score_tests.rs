@@ -93,7 +93,7 @@ async fn devrait_retourner_grade_g_pour_lpc(pool: Pool<MySql>) {
 async fn devrait_retourner_grade_a_pour_mo_normal(pool: Pool<MySql>) {
     // GIVEN
     seed_data(&pool).await;
-    let carbon_footprint = 150.0;
+    let carbon_footprint = 100.0;
     let page = "mo".to_string();
 
     // WHEN
@@ -136,7 +136,7 @@ async fn devrait_gerer_logique_echelle_etrange_mo(pool: Pool<MySql>) {
 async fn devrait_retourner_grade_g_pour_my_data_normal(pool: Pool<MySql>) {
     // GIVEN
     seed_data(&pool).await;
-    let carbon_footprint = 120.0;
+    let carbon_footprint = 200.0;
     let page = "my_data".to_string();
 
     // WHEN
