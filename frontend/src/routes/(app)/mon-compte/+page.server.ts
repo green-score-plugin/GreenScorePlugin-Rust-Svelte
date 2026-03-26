@@ -117,6 +117,61 @@ export const actions = {
         }
     },
 
+    delete_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const serviceId = parseInt(data.get('serviceId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/organization/services/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                body: JSON.stringify({ serviceId, organisationId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return { success: true, message: 'success.service_deleted', actionType: 'delete_service' };
+            }
+
+            return fail(400, { message: result.message ?? 'errors.service_delete_error', actionType: 'delete_service' });
+        } catch {
+            return fail(500, { message: 'errors.server_error', actionType: 'delete_service' });
+        }
+    },
+
+    assign_user_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const serviceId = parseInt(data.get('serviceId')?.toString() || '0', 10);
+        const userId = parseInt(data.get('userId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/organization/services/assign`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                body: JSON.stringify({ serviceId, userId, organisationId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return { success: true, message: 'success.user_assigned', actionType: 'assign_user' };
+            }
+
+            return fail(400, { message: result.message ?? 'errors.assign_error', actionType: 'assign_user' });
+        } catch {
+            return fail(500, { message: 'errors.server_error', actionType: 'assign_user' });
+        }
+    },
+
     modifier: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const prenom = data.get('prenom')?.toString();

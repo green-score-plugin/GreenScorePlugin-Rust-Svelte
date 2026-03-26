@@ -69,4 +69,20 @@ impl ServiceRepository {
 
         Ok(services)
     }
+
+    pub async fn delete_by_id(pool: &MySqlPool, service_id: i64) -> Result<(), sqlx::Error> {
+        // Disassociate users from this service first
+        sqlx::query("UPDATE user SET service_id = NULL WHERE service_id = ?")
+            .bind(service_id)
+            .execute(pool)
+            .await?;
+
+        // Then delete the service
+        sqlx::query("DELETE FROM service WHERE id = ?")
+            .bind(service_id)
+            .execute(pool)
+            .await?;
+
+        Ok(())
+    }
 }

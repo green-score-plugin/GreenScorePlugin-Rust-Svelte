@@ -124,6 +124,27 @@ pub async fn get_organisation_services(State(pool): State<MySqlPool>, Authentica
     })))
 }
 
+pub async fn delete_service(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload): Json<Value>) -> Result<Json<Value>, AppError> {
+    let service_id = payload.get("serviceId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid serviceId".into()))?;
+
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
+
+    if !user_full.organisation.iter().any(|o| o.id == orga_id && o.est_admin) {
+        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    }
+
+    ServiceService::delete_service(&pool, service_id, orga_id).await
+        .map_err(AppError::InternalServerError)?;
+
+    Ok(Json(json!({
+        "success": true
+    })))
+}
+
 pub async fn remove_organisation_member(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser, Json(payload) : Json<Value>) -> Result<Json<Value>, AppError> {
     let user_id = payload.get("userId")
         .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
@@ -146,6 +167,41 @@ pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Authentic
 
     Ok(Json(json!({
         "success": true
+    })))
+}
+
+pub async fn assign_user_to_service(
+    State(pool): State<MySqlPool>,
+    AuthenticatedUser(user_full): AuthenticatedUser,
+    Json(payload): Json<Value>
+) -> Result<Json<Value>, AppError> {
+    let service_id = payload.get("serviceId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid serviceId".into()))?;
+
+    let user_id = payload.get("userId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid userId".into()))?;
+
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
+
+    // Verify requesting user is admin of the organization
+    if !user_full.organisation.iter().any(|o| o.id == orga_id && o.est_admin) {
+        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    }
+
+    if user_id == user_full.user.id {
+        return Err(AppError::BadRequest("errors.cannot_assign_self".to_string()));
+    }
+
+    ServiceService::assign_user_to_service(&pool, user_id, service_id, orga_id).await
+        .map_err(AppError::InternalServerError)?;
+
+    Ok(Json(json!({
+        "success": true,
+        "message": "success.user_assigned"
     })))
 }
 

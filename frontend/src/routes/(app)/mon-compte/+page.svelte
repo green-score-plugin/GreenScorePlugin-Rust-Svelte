@@ -127,7 +127,7 @@
                         {:else}
                             <div class="flex flex-col gap-6 animate-in fade-in duration-300">
                                 <CreateService organisationId={selectedOrganisation.id} />
-                                <MyService {services} />
+                                <MyService {services} organisationId={selectedOrganisation.id} members={page.data.members} currentUserId={user.id} />
                             </div>
                         {/if}
                     {:else}

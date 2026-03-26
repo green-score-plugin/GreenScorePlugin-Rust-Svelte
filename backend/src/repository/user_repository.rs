@@ -101,7 +101,7 @@ impl UserRepository {
         .fetch_optional(pool)
         .await?;
 
-        Ok(result.map(|row| row.get::<Option<f64>, _>("total_carbon_footprint").unwrap_or(0.0)))
+        Ok(result.map(|row| row.get("total_carbon_footprint")))
     }
 
     pub async fn count_user_equivalent(
@@ -222,5 +222,20 @@ impl UserRepository {
             .fetch_optional(pool)
             .await?;
         Ok(result.is_some())
+    }
+
+    pub async fn update_user_service(
+        pool: &MySqlPool,
+        user_id: i64,
+        service_id: Option<i64>
+    ) -> Result<(), Error> {
+        sqlx::query(
+            "UPDATE user SET service_id = ? WHERE id = ?"
+        )
+        .bind(service_id)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
+        Ok(())
     }
 }
