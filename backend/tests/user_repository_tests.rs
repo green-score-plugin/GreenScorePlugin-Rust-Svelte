@@ -1,4 +1,5 @@
 use sqlx::MySqlPool;
+use sqlx::Row;
 use backend::repository::user_repository::UserRepository;
 use backend::repository::organisation_repository::OrganisationRepository;
 use backend::models::user::User;
@@ -41,13 +42,11 @@ async fn devrait_trouver_avec_mot_de_passe(pool: MySqlPool) {
 
     // THEN
     assert!(result.is_some());
-    let (_id, pwd, first_name, last_name, org_id, srv_id, is_admin) = result.unwrap();
+    let (_id, pwd, first_name, last_name, srv_id) = result.unwrap();
     assert_eq!(pwd, password);
     assert_eq!(first_name, "Alice");
     assert_eq!(last_name, "Wonder");
-    assert_eq!(org_id, None);
     assert_eq!(srv_id, None);
-    assert_eq!(is_admin, false);
 }
 
 #[sqlx::test]
@@ -67,12 +66,16 @@ async fn devrait_rejoindre_organisation(pool: MySqlPool) {
         .expect("Failed to join organisation");
 
     // THEN
-    let (_, _, _, _, db_org_id, _, is_admin) = UserRepository::find_with_password_by_email(&pool, "join_org@test.com")
+    // Verify in organisation_user table directly as User struct doesn't hold this anymore
+    let row = sqlx::query("SELECT est_admin FROM organisation_user WHERE user_id = ? AND organisation_id = ?")
+        .bind(user_id)
+        .bind(org_id)
+        .fetch_optional(&pool)
         .await
-        .expect("Failed to find user")
-        .unwrap();
+        .expect("Failed to query organisation_user");
 
-    assert_eq!(db_org_id, Some(org_id));
+    assert!(row.is_some());
+    let is_admin: bool = row.unwrap().try_get("est_admin").expect("Failed to get est_admin");
     assert!(is_admin);
 }
 
@@ -114,8 +117,6 @@ async fn devrait_mettre_a_jour_user(pool: MySqlPool) {
         email: "updated@test.com".to_string(),
         prenom: "New".to_string(),
         nom: "NameUpdated".to_string(),
-        est_admin: false,
-        id_organisation: None,
         id_service: None,
         total_carbon_footprint: 0.0,
     };
@@ -127,7 +128,7 @@ async fn devrait_mettre_a_jour_user(pool: MySqlPool) {
         .expect("Failed to update user");
 
     // THEN
-    let (id, pwd, fname, lname, _, _, _) = UserRepository::find_with_password_by_email(&pool, "updated@test.com")
+    let (id, pwd, fname, lname, _) = UserRepository::find_with_password_by_email(&pool, "updated@test.com")
         .await
         .expect("Failed to find user")
         .unwrap();
@@ -185,7 +186,7 @@ async fn devrait_gerer_membres_organisation(pool: MySqlPool) {
     assert!(members.iter().any(|u| u.id == u2));
 
     // WHEN remove u1
-    UserRepository::remove_organization_member(&pool, u1)
+    UserRepository::remove_organization_member(&pool, u1, org_id)
         .await
         .expect("Failed to remove member");
 
@@ -223,4 +224,52 @@ async fn devrait_compter_equivalents_utilisateur(pool: MySqlPool) {
 
     // THEN
     assert_eq!(count, 1);
+}
+
+#[sqlx::test]
+async fn devrait_verifier_membre_organisation_specifique(pool: MySqlPool) {
+    // GIVEN
+    let org_id = OrganisationRepository::insert_organisation(&pool, "Check Org", "CHECK", None)
+        .await
+        .expect("Failed to insert org");
+
+    let u1 = UserRepository::insert_user(&pool, "check@org.com", "p", "U", "C")
+        .await
+        .expect("Insert u1");
+
+    UserRepository::update_user_organization(&pool, u1, org_id)
+        .await
+        .expect("Add u1");
+
+    // WHEN
+    let is_member = UserRepository::is_member_of_organisation(&pool, u1, org_id)
+        .await
+        .expect("Check u1");
+
+    // THEN
+    assert!(is_member);
+}
+
+#[sqlx::test]
+async fn devrait_verifier_membre_une_organisation_quelconque(pool: MySqlPool) {
+    // GIVEN
+    let org_id = OrganisationRepository::insert_organisation(&pool, "Any Org", "ANY", None)
+        .await
+        .expect("Failed to insert org");
+
+    let u1 = UserRepository::insert_user(&pool, "any@org.com", "p", "U", "A")
+        .await
+        .expect("Insert u1");
+
+    UserRepository::update_user_organization(&pool, u1, org_id)
+        .await
+        .expect("Add u1");
+
+    // WHEN
+    let is_member = UserRepository::is_member_of_any_organisation(&pool, u1)
+        .await
+        .expect("Check u1");
+
+    // THEN
+    assert!(is_member);
 }
