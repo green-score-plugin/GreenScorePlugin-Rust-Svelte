@@ -15,7 +15,6 @@ use crate::dto::equivalent_dto::EquivalentSelection;
 use crate::middleware::auth::AuthenticatedUser;
 use crate::error::AppError;
 use crate::models::organisation::Organisation;
-use crate::dto::current_account_response::CurrentAccountResponse;
 
 #[derive(Deserialize)]
 pub struct JoinOrgaRequest {
@@ -343,7 +342,7 @@ pub async fn create_organization(
     session: Session,
     AuthenticatedUser(mut user_full): AuthenticatedUser,
     Json(payload): Json<Value>
-) -> Result<Json<CurrentAccountResponse>, AppError> {
+) -> Result<Json<Value>, AppError> {
     let orga_name = payload["organization_name"].as_str()
         .ok_or(AppError::BadRequest("Missing organization_name".to_string()))?;
 
@@ -368,18 +367,16 @@ pub async fn create_organization(
         id: organisation_id,
         nom: orga_name.to_string(),
         siret,
-        code: organisation_code,
+        code: organisation_code.clone(),
         est_admin: true
     };
 
     user_full.organisation.push(organisation);
 
-    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
-    Ok(Json(CurrentAccountResponse {
-        success: true,
-        user_full: Some(user_full),
-        message: None,
-        services: None,
-    }))
+    Ok(Json(json!({
+        "success": true,
+        "orga_code": organisation_code
+    })))
 }
