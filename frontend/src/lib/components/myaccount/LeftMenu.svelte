@@ -4,6 +4,8 @@
     import { t } from 'svelte-i18n';
     import type {User, UserFull} from "$lib/types/account.ts";
 
+    let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
+    let user = $derived(userFull.user as User);
 
     let { activePage = $bindable() } = $props();
     let showDeleteModal = $state(false);
@@ -69,6 +71,20 @@
         {$t('account.menu.my_organization')}
     </button>
 
+    {#if user.est_admin === true}
+        <button
+                type="button"
+                class="flex items-center gap-x-2 px-8 py-4 rounded w-full cursor-pointer
+               {activePage === 'services' ? 'bg-gs-green-950 text-white' : 'bg-gray-100 hover:bg-gray-200'}"
+                onclick={() => activePage = 'services'}
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            {$t('account.menu.services')}
+        </button>
+    {/if}
 
     <button
             type="button"
@@ -81,13 +97,6 @@
         <span class="text-base whitespace-nowrap">{$t('account.menu.delete_account')}</span>
     </button>
 </div>
-
-{#if activePage === 'debug'}
-    <div class="p-4 bg-gray-100 rounded mt-4 border border-gray-300 text-xs font-mono overflow-auto">
-        <p>UserFull Debug:</p>
-        <pre>{JSON.stringify(userFull, null, 2)}</pre>
-    </div>
-{/if}
 
 {#if showDeleteModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">

@@ -32,11 +32,11 @@
             }
         };
 
-        document.addEventListener('click', handle);
+        document.addEventListener('click', handle, true);
 
         return {
             destroy() {
-                document.removeEventListener('click', handle);
+                document.removeEventListener('click', handle, true);
             }
         };
     }

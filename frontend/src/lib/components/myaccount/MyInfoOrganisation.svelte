@@ -68,7 +68,7 @@
       }}
 >
 
-    <h1 class="text-2xl font-bold py-2">{$t('account.info.title')}</h1>
+    <h1 class="text-2xl font-bold py-2 font-outfit text-gray-900">{$t('account.info.title')}</h1>
     <input type="hidden" name="id" value={organisation?.id} />
 
     {#if message}
