@@ -144,11 +144,18 @@
                                     {:else}
                                         <span
                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200"
-                                            title={'Service: ' + member.service_name}
+                                            title="admin"
                                         >
-                                            {member.service_name}
+                                            Admin
                                         </span>
                                     {/if}
+                                {:else}
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200"
+                                        title="admin"
+                                    >
+                                        Admin
+                                    </span>
                                 {/if}
                             </p>
                             <p class="text-xs text-gray-500">{ member.email }</p>
@@ -184,8 +191,6 @@
 
 {#if showDeleteModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-lg text-center">
             <svg class="w-16 h-16 text-yellow-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -223,8 +228,6 @@
 
 {#if showUnassignModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <!-- svelte-ignore a11y_click_events_have_key_events -->
         <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-lg text-center">
              <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="23" y1="11" x2="17" y2="11"></line></svg>
