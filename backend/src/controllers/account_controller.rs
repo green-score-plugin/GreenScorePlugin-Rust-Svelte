@@ -41,7 +41,7 @@ pub async fn update_account(
         .map_err(AppError::AuthError)?;
 
     user_full.user = new_user;
-    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
@@ -55,7 +55,7 @@ pub async fn delete_account( session: Session, State(pool): State<MySqlPool>, Au
     UserService::delete_user(&pool, user_id).await
         .map_err(|e| AppError::DatabaseError(e))?;
 
-    session.remove::<UserFull>("user_full").await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.remove::<UserFull>("user_full").await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
@@ -79,7 +79,7 @@ pub async fn join_organization(
     let org_id = organisation.id;
 
     user_full.organisation.push(organisation);
-    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
@@ -155,7 +155,7 @@ pub async fn remove_organisation_member(State(pool): State<MySqlPool>, Authentic
         .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
 
     if user_id == user_full.user.id {
-        return Err(AppError::InternalServerError("User already exists".to_string()));
+        return Err(AppError::InternalServerError("errors.cannot_remove_self".to_string()));
     }
 
     if !user_full.organisation.iter().any(|o| o.id == orga_id && o.est_admin) {
@@ -223,7 +223,7 @@ pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>
         .map_err(AppError::BadRequest)?;
 
     user_full.organisation[idx] = updated_org.clone();
-    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
@@ -257,7 +257,7 @@ pub async fn leave_organization(
         }
     }
 
-    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(json!({
         "success": true,
@@ -347,7 +347,7 @@ pub async fn create_organization(
 
     user_full.organisation.push(organisation);
 
-    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(CurrentAccountResponse {
         success: true,

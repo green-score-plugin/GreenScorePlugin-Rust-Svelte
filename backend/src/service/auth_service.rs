@@ -24,13 +24,13 @@ impl AuthService{
         last_name: &str)
         -> Result<i64, String>
     {
-        if UserRepository::find_id_by_email(pool, email.parse().unwrap()).await.map_err(|_| "db_error")?.is_some() {
-            return Err("email_exists".to_string());
+        if UserRepository::find_id_by_email(pool, email.parse().unwrap()).await.map_err(|_| "errors.db_error")?.is_some() {
+            return Err("errors.auth.email_exists".to_string());
         }
 
-        let password_hash = Self::hash_password(password).map_err(|_| "hash_error")?;
+        let password_hash = Self::hash_password(password).map_err(|_| "errors.auth.hash_error")?;
         let user_id = UserRepository::insert_user(pool, email, &password_hash, first_name, last_name)
-            .await.map_err(|_| "insert_error")?;
+            .await.map_err(|_| "errors.auth.insert_error")?;
 
         Ok(user_id)
     }

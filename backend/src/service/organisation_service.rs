@@ -95,8 +95,8 @@ impl OrganisationService {
         user_id: i64
     ) -> Result<(i64, String), String>
     {
-        if OrganisationRepository::find_id_by_siret(pool, organisation_name).await.map_err(|_| "db_error")?.is_some() {
-            return Err("organisation_exists".to_string());
+        if OrganisationRepository::find_id_by_siret(pool, organisation_name).await.map_err(|_| "errors.db_error")?.is_some() {
+            return Err("errors.org_exists".to_string());
         }
 
         let code = OrganisationService::generate_organisation_code();
@@ -104,12 +104,12 @@ impl OrganisationService {
         let siret_string = siret.map(|s| s.to_string());
         let organisation_id = OrganisationRepository::insert_organisation(pool, organisation_name, &code, siret_string)
             .await
-            .map_err(|_| "insert_error")?;
+            .map_err(|_| "errors.org_insert_error")?;
 
         let is_admin = true;
         UserRepository::join_organisation(pool, user_id, organisation_id, is_admin)
             .await
-            .map_err(|_| "join_error")?;
+            .map_err(|_| "errors.org_join_error")?;
 
         Ok((organisation_id, code))
     }

@@ -52,7 +52,7 @@ pub async fn login(session: Session, State(pool): State<MySqlPool>, Json(payload
 
     let user_full = AuthService::login(&pool, email, password).await?;
 
-    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(GenericResponse {
         success: true,
@@ -88,7 +88,7 @@ pub async fn inscription(session: Session, State(pool): State<MySqlPool>, Json(p
         service: None,
     };
 
-    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(GenericResponse {
         success: true,
@@ -102,7 +102,7 @@ pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Jso
     let organisation_id = payload.organisation_id;
 
     let mut user_full = session.get::<UserFull>("user_full").await
-        .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
+        .map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?
         .ok_or(AppError::AuthError("errors.auth.not_logged_in".to_string()))?;
 
     // Verify user belongs to organisation and is admin?
@@ -122,7 +122,7 @@ pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Jso
         user_full.service = Some(service.clone());
     }
 
-    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.insert("user_full", user_full.clone()).await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     Ok(Json(CurrentAccountResponse {
         success: true,
@@ -134,7 +134,7 @@ pub async fn create_service(session: Session, State(pool): State<MySqlPool>, Jso
 
 pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>) -> Result<Json<CurrentAccountResponse>, AppError> {
 
-    let user_full_opt: Option<UserFull> = session.get("user_full").await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    let user_full_opt: Option<UserFull> = session.get("user_full").await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
 
     if let Some(user_full) = user_full_opt {
         let mut services = None;
@@ -156,7 +156,7 @@ pub async fn get_current_account(session: Session, State(pool): State<MySqlPool>
 }
 
 pub async fn logout(session: Session) -> Result<Json<GenericResponse>, AppError> {
-    session.delete().await.map_err(|_| AppError::InternalServerError("Session error".to_string()))?;
+    session.delete().await.map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
     Ok(Json(GenericResponse {
         success: true,
         message: None,
