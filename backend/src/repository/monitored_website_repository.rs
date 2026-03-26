@@ -263,7 +263,7 @@ impl MonitoredWebsiteRepository {
                   JOIN user u ON u.id = mw.user_id
                   WHERE u.organisation_id = ?
                         AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
-                  GROUP BY WEEK(mw.creation_date, 1)
+                  GROUP BY WEEK(mw.creation_date, 1), label
                   ORDER BY WEEK(mw.creation_date, 1) ASC"
         )
             .bind(orga_id)
