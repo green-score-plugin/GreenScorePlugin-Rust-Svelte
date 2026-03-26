@@ -22,6 +22,7 @@
         "webNavigation",
         "tabs",
         "scripting",
+        "notifications",
         "http://127.0.0.1/index.php"
     ],
     "background": {
