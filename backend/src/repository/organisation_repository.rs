@@ -8,7 +8,7 @@ impl OrganisationRepository {
 
     pub async fn find_by_id(pool: &MySqlPool, organisation_id: i64) -> Result<Option<Organisation>, sqlx::Error> {
         let organisation = sqlx::query_as::<_, Organisation>(
-            "SELECT id, organisation_name, organisation_code, siret FROM organisation WHERE id = ?"
+            "SELECT id, organisation_name, organisation_code, siret, false as est_admin FROM organisation WHERE id = ?"
         )
         .bind(organisation_id)
         .fetch_optional(pool)
@@ -26,6 +26,20 @@ impl OrganisationRepository {
         .await?;
 
         Ok(result.map(|row| row.get::<i64, _>("id")))
+    }
+
+    pub async fn find_all_by_user_id(pool: &MySqlPool, user_id: i64) -> Result<Vec<Organisation>, sqlx::Error> {
+        let organisations = sqlx::query_as::<_, Organisation>(
+            "SELECT o.id, o.organisation_name, o.organisation_code, o.siret, ou.est_admin
+             FROM organisation o
+             JOIN organisation_user ou ON o.id = ou.organisation_id
+             WHERE ou.user_id = ?"
+        )
+        .bind(user_id)
+        .fetch_all(pool)
+        .await?;
+
+        Ok(organisations)
     }
 
     pub async fn insert_organisation(pool: &MySqlPool,
@@ -76,7 +90,7 @@ impl OrganisationRepository {
 
     pub async fn find_organization_by_code(pool: &MySqlPool, org_code: String) -> Result<Option<Organisation>, sqlx::Error> {
         sqlx::query_as::<_, Organisation>(
-            "SELECT * FROM organisation WHERE organisation_code = ?"
+            "SELECT id, organisation_name, organisation_code, siret, false as est_admin FROM organisation WHERE organisation_code = ?"
         )
             .bind(org_code)
             .fetch_optional(pool)

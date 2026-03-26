@@ -21,7 +21,7 @@
     let showChangeModal = $state(false);
     let showInscriptionOrga = $state(false);
 
-    let organisation = $derived(page.data.userFull.organisation as Organisation);
+    let { organisation } = $props();
 
     const handleLeaveOrga = () => {
         return async ({ result, update }: { result: any, update: any }) => {
@@ -163,6 +163,7 @@
                                     method="POST"
                                     use:enhance={handleLeaveOrga}
                             >
+                                <input type="hidden" name="organisationId" value={organisation.id} />
                                 <button
                                         type="submit"
                                         class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer transition"
