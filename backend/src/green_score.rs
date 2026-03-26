@@ -111,10 +111,10 @@ pub async fn organizations_global_average_carbon_footprint(pool: &MySqlPool) -> 
     let rows = sqlx::query_as::<_, (f64,)>(
         "SELECT AVG(u.total_carbon_footprint) AS averageConsumption
         FROM `user` u
-        JOIN organisation_user ou ON u.id = ou.user_id
         WHERE u.total_carbon_footprint IS NOT NULL
         AND u.total_carbon_footprint > 0
-        GROUP BY ou.organisation_id;",
+        AND u.organisation_id IS NOT NULL
+        GROUP BY u.organisation_id;",
     )
         .fetch_all(pool)
         .await?;
@@ -133,10 +133,10 @@ pub async fn organizations_least_carbon_footprint(pool: &MySqlPool) -> Result<f6
     let row = sqlx::query_as::<_, (f64,)>(
         "SELECT SUM(u.total_carbon_footprint) AS totalConsumption
         FROM `user` u
-        JOIN organisation_user ou ON u.id = ou.user_id
         WHERE u.total_carbon_footprint IS NOT NULL
         AND u.total_carbon_footprint > 0
-        GROUP BY ou.organisation_id
+        AND u.organisation_id IS NOT NULL
+        GROUP BY u.organisation_id
         ORDER BY totalConsumption ASC
         LIMIT 1;",
     )

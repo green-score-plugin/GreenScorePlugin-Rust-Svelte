@@ -59,9 +59,8 @@ impl MonitoredWebsiteRepository {
             mw.url_domain,
             SUM(mw.carbon_footprint) as total_footprint
             FROM monitored_website mw
-            JOIN organisation_user ou
-            ON ou.user_id = mw.user_id
-            WHERE ou.organisation_id = ?
+            JOIN user u ON u.id = mw.user_id
+            WHERE u.organisation_id = ?
             AND mw.url_domain IS NOT NULL
             GROUP BY mw.url_domain
             ORDER BY total_footprint
@@ -105,8 +104,8 @@ impl MonitoredWebsiteRepository {
                 , 0)
             , 2) AS average_daily_carbon_footprint
         FROM monitored_website mw
-        JOIN organisation_user ou ON ou.user_id = mw.user_id
-        WHERE ou.organisation_id = ?"
+        JOIN user u ON u.id = mw.user_id
+        WHERE u.organisation_id = ?"
         )
             .bind(org_id)
             .fetch_one(pool)
@@ -122,9 +121,8 @@ impl MonitoredWebsiteRepository {
         sqlx::query_as::<_, (Option<f64>,)>(
    "SELECT SUM(mw.carbon_footprint) as total_consumption
         FROM monitored_website mw
-        JOIN organisation_user ou
-        ON mw.user_id = ou.user_id
-        WHERE ou.organisation_id = ?",
+        JOIN user u ON u.id = mw.user_id
+        WHERE u.organisation_id = ?",
         )
             .bind(org_id)
             .fetch_one(pool)
@@ -244,8 +242,8 @@ impl MonitoredWebsiteRepository {
             DATE_FORMAT(mw.creation_date, '%d/%m') as label,
             SUM(mw.carbon_footprint) as value
             FROM monitored_website mw
-            JOIN organisation_user ou ON ou.user_id = mw.user_id
-            WHERE ou.organisation_id = ?
+            JOIN user u ON u.id = mw.user_id
+            WHERE u.organisation_id = ?
             AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 7 DAY)
             GROUP BY DATE(mw.creation_date), label
             ORDER BY DATE(mw.creation_date) ASC"
@@ -262,8 +260,8 @@ impl MonitoredWebsiteRepository {
             "SELECT CONCAT('Semaine ', WEEK(mw.creation_date, 1)) as label,
                         SUM(mw.carbon_footprint) as value
                   FROM monitored_website mw
-                  JOIN organisation_user ou ON ou.user_id = mw.user_id
-                  WHERE ou.organisation_id = ?
+                  JOIN user u ON u.id = mw.user_id
+                  WHERE u.organisation_id = ?
                         AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 4 WEEK)
                   GROUP BY WEEK(mw.creation_date, 1)
                   ORDER BY WEEK(mw.creation_date, 1) ASC"
@@ -281,8 +279,8 @@ impl MonitoredWebsiteRepository {
             "SELECT DATE_FORMAT(mw.creation_date, '%m/%Y') as label,
                         SUM(mw.carbon_footprint) as value
                   FROM monitored_website mw
-                  JOIN organisation_user ou ON ou.user_id = mw.user_id
-                  WHERE ou.organisation_id = ?
+                  JOIN user u ON u.id = mw.user_id
+                  WHERE u.organisation_id = ?
                         AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
                   GROUP BY MONTH(mw.creation_date), YEAR(mw.creation_date)
                   ORDER BY YEAR(mw.creation_date), MONTH(mw.creation_date) ASC"
