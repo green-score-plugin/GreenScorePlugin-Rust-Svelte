@@ -28,7 +28,7 @@ async fn main() {
         .with_http_only(true)
         .with_same_site(tower_sessions::cookie::SameSite::Lax)
         .with_name("greenscoreweb_sessions")
-        .with_expiry(Expiry::OnInactivity(Duration::seconds(3600)));
+        .with_expiry(Expiry::OnInactivity(Duration::days(30)));
 
     let cors = CorsLayer::new()
         .allow_origin([
