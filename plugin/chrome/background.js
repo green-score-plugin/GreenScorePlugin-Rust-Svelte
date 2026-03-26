@@ -22,11 +22,8 @@ let countryCache = {
 const CARBON_CACHE_TTL = 3600000; // 1 heure
 const carbonIntensityCache = new Map();
 
-
-// Information nécessaire pour appeler les APIs
-const token = CONFIG.BACKEND.ELECTRICITY_MAP_API_KEY;
-const carbonIntensityUrl =
-  "https://api.electricitymap.org/v3/carbon-intensity/latest";
+// Flag pour éviter de spammer la notification
+let hasNotifiedExpiration = false;
 
 function getTabData(tabId) {
   if (!tabNetworkData.has(tabId)) {
@@ -178,6 +175,10 @@ async function getUserId() {
 
     if (!sessionCookie) {
       console.log("Pas de cookie de session trouvé");
+      if (userCache.data !== null && !hasNotifiedExpiration) {
+        showSessionExpiredNotification();
+        hasNotifiedExpiration = true;
+      }
       userCache.data = null;
       return null;
     }
@@ -205,12 +206,27 @@ async function getUserId() {
 
     userCache.data = userData.account;
     userCache.timestamp = now;
+    hasNotifiedExpiration = false; // Réinitialise si connexion réussie
 
     return userData.account;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID:", error);
+    if (userCache.data !== null && !hasNotifiedExpiration) {
+      showSessionExpiredNotification();
+      hasNotifiedExpiration = true;
+    }
+    userCache.data = null;
     return null;
   }
+}
+
+function showSessionExpiredNotification() {
+  chrome.notifications.create({
+    type: "basic",
+    title: "Session Expirée",
+    message: "Votre session GreenScore a expiré. Veuillez vous reconnecter.",
+    iconUrl: chrome.runtime.getURL("assets/images/logo.png")
+  });
 }
 
 async function getUserData() {
