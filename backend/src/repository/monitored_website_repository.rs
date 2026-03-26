@@ -182,7 +182,7 @@ impl MonitoredWebsiteRepository {
             FROM monitored_website
             WHERE user_id = ?
             AND creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-            GROUP BY YEAR(creation_date), MONTH(creation_date)
+            GROUP BY YEAR(creation_date), MONTH(creation_date), label
             ORDER BY YEAR(creation_date), MONTH(creation_date) ASC"
         )
             .bind(user_id)
@@ -282,7 +282,7 @@ impl MonitoredWebsiteRepository {
                   JOIN user u ON u.id = mw.user_id
                   WHERE u.organisation_id = ?
                         AND mw.creation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-                  GROUP BY MONTH(mw.creation_date), YEAR(mw.creation_date)
+                  GROUP BY MONTH(mw.creation_date), YEAR(mw.creation_date), label
                   ORDER BY YEAR(mw.creation_date), MONTH(mw.creation_date) ASC"
         )
             .bind(org_id)
