@@ -225,3 +225,51 @@ async fn devrait_compter_equivalents_utilisateur(pool: MySqlPool) {
     // THEN
     assert_eq!(count, 1);
 }
+
+#[sqlx::test]
+async fn devrait_verifier_membre_organisation_specifique(pool: MySqlPool) {
+    // GIVEN
+    let org_id = OrganisationRepository::insert_organisation(&pool, "Check Org", "CHECK", None)
+        .await
+        .expect("Failed to insert org");
+
+    let u1 = UserRepository::insert_user(&pool, "check@org.com", "p", "U", "C")
+        .await
+        .expect("Insert u1");
+
+    UserRepository::update_user_organization(&pool, u1, org_id)
+        .await
+        .expect("Add u1");
+
+    // WHEN
+    let is_member = UserRepository::is_member_of_organisation(&pool, u1, org_id)
+        .await
+        .expect("Check u1");
+
+    // THEN
+    assert!(is_member);
+}
+
+#[sqlx::test]
+async fn devrait_verifier_membre_une_organisation_quelconque(pool: MySqlPool) {
+    // GIVEN
+    let org_id = OrganisationRepository::insert_organisation(&pool, "Any Org", "ANY", None)
+        .await
+        .expect("Failed to insert org");
+
+    let u1 = UserRepository::insert_user(&pool, "any@org.com", "p", "U", "A")
+        .await
+        .expect("Insert u1");
+
+    UserRepository::update_user_organization(&pool, u1, org_id)
+        .await
+        .expect("Add u1");
+
+    // WHEN
+    let is_member = UserRepository::is_member_of_any_organisation(&pool, u1)
+        .await
+        .expect("Check u1");
+
+    // THEN
+    assert!(is_member);
+}
