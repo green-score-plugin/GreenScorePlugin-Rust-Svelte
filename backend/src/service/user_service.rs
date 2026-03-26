@@ -4,6 +4,7 @@ use crate::repository::user_repository::UserRepository;
 use crate::dto::update_account_request_dto::UpdateAccountRequest;
 use crate::models::organisation::Organisation;
 use crate::repository::organisation_repository::OrganisationRepository;
+use crate::dto::member_dto::MemberDto;
 
 pub struct UserService;
 
@@ -82,7 +83,7 @@ impl UserService {
 
     }
 
-    pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<User>, Error> {
+    pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<MemberDto>, Error> {
         UserRepository::get_organization_members(pool, orga_id).await
     }
 

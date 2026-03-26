@@ -1,5 +1,11 @@
 {
   "hello": "Hello",
+  "common": {
+    "cancel": "Cancel",
+    "validate": "Validate",
+    "confirm": "Confirm",
+    "warning": "Warning"
+  },
   "header": {
     "home": "Home",
     "my_data": "My Data",
@@ -143,7 +149,7 @@
       "name_label": "Service Name",
       "leave_button": "Leave Service",
       "create_title": "Create a new Service",
-      "create_button": "Create Service",
+      "create_button": "Create",
       "create_placeholder": "Service Name",
       "join_title": "Join a Service",
       "join_button": "Join",
@@ -153,7 +159,20 @@
       "success_left": "You have left the service",
       "list_title": "Organization Services List",
       "no_services": "No services found for this organization.",
-      "name": "Service Name"
+      "name": "Service Name",
+      "assign_member": "Assign member",
+      "delete_service": "Delete service",
+      "assign_modal": {
+        "title": "Assign a member",
+        "description_prefix": "Select a member to add to the service",
+        "member_label": "Member",
+        "select_placeholder": "Select a member...",
+        "move_suffix": "(Move)"
+      },
+      "delete_modal": {
+        "confirmation_prefix": "Are you sure you want to delete the service",
+        "warning_detail": "This action will also remove the link between this service and the associated users."
+      }
     },
     "info": {
       "title": "My Information",
@@ -508,12 +527,14 @@
     "validation_fields_required": "First name, last name, and email are required",
     "validation_password_complexity": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character (#?!@$%^&*-)",
     "validation_code_required": "Organization code is required",
+    "validation_code_invalid": "Invalid organization code",
     "validation_service_name_required": "Service name is required",
     "service_not_in_organisation": "This service does not belong to the specified organization",
     "service_not_found": "Service not found",
     "user_not_in_organisation": "User is not part of the organization",
     "server_champs": "Server error during validation",
     "cannot_assign_self": "You cannot assign yourself to a service",
+    "already_member": "You are already a member of this organization",
     "org_exists": "This organization is already registered",
     "auth": {
       "unauthenticated": "Unauthenticated",

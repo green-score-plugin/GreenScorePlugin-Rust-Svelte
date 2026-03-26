@@ -172,6 +172,33 @@ export const actions = {
         }
     },
 
+    unassign_user_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const userId = parseInt(data.get('userId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/organization/services/unassign`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                body: JSON.stringify({ userId, organisationId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return { success: true, message: 'success.user_unassigned', actionType: 'unassign_user' };
+            }
+
+            return fail(400, { message: result.message ?? 'errors.unassign_error', actionType: 'unassign_user' });
+        } catch {
+            return fail(500, { message: 'errors.server_error', actionType: 'unassign_user' });
+        }
+    },
+
     modifier: async ({ request, fetch, cookies }) => {
         const data = await request.formData();
         const prenom = data.get('prenom')?.toString();
@@ -432,7 +459,11 @@ export const actions = {
             });
 
             if (!response.ok) {
-                return fail(response.status, { actionType: 'change_orga', message: 'errors.validation_code_invalid' });
+                const errorData = await response.json().catch(() => ({}));
+                return fail(response.status, { 
+                    actionType: 'change_orga', 
+                    message: errorData.message || 'errors.validation_code_invalid' 
+                });
             }
 
             const result = await response.json();
@@ -515,8 +546,6 @@ export const actions = {
             });
 
             const result = await response.json();
-
-             console.log('Create service result:', result.success, 'Services count:', result.services?.length);
 
             if (!result.success) {
                 return fail(400, { actionType: 'create_service', message: result.message ?? 'errors.create_service_error' });

@@ -1,5 +1,6 @@
 use sqlx::{MySqlPool, Row, Error};
 use crate::models::user::User;
+use crate::dto::member_dto::MemberDto;
 
 pub struct UserRepository;
 
@@ -176,9 +177,13 @@ impl UserRepository {
         Ok(())
     }
 
-    pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<User>, Error> {
-        let result = sqlx::query_as::<_, User>(
-            "SELECT u.* FROM user u JOIN organisation_user ou ON u.id = ou.user_id WHERE ou.organisation_id = ?"
+    pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<MemberDto>, Error> {
+        let result = sqlx::query_as::<_, MemberDto>(
+            "SELECT u.*, s.nom as service_name
+             FROM user u
+             JOIN organisation_user ou ON u.id = ou.user_id
+             LEFT JOIN service s ON u.service_id = s.id
+             WHERE ou.organisation_id = ?"
         )
             .bind(orga_id)
             .fetch_all(pool)

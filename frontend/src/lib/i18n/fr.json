@@ -1,5 +1,11 @@
 {
   "hello": "Bonjour",
+  "common": {
+    "cancel": "Annuler",
+    "validate": "Valider",
+    "confirm": "Confirmer",
+    "warning": "Attention"
+  },
   "header": {
     "home": "Accueil",
     "my_data": "Mes données",
@@ -143,7 +149,7 @@
       "name_label": "Nom du service",
       "leave_button": "Quitter le service",
       "create_title": "Créer un nouveau service",
-      "create_button": "Créer le service",
+      "create_button": "Créer",
       "create_placeholder": "Nom du service",
       "join_title": "Rejoindre un service",
       "join_button": "Rejoindre",
@@ -152,7 +158,20 @@
       "success_left": "Vous avez quitté le service",
       "list_title": "Liste des services de l'organisation",
       "no_services": "Aucun service trouvé pour cette organisation.",
-      "name": "Nom du service"
+      "name": "Nom du service",
+      "assign_member": "Assigner un membre",
+      "delete_service": "Supprimer le service",
+      "assign_modal": {
+        "title": "Assigner un membre",
+        "description_prefix": "Sélectionnez un membre à ajouter au service",
+        "member_label": "Membre",
+        "select_placeholder": "Choisir un membre...",
+        "move_suffix": "(Déplacer)"
+      },
+      "delete_modal": {
+        "confirmation_prefix": "Voulez-vous vraiment supprimer le service",
+        "warning_detail": "Cette action supprimera également le lien entre ce service et les utilisateurs associés."
+      }
     },
     "info": {
       "title": "Mes informations",
@@ -519,12 +538,14 @@
     "validation_fields_required": "Prénom, nom et email requis",
     "validation_password_complexity": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)",
     "validation_code_required": "Le code de l'organisation est requis",
+    "validation_code_invalid": "Le code de l'organisation est invalide",
     "validation_service_name_required": "Le nom du service est requis",
     "service_not_in_organisation": "Ce service n'appartient pas à l'organisation spécifiée",
     "service_not_found": "Le service demandé est introuvable",
     "user_not_in_organisation": "L'utilisateur ne fait pas partie de l'organisation",
     "server_champs": "Erreur serveur lors de la validation",
     "cannot_assign_self": "Vous ne pouvez pas vous assigner vous-même",
+    "already_member": "Vous êtes déjà membre de cette organisation",
     "org_exists": "Cette organisation est déjà enregistrée",
     "auth": {
       "unauthenticated": "Non authentifié",

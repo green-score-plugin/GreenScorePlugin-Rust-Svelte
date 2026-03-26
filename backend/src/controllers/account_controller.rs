@@ -205,6 +205,33 @@ pub async fn assign_user_to_service(
     })))
 }
 
+pub async fn unassign_user_from_service(
+    State(pool): State<MySqlPool>,
+    AuthenticatedUser(user_full): AuthenticatedUser,
+    Json(payload): Json<Value>
+) -> Result<Json<Value>, AppError> {
+    let user_id = payload.get("userId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid userId".into()))?;
+
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
+
+    // Verify requesting user is admin of the organization
+    if !user_full.organisation.iter().any(|o| o.id == orga_id && o.est_admin) {
+        return Err(AppError::AuthError("errors.auth.unauthenticated_org".to_string()));
+    }
+
+    ServiceService::unassign_user_from_service(&pool, user_id, orga_id).await
+        .map_err(AppError::InternalServerError)?;
+
+    Ok(Json(json!({
+        "success": true,
+        "message": "success.user_unassigned"
+    })))
+}
+
 pub async fn update_organisation(session: Session, State(pool): State<MySqlPool>, AuthenticatedUser(mut user_full): AuthenticatedUser, Json(payload) : Json<UpdateOrganisationRequest>) -> Result<Json<Value>, AppError> {
     let org_id = payload.id;
     let idx = if let Some(id) = org_id {

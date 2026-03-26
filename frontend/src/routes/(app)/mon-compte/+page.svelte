@@ -103,7 +103,7 @@
                                         class="{activeOrgTab === 'details'
                                             ? 'border-gs-green-950 text-gs-green-950'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                                            whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors font-outfit"
+                                            whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors font-outfit cursor-pointer"
                                 >
                                     {$t('account.menu.my_organization')}
                                 </button>
@@ -112,7 +112,7 @@
                                         class="{activeOrgTab === 'services'
                                             ? 'border-gs-green-950 text-gs-green-950'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                                            whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors font-outfit"
+                                            whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors font-outfit cursor-pointer"
                                 >
                                     {$t('account.menu.services')}
                                 </button>

@@ -62,11 +62,6 @@ impl AuthService{
             service = ServiceRepository::find_by_id(pool, srv_id).await.map_err(AppError::DatabaseError)?;
         }
 
-        if let Some(ref srv) = service {
-            let org_opt = OrganisationRepository::find_by_id(pool, srv.id_organisation).await.map_err(AppError::DatabaseError)?;
-            organisations = org_opt.map(|o| vec![o]).expect("Service's organisation not found");
-        }
-
         let user_full = UserFull {
             user,
             organisation: organisations,

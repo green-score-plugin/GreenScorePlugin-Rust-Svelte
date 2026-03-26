@@ -98,20 +98,18 @@ impl ServiceService {
         Ok(())
     }
 
-    pub async fn remove_user_from_service(pool: &MySqlPool, user_id: i64, service_id: i64, organisation_id: i64) -> Result<(), String> {
-         let service = ServiceRepository::find_by_id(pool, service_id).await.map_err(|e| format!("db_error: {}", e))?;
-        match service {
-            Some(s) => {
-                if s.id_organisation != organisation_id {
-                    return Err("errors.service_not_in_organisation".to_string());
-                }
-            },
-            None => return Err("errors.service_not_found".to_string()),
+    pub async fn unassign_user_from_service(pool: &MySqlPool, user_id: i64, organisation_id: i64) -> Result<(), String> {
+        let is_member = UserRepository::is_member_of_organisation(pool, user_id, organisation_id)
+            .await
+            .map_err(|e| format!("db_error: {}", e))?;
+
+        if !is_member {
+             return Err("errors.user_not_in_organisation".to_string());
         }
 
         UserRepository::update_user_service(pool, user_id, None)
             .await
-             .map_err(|e| format!("db_error: {}", e))?;
+            .map_err(|e| format!("db_error: {}", e))?;
 
         Ok(())
     }
