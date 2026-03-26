@@ -124,29 +124,31 @@
                             <p class="text-sm font-medium text-gray-950 flex items-center gap-2">
                                 { member.nom } { member.prenom }
                                 {#if member.service_name}
-                                    <!-- svelte-ignore a11y_click_events_have_key_events -->
-                                    <!-- svelte-ignore a11y_no_static_element_interactions -->
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200"
-                                        class:cursor-pointer={user.id !== member.id}
-                                        class:hover:bg-red-100={user.id !== member.id}
-                                        class:hover:text-red-800={user.id !== member.id}
-                                        title="{user.id !== member.id ? 'Cliquer pour retirer du service' : 'Service: ' + member.service_name}"
-                                        onclick={() => {
-                                            if (user.id !== member.id) {
+                                    {#if user.id !== member.id}
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200 cursor-pointer hover:bg-red-100 hover:text-red-800"
+                                            title="Cliquer pour retirer du service"
+                                            aria-label="Retirer du service"
+                                            onclick={() => {
                                                 showUnassignModal = true;
                                                 unassignMemberId = member.id;
                                                 unassignServiceMemberName = `${member.prenom} ${member.nom}`;
-                                            }
-                                        }}
-                                    >
-                                        {member.service_name}
-                                        {#if user.id !== member.id}
+                                            }}
+                                        >
+                                            {member.service_name}
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 ml-1.5 opacity-60 hover:opacity-100 transition-opacity">
                                                 <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
                                             </svg>
-                                        {/if}
-                                    </span>
+                                        </button>
+                                    {:else}
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200"
+                                            title={'Service: ' + member.service_name}
+                                        >
+                                            {member.service_name}
+                                        </span>
+                                    {/if}
                                 {/if}
                             </p>
                             <p class="text-xs text-gray-500">{ member.email }</p>
