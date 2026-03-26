@@ -234,7 +234,7 @@
             </div>
             <h2 class="text-xl font-bold mb-2">{$t('account.service.unassign_modal.title') || "Retirer du service"}</h2>
             <p class="text-gray-600 mb-6">
-                {$t('account.service.unassign_modal.description_prefix') || "Voulez-vous vraiment retirer"} <span class="font-bold">{unassignServiceMemberName}</span> {$t('account.service.unassign_modal.description_suffix') || "de son service ?"}.
+                {$t('account.service.unassign_modal.description_prefix') || "Voulez-vous vraiment retirer"} <span class="font-bold">{unassignServiceMemberName}</span> {$t('account.service.unassign_modal.description_suffix') || "de son service ?"}
             </p>
             {#if unassignErrorMessage}
                 <p class="text-red-500 mb-4 font-medium text-sm">{unassignErrorMessage}</p>
