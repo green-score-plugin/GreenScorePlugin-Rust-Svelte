@@ -29,6 +29,21 @@ async fn devrait_retourner_erreur_si_nom_vide(pool: MySqlPool) {
 }
 
 #[sqlx::test]
+async fn devrait_retourner_erreur_si_service_existe_deja(pool: MySqlPool) {
+    // GIVEN
+    let org_id = 1;
+    let nom_service = "Service Existant";
+
+    // WHEN
+    ServiceService::create_service(&pool, org_id, nom_service).await.unwrap();
+    let result = ServiceService::create_service(&pool, org_id, nom_service).await;
+
+    // THEN
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "errors.service_exists");
+}
+
+#[sqlx::test]
 async fn devrait_recuperer_services_organisation(pool: MySqlPool) {
     // GIVEN
     let org_id = 1;
@@ -80,6 +95,67 @@ async fn devrait_assigner_et_desassigner_utilisateur(pool: MySqlPool) {
 }
 
 #[sqlx::test]
+async fn devrait_retourner_erreur_si_assignation_service_inexistant(pool: MySqlPool) {
+    // GIVEN
+    let org_id = 1;
+    let user_id = 1;
+
+    // WHEN
+    let result = ServiceService::assign_user_to_service(&pool, user_id, 99999, org_id).await;
+
+    // THEN
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "errors.service_not_found");
+}
+
+#[sqlx::test]
+async fn devrait_retourner_erreur_si_assignation_service_autre_organisation(pool: MySqlPool) {
+    // GIVEN
+    let org1 = 1;
+    let org2 = 2; // Suppose qu'il y a une organisation 2 ou on utilisera un id bidon
+    let user_id = 1;
+    let services = ServiceService::create_service(&pool, org1, "Service Org 1").await.unwrap();
+    let service_id = services.into_iter().find(|s| s.nom == "Service Org 1").unwrap().id;
+
+    // WHEN
+    let result = ServiceService::assign_user_to_service(&pool, user_id, service_id, org2).await;
+
+    // THEN
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "errors.service_not_in_organisation");
+}
+
+#[sqlx::test]
+async fn devrait_retourner_erreur_si_assignation_utilisateur_autre_organisation(pool: MySqlPool) {
+    // GIVEN
+    let org_id = 1;
+    let user_id = 99999; // Utilisateur inexistant
+    let services = ServiceService::create_service(&pool, org_id, "Service User Inexistant").await.unwrap();
+    let service_id = services.into_iter().find(|s| s.nom == "Service User Inexistant").unwrap().id;
+
+    // WHEN
+    let result = ServiceService::assign_user_to_service(&pool, user_id, service_id, org_id).await;
+
+    // THEN
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "errors.user_not_in_organisation");
+}
+
+#[sqlx::test]
+async fn devrait_retourner_erreur_si_desassignation_utilisateur_autre_organisation(pool: MySqlPool) {
+    // GIVEN
+    let org_id = 1;
+    let user_id = 99999;
+
+    // WHEN
+    let result = ServiceService::unassign_user_from_service(&pool, user_id, org_id).await;
+
+    // THEN
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "errors.user_not_in_organisation");
+}
+
+#[sqlx::test]
 async fn devrait_supprimer_service(pool: MySqlPool) {
     // GIVEN
     let org_id = 1;
@@ -94,4 +170,33 @@ async fn devrait_supprimer_service(pool: MySqlPool) {
 
     let remaining_services = ServiceService::get_organisation_services(&pool, org_id).await.unwrap();
     assert!(!remaining_services.iter().any(|s| s.id == service_id));
+}
+
+#[sqlx::test]
+async fn devrait_retourner_erreur_si_suppression_service_inexistant(pool: MySqlPool) {
+    // GIVEN
+    let org_id = 1;
+
+    // WHEN
+    let result = ServiceService::delete_service(&pool, 99999, org_id).await;
+
+    // THEN
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "errors.service_not_found");
+}
+
+#[sqlx::test]
+async fn devrait_retourner_erreur_si_suppression_service_autre_organisation(pool: MySqlPool) {
+    // GIVEN
+    let org1 = 1;
+    let org2 = 2; // Simulation d'une tentative de suppression depuis une autre org
+    let services = ServiceService::create_service(&pool, org1, "Service Org 1 a ne pas suppr").await.unwrap();
+    let service_id = services.into_iter().find(|s| s.nom == "Service Org 1 a ne pas suppr").unwrap().id;
+
+    // WHEN
+    let result = ServiceService::delete_service(&pool, service_id, org2).await;
+
+    // THEN
+    assert!(result.is_err());
+    assert_eq!(result.unwrap_err(), "errors.service_not_in_organisation");
 }
