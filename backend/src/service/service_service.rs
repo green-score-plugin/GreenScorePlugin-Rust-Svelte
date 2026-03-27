@@ -66,23 +66,6 @@ impl ServiceService {
             None => return Err("errors.service_not_found".to_string()),
         }
 
-        // Verify user belongs to organization
-        // We use a simplified check here assuming the controller has validated the admin's rights.
-        // But we must ensure the target user is in the same organization to avoid cross-org assignments.
-        // Actually, we can check if the user is in the organisation_user table for this org.
-
-        /*
-           Note: I need to make sure UserRepository is accessible.
-           If UserRepository is not public or methods are not public, I might have issues.
-           Assuming they are public based on previous context.
-        */
-
-        // For now, let's just update the user service
-        // Strict check: User must be in the organisation
-        // Since we don't have direct access to is_member_of_organisation easily without importing,
-        // I will trust the controller to send valid data or add the check if I can import UserRepository.
-
-        // Adding the check:
         let is_member = UserRepository::is_member_of_organisation(pool, user_id, organisation_id)
             .await
             .map_err(|e| format!("db_error: {}", e))?;
