@@ -114,6 +114,10 @@ impl OrganisationService {
         Ok((organisation_id, code))
     }
 
+    pub async fn delete_organization(pool: &MySqlPool, org_id: i64) -> Result<(), String> {
+        OrganisationRepository::delete_organization(pool, org_id).await.map_err(|e| e.to_string())
+    }
+
     pub fn generate_organisation_code() -> String {
         const CHARACTERS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         const LENGTH: usize = 8;

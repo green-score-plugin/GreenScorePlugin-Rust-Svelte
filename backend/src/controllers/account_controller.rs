@@ -291,6 +291,44 @@ pub async fn leave_organization(
     })))
 }
 
+pub async fn delete_organization(
+    session: Session,
+    State(pool): State<MySqlPool>,
+    AuthenticatedUser(mut user_full): AuthenticatedUser,
+    Json(payload): Json<Value>
+) -> Result<Json<Value>, AppError> {
+    let orga_id = payload.get("organisationId")
+        .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
+        .ok_or(AppError::BadRequest("Missing or invalid organisationId".into()))?;
+
+    let org_idx = user_full.organisation.iter().position(|o| o.id == orga_id)
+        .ok_or(AppError::AuthError("errors.auth.unauthenticated_org".into()))?;
+
+    if !user_full.organisation[org_idx].est_admin {
+         return Err(AppError::AuthError("errors.auth.not_admin".into()));
+    }
+
+    OrganisationService::delete_organization(&pool, orga_id).await
+         .map_err(|e| AppError::InternalServerError(format!("Erreur suppression organisation: {}", e)))?;
+
+    user_full.organisation.remove(org_idx);
+
+    if let Some(ref s) = user_full.service {
+        if s.id_organisation == orga_id {
+            user_full.service = None;
+            user_full.user.id_service = None;
+        }
+    }
+
+    session.insert("user_full", user_full).await
+        .map_err(|_| AppError::InternalServerError("errors.session_error".to_string()))?;
+
+    Ok(Json(json!({
+        "success": true,
+        "message": "success.org_deleted"
+    })))
+}
+
 pub async fn get_my_organization(
     AuthenticatedUser(user_full): AuthenticatedUser
 ) -> Result<Json<Value>, AppError> {
