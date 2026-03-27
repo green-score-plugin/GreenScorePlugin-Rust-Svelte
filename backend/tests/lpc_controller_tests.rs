@@ -29,7 +29,7 @@ async fn devrait_retourner_succes_et_enregistrer_donnees_pour_lpc(pool: MySqlPoo
     let authenticated_user = AuthenticatedUser(create_dummy_user_full(1));
 
     let params = LastPageConsultedInfos {
-        link: "https://example.com/page".to_string(),
+        url_full: "https://example.com/page".to_string(),
         queries_quantity: 10,
         carbon_footprint: 0.1, // Grade A
         data_transferred: 100.0,
@@ -53,7 +53,7 @@ async fn devrait_retourner_succes_et_enregistrer_donnees_pour_lpc(pool: MySqlPoo
 
     assert!(response.lpc_infos.is_some(), "Les informations LPC devraient être présentes");
     let returned_info = response.lpc_infos.unwrap();
-    assert_eq!(returned_info.link, params.link, "Le lien retourné devrait correspondre à l'entrée");
+    assert_eq!(returned_info.url_full, params.url_full, "Le lien retourné devrait correspondre à l'entrée");
     assert_eq!(returned_info.carbon_footprint, params.carbon_footprint, "L'empreinte carbone retournée devrait correspondre");
 
     assert_eq!(response.letter, Some("A".to_string()), "Le grade devrait être A pour une empreinte de 0.1");

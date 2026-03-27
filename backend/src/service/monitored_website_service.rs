@@ -41,13 +41,13 @@ impl MonitoredWebsiteService {
 
         if let (Some(u_id), Some(infos)) = (user_id, &params) {
             // Simple domain extraction
-            let domain = infos.link
+            let domain = infos.url_full
                 .split("://")
                 .nth(1)
-                .unwrap_or(&infos.link)
+                .unwrap_or(&infos.url_full)
                 .split('/')
                 .next()
-                .unwrap_or(&infos.link)
+                .unwrap_or(&infos.url_full)
                 .to_string();
 
             let website = MonitoredWebsite {
@@ -59,7 +59,7 @@ impl MonitoredWebsiteService {
                 resources: 0, // Default as it's missing in inputs
                 loading_time: infos.loading_time,
                 carbon_footprint: infos.carbon_footprint,
-                url_full: infos.link.clone(),
+                url_full: infos.url_full.clone(),
                 country: infos.country.clone(),
             };
 
