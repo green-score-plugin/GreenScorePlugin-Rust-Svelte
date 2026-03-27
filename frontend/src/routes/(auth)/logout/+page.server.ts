@@ -1,12 +1,11 @@
 import { redirect } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import type { PageServerLoad } from './$types';
 import { BACKEND_URL } from '$lib/config.ts';
 import { invalidateCache } from '$lib/server/session.ts';
 
-export const GET: RequestHandler = async ({ url, cookies, fetch }) => {
+export const load: PageServerLoad = async ({ url, cookies, fetch }) => {
     const sessionCookie = cookies.get('greenscoreweb_sessions');
 
-    // ... code ...
     if (sessionCookie) {
         invalidateCache(sessionCookie);
         try {
@@ -14,8 +13,8 @@ export const GET: RequestHandler = async ({ url, cookies, fetch }) => {
                 method: 'POST',
                 headers: { cookie: `greenscoreweb_sessions=${sessionCookie}` }
             });
-        } catch (e) {
-
+        } catch {
+            console.error('Erreur lors de la déconnexion');
         }
 
         cookies.delete('greenscoreweb_sessions', { path: '/' });

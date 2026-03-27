@@ -1,5 +1,6 @@
 use sqlx::{MySqlPool, Row, Error};
 use crate::models::user::User;
+use crate::dto::member_dto::MemberDto;
 
 pub struct UserRepository;
 
@@ -12,7 +13,7 @@ impl UserRepository {
         last_name: &str
     ) -> Result<i64, Error> {
         let result = sqlx::query(
-            "INSERT INTO user (email, password, first_name, last_name) VALUES (?, ?, ?, ?)"
+            "INSERT INTO user (email, password, first_name, last_name, total_carbon_footprint) VALUES (?, ?, ?, ?, 0.0)"
         )
         .bind(email)
         .bind(password_hash)
@@ -41,9 +42,9 @@ impl UserRepository {
     pub async fn find_with_password_by_email(
         pool: &MySqlPool,
         email: &str
-    ) -> Result<Option<(i64, String, String, String, Option<i64>, Option<i64>, bool)>, Error> {
+    ) -> Result<Option<(i64, String, String, String, Option<i64>)>, Error> {
         let result = sqlx::query(
-            "SELECT id, password, first_name, last_name, organisation_id, service_id ,est_admin FROM user WHERE email = ?"
+            "SELECT id, password, first_name, last_name, service_id FROM user WHERE email = ?"
         )
         .bind(email)
         .fetch_optional(pool)
@@ -54,22 +55,22 @@ impl UserRepository {
             row.get::<String, _>("password"),
             row.get::<String, _>("first_name"),
             row.get::<String, _>("last_name"),
-            row.get::<Option<i64>, _>("organisation_id"),
             row.get::<Option<i64>, _>("service_id"),
-            row.get::<bool, _>("est_admin"),
         )))
     }
 
     pub async fn join_organisation(
         pool: &MySqlPool,
         user_id: i64,
-        organisation_id: i64
+        organisation_id: i64,
+        is_admin: bool
     ) -> Result<(), Error> {
         sqlx::query(
-            "UPDATE user SET organisation_id = ? AND est_admin = true WHERE id = ?"
+            "INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, ?)"
         )
-        .bind(organisation_id)
         .bind(user_id)
+        .bind(organisation_id)
+        .bind(is_admin)
         .execute(pool)
         .await?;
         Ok(())
@@ -101,7 +102,7 @@ impl UserRepository {
         .fetch_optional(pool)
         .await?;
 
-        Ok(result.map(|row| row.get::<Option<f64>, _>("total_carbon_footprint").unwrap_or(0.0)))
+        Ok(result.map(|row| row.get("total_carbon_footprint")))
     }
 
     pub async fn count_user_equivalent(
@@ -136,9 +137,9 @@ impl UserRepository {
         updates.push("last_name = ?".to_string());
         params.push(new_user.nom.clone());
 
-        if new_password.is_some() {
+        if let Some(new_password) = new_password {
             updates.push("password = ?".to_string());
-            params.push(new_password.unwrap());
+            params.push(new_password);
         }
 
         query.push_str(&updates.join(", "));
@@ -165,20 +166,24 @@ impl UserRepository {
     }
 
     pub async fn update_user_organization(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<(), Error> {
-        sqlx::query(
-            "UPDATE user SET organisation_id = ? WHERE id = ?"
+         sqlx::query(
+            "INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)"
         )
-        .bind(orga_id)
         .bind(user_id)
+        .bind(orga_id)
         .execute(pool)
         .await?;
 
         Ok(())
     }
 
-    pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<User>, Error> {
-        let result = sqlx::query_as::<_, User>(
-            "SELECT * FROM user WHERE organisation_id = ? AND est_admin = true"
+    pub async fn get_organization_members(pool: &MySqlPool, orga_id: i64) -> Result<Vec<MemberDto>, Error> {
+        let result = sqlx::query_as::<_, MemberDto>(
+            "SELECT u.*, s.nom as service_name
+             FROM user u
+             JOIN organisation_user ou ON u.id = ou.user_id
+             LEFT JOIN service s ON u.service_id = s.id
+             WHERE ou.organisation_id = ?"
         )
             .bind(orga_id)
             .fetch_all(pool)
@@ -186,14 +191,56 @@ impl UserRepository {
         Ok(result)
     }
 
-    pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64) -> Result<(), Error> {
-        sqlx::query("
-            UPDATE user SET organisation_id = NULL WHERE id = ?
-        ")
+    pub async fn remove_organization_member(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<(), Error> {
+        sqlx::query(
+            "UPDATE user u
+             JOIN service s ON u.service_id = s.id
+             SET u.service_id = NULL
+             WHERE u.id = ? AND s.id_organisation = ?"
+        )
+        .bind(user_id)
+        .bind(orga_id)
+        .execute(pool)
+        .await?;
+
+        sqlx::query("DELETE FROM organisation_user WHERE user_id = ? AND organisation_id = ?")
             .bind(user_id)
+            .bind(orga_id)
             .execute(pool)
             .await?;
 
+        Ok(())
+    }
+
+    pub async fn is_member_of_organisation(pool: &MySqlPool, user_id: i64, orga_id: i64) -> Result<bool, Error> {
+         let result = sqlx::query("SELECT 1 FROM organisation_user WHERE user_id = ? AND organisation_id = ? LIMIT 1")
+            .bind(user_id)
+            .bind(orga_id)
+            .fetch_optional(pool)
+            .await?;
+        Ok(result.is_some())
+    }
+
+    pub async fn is_member_of_any_organisation(pool: &MySqlPool, user_id: i64) -> Result<bool, Error> {
+         let result = sqlx::query("SELECT 1 FROM organisation_user WHERE user_id = ? AND est_admin = false LIMIT 1")
+            .bind(user_id)
+            .fetch_optional(pool)
+            .await?;
+        Ok(result.is_some())
+    }
+
+    pub async fn update_user_service(
+        pool: &MySqlPool,
+        user_id: i64,
+        service_id: Option<i64>
+    ) -> Result<(), Error> {
+        sqlx::query(
+            "UPDATE user SET service_id = ? WHERE id = ?"
+        )
+        .bind(service_id)
+        .bind(user_id)
+        .execute(pool)
+        .await?;
         Ok(())
     }
 }

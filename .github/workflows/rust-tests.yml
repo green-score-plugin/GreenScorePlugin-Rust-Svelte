@@ -63,7 +63,7 @@ jobs:
       - name: Setup Database Schema
         run: |
           sudo apt-get update && sudo apt-get install -y mysql-client
-          mysql -h 127.0.0.1 -P 3306 -u root -proot -D greenscoreweb_database < migrations/20260128151309_sql_test.sql
+          mysql -h 127.0.0.1 -P 3306 -u root -proot -D greenscoreweb_database < migrations/20260325091757_sql_test.sql
 
       - name: Exécution des tests et génération du rapport HTML
         run: |

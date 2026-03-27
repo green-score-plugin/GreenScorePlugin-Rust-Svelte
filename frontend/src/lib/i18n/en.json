@@ -1,5 +1,11 @@
 {
   "hello": "Hello",
+  "common": {
+    "cancel": "Cancel",
+    "validate": "Validate",
+    "confirm": "Confirm",
+    "warning": "Warning"
+  },
   "header": {
     "home": "Home",
     "my_data": "My Data",
@@ -132,9 +138,47 @@
       "my_info": "My Account",
       "my_equivalents": "My Equivalents",
       "my_organization": "My Organization",
+      "services": "Services",
       "manage_organization": "Manage My Organization",
       "delete_account": "Delete Account",
       "delete_organization": "Delete Organization"
+    },
+    "service": {
+      "title": "Service Management",
+      "no_service": "You are not attached to any service.",
+      "name_label": "Service Name",
+      "leave_button": "Leave Service",
+      "create_title": "Create a new Service",
+      "create_button": "Create",
+      "create_placeholder": "Service Name",
+      "join_title": "Join a Service",
+      "join_button": "Join",
+      "join_placeholder": "Select a Service",
+      "success_created": "Service created successfully",
+      "success_joined": "Service joined successfully",
+      "success_left": "You have left the service",
+      "list_title": "Organization Services List",
+      "no_services": "No services found for this organization.",
+      "name": "Service Name",
+      "assign_member": "Assign member",
+      "delete_service": "Delete service",
+      "assign_modal": {
+        "title": "Assign a member",
+        "description_prefix": "Select a member to add to the service",
+        "member_label": "Member",
+        "select_placeholder": "Select a member...",
+        "move_suffix": "(Move)"
+      },
+      "delete_modal": {
+        "confirmation_prefix": "Are you sure you want to delete the service",
+        "warning_detail": "This action will also remove the link between this service and the associated users."
+      },
+      "unassign_modal": {
+        "title": "Remove from service",
+        "description_prefix": "Are you sure you want to remove",
+        "description_suffix": "from their service?",
+        "confirm_button": "Remove"
+      }
     },
     "info": {
       "title": "My Information",
@@ -182,7 +226,9 @@
       "confirm": "Confirm",
       "delete_confirm_title": "Confirm Deletion",
       "delete_confirm_desc": "Are you sure you want to delete your user account?",
-      "delete": "Delete"
+      "delete": "Delete",
+      "delete_member_title": "Delete Member",
+      "delete_member_desc": "Are you sure you want to delete this member from the organization?"
     }
   },
   "dashboard": {
@@ -487,24 +533,18 @@
     "validation_fields_required": "First name, last name, and email are required",
     "validation_password_complexity": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character (#?!@$%^&*-)",
     "validation_code_required": "Organization code is required",
-    "session_error": "Session error",
-    "too_many_attempts": "Too many attempts, please try again in 15 minutes",
-    "org_change_error": "Server error while changing organization",
-    "no_changes": "No changes to be made",
-    "db_error": "Database error",
-    "org_not_found": "Organization not found",
-    "org_name_exists": "Organization name already exists",
-    "org_siret_exists": "SIRET already exists",
-    "org_leave_error": "Error leaving organization",
-    "members_retrieval_error": "Error retrieving members",
-    "org_update_error": "Error updating organization",
-    "champs" : "All fields are required",
-    "match_password" : "Passwords do not match",
-    "regex_password": "The password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character (#?!@$%^&*-)",
-    "cgu": "Vous devez accepter les conditions générales d'utilisation",
-    "match_user": "Email and password required",
+    "validation_code_invalid": "Invalid organization code",
+    "validation_service_name_required": "Service name is required",
+    "service_not_in_organisation": "This service does not belong to the specified organization",
+    "service_not_found": "Service not found",
+    "user_not_in_organisation": "User is not part of the organization",
+    "server_champs": "Server error during validation",
+    "cannot_assign_self": "You cannot assign yourself to a service",
+    "already_member": "You are already a member of this organization",
+    "org_exists": "This organization is already registered",
     "auth": {
       "unauthenticated": "Unauthenticated",
+      "unauthenticated_org": "You are not authorized to manage this organization",
       "email_exists": "This email is already taken",
       "hash_error": "Password hashing error",
       "connection_error": "An error occurred during connection",
@@ -512,13 +552,18 @@
       "user_retrieval_error": "User retrieval error",
       "email_verification_error": "Email verification error",
       "registration_error": "Registration error",
+      "insert_error": "Error creating account",
       "org_creation_error": "Organization creation error",
       "user_creation_error": "User creation error",
+      "not_logged_in": "You are not logged in",
+      "forbidden": "Access denied",
       "missing_fields": "All fields are required"
-    }
+    },
+    "service_exists": "A service with this name already exists in your organization."
   },
   "success": {
     "member_deleted": "Member deleted successfully",
+    "user_assigned": "User assigned to service successfully",
     "info_updated": "Your information has been updated successfully",
     "org_joined": "You have successfully joined the organization.",
     "org_updated": "Organization information has been updated successfully",
@@ -526,7 +571,10 @@
     "org_left": "You have left the organization.",
     "org_changed": "You have successfully changed your organization.",
     "join_organization": "You have successfully joined the organization.",
-    "leave_organization": "You have successfully left the organization."
+    "leave_organization": "You have successfully left the organization.",
+    "service_created": "Service successfully created"
+
+
   },
   "data": {
     "advice": {

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
-pub struct User {
+pub struct MemberDto {
     pub id: i64,
     #[serde(default)]
     #[sqlx(rename = "service_id")]
@@ -13,4 +13,7 @@ pub struct User {
     pub nom: String,
     #[serde(default)]
     pub total_carbon_footprint: f64,
+    #[sqlx(default)]
+    pub service_name: Option<String>
 }
+
