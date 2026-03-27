@@ -26,15 +26,6 @@ fn create_dummy_user_full(id: i64) -> UserFull {
 #[sqlx::test]
 async fn devrait_retourner_succes_et_enregistrer_donnees_pour_lpc(pool: MySqlPool) {
     // GIVEN
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await
-        .expect("Echec de la migration de la base de données");
-
-    sqlx::query("INSERT INTO advice (advice, is_dev, title, icon) VALUES ('Dev advice', 1, '', '')").execute(&pool).await.ok();
-    sqlx::query("INSERT INTO advice (advice, is_dev, title, icon) VALUES ('User advice', 0, '', '')").execute(&pool).await.ok();
-    sqlx::query("INSERT INTO equivalent (name, equivalent, icon_thumbnail) VALUES ('Car', 0.5, 'car.png')").execute(&pool).await.ok();
-
     let authenticated_user = AuthenticatedUser(create_dummy_user_full(1));
 
     let params = LastPageConsultedInfos {
