@@ -16,7 +16,7 @@ async fn devrait_confirmer_email_existant(pool: MySqlPool) {
     let exists = UserService::user_with_email_exists(&pool, email.to_string()).await;
 
     // THEN
-    assert!(exists, "L'email insere devrait etre detecte comme existant");
+    assert!(exists, "L'email inséré devrait être détecté comme existant");
 }
 
 #[sqlx::test]
@@ -28,7 +28,7 @@ async fn devrait_confirmer_email_inexistant(pool: MySqlPool) {
     let exists = UserService::user_with_email_exists(&pool, email.to_string()).await;
 
     // THEN
-    assert!(!exists, "Un email non present ne doit pas etre considere existant");
+    assert!(!exists, "Un email non présent ne doit pas être considéré existant");
 }
 
 #[sqlx::test]
@@ -260,39 +260,3 @@ async fn devrait_retourner_erreur_mise_a_jour_si_pool_ferme(pool: MySqlPool) {
         error_message
     );
 }
-
-#[sqlx::test]
-#[ignore = "bcrypt::hash(DEFAULT_COST) ne permet pas de forcer une erreur de hash de façon déterministe sans modifier le service"]
-async fn hash_error_est_non_deterministe_sans_injection(pool: MySqlPool) {
-    // GIVEN
-    let user_id = UserRepository::insert_user(&pool, "hash_error_probe@test.com", "pwd", "Hash", "Probe")
-        .await
-        .expect("Failed to insert user");
-
-    let user = User {
-        id: user_id,
-        id_service: None,
-        email: "hash_error_probe@test.com".to_string(),
-        prenom: "Hash".to_string(),
-        nom: "Probe".to_string(),
-        total_carbon_footprint: 0.0,
-    };
-
-    let payload = UpdateAccountRequest {
-        email: None,
-        prenom: None,
-        nom: None,
-        password: Some("motdepasse123".to_string()),
-    };
-
-    // WHEN
-    let result = UserService::update_user(&pool, user, payload).await;
-
-    // THEN
-    // Ce test est ignoré volontairement : la branche hash_error n'est pas pilotable en entrée.
-    match result {
-        Err(err) => assert_eq!(err, "errors.auth.hash_error"),
-        Ok(_) => panic!("Le hash a reussi : branche hash_error non atteinte"),
-    }
-}
-
