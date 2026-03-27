@@ -97,7 +97,7 @@ impl OrganisationRepository {
             .await
     }
 
-    pub async fn delete_organisation(pool: &MySqlPool, organisation_id: i64) -> Result<(), sqlx::Error> {
+    pub async fn delete_organization(pool: &MySqlPool, organisation_id: i64) -> Result<(), sqlx::Error> {
         sqlx::query("DELETE FROM organisation WHERE id = ?")
             .bind(organisation_id)
             .execute(pool)

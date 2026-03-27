@@ -9,7 +9,6 @@ use crate::service::user_service::UserService;
 use crate::service::organisation_service::OrganisationService;
 use crate::service::equivalent_service::EquivalentService;
 use crate::service::service_service::ServiceService;
-use crate::repository::organisation_repository::OrganisationRepository;
 use crate::dto::update_account_request_dto::UpdateAccountRequest;
 use crate::dto::update_organisation_request_dto::UpdateOrganisationRequest;
 use crate::dto::equivalent_dto::EquivalentSelection;
@@ -309,7 +308,7 @@ pub async fn delete_organization(
          return Err(AppError::AuthError("errors.auth.not_admin".into()));
     }
 
-    OrganisationRepository::delete_organisation(&pool, orga_id).await
+    OrganisationService::delete_organization(&pool, orga_id).await
          .map_err(|e| AppError::InternalServerError(format!("Erreur suppression organisation: {}", e)))?;
 
     user_full.organisation.remove(org_idx);
