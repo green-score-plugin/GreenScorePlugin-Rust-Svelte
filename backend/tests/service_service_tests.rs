@@ -200,3 +200,36 @@ async fn devrait_retourner_erreur_si_suppression_service_autre_organisation(pool
     assert!(result.is_err());
     assert_eq!(result.unwrap_err(), "errors.service_not_in_organisation");
 }
+
+#[sqlx::test]
+async fn devrait_retourner_db_error_si_erreur_bdd(pool: MySqlPool) {
+    // GIVEN - Fermer le pool pour forcer une erreur de base de données (PoolClosed)
+    pool.close().await;
+
+    // WHEN
+    let res_create = ServiceService::create_service(&pool, 1, "Test Db Error").await;
+    let res_get_org = ServiceService::get_organisation_services(&pool, 1).await;
+    let res_get_user = ServiceService::get_services_by_user_id(&pool, 1).await;
+    let res_delete = ServiceService::delete_service(&pool, 1, 1).await;
+    let res_assign = ServiceService::assign_user_to_service(&pool, 1, 1, 1).await;
+    let res_unassign = ServiceService::unassign_user_from_service(&pool, 1, 1).await;
+
+    // THEN
+    assert!(res_create.is_err());
+    assert!(res_create.unwrap_err().starts_with("db_error:"));
+
+    assert!(res_get_org.is_err());
+    assert!(res_get_org.unwrap_err().starts_with("db_error:"));
+
+    assert!(res_get_user.is_err());
+    assert!(res_get_user.unwrap_err().starts_with("db_error:"));
+
+    assert!(res_delete.is_err());
+    assert!(res_delete.unwrap_err().starts_with("db_error:"));
+
+    assert!(res_assign.is_err());
+    assert!(res_assign.unwrap_err().starts_with("db_error:"));
+
+    assert!(res_unassign.is_err());
+    assert!(res_unassign.unwrap_err().starts_with("db_error:"));
+}
