@@ -99,9 +99,9 @@ impl MonitoredWebsiteService {
         pool: &MySqlPool,
         user_id: i64
     ) -> Result<Vec<ConsumptionDataPoint>, Error>  {
-        let daily_consumtion: Vec<ConsumptionDataPoint> = MonitoredWebsiteRepository::get_daily_consumption_by_user(pool, user_id).await?;
+        let daily_consumption: Vec<ConsumptionDataPoint> = MonitoredWebsiteRepository::get_daily_consumption_by_user(pool, user_id).await?;
 
-        Ok(daily_consumtion.into_iter()
+        Ok(daily_consumption.into_iter()
             .map(|consumption_data_point: ConsumptionDataPoint| ConsumptionDataPoint {
                 label: consumption_data_point.label,
                 value: (consumption_data_point.value * 100.0).round() / 100.0
