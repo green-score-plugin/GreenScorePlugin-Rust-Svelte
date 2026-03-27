@@ -1,10 +1,10 @@
 use backend::controllers::lpc_controller;
-use backend::dto::lpc_dto::{LastPageConsultedInfos, LastPageConsultedResponse};
+use backend::dto::lpc_dto::{LastPageConsultedInfos};
 use backend::dto::user_full::UserFull;
 use backend::models::user::User;
 use backend::middleware::auth::AuthenticatedUser;
 use axum::extract::{Query, State};
-use sqlx::{MySqlPool, Row};
+use sqlx::{MySqlPool};
 
 fn create_dummy_user_full(id: i64) -> UserFull {
     UserFull {
