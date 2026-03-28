@@ -11,6 +11,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
 
     let members = [];
     let services = [];
+    let accountEquivalents = [];
 
     const orgIdParam = url.searchParams.get('orgId');
     let targetOrgId = orgIdParam ? parseInt(orgIdParam) : null;
@@ -51,12 +52,26 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
         }
     }
 
+    const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+    });
+    if (equivRes.ok) {
+        try {
+            const result = await equivRes.json();
+            if (result.success && result.equivalents) {
+                accountEquivalents = result.equivalents;
+            }
+        } catch {}
+    }
+
     return {
         userFull: locals.user,
         members,
         services,
         organisation: targetOrg,
-        accountEquivalents: (locals.user as any)?.equivalents || [],
+        accountEquivalents,
         currentOrgId: targetOrgId
     };
 };
