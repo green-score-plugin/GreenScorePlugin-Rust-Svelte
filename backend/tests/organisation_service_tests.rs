@@ -24,7 +24,7 @@ mod tests {
         let user_id = 1;
 
         // WHEN
-        let infos = OrganisationService::organization_informations(&pool, org_id, user_id).await.unwrap();
+        let infos = OrganisationService::organization_informations(&pool, org_id, user_id, None).await.unwrap();
 
         // THEN
         assert_eq!(infos.name, "Test Organisation");
@@ -97,7 +97,7 @@ mod tests {
         let org_id = 1;
 
         // WHEN
-        let res = OrganisationService::get_daily_organization_consumption(&pool, org_id).await;
+        let res = OrganisationService::get_daily_organization_consumption(&pool, org_id, None).await;
 
         // THEN
         assert!(res.is_ok(), "Devrait récupérer les données journalières");
@@ -109,7 +109,7 @@ mod tests {
         let org_id = 1;
 
         // WHEN
-        let res = OrganisationService::get_weekly_organization_consumption(&pool, org_id).await;
+        let res = OrganisationService::get_weekly_organization_consumption(&pool, org_id, None).await;
 
         // THEN
         assert!(res.is_ok(), "Devrait récupérer les données hebdomadaires");
@@ -121,7 +121,7 @@ mod tests {
         let org_id = 1;
 
         // WHEN
-        let res = OrganisationService::get_monthly_organization_consumption(&pool, org_id).await;
+        let res = OrganisationService::get_monthly_organization_consumption(&pool, org_id, None).await;
 
         // THEN
         assert!(res.is_ok(), "Devrait récupérer les données mensuelles");
@@ -144,7 +144,7 @@ mod tests {
             .unwrap();
 
         // WHEN
-        let res = OrganisationService::get_top5_polluting_sites_by_organization(&pool, org_id).await;
+        let res = OrganisationService::get_top5_polluting_sites_by_organization(&pool, org_id, None).await;
 
         // THEN
         assert!(res.is_ok(), "Devrait récupérer le top 5 des sites polluants");
