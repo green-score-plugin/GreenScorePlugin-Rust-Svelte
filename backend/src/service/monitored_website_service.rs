@@ -117,18 +117,17 @@ impl MonitoredWebsiteService {
             .collect())
     }
 
-    pub async fn average_daily_carbon_footprint_for_organization(pool: &MySqlPool, org_id: i64) -> f64 {
-        let avg = MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(pool, org_id).await;
-        (avg * 100.0).round() / 100.0
+    pub async fn average_daily_carbon_footprint_for_organization(pool: &MySqlPool, org_id: i64, service_id: Option<i64>) -> f64 {
+        MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(pool, org_id, service_id).await
     }
 
     pub async fn get_daily_consumption_by_user(
         pool: &MySqlPool,
         user_id: i64
     ) -> Result<Vec<ConsumptionDataPoint>, Error>  {
-        let daily_consumption: Vec<ConsumptionDataPoint> = MonitoredWebsiteRepository::get_daily_consumption_by_user(pool, user_id).await?;
+        let daily_consumtion: Vec<ConsumptionDataPoint> = MonitoredWebsiteRepository::get_daily_consumption_by_user(pool, user_id).await?;
 
-        Ok(daily_consumption.into_iter()
+        Ok(daily_consumtion.into_iter()
             .map(|consumption_data_point: ConsumptionDataPoint| ConsumptionDataPoint {
                 label: consumption_data_point.label,
                 value: (consumption_data_point.value * 100.0).round() / 100.0
@@ -136,9 +135,8 @@ impl MonitoredWebsiteService {
             .collect())
     }
 
-    pub async fn total_organization_consumption(pool: &MySqlPool, org_id: i64) -> Result<Option<f64>, Error> {
-        let total = MonitoredWebsiteRepository::total_organization_consumption(pool, org_id).await?;
-        Ok(total.map(|t| (t * 100.0).round() / 100.0))
+    pub async fn total_organization_consumption(pool: &MySqlPool, org_id: i64, service_id: Option<i64>) -> Result<Option<f64>, Error> {
+        MonitoredWebsiteRepository::total_organization_consumption(pool, org_id, service_id).await
     }
 
     pub async fn get_weekly_consumption_by_user(
