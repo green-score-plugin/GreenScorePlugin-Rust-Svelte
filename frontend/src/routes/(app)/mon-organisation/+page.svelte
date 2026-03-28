@@ -75,10 +75,8 @@
             { description }
             </p>
         {/if}
-
-        {#if isAdmin}
-            <div class="mt-4 flex flex-col md:flex-row gap-4 items-center justify-center">
-                {#if userOrgs.length > 1}
+        <div class="mt-4 flex flex-col md:flex-row gap-4 items-center justify-center">
+            {#if userOrgs.length > 1}
                 <div class="flex items-center gap-2">
                     <label for="org-select" class="font-medium text-sm">{$t('auth.register.org_name')}:</label>
                     <select id="org-select" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm" bind:value={selectedOrgId} on:change={() => { selectedServiceId = ''; handleFilterChange(); }}>
@@ -87,19 +85,19 @@
                         {/each}
                     </select>
                 </div>
-                {/if}
-
-                <div class="flex items-center gap-2">
-                    <label for="service-select" class="font-medium text-sm">Service:</label>
-                    <select id="service-select" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm" bind:value={selectedServiceId} on:change={handleFilterChange}>
-                        <option value="">Tous les services</option>
-                        {#each services as svc}
-                            <option value={svc.id.toString()}>{svc.nom}</option>
-                        {/each}
-                    </select>
-                </div>
-            </div>
-        {/if}
+            {/if}
+            {#if isAdmin}
+                    <div class="flex items-center gap-2">
+                        <label for="service-select" class="font-medium text-sm">Service:</label>
+                        <select id="service-select" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm" bind:value={selectedServiceId} on:change={handleFilterChange}>
+                            <option value="">Tous les services</option>
+                            {#each services as svc}
+                                <option value={svc.id.toString()}>{svc.nom}</option>
+                            {/each}
+                        </select>
+                    </div>
+            {/if}
+        </div>
     </div>
 
     {#if !noDatas}
