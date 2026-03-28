@@ -19,11 +19,11 @@ impl OrganisationService {
     pub async fn find_id_by_siret(pool: &MySqlPool, siret: String) -> Result<Option<i64>, Error> {
         OrganisationRepository::find_id_by_siret(pool, &siret).await
     }
-    pub async fn organization_informations(pool: &MySqlPool, orga_id: i64, user_id: i64) -> Result<MyOrganizationInfos, Error>
+    pub async fn organization_informations(pool: &MySqlPool, orga_id: i64, user_id: i64, service_id: Option<i64>) -> Result<MyOrganizationInfos, Error>
     {
         let name: String = OrganisationRepository::organization_name(pool, orga_id).await.unwrap_or(None).unwrap_or_else(|| "Organisation inconnue".to_string());
-        let average_daily_carbon_footprint: f64 = MonitoredWebsiteService::average_daily_carbon_footprint_for_organization(pool, orga_id).await;
-        let total_consumption: f64 = MonitoredWebsiteService::total_organization_consumption(pool, orga_id).await.unwrap_or(None).unwrap_or(0.0);
+        let average_daily_carbon_footprint: f64 = MonitoredWebsiteService::average_daily_carbon_footprint_for_organization(pool, orga_id, service_id).await;
+        let total_consumption: f64 = MonitoredWebsiteService::total_organization_consumption(pool, orga_id, service_id).await.unwrap_or(None).unwrap_or(0.0);
 
         let equivalent = EquivalentService::equivalent(pool, Some(user_id), 1, total_consumption).await.ok().and_then(|mut v| v.pop());
 
@@ -35,20 +35,20 @@ impl OrganisationService {
         })
     }
 
-    pub async fn get_daily_organization_consumption(pool: &MySqlPool, orga_id: i64) -> Result<Vec<ConsumptionDataPoint>, Error> {
-        MonitoredWebsiteRepository::get_daily_organization_consumption(pool, orga_id).await
+    pub async fn get_daily_organization_consumption(pool: &MySqlPool, orga_id: i64, service_id: Option<i64>) -> Result<Vec<ConsumptionDataPoint>, Error> {
+        MonitoredWebsiteRepository::get_daily_organization_consumption(pool, orga_id, service_id).await
     }
 
-    pub async fn get_weekly_organization_consumption(pool: &MySqlPool, orga_id: i64) -> Result<Vec<ConsumptionDataPoint>, Error> {
-        MonitoredWebsiteRepository::get_weekly_organization_consumption(pool, orga_id).await
+    pub async fn get_weekly_organization_consumption(pool: &MySqlPool, orga_id: i64, service_id: Option<i64>) -> Result<Vec<ConsumptionDataPoint>, Error> {
+        MonitoredWebsiteRepository::get_weekly_organization_consumption(pool, orga_id, service_id).await
     }
 
-    pub async fn get_monthly_organization_consumption(pool: &MySqlPool, orga_id: i64) -> Result<Vec<ConsumptionDataPoint>, Error> {
-        MonitoredWebsiteRepository::get_monthly_organization_consumption(pool, orga_id).await
+    pub async fn get_monthly_organization_consumption(pool: &MySqlPool, orga_id: i64, service_id: Option<i64>) -> Result<Vec<ConsumptionDataPoint>, Error> {
+        MonitoredWebsiteRepository::get_monthly_organization_consumption(pool, orga_id, service_id).await
     }
 
-    pub async fn get_top5_polluting_sites_by_organization(pool: &MySqlPool, org_id: i64) -> Result<Vec<TopPollutingSite>, Error> {
-        let top_polluting_sites: Vec<TopPollutingSite> = MonitoredWebsiteRepository::get_top5_polluting_sites_by_organization(pool, org_id).await?;
+    pub async fn get_top5_polluting_sites_by_organization(pool: &MySqlPool, org_id: i64, service_id: Option<i64>) -> Result<Vec<TopPollutingSite>, Error> {
+        let top_polluting_sites: Vec<TopPollutingSite> = MonitoredWebsiteRepository::get_top5_polluting_sites_by_organization(pool, org_id, service_id).await?;
 
         Ok(top_polluting_sites.into_iter()
             .map(|top_polluting_site: TopPollutingSite| TopPollutingSite {
