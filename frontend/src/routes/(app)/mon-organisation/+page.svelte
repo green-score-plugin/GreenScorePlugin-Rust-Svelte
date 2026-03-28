@@ -45,9 +45,18 @@
     $: isAdmin = data.isAdmin;
     $: services = data.services || [];
     $: userOrgs = data.userFull?.organisation || [];
+    $: memberService = data.userFull?.service;
 
     let selectedOrgId = data.currentOrgId || '';
     let selectedServiceId = data.currentServiceId || '';
+    $: selectedOrgIdNumber = selectedOrgId ? Number(selectedOrgId) : null;
+    $: memberServiceName =
+        !isAdmin &&
+        memberService &&
+        selectedOrgIdNumber !== null &&
+        memberService.id_organisation === selectedOrgIdNumber
+            ? memberService.nom
+            : '';
 
     $: {
         if (!selectedOrgId && userOrgs.length > 0) {
@@ -96,6 +105,11 @@
                             {/each}
                         </select>
                     </div>
+            {:else if memberServiceName}
+                <div class="flex items-center gap-2">
+                    <span class="font-medium text-sm">{$t('account.service.name_label')}:</span>
+                    <span class="text-sm">{memberServiceName}</span>
+                </div>
             {/if}
         </div>
     </div>
