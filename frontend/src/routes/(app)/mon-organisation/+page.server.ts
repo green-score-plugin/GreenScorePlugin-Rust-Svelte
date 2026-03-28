@@ -44,7 +44,6 @@ export const load: PageServerLoad = async ({ fetch, request, url }) => {
             credentials: 'include'
         });
         const result = await response.json();
-        console.log(result);
         if (!result.success) {
             return {
                 organisationData: null,
