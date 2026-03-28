@@ -25,7 +25,7 @@ function formatMonthlyData(data: Array<{ label: string; value: number }>, locale
     return result;
 }
 
-export const load: PageServerLoad = async ({ fetch, request }) => {
+export const load: PageServerLoad = async ({ fetch, request, url }) => {
     try {
         const cookieHeader = request.headers.get('cookie') || '';
         let locale = 'fr';
@@ -33,7 +33,9 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
              locale = 'en';
         }
 
-        const response = await fetch(`${BACKEND_URL}/mon-organisation`, {
+        let query = url.searchParams.toString();
+        console.log("query: " + query);
+        const response = await fetch(`${BACKEND_URL}/mon-organisation${query ? '?' + query : ''}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -42,7 +44,7 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             credentials: 'include'
         });
         const result = await response.json();
-
+        console.log(result);
         if (!result.success) {
             return {
                 organisationData: null,
@@ -74,6 +76,10 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             weeklyConsumption: result.weekly_consumption || [],
             monthlyConsumption: formatMonthlyData(result.monthly_consumption || [], locale),
             topPollutingSites: result.top_polluting_sites || [],
+            isAdmin: result.is_admin || false,
+            services: result.services || [],
+            currentOrgId: url.searchParams.get('org_id') || null,
+            currentServiceId: url.searchParams.get('service_id') || null,
         };
 
     } catch (error) {
@@ -89,6 +95,10 @@ export const load: PageServerLoad = async ({ fetch, request }) => {
             weeklyConsumption: [],
             monthlyConsumption: formatMonthlyData([], 'fr'),
             topPollutingSites: [],
+            isAdmin: false,
+            services: [],
+            currentOrgId: null,
+            currentServiceId: null,
         };
     }
 }
