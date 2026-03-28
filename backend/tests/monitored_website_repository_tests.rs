@@ -125,10 +125,9 @@ async fn devrait_retourner_top5_polluting_sites_by_organization(pool: MySqlPool)
         .unwrap();
     let org_id = result.last_insert_id() as i64;
 
-    // Update user avec organisation
-    sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
-        .bind(org_id)
+    sqlx::query("INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)")
         .bind(user_id)
+        .bind(org_id)
         .execute(&pool)
         .await
         .unwrap();
@@ -151,7 +150,7 @@ async fn devrait_retourner_top5_polluting_sites_by_organization(pool: MySqlPool)
     }
 
     // WHEN
-    let top5 = MonitoredWebsiteRepository::get_top5_polluting_sites_by_organization(&pool, org_id).await.unwrap();
+    let top5 = MonitoredWebsiteRepository::get_top5_polluting_sites_by_organization(&pool, org_id, None).await.unwrap();
 
     // THEN
     assert_eq!(top5.len(), 5, "Devrait retourner 5 sites pour l'organisation");
@@ -170,9 +169,9 @@ async fn devrait_retourner_total_organization_consumption(pool: MySqlPool) {
         .unwrap();
     let org_id = result.last_insert_id() as i64;
 
-    sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
-        .bind(org_id)
+    sqlx::query("INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)")
         .bind(user_id)
+        .bind(org_id)
         .execute(&pool)
         .await
         .unwrap();
@@ -198,7 +197,7 @@ async fn devrait_retourner_total_organization_consumption(pool: MySqlPool) {
     MonitoredWebsiteRepository::save_monitored_website_data(&pool, &website2).await.unwrap();
 
     // WHEN
-    let total = MonitoredWebsiteRepository::total_organization_consumption(&pool, org_id).await.unwrap();
+    let total = MonitoredWebsiteRepository::total_organization_consumption(&pool, org_id, None).await.unwrap();
 
     // THEN
     assert_eq!(total, Some(30.0), "Total conso orga incorrect");
@@ -238,8 +237,8 @@ async fn devrait_retourner_average_daily_carbon_footprint_for_organization(pool:
         .unwrap();
     let org_id = result.last_insert_id() as i64;
 
-    sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
-        .bind(org_id).bind(user_id).execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)")
+        .bind(user_id).bind(org_id).execute(&pool).await.unwrap();
 
     let website = MonitoredWebsite {
         id: 1, url_domain: "site1.com".to_string(), user_id, queries_quantity: 10, data_transferred: 100, resources: 5, loading_time: 1.5,
@@ -248,7 +247,7 @@ async fn devrait_retourner_average_daily_carbon_footprint_for_organization(pool:
     MonitoredWebsiteRepository::save_monitored_website_data(&pool, &website).await.unwrap();
 
     // WHEN
-    let average = MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(&pool, org_id).await;
+    let average = MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(&pool, org_id, None).await;
 
     // THEN
     // 1 jour, total 100 -> moyenne 100
@@ -351,15 +350,15 @@ async fn devrait_retourner_get_daily_organization_consumption(pool: MySqlPool) {
 
     // Assigner à l'organisation
     for uid in [u1, u2] {
-        sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
-            .bind(org_id).bind(uid).execute(&pool).await.unwrap();
+        sqlx::query("INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)")
+            .bind(uid).bind(org_id).execute(&pool).await.unwrap();
     }
 
     insert_measure(&pool, u1, 10.0, "NOW()").await;
     insert_measure(&pool, u2, 20.0, "NOW()").await;
 
     // WHEN
-    let result = MonitoredWebsiteRepository::get_daily_organization_consumption(&pool, org_id).await.unwrap();
+    let result = MonitoredWebsiteRepository::get_daily_organization_consumption(&pool, org_id, None).await.unwrap();
 
     // THEN
     assert_eq!(result.len(), 1, "Devrait avoir 1 jour de données");
@@ -374,14 +373,14 @@ async fn devrait_retourner_get_weekly_organization_consumption(pool: MySqlPool) 
     let org_id = result.last_insert_id() as i64;
 
     let u3 = create_test_user(&pool).await;
-    sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
-        .bind(org_id).bind(u3).execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)")
+        .bind(u3).bind(org_id).execute(&pool).await.unwrap();
 
     insert_measure(&pool, u3, 100.0, "NOW()").await;
     insert_measure(&pool, u3, 50.0, "DATE_SUB(NOW(), INTERVAL 2 WEEK)").await;
 
     // WHEN
-    let result = MonitoredWebsiteRepository::get_weekly_organization_consumption(&pool, org_id).await.unwrap();
+    let result = MonitoredWebsiteRepository::get_weekly_organization_consumption(&pool, org_id, None).await.unwrap();
 
     // THEN
     assert_eq!(result.len(), 2, "2 semaines de données attendues");
@@ -398,14 +397,14 @@ async fn devrait_retourner_get_monthly_organization_consumption(pool: MySqlPool)
     let org_id = result.last_insert_id() as i64;
 
     let u4 = create_test_user(&pool).await;
-    sqlx::query("UPDATE user SET organisation_id = ? WHERE id = ?")
-        .bind(org_id).bind(u4).execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO organisation_user (user_id, organisation_id, est_admin) VALUES (?, ?, false)")
+        .bind(u4).bind(org_id).execute(&pool).await.unwrap();
 
     insert_measure(&pool, u4, 200.0, "NOW()").await;
     insert_measure(&pool, u4, 100.0, "DATE_SUB(NOW(), INTERVAL 3 MONTH)").await;
 
     // WHEN
-    let result = MonitoredWebsiteRepository::get_monthly_organization_consumption(&pool, org_id).await.unwrap();
+    let result = MonitoredWebsiteRepository::get_monthly_organization_consumption(&pool, org_id, None).await.unwrap();
 
     // THEN
     assert_eq!(result.len(), 2, "2 mois de données attendues");
