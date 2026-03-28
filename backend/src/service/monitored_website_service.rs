@@ -117,8 +117,8 @@ impl MonitoredWebsiteService {
             .collect())
     }
 
-    pub async fn average_daily_carbon_footprint_for_organization(pool: &MySqlPool, org_id: i64) -> f64 {
-        MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(pool, org_id).await
+    pub async fn average_daily_carbon_footprint_for_organization(pool: &MySqlPool, org_id: i64, service_id: Option<i64>) -> f64 {
+        MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(pool, org_id, service_id).await
     }
 
     pub async fn get_daily_consumption_by_user(
@@ -135,8 +135,8 @@ impl MonitoredWebsiteService {
             .collect())
     }
 
-    pub async fn total_organization_consumption(pool: &MySqlPool, org_id: i64) -> Result<Option<f64>, Error> {
-        MonitoredWebsiteRepository::total_organization_consumption(pool, org_id).await
+    pub async fn total_organization_consumption(pool: &MySqlPool, org_id: i64, service_id: Option<i64>) -> Result<Option<f64>, Error> {
+        MonitoredWebsiteRepository::total_organization_consumption(pool, org_id, service_id).await
     }
 
     pub async fn get_weekly_consumption_by_user(
