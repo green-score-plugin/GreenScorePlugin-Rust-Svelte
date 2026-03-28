@@ -8,6 +8,7 @@
     import Advice from "$lib/components/widgets/Advice.svelte";
     import type { PageData } from './$types';
     import { t } from 'svelte-i18n';
+    import { goto } from '$app/navigation';
 
     export let data: PageData;
 
@@ -40,6 +41,35 @@
     $: consumptionData = selectedPeriod === 'daily' ? dailyConsumption
         : selectedPeriod === 'weekly' ? weeklyConsumption
             : monthlyConsumption;
+
+    $: isAdmin = data.isAdmin;
+    $: services = data.services || [];
+    $: userOrgs = data.userFull?.organisation || [];
+    $: memberService = data.userFull?.service;
+
+    let selectedOrgId = data.currentOrgId || '';
+    let selectedServiceId = data.currentServiceId || '';
+    $: selectedOrgIdNumber = selectedOrgId ? Number(selectedOrgId) : null;
+    $: memberServiceName =
+        !isAdmin &&
+        memberService &&
+        selectedOrgIdNumber !== null &&
+        memberService.id_organisation === selectedOrgIdNumber
+            ? memberService.nom
+            : '';
+
+    $: {
+        if (!selectedOrgId && userOrgs.length > 0) {
+            selectedOrgId = userOrgs[0].id.toString();
+        }
+    }
+
+    function handleFilterChange() {
+        let qs = new URLSearchParams();
+        if (selectedOrgId) qs.set('org_id', selectedOrgId);
+        if (selectedServiceId) qs.set('service_id', selectedServiceId);
+        goto(`?${qs.toString()}`);
+    }
 </script>
 
 <svelte:head>
@@ -54,6 +84,34 @@
             { description }
             </p>
         {/if}
+        <div class="mt-4 flex flex-col md:flex-row gap-4 items-center justify-center">
+            {#if userOrgs.length > 1}
+                <div class="flex items-center gap-2">
+                    <label for="org-select" class="font-medium text-sm">{$t('auth.register.org_name')}:</label>
+                    <select id="org-select" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm" bind:value={selectedOrgId} on:change={() => { selectedServiceId = ''; handleFilterChange(); }}>
+                        {#each userOrgs as org}
+                            <option value={org.id.toString()}>{org.nom}</option>
+                        {/each}
+                    </select>
+                </div>
+            {/if}
+            {#if isAdmin}
+                    <div class="flex items-center gap-2">
+                        <label for="service-select" class="font-medium text-sm">Service:</label>
+                        <select id="service-select" class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none sm:text-sm" bind:value={selectedServiceId} on:change={handleFilterChange}>
+                            <option value="">Tous les services</option>
+                            {#each services as svc}
+                                <option value={svc.id.toString()}>{svc.nom}</option>
+                            {/each}
+                        </select>
+                    </div>
+            {:else if memberServiceName}
+                <div class="flex items-center gap-2">
+                    <span class="font-medium text-sm">{$t('account.service.name_label')}:</span>
+                    <span class="text-sm">{memberServiceName}</span>
+                </div>
+            {/if}
+        </div>
     </div>
 
     {#if !noDatas}

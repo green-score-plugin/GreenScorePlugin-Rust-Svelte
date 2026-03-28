@@ -1,7 +1,6 @@
 <script lang="ts">
     import { page } from "$app/state";
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
-    import type { Organisation } from "$lib/types/account";
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
 
@@ -68,7 +67,7 @@
       }}
 >
 
-    <h1 class="text-2xl font-bold py-2">{$t('account.info.title')}</h1>
+    <h1 class="text-2xl font-bold py-2 font-outfit text-gray-900">{$t('account.info.title')}</h1>
     <input type="hidden" name="id" value={organisation?.id} />
 
     {#if message}

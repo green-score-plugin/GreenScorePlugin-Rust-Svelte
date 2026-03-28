@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
     };
 
     let members = [];
-    let organisation = null;
+    let services = [];
     let accountEquivalents = [];
 
     const orgIdParam = url.searchParams.get('orgId');
@@ -37,11 +37,26 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
                     if (data.success) members = data.members;
                 } catch {}
             }
+
+            const resServices = await fetch(`${BACKEND_URL}/account/organization/services`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ organisation_id: targetOrgId })
+            });
+            if (resServices.ok) {
+                 try {
+                     const data = await resServices.json();
+                     if (data.success) services = data.services;
+                 } catch {}
+            }
         }
-        organisation = targetOrg;
     }
 
-    const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, { method: 'GET', headers, credentials: 'include' });
+    const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+    });
     if (equivRes.ok) {
         try {
             const result = await equivRes.json();
@@ -51,10 +66,83 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
         } catch {}
     }
 
-    return { members, organisation, accountEquivalents };
+    return {
+        userFull: locals.user,
+        members,
+        services,
+        organisation: targetOrg,
+        accountEquivalents,
+        currentOrgId: targetOrgId
+    };
 };
 
-export const actions = {
+export const actions: Actions = {
+    updateAccount: async ({ request, fetch, cookies }) => {
+        try {
+            const data = await request.formData();
+            const payload = Object.fromEntries(data);
+
+            const res = await fetch(`${BACKEND_URL}/account/update`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                return fail(res.status, {
+                    actionType: 'update_info',
+                    message: 'errors.communication_error',
+                    params: { details: await res.text() }
+                });
+            }
+
+            const result = await res.json();
+
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    const sessionValue = (result.token ?? result.session ?? result.sessionValue) as
+                        | string
+                        | undefined
+                        | null;
+
+                    if (sessionValue) {
+                        await setSessionCookie(cookies, sessionValue);
+                    } else {
+                        await setSessionCookie(cookies, res);
+                    }
+                } catch (cookieError) {
+                    console.error('Erreur cookie:', cookieError);
+                }
+
+                return {
+                    actionType: 'update_info',
+                    success: true,
+                    message: 'success.info_updated'
+                };
+            } else {
+                return fail(400, {
+                    actionType: 'update_info',
+                    message: result.message ?? 'errors.update_error'
+                });
+            }
+        } catch (err) {
+            return fail(500, {
+                actionType: 'update_info',
+                message: 'errors.server_error',
+                params: { details: err instanceof Error ? err.message : 'errors.unknown_error' }
+            });
+        }
+    },
+
     supprimer: async ({ request, fetch }) => {
         try {
             const response = await fetch(`${BACKEND_URL}/account/delete`, {
@@ -101,6 +189,88 @@ export const actions = {
             return fail(400, { message: result.message ?? 'errors.member_delete_error' });
         } catch {
             return fail(500, { message: 'errors.server_error' });
+        }
+    },
+
+    delete_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const serviceId = parseInt(data.get('serviceId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/organization/services/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                body: JSON.stringify({ userId: serviceId, organisationId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return { success: true, message: 'success.service_deleted', actionType: 'delete_service' };
+            }
+
+            return fail(400, { message: result.message ?? 'errors.service_delete_error', actionType: 'delete_service' });
+        } catch {
+            return fail(500, { message: 'errors.server_error', actionType: 'delete_service' });
+        }
+    },
+
+    assign_user_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const serviceId = parseInt(data.get('serviceId')?.toString() || '0', 10);
+        const userId = parseInt(data.get('userId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/organization/services/assign`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                body: JSON.stringify({ serviceId, userId, organisationId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return { success: true, message: 'success.user_assigned', actionType: 'assign_user' };
+            }
+
+            return fail(400, { message: result.message ?? 'errors.assign_error', actionType: 'assign_user' });
+        } catch {
+            return fail(500, { message: 'errors.server_error', actionType: 'assign_user' });
+        }
+    },
+
+    unassign_user_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const userId = parseInt(data.get('userId')?.toString() || '0', 10);
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0', 10);
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/organization/services/unassign`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                body: JSON.stringify({ userId, organisationId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                return { success: true, message: 'success.user_unassigned', actionType: 'unassign_user' };
+            }
+
+            return fail(400, { message: result.message ?? 'errors.unassign_error', actionType: 'unassign_user' });
+        } catch {
+            return fail(500, { message: 'errors.server_error', actionType: 'unassign_user' });
         }
     },
 
@@ -364,7 +534,11 @@ export const actions = {
             });
 
             if (!response.ok) {
-                return fail(response.status, { actionType: 'change_orga', message: 'errors.validation_code_invalid' });
+                const errorData = await response.json().catch(() => ({}));
+                return fail(response.status, { 
+                    actionType: 'change_orga', 
+                    message: errorData.message || 'errors.validation_code_invalid' 
+                });
             }
 
             const result = await response.json();
@@ -426,8 +600,46 @@ export const actions = {
             return fail(500, { actionType: 'modification_equivalents', message: 'errors.server_error' });
         }
     },
+    create_service: async ({ request, fetch }) => {
+        const data = await request.formData();
+        const serviceName = data.get('serviceName')?.toString().trim();
+        const organisationId = parseInt(data.get('organisationId')?.toString() || '0');
 
-    create_organization: async ({ request, fetch, cookies })=> {        const data = await request.formData();
+        if (!serviceName) {
+            return fail(400, { actionType: 'create_service', message: 'errors.validation_service_name_required' });
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/auth/create_service`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ service_name: serviceName, organisation_id: organisationId })
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                return fail(400, { actionType: 'create_service', message: result.message ?? 'errors.create_service_error' });
+            }
+
+            return {
+                actionType: 'create_service',
+                success: true,
+                message: 'success.service_created',
+                updatedServices: result.services,
+                updatedUser: result.user_full
+            };
+        } catch {
+            return fail(500, { actionType: 'create_service', message: 'errors.server_error' });
+        }
+    },
+
+    create_organization: async ({ request, fetch, cookies })=> {
+        const data = await request.formData();
         const organisationName = data.get('organisationName');
         const siret = data.get('siret')?.toString();
 
@@ -456,7 +668,6 @@ export const actions = {
 
             const result = await response.clone().json();
 
-
             if(result.success) {
                 const currentToken = cookies.get('greenscoreweb_sessions');
                 if (currentToken) {
@@ -470,8 +681,8 @@ export const actions = {
                 } else {
                     await setSessionCookie(cookies, response);
                 }
-                
-                const code = result.account?.code || result.user_full?.organisation?.[0]?.code;
+
+                const code = result.orga_code;
                 redirect(303,`/inscription-organisation/${code}`);
             }
 
@@ -481,6 +692,98 @@ export const actions = {
                 throw error;
             }
             return fail(500, { message: 'errors.server_error' });
+        }
+    },
+
+    deleteOrganisation: async ({ request, fetch, cookies }) => {
+        const formData = await request.formData();
+        const organisationId = formData.get('organisationId');
+
+        const res = await fetch(`${BACKEND_URL}/account/delete-organization`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': request.headers.get('cookie') || ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({ organisationId })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            const currentToken = cookies.get('greenscoreweb_sessions');
+            if (currentToken) {
+                invalidateCache(currentToken);
+            }
+
+            try {
+                await setSessionCookie(cookies, res);
+            } catch (cookieError) {}
+
+            redirect(303, '?tab=organisation&action=new');
+        } else {
+            return fail(400, { success: false, message: data.message || 'Error deleting organisation' });
+        }
+    },
+
+    joinOrganisation: async ({ request, fetch, cookies }) => {
+        const data = await request.formData();
+        const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
+
+        if (!codeOrganisation) {
+            return fail(400, { actionType: 'join_orga', message: "errors.validation_code_required" });
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/join-organization`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ code: codeOrganisation })
+            });
+
+            if (!response.ok) {
+                return fail(response.status, {
+                    actionType: 'join_orga',
+                    message: 'errors.validation_code_invalid'
+                });
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                const sessionValue = result.token ?? result.session ?? result.sessionValue;
+
+                if (sessionValue) {
+                    await setSessionCookie(cookies, sessionValue);
+                }
+
+                if (result.organisation_id) {
+                     redirect(303, `?tab=organisation&orgId=${result.organisation_id}`);
+                }
+
+                return {
+                    actionType: 'join_orga',
+                    success: true,
+                    message: 'success.join_organization'
+                };
+            } else {
+                return fail(400, { actionType: 'join_orga', message: result.message ?? 'errors.operation_error' });
+            }
+        } catch (error) {
+            if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
+                throw error;
+            }
+            return fail(500, { actionType: 'join_orga', message: 'errors.org_connection_error' });
         }
     }
 } satisfies Actions;

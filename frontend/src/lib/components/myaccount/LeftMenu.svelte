@@ -4,6 +4,8 @@
     import { t } from 'svelte-i18n';
     import type {User, UserFull} from "$lib/types/account.ts";
 
+    let userFull = $derived((page.form?.updatedUser as UserFull | undefined) ?? (page.data.userFull as UserFull));
+    let user = $derived(userFull.user as User);
 
     let { activePage = $bindable() } = $props();
     let showDeleteModal = $state(false);
@@ -69,7 +71,6 @@
         {$t('account.menu.my_organization')}
     </button>
 
-
     <button
             type="button"
             class="flex items-center gap-x-2 px-8 py-4 text-red-600 hover:bg-red-50 transition-colors w-full justify-center cursor-pointer"
@@ -81,13 +82,6 @@
         <span class="text-base whitespace-nowrap">{$t('account.menu.delete_account')}</span>
     </button>
 </div>
-
-{#if activePage === 'debug'}
-    <div class="p-4 bg-gray-100 rounded mt-4 border border-gray-300 text-xs font-mono overflow-auto">
-        <p>UserFull Debug:</p>
-        <pre>{JSON.stringify(userFull, null, 2)}</pre>
-    </div>
-{/if}
 
 {#if showDeleteModal}
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">

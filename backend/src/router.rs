@@ -8,6 +8,7 @@ pub fn create_router(pool: MySqlPool) -> Router {
     let auth_routes = Router::new()
         .route("/login", post(auth_controller::login))
         .route("/inscription", post(auth_controller::inscription))
+        .route("/create_service", post(auth_controller::create_service))
         .route("/get-account", post(auth_controller::get_current_account))
         .route("/logout", post(auth_controller::logout));
 
@@ -20,10 +21,15 @@ pub fn create_router(pool: MySqlPool) -> Router {
         // Organization management
         .route("/join-organization", patch(account_controller::join_organization))
         .route("/leave-organization", post(account_controller::leave_organization))
+        .route("/delete-organization", post(account_controller::delete_organization))
         .route("/my-organization", get(account_controller::get_my_organization))
         .route("/organization/create", post(account_controller::create_organization))
         .route("/organization/members", post(account_controller::get_organisation_member))
+        .route("/organization/services", post(account_controller::get_organisation_services))
         .route("/organization/members/remove", post(account_controller::remove_organisation_member))
+        .route("/organization/services/delete", post(account_controller::delete_service))
+        .route("/organization/services/assign", post(account_controller::assign_user_to_service))
+        .route("/organization/services/unassign", post(account_controller::unassign_user_from_service))
         .route("/organization/update", patch(account_controller::update_organisation))
         // Equivalents
         .route("/equivalents", get(account_controller::get_account_all_equivalents).patch(account_controller::update_account_equivalents));

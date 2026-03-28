@@ -1,5 +1,11 @@
 {
   "hello": "Bonjour",
+  "common": {
+    "cancel": "Annuler",
+    "validate": "Valider",
+    "confirm": "Confirmer",
+    "warning": "Attention"
+  },
   "header": {
     "home": "Accueil",
     "my_data": "Mes données",
@@ -132,9 +138,46 @@
       "my_info": "Mon compte",
       "my_equivalents": "Mes équivalents",
       "my_organization": "Mon organisation",
+      "services": "Services",
       "manage_organization": "Gérer mon organisation",
       "delete_account": "Supprimer le compte",
       "delete_organization": "Supprimer l'organisation"
+    },
+    "service": {
+      "title": "Gestion des services",
+      "no_service": "Vous n'êtes rattaché à aucun service.",
+      "name_label": "Nom du service",
+      "leave_button": "Quitter le service",
+      "create_title": "Créer un nouveau service",
+      "create_button": "Créer",
+      "create_placeholder": "Nom du service",
+      "join_title": "Rejoindre un service",
+      "join_button": "Rejoindre",
+      "join_placeholder": "Sélectionnez un service",
+      "success_joined": "Service rejoint avec succès",
+      "success_left": "Vous avez quitté le service",
+      "list_title": "Liste des services de l'organisation",
+      "no_services": "Aucun service trouvé pour cette organisation.",
+      "name": "Nom du service",
+      "assign_member": "Assigner un membre",
+      "delete_service": "Supprimer le service",
+      "assign_modal": {
+        "title": "Assigner un membre",
+        "description_prefix": "Sélectionnez un membre à ajouter au service",
+        "member_label": "Membre",
+        "select_placeholder": "Choisir un membre...",
+        "move_suffix": "(Déplacer)"
+      },
+      "delete_modal": {
+        "confirmation_prefix": "Voulez-vous vraiment supprimer le service",
+        "warning_detail": "Cette action supprimera également le lien entre ce service et les utilisateurs associés."
+      },
+      "unassign_modal": {
+        "title": "Retirer du service",
+        "description_prefix": "Voulez-vous vraiment retirer",
+        "description_suffix": "de son service ?",
+        "confirm_button": "Retirer"
+      }
     },
     "info": {
       "title": "Mes informations",
@@ -501,24 +544,18 @@
     "validation_fields_required": "Prénom, nom et email requis",
     "validation_password_complexity": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (#?!@$%^&*-)",
     "validation_code_required": "Le code de l'organisation est requis",
-    "session_error": "Erreur de session",
-    "too_many_attempts": "Trop de tentatives, veuillez réessayer dans 15 minutes",
-    "org_change_error": "Erreur serveur lors du changement d'organisation",
-    "no_changes": "Aucune modification à effectuer",
-    "db_error": "Erreur base de données",
-    "org_not_found": "Organisation introuvable",
-    "org_name_exists": "Le nom de l'organisation est déjà utilisé",
-    "org_siret_exists": "Le SIRET est déjà utilisé",
-    "org_leave_error": "Erreur lors de la sortie de l'organisation",
-    "members_retrieval_error": "Erreur récupération membres",
-    "org_update_error": "Erreur mise à jour organisation",
-    "champ": "Tous les champs sont requis",
-    "match_password": "Les mots de passe ne correspondent pas",
-    "cgu": "You must accept the terms and conditions of use.",
-    "match_user": "Email et mot de passe requis",
     "validation_code_invalid": "Le code de l'organisation est invalide",
+    "validation_service_name_required": "Le nom du service est requis",
+    "service_not_in_organisation": "Ce service n'appartient pas à l'organisation spécifiée",
+    "service_not_found": "Le service demandé est introuvable",
+    "user_not_in_organisation": "L'utilisateur ne fait pas partie de l'organisation",
+    "server_champs": "Erreur serveur lors de la validation",
+    "cannot_assign_self": "Vous ne pouvez pas vous assigner vous-même",
+    "already_member": "Vous êtes déjà membre de cette organisation",
+    "org_exists": "Cette organisation est déjà enregistrée",
     "auth": {
       "unauthenticated": "Non authentifié",
+      "unauthenticated_org": "Vous n'êtes pas autorisé à gérer cette organisation",
       "email_exists": "Cet email est déjà utilisé",
       "hash_error": "Erreur de hashage du mot de passe",
       "connection_error": "Une erreur est survenue lors de la connexion",
@@ -526,13 +563,18 @@
       "user_retrieval_error": "Erreur récupération utilisateur",
       "email_verification_error": "Erreur vérification email",
       "registration_error": "Erreur d'inscription",
+      "insert_error": "Erreur lors de la création du compte",
       "org_creation_error": "Erreur création organisation",
       "user_creation_error": "Erreur création utilisateur",
+      "not_logged_in": "Vous n'êtes pas connecté",
+      "forbidden": "Accès interdit",
       "missing_fields": "Tous les champs sont requis"
-    }
+    },
+    "service_exists": "Un service avec ce nom existe déjà dans votre organisation."
   },
   "success": {
     "member_deleted": "Membre supprimé avec succès",
+    "user_assigned": "L'utilisateur a été assigné au service avec succès",
     "info_updated": "Vos informations ont été mises à jour avec succès",
     "org_joined": "Vous avez rejoint l'organisation avec succès.",
     "org_updated": "Les informations de l'organisation ont été mises à jour avec succès",
@@ -540,7 +582,8 @@
     "org_left": "Vous avez quitté l'organisation.",
     "org_changed": "Vous avez changé d'organisation avec succès.",
     "join_organization": "Vous avez rejoint l'organisation avec succès.",
-    "leave_organization": "Vous avez quitté l'organisation.\n"
+    "leave_organization": "Vous avez quitté l'organisation.",
+    "service_created": "Service créé avec succès"
   },
   "data": {
     "advice": {

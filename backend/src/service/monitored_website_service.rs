@@ -39,6 +39,33 @@ impl MonitoredWebsiteService {
         params: Option<LastPageConsultedInfos>,
     ) -> Result<LastPageConsultedResponse, Error> {
 
+        if let (Some(u_id), Some(infos)) = (user_id, &params) {
+            // Simple domain extraction
+            let domain = infos.url_full
+                .split("://")
+                .nth(1)
+                .unwrap_or(&infos.url_full)
+                .split('/')
+                .next()
+                .unwrap_or(&infos.url_full)
+                .to_string();
+
+            let website = MonitoredWebsite {
+                id: 0, // will be ignored on insert
+                url_domain: domain,
+                user_id: u_id,
+                queries_quantity: infos.queries_quantity as i64,
+                data_transferred: infos.data_transferred as i64,
+                resources: 0, // Default as it's missing in inputs
+                loading_time: infos.loading_time,
+                carbon_footprint: infos.carbon_footprint,
+                url_full: infos.url_full.clone(),
+                country: infos.country.clone(),
+            };
+
+            Self::save_monitored_website_data(pool, &website).await?;
+        }
+
         let last_search_info = match params {
             Some(infos) => Some(infos),
             None => match user_id {
@@ -90,8 +117,8 @@ impl MonitoredWebsiteService {
             .collect())
     }
 
-    pub async fn average_daily_carbon_footprint_for_organization(pool: &MySqlPool, org_id: i64) -> f64 {
-        MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(pool, org_id).await
+    pub async fn average_daily_carbon_footprint_for_organization(pool: &MySqlPool, org_id: i64, service_id: Option<i64>) -> f64 {
+        MonitoredWebsiteRepository::average_daily_carbon_footprint_for_organization(pool, org_id, service_id).await
     }
 
     pub async fn get_daily_consumption_by_user(
@@ -108,8 +135,8 @@ impl MonitoredWebsiteService {
             .collect())
     }
 
-    pub async fn total_organization_consumption(pool: &MySqlPool, org_id: i64) -> Result<Option<f64>, Error> {
-        MonitoredWebsiteRepository::total_organization_consumption(pool, org_id).await
+    pub async fn total_organization_consumption(pool: &MySqlPool, org_id: i64, service_id: Option<i64>) -> Result<Option<f64>, Error> {
+        MonitoredWebsiteRepository::total_organization_consumption(pool, org_id, service_id).await
     }
 
     pub async fn get_weekly_consumption_by_user(
