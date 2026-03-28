@@ -34,7 +34,6 @@ export const load: PageServerLoad = async ({ fetch, request, url }) => {
         }
 
         let query = url.searchParams.toString();
-        console.log("query: " + query);
         const response = await fetch(`${BACKEND_URL}/mon-organisation${query ? '?' + query : ''}`, {
             method: 'GET',
             headers: {
