@@ -102,13 +102,13 @@
 
     {#if showPasswordError}
         <div class="px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-            <p class="font-semibold mb-2">{$t('auth.login.password_requirements')}</p>
+            <p class="font-semibold mb-2">{$t('auth.register.password_requirements')}</p>
             <ul class="list-disc list-inside space-y-1 ml-1">
-                <li>{$t('auth.login.req_length')}</li>
-                <li>{$t('auth.login.req_uppercase')}</li>
-                <li>{$t('auth.login.req_lowercase')}</li>
-                <li>{$t('auth.login.req_number')}</li>
-                <li>{$t('auth.login.req_special')}</li>
+                <li>{$t('auth.register.req_length')}</li>
+                <li>{$t('auth.register.req_uppercase')}</li>
+                <li>{$t('auth.register.req_lowercase')}</li>
+                <li>{$t('auth.register.req_number')}</li>
+                <li>{$t('auth.register.req_special')}</li>
             </ul>
         </div>
     {/if}
