@@ -1,8 +1,17 @@
+use axum::extract::Query;
+use serde::Deserialize;
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct MoQuery {
+    pub org_id: Option<i64>,
+    pub service_id: Option<i64>,
+}
 use crate::dto::top_polluting_site_dto::TopPollutingSite;
 use crate::green_score::calculate_green_score;
 use crate::service::advice_service::AdviceService;
 use crate::service::equivalent_service::EquivalentService;
 use crate::service::organisation_service::OrganisationService;
+use crate::service::service_service::ServiceService;
 use crate::models::equivalent::Equivalent;
 use axum::extract::State;
 use axum::Json;
@@ -25,17 +34,33 @@ pub struct MyOrganizationResponse {
     pub weekly_consumption: Vec<ConsumptionDataPoint>,
     pub monthly_consumption: Vec<ConsumptionDataPoint>,
     pub top_polluting_sites: Vec<TopPollutingSite>,
+    pub is_admin: bool,
+    pub services: Option<Vec<crate::models::service::Service>>,
 }
 
 
-pub async fn mo(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): AuthenticatedUser) -> Result<Json<MyOrganizationResponse>, AppError> {
+pub async fn mo(
+    State(pool): State<MySqlPool>, 
+    Query(query): Query<MoQuery>,
+    AuthenticatedUser(user_full): AuthenticatedUser
+) -> Result<Json<MyOrganizationResponse>, AppError> {
 
-    let organization = user_full.organisation.first().ok_or(AppError::NotFound("User is not in an organization".to_string()))?;
+    let organization = if let Some(oid) = query.org_id {
+        user_full.organisation.iter().find(|o| o.id == oid).cloned().ok_or(AppError::NotFound("User is not in the specified organization".to_string()))?
+    } else {
+        user_full.organisation.first().cloned().ok_or(AppError::NotFound("User is not in an organization".to_string()))?
+    };
 
     let organization_id = organization.id;
     let user_id = user_full.user.id;
 
-    let organization_informations = OrganisationService::organization_informations(&pool, organization_id, user_id).await
+    let service_id = if organization.est_admin {
+        query.service_id
+    } else {
+        user_full.service.map(|s| s.id)
+    };
+
+    let organization_informations = OrganisationService::organization_informations(&pool, organization_id, user_id, service_id).await
         .map_err(AppError::from)?;
 
     let advices: Vec<String> = vec![
@@ -48,14 +73,22 @@ pub async fn mo(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): Aut
     let equivalents = EquivalentService::equivalent(&pool, Some(user_id), 2, organization_informations.total_consumption).await
         .ok();
 
-    let daily_consumption = OrganisationService::get_daily_organization_consumption(&pool, organization_id).await
+    let daily_consumption = OrganisationService::get_daily_organization_consumption(&pool, organization_id, service_id).await
         .map_err(AppError::from)?;
-    let weekly_consumption = OrganisationService::get_weekly_organization_consumption(&pool, organization_id).await
+    let weekly_consumption = OrganisationService::get_weekly_organization_consumption(&pool, organization_id, service_id).await
         .map_err(AppError::from)?;
-    let monthly_consumption = OrganisationService::get_monthly_organization_consumption(&pool, organization_id).await
+    let monthly_consumption = OrganisationService::get_monthly_organization_consumption(&pool, organization_id, service_id).await
         .map_err(AppError::from)?;
-    let top_polluting_sites = OrganisationService::get_top5_polluting_sites_by_organization(&pool, organization_id).await
+    let top_polluting_sites = OrganisationService::get_top5_polluting_sites_by_organization(&pool, organization_id, service_id).await
         .map_err(AppError::from)?;
+
+    let is_admin = organization.est_admin;
+
+    let services = if is_admin {
+        ServiceService::get_organisation_services(&pool, organization_id).await.ok()
+    } else {
+        None
+    };
 
     Ok(Json(MyOrganizationResponse {
         success: true,
@@ -67,6 +100,8 @@ pub async fn mo(State(pool): State<MySqlPool>, AuthenticatedUser(user_full): Aut
         daily_consumption,
         weekly_consumption,
         monthly_consumption,
-        top_polluting_sites
+        top_polluting_sites,
+        is_admin,
+        services,
     }))
 }

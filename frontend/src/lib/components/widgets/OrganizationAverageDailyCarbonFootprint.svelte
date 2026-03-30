@@ -36,7 +36,7 @@
             {#if equivalentAverage.icon}
             <div class="flex justify-center items-center w-full mt-4">
                 <picture class="w-12 h-12 flex items-center justify-center">
-                    <img src="/images/equivalents/{equivalentAverage.icon}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy" on:error={(e) => e.currentTarget.src = '/images/equivalent.png'}>
+                    <img src="/images/equivalents/{equivalentAverage.icon}" alt="{equivalentAverage.name}" class="w-full h-auto object-contain" loading="lazy" on:error={(e) => { const target = e.currentTarget; if(target instanceof HTMLImageElement) target.src = '/images/equivalent.png'; }}>
                 </picture>
             </div>
             {/if}

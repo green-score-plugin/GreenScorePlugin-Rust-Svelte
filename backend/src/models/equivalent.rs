@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow, PartialEq)]
 pub struct Equivalent {
     pub name: String,
     pub value: f64,

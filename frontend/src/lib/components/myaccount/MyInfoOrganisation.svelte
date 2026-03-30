@@ -1,7 +1,6 @@
 <script lang="ts">
     import { page } from "$app/state";
     import CodeClipboard from "$lib/components/CodeClipboard.svelte";
-    import type { Organisation } from "$lib/types/account";
     import { enhance } from '$app/forms';
     import { t } from 'svelte-i18n';
 

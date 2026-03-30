@@ -10,9 +10,8 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
     };
 
     let members = [];
-    let organisation = null;
-    let accountEquivalents = [];
     let services = [];
+    let accountEquivalents = [];
 
     const orgIdParam = url.searchParams.get('orgId');
     let targetOrgId = orgIdParam ? parseInt(orgIdParam) : null;
@@ -51,10 +50,13 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
                  } catch {}
             }
         }
-        organisation = targetOrg;
     }
 
-    const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, { method: 'GET', headers, credentials: 'include' });
+    const equivRes = await fetch(`${BACKEND_URL}/account/equivalents`, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+    });
     if (equivRes.ok) {
         try {
             const result = await equivRes.json();
@@ -64,10 +66,83 @@ export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
         } catch {}
     }
 
-    return { members, organisation, accountEquivalents, services };
+    return {
+        userFull: locals.user,
+        members,
+        services,
+        organisation: targetOrg,
+        accountEquivalents,
+        currentOrgId: targetOrgId
+    };
 };
 
-export const actions = {
+export const actions: Actions = {
+    updateAccount: async ({ request, fetch, cookies }) => {
+        try {
+            const data = await request.formData();
+            const payload = Object.fromEntries(data);
+
+            const res = await fetch(`${BACKEND_URL}/account/update`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                return fail(res.status, {
+                    actionType: 'update_info',
+                    message: 'errors.communication_error',
+                    params: { details: await res.text() }
+                });
+            }
+
+            const result = await res.json();
+
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                try {
+                    const sessionValue = (result.token ?? result.session ?? result.sessionValue) as
+                        | string
+                        | undefined
+                        | null;
+
+                    if (sessionValue) {
+                        await setSessionCookie(cookies, sessionValue);
+                    } else {
+                        await setSessionCookie(cookies, res);
+                    }
+                } catch (cookieError) {
+                    console.error('Erreur cookie:', cookieError);
+                }
+
+                return {
+                    actionType: 'update_info',
+                    success: true,
+                    message: 'success.info_updated'
+                };
+            } else {
+                return fail(400, {
+                    actionType: 'update_info',
+                    message: result.message ?? 'errors.update_error'
+                });
+            }
+        } catch (err) {
+            return fail(500, {
+                actionType: 'update_info',
+                message: 'errors.server_error',
+                params: { details: err instanceof Error ? err.message : 'errors.unknown_error' }
+            });
+        }
+    },
+
     supprimer: async ({ request, fetch }) => {
         try {
             const response = await fetch(`${BACKEND_URL}/account/delete`, {
@@ -129,7 +204,7 @@ export const actions = {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
                 },
-                body: JSON.stringify({ serviceId, organisationId })
+                body: JSON.stringify({ userId: serviceId, organisationId })
             });
 
             const result = await response.json();
@@ -617,6 +692,98 @@ export const actions = {
                 throw error;
             }
             return fail(500, { message: 'errors.server_error' });
+        }
+    },
+
+    deleteOrganisation: async ({ request, fetch, cookies }) => {
+        const formData = await request.formData();
+        const organisationId = formData.get('organisationId');
+
+        const res = await fetch(`${BACKEND_URL}/account/delete-organization`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': request.headers.get('cookie') || ''
+            },
+            credentials: 'include',
+            body: JSON.stringify({ organisationId })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            const currentToken = cookies.get('greenscoreweb_sessions');
+            if (currentToken) {
+                invalidateCache(currentToken);
+            }
+
+            try {
+                await setSessionCookie(cookies, res);
+            } catch (cookieError) {}
+
+            redirect(303, '?tab=organisation&action=new');
+        } else {
+            return fail(400, { success: false, message: data.message || 'Error deleting organisation' });
+        }
+    },
+
+    joinOrganisation: async ({ request, fetch, cookies }) => {
+        const data = await request.formData();
+        const codeOrganisation = data.get('codeOrganisation')?.toString().trim();
+
+        if (!codeOrganisation) {
+            return fail(400, { actionType: 'join_orga', message: "errors.validation_code_required" });
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/account/join-organization`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cookie': request.headers.get('cookie') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ code: codeOrganisation })
+            });
+
+            if (!response.ok) {
+                return fail(response.status, {
+                    actionType: 'join_orga',
+                    message: 'errors.validation_code_invalid'
+                });
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                const currentToken = cookies.get('greenscoreweb_sessions');
+                if (currentToken) {
+                    invalidateCache(currentToken);
+                }
+
+                const sessionValue = result.token ?? result.session ?? result.sessionValue;
+
+                if (sessionValue) {
+                    await setSessionCookie(cookies, sessionValue);
+                }
+
+                if (result.organisation_id) {
+                     redirect(303, `?tab=organisation&orgId=${result.organisation_id}`);
+                }
+
+                return {
+                    actionType: 'join_orga',
+                    success: true,
+                    message: 'success.join_organization'
+                };
+            } else {
+                return fail(400, { actionType: 'join_orga', message: result.message ?? 'errors.operation_error' });
+            }
+        } catch (error) {
+            if (error && typeof error === 'object' && ('status' in error || 'location' in error)) {
+                throw error;
+            }
+            return fail(500, { actionType: 'join_orga', message: 'errors.org_connection_error' });
         }
     }
 } satisfies Actions;

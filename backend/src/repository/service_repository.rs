@@ -59,8 +59,8 @@ impl ServiceRepository {
             r#"
             SELECT s.id, s.nom, s.id_organisation
             FROM service s
-            JOIN user u ON u.id_organisation = s.id_organisation
-            WHERE u.id = ?
+            JOIN organisation_user ou ON ou.organisation_id = s.id_organisation
+            WHERE ou.user_id = ?
             "#
         )
         .bind(user_id)
