@@ -8,6 +8,7 @@
   "corresponds_label": { "message": "This corresponds to:" },
   "no_data": { "message": "No data" },
   "more_details": { "message": "More details" },
+  "connected": { "message":  "You are connected !"},
   "save_result": { "message": "Do you want to save this result?" },
   "login": { "message": "Log in" },
   "negligible": { "message": "negligible" },
