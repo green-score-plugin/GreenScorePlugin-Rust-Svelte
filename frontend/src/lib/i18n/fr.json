@@ -106,6 +106,12 @@
       "loading": "Connexion...",
       "invalid_email": "Email invalide",
       "password_required": "Le mot de passe est requis",
+      "password_requirements": "Le mot de passe doit contenir :",
+      "req_length": "Au moins 8 caractères",
+      "req_uppercase": "Au moins une lettre majuscule",
+      "req_lowercase": "Au moins une lettre minuscule",
+      "req_number": "Au moins un chiffre",
+      "req_special": "Au moins un caractère spécial (#?!@$%^&*-)",
       "already_have_account": "J'ai déjà un compte",
       "register_link": "Inscription",
       "success_deleted": "Succès !",
@@ -698,3 +704,4 @@
     "12": "Décembre"
   }
 }
+
