@@ -37,11 +37,9 @@ pub async fn save_monitored_website_data(session: Session, State(pool): State<My
 
     let mut user_full: UserFull = session.get("user_full").await
         .map_err(|_| AppError::InternalServerError("Session error".to_string()))?
-        .ok_or(AppError::BadRequest("User not found in session".to_string()))?; // Keeping BadRequest as per original code, though Unauthorized might be better?
+        .ok_or(AppError::BadRequest("User not found in session".to_string()))?;
 
     let current = user_full.user.total_carbon_footprint;
-    // logic from original code. save_monitored_website_data returns Result<Option<f64>, Error>.
-    // If it fails, new_total_footprint is Err.
     let new_value = match new_total_footprint {
         Ok(Some(val)) => val,
         Ok(None) => current + monitored_website.carbon_footprint,
