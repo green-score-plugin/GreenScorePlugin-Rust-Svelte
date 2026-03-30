@@ -69,13 +69,13 @@
                    class="px-4 py-2 border rounded-lg w-full focus:outline-none {submitted && errors.password ? 'border-red-700 bg-red-50' : 'border-grey-200'}" placeholder={$t('auth.login.password_placeholder')}>
             {#if submitted && errors.password}
                 <div class="text-red-500 text-sm mt-1">
-                    <p class="font-semibold mb-1">{$t('auth.login.password_requirements')}</p>
+                    <p class="font-semibold mb-1">{$t('auth.register.password_requirements')}</p>
                     <ul class="list-disc list-inside space-y-0.5 ml-1">
-                        <li>{$t('auth.login.req_length')}</li>
-                        <li>{$t('auth.login.req_uppercase')}</li>
-                        <li>{$t('auth.login.req_lowercase')}</li>
-                        <li>{$t('auth.login.req_number')}</li>
-                        <li>{$t('auth.login.req_special')}</li>
+                        <li>{$t('auth.register.req_length')}</li>
+                        <li>{$t('auth.register.req_uppercase')}</li>
+                        <li>{$t('auth.register.req_lowercase')}</li>
+                        <li>{$t('auth.register.req_number')}</li>
+                        <li>{$t('auth.register.req_special')}</li>
                     </ul>
                 </div>
             {/if}
