@@ -171,11 +171,10 @@ function extractDomain(url) {
 
 async function getUserId() {
   try {
-    const cookies = await browser.cookies.getAll({
-      domain: CONFIG.BACKEND.DOMAIN,
+    const sessionCookie = await browser.cookies.get({
+      url: `${CONFIG.BACKEND.BASE_URL}/`,
+      name: "greenscoreweb_sessions",
     });
-
-    const sessionCookie = cookies.find((cookie) => cookie.name === "greenscoreweb_sessions");
 
     if (!sessionCookie) {
       console.log("Pas de cookie de session trouvé");
@@ -207,12 +206,13 @@ async function getUserId() {
     }
 
     const userData = await response.json();
+    const accountData = userData.account || userData.user_full || null;
 
-    userCache.data = userData.account;
+    userCache.data = accountData;
     userCache.timestamp = now;
     hasNotifiedExpiration = false; // Réinitialise si connexion réussie
 
-    return userData.account;
+    return accountData;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID:", error);
     if (userCache.data !== null && !hasNotifiedExpiration) {
@@ -743,7 +743,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const activeTab = tabs[0];
 
     // Vérification localhost
-    if (isLocalDomain(activeTab.url)) {
+    if (message.type !== "checkLoginStatus" && isLocalDomain(activeTab.url)) {
       await browser.runtime.sendMessage({
         type: "localhostDetected",
         message: "Vous êtes bien arrivé sur notre site ;)",
