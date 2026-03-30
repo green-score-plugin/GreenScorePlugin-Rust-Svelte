@@ -274,10 +274,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             const params = new URLSearchParams({
               country: response.country || "",
               url_full: response.urlFull || "",
-              totalConsu: gCO2eValue || 0,
-              pageSize: response.totalResourceSize || 0,
-              loadingTime: response.loadTime || 0,
-              queriesQuantity: response.totalRequests || 0,
+              carbon_footprint: gCO2eValue || 0,
+              data_transferred: response.totalResourceSize || 0,
+              loading_time: response.loadTime || 0,
+              queries_quantity: response.totalRequests || 0,
             });
             url += "?" + params.toString();
           }

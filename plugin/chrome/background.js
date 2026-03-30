@@ -22,11 +22,12 @@ let countryCache = {
 const CARBON_CACHE_TTL = 3600000; // 1 heure
 const carbonIntensityCache = new Map();
 
+// Flag pour éviter de spammer la notification
+let hasNotifiedExpiration = false;
 
-// Information nécessaire pour appeler les APIs
-const token = CONFIG.BACKEND.ELECTRICITY_MAP_API_KEY;
+const token  = CONFIG.BACKEND.ELECTRICITY_MAP_API_KEY;
 const carbonIntensityUrl =
-  "https://api.electricitymap.org/v3/carbon-intensity/latest";
+    "https://api.electricitymap.org/v3/carbon-intensity/latest";
 
 function getTabData(tabId) {
   if (!tabNetworkData.has(tabId)) {
@@ -167,14 +168,17 @@ function extractDomain(url) {
 
 async function getUserId() {
   try {
-    const cookies = await chrome.cookies.getAll({
-      domain: CONFIG.BACKEND.DOMAIN,
+    const sessionCookie = await chrome.cookies.get({
+      url: `${CONFIG.BACKEND.BASE_URL}/`,
+      name: "greenscoreweb_sessions",
     });
-
-    const sessionCookie = cookies.find((cookie) => cookie.name === "greenscoreweb_sessions");
 
     if (!sessionCookie) {
       console.log("Pas de cookie de session trouvé");
+      if (userCache.data !== null && !hasNotifiedExpiration) {
+        showSessionExpiredNotification();
+        hasNotifiedExpiration = true;
+      }
       userCache.data = null;
       return null;
     }
@@ -199,15 +203,32 @@ async function getUserId() {
     }
 
     const userData = await response.json();
+    // Compat backend: certains endpoints renvoient `user_full` au lieu de `account`.
+    const accountData = userData.account || userData.user_full || null;
 
-    userCache.data = userData.account;
+    userCache.data = accountData;
     userCache.timestamp = now;
+    hasNotifiedExpiration = false; // Réinitialise si connexion réussie
 
-    return userData.account;
+    return accountData;
   } catch (error) {
     console.error("Erreur lors de la récupération de l'ID:", error);
+    if (userCache.data !== null && !hasNotifiedExpiration) {
+      showSessionExpiredNotification();
+      hasNotifiedExpiration = true;
+    }
+    userCache.data = null;
     return null;
   }
+}
+
+function showSessionExpiredNotification() {
+  chrome.notifications.create({
+    type: "basic",
+    title: "Session Expirée",
+    message: "Votre session GreenScore a expiré. Veuillez vous reconnecter.",
+    iconUrl: chrome.runtime.getURL("assets/images/logo.png")
+  });
 }
 
 async function getUserData() {
@@ -689,7 +710,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return {
           success: true,
           equivalents: equivalents.map((eq) => ({
-            image: "../assets/images/equivalents/" + eq.icon,
+            image: "assets/images/equivalents/" + eq.icon,
             value: parseFloat(eq.value).toFixed(1),
             name: eq.name,
           })),
@@ -718,7 +739,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const activeTab = tabs[0];
 
     // Vérification localhost
-    if (isLocalDomain(activeTab.url)) {
+    // `checkLoginStatus` doit rester disponible même sur GreenScore pour déclencher get-account.
+    if (message.type !== "checkLoginStatus" && isLocalDomain(activeTab.url)) {
       await chrome.runtime.sendMessage({
         type: "localhostDetected",
         message: "Vous êtes bien arrivé sur notre site ;)",
