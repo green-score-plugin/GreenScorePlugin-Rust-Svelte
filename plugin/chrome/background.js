@@ -53,9 +53,6 @@ function isLocalDomain(url) {
   try {
     const hostname = new URL(url).hostname;
     return (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname === "[::1]" ||
       hostname === "greenscore.alwaysdata.net"
     );
   } catch (error) {
