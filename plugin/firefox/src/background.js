@@ -166,6 +166,22 @@ function extractDomain(url) {
   }
 }
 
+function resolveAccountData(payload) {
+  if (!payload || payload.success === false) {
+    return null;
+  }
+
+  return payload.account || payload.user_full || payload.user || null;
+}
+
+function resolveUserId(accountData) {
+  if (!accountData) {
+    return null;
+  }
+
+  return accountData.id ?? accountData.user?.id ?? null;
+}
+
 async function getUserId() {
   try {
     const sessionCookie = await browser.cookies.get({
@@ -203,7 +219,12 @@ async function getUserId() {
     }
 
     const userData = await response.json();
-    const accountData = userData.account || userData.user_full || null;
+    const accountData = resolveAccountData(userData);
+    const userId = resolveUserId(accountData);
+
+    if (!accountData || !userId) {
+      throw new Error("Invalid get-account payload");
+    }
 
     userCache.data = accountData;
     userCache.timestamp = now;
@@ -233,9 +254,11 @@ function showSessionExpiredNotification() {
 async function getUserData() {
   try {
     const userData = await getUserId();
+    const userId = resolveUserId(userData);
+
     return {
-      isLoggedIn: !!userData,
-      userId: userData ? userData.id : null,
+      isLoggedIn: !!userId,
+      userId,
     };
   } catch (error) {
     console.error(
@@ -267,8 +290,18 @@ async function processAndSendData(tabId, tabData, isFinal = false) {
   sendInProgress = true;
 
   try {
-    const { isLoggedIn, userId } = await getUserData();
-    if (!isLoggedIn || !userId) {
+    let isLoggedIn = false;
+    let userId = null;
+
+    if (userCache.data != null) {
+      userId = resolveUserId(userCache.data);
+      isLoggedIn = !!userId;
+
+    } else {
+      ({ isLoggedIn, userId } = await getUserData());
+    }
+
+    if ((!isLoggedIn || !userId) && userCache.data === null) {
       return;
     }
 
@@ -280,20 +313,20 @@ async function processAndSendData(tabId, tabData, isFinal = false) {
     const emissionsData = calculateCarbonEmissions(tabData);
 
     const dataToSend = {
-      tabId,
-      domain,
-      totalTransferredSize: tabData.totalTransferredSize,
-      totalResourceSize: tabData.totalResourceSize,
-      totalRequests: tabData.totalRequests,
-      totalEmissions: emissionsData.totalEmissions,
-      loadTime: (tabData.endTime - tabData.startTime) / 1000,
-      url: tabData.currentUrl,
-      country: tabData.country,
-      userId: userId,
-      carbonIntensity,
-      isFinal,
+      id: 0,
+      url_domain: domain,
+      user_id: userId,
+      queries_quantity: tabData.totalRequests || 0,
+      data_transferred: tabData.totalTransferredSize || 0,
+      resources: tabData.totalResourceSize || 0,
+      loading_time:
+          tabData.startTime && tabData.endTime
+              ? (tabData.endTime - tabData.startTime) / 1000
+              : 0,
+      carbon_footprint: emissionsData.totalEmissions || 0,
+      url_full: tabData.currentUrl || "",
+      country: tabData.country || "Unknown",
     };
-
     await sendDataToServer(dataToSend);
     lastSendTime = now;
   } catch (error) {
