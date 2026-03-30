@@ -1,4 +1,4 @@
-from locust import HttpUser, task, between, events
+from locust import HttpUser, task, between
 import random
 import uuid
 import json
@@ -10,10 +10,22 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class GreenScoreUser(HttpUser):
     wait_time = between(1, 5)
 
+    def mark_expected_status(self, response, expected_statuses, action_name):
+        """Mark request success only for explicit expected statuses; 5xx is always a failure."""
+        if response.status_code in expected_statuses:
+            response.success()
+            return
+        if response.status_code >= 500:
+            response.failure(f"{action_name} server error {response.status_code}: {response.text[:180]}")
+            return
+        response.failure(f"{action_name} unexpected status {response.status_code}: {response.text[:180]}")
+
     def on_start(self):
         """Called when a User starts running."""
         self.user_id = None
         self.organisation_id = None
+        self.service_ids = []
+        self.organization_member_ids = []
         self.equivalent_ids = []
         self.email = f"user_{uuid.uuid4()}@example.com"
         self.password = "password123"
@@ -65,6 +77,10 @@ class GreenScoreUser(HttpUser):
                             self.organisation_id = data["user_full"]["organisation"][0]["id"]
                         else:
                             self.organisation_id = None
+                            self.organization_member_ids = []
+                        services = data.get("services") or []
+                        if isinstance(services, list):
+                            self.service_ids = [service["id"] for service in services if "id" in service]
                 except json.JSONDecodeError:
                     response.fail("Invalid JSON response from get-account")
             else:
@@ -73,7 +89,8 @@ class GreenScoreUser(HttpUser):
 
     @task(3)
     def view_advice(self):
-        self.client.get("/home/advice")
+        with self.client.get("/home/advice", catch_response=True) as response:
+            self.mark_expected_status(response, {200}, "view_advice")
 
     @task(3)
     def calculate_equivalent(self):
@@ -83,7 +100,8 @@ class GreenScoreUser(HttpUser):
             "gCO2": gco2,
             "count": 3
         }
-        self.client.post("/plugin/equivalent", json=payload)
+        with self.client.post("/plugin/equivalent", json=payload, catch_response=True) as response:
+            self.mark_expected_status(response, {200}, "calculate_equivalent")
 
     @task(5)
     def save_website_data(self):
@@ -107,7 +125,8 @@ class GreenScoreUser(HttpUser):
             "country": "FR"
         }
 
-        self.client.post("/plugin/save_monitored_website_data", json=payload)
+        with self.client.post("/plugin/save_monitored_website_data", json=payload, catch_response=True) as response:
+            self.mark_expected_status(response, {200}, "save_website_data")
 
     @task(2)
     def view_dashboard_pages(self):
@@ -115,7 +134,8 @@ class GreenScoreUser(HttpUser):
             return
 
         # These are the protected pages
-        self.client.get("/mes-donnees")
+        with self.client.get("/mes-donnees", catch_response=True) as response:
+            self.mark_expected_status(response, {200}, "view_mes_donnees")
 
         # Last Page Consulted (requires query params usually)
         # Note: /derniere-page-consultee maps to lpc_controller::lpc
@@ -128,7 +148,8 @@ class GreenScoreUser(HttpUser):
             "loading_time": 1.2,
             "country": "US"
         }
-        self.client.get("/derniere-page-consultee", params=params)
+        with self.client.get("/derniere-page-consultee", params=params, catch_response=True) as response:
+            self.mark_expected_status(response, {200}, "view_derniere_page_consultee")
 
     @task(1)
     def view_organization(self):
@@ -137,10 +158,7 @@ class GreenScoreUser(HttpUser):
 
         # This will fail if user is not in organization, so catch 404/500
         with self.client.get("/mon-organisation", catch_response=True) as response:
-            if response.status_code == 404: # "User is not in an organization"
-                response.success()
-            elif response.status_code == 200:
-                response.success()
+            self.mark_expected_status(response, {200, 404}, "view_mon_organisation")
 
     @task(2)
     def view_equivalents(self):
@@ -159,10 +177,22 @@ class GreenScoreUser(HttpUser):
             else:
                 response.failure(f"Get equivalents failed: {response.status_code}")
 
-    # Logout removed to prevent session invalidation during test loop
-    # @task(1)
-    # def logout(self):
-    #    self.client.post("/auth/logout")
+    @task(1)
+    def logout_and_relogin(self):
+        if not self.user_id:
+            return
+
+        with self.client.post("/auth/logout", catch_response=True) as response:
+            if response.status_code == 200:
+                response.success()
+                self.user_id = None
+                self.organisation_id = None
+                self.service_ids = []
+                self.login()
+            elif response.status_code in [401, 403]:
+                response.success()
+            else:
+                response.failure(f"Logout failed: {response.status_code}")
 
     @task(1)
     def update_account(self):
@@ -173,7 +203,8 @@ class GreenScoreUser(HttpUser):
             "prenom": f"User{random.randint(1001, 2000)}",
             "nom": f"Updated{random.randint(1, 1000)}"
         }
-        self.client.patch("/account/update", json=payload)
+        with self.client.patch("/account/update", json=payload, catch_response=True) as response:
+            self.mark_expected_status(response, {200}, "update_account")
 
     @task(1)
     def delete_account(self):
@@ -183,6 +214,8 @@ class GreenScoreUser(HttpUser):
         with self.client.delete("/account/delete", catch_response=True) as response:
             if response.status_code == 200:
                 self.user_id = None # User deleted
+                self.organisation_id = None
+                self.service_ids = []
             else:
                  response.failure(f"Delete failed: {response.status_code}")
 
@@ -192,10 +225,11 @@ class GreenScoreUser(HttpUser):
             return
         payload = {"code": "TESTCODE"}
         with self.client.patch("/account/join-organization", json=payload, catch_response=True) as response:
-             if response.status_code == 400: # Invalid code or already joined
+             if response.status_code == 200:
                  response.success()
-             elif response.status_code == 200:
                  self.get_account_info() # Refresh to get org id
+             else:
+                 self.mark_expected_status(response, {400}, "join_organization")
 
     @task(1)
     def leave_organization(self):
@@ -206,10 +240,27 @@ class GreenScoreUser(HttpUser):
         with self.client.post("/account/leave-organization", json=payload, catch_response=True) as response:
              if response.status_code == 200:
                  self.organisation_id = None
+                 self.service_ids = []
              elif response.status_code == 400: # Not in org
                  response.success()
              else:
                  response.failure(f"Leave org failed: {response.status_code}")
+
+    @task(1)
+    def delete_organization(self):
+        if not self.user_id or not self.organisation_id:
+            return
+
+        payload = {"organisationId": self.organisation_id}
+        with self.client.post("/account/delete-organization", json=payload, catch_response=True) as response:
+            if response.status_code == 200:
+                response.success()
+                self.organisation_id = None
+                self.service_ids = []
+            elif response.status_code in [400, 401, 403]:
+                response.success()
+            else:
+                response.failure(f"Delete organization failed: {response.status_code}")
 
     @task(1)
     def my_organization(self):
@@ -229,9 +280,34 @@ class GreenScoreUser(HttpUser):
         payload = {"organization_name": f"Org{random.randint(1, 10000)}", "siret": str(random.randint(10000000000000, 99999999999999))}
         with self.client.post("/account/organization/create", json=payload, catch_response=True) as response:
              if response.status_code == 200:
-                 self.get_account_info() # Refresh
-             elif response.status_code == 400: # Siret exists
                  response.success()
+                 self.get_account_info() # Refresh
+             else:
+                 self.mark_expected_status(response, {400}, "create_organization")
+
+    @task(1)
+    def create_service(self):
+        if not self.user_id or not self.organisation_id:
+            return
+
+        payload = {
+            "service_name": f"Service{random.randint(1, 10000)}",
+            "organisation_id": self.organisation_id,
+        }
+        with self.client.post("/auth/create_service", json=payload, catch_response=True) as response:
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    services = data.get("services") or []
+                    if isinstance(services, list):
+                        self.service_ids = [service["id"] for service in services if "id" in service]
+                    response.success()
+                except Exception:
+                    response.failure("Failed to parse create service response")
+            elif response.status_code in [400, 401, 403]:
+                response.success()
+            else:
+                response.failure(f"Create service failed: {response.status_code}")
 
     @task(1)
     def get_organisation_members(self):
@@ -241,20 +317,95 @@ class GreenScoreUser(HttpUser):
         with self.client.post("/account/organization/members", json=payload, catch_response=True) as response:
             if response.status_code == 200:
                 response.success()
-            elif response.status_code in [401, 403, 400]: # Not in org or unauthenticated logic
+                try:
+                    data = response.json()
+                    members = data.get("members") or []
+                    if isinstance(members, list):
+                        self.organization_member_ids = [m["id"] for m in members if m.get("id") != self.user_id]
+                except Exception:
+                    self.organization_member_ids = []
+            else:
+                self.mark_expected_status(response, {400, 401, 403}, "get_organisation_members")
+
+    @task(1)
+    def get_organisation_services(self):
+        if not self.user_id:
+            return
+
+        payload = {"organisation_id": self.organisation_id} if self.organisation_id else {}
+        with self.client.post("/account/organization/services", json=payload, catch_response=True) as response:
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    services = data.get("services") or []
+                    if isinstance(services, list):
+                        self.service_ids = [service["id"] for service in services if "id" in service]
+                    response.success()
+                except Exception:
+                    response.failure("Failed to parse services response")
+            elif response.status_code in [400, 401, 403]:
                 response.success()
             else:
-                response.failure(f"Get members failed: {response.status_code}")
+                response.failure(f"Get services failed: {response.status_code}")
 
     @task(1)
     def remove_organisation_member(self):
-        if not self.user_id or not self.organisation_id:
+        if not self.user_id or not self.organisation_id or not self.organization_member_ids:
             return
-        payload = {"userId": self.user_id, "organisationId": self.organisation_id}
-        # Expect error when removing self
+        payload = {
+            "userId": random.choice(self.organization_member_ids),
+            "organisationId": self.organisation_id,
+        }
         with self.client.post("/account/organization/members/remove", json=payload, catch_response=True) as response:
-             if response.status_code in [400, 500]: # Cannot remove self
+             if response.status_code == 200:
                  response.success()
+                 self.get_organisation_members()
+             else:
+                 self.mark_expected_status(response, {400, 401, 403}, "remove_organisation_member")
+
+    @task(1)
+    def assign_user_to_service(self):
+        if not self.user_id or not self.organisation_id or not self.service_ids or not self.organization_member_ids:
+            return
+
+        payload = {
+            "serviceId": random.choice(self.service_ids),
+            "userId": random.choice(self.organization_member_ids),
+            "organisationId": self.organisation_id,
+        }
+        with self.client.post("/account/organization/services/assign", json=payload, catch_response=True) as response:
+            self.mark_expected_status(response, {200, 400, 401, 403}, "assign_user_to_service")
+
+    @task(1)
+    def unassign_user_from_service(self):
+        if not self.user_id or not self.organisation_id or not self.organization_member_ids:
+            return
+
+        payload = {
+            "userId": random.choice(self.organization_member_ids),
+            "organisationId": self.organisation_id,
+        }
+        with self.client.post("/account/organization/services/unassign", json=payload, catch_response=True) as response:
+            self.mark_expected_status(response, {200, 400, 401, 403}, "unassign_user_from_service")
+
+    @task(1)
+    def delete_service(self):
+        if not self.user_id or not self.organisation_id or not self.service_ids:
+            return
+
+        service_id = random.choice(self.service_ids)
+        payload = {
+            "serviceId": service_id,
+            "organisationId": self.organisation_id,
+        }
+        with self.client.post("/account/organization/services/delete", json=payload, catch_response=True) as response:
+            if response.status_code == 200:
+                self.service_ids = [sid for sid in self.service_ids if sid != service_id]
+                response.success()
+            elif response.status_code in [400, 401, 403]:
+                response.success()
+            else:
+                response.failure(f"Delete service failed: {response.status_code}")
 
     @task(1)
     def update_organisation(self):
@@ -295,4 +446,5 @@ class GreenScoreUser(HttpUser):
     def plugin_get_account(self):
         if not self.user_id:
             return
-        self.client.post("/plugin/get-account")
+        with self.client.post("/plugin/get-account", catch_response=True) as response:
+            self.mark_expected_status(response, {200}, "plugin_get_account")
