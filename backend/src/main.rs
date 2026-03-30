@@ -13,6 +13,7 @@ use tower_http::trace::TraceLayer;
 async fn main() {
     dotenvy::dotenv().ok();
 
+    #[cfg(feature = "tokio-console")]
     console_subscriber::init();
 
     let backend_url = env::var("BACKEND_URL").unwrap_or("localhost:3000".to_string());
