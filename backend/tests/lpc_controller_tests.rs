@@ -1,10 +1,11 @@
 use backend::controllers::lpc_controller;
-use backend::dto::lpc_dto::{LastPageConsultedInfos};
+use backend::dto::lpc_dto::{LastPageConsultedInfos, LastPageConsultedQuery};
 use backend::dto::user_full::UserFull;
 use backend::models::user::User;
-use backend::middleware::auth::AuthenticatedUser;
 use axum::extract::{Query, State};
 use sqlx::{MySqlPool};
+use std::sync::Arc;
+use tower_sessions::{MemoryStore, Session};
 
 fn create_dummy_user_full(id: i64) -> UserFull {
     UserFull {
@@ -24,7 +25,8 @@ fn create_dummy_user_full(id: i64) -> UserFull {
 #[sqlx::test]
 async fn devrait_retourner_succes_et_enregistrer_donnees_pour_lpc(pool: MySqlPool) {
     // GIVEN
-    let authenticated_user = AuthenticatedUser(create_dummy_user_full(1));
+    let session = Session::new(None, Arc::new(MemoryStore::default()), None);
+    session.insert("user_full", create_dummy_user_full(1)).await.unwrap();
 
     let params = LastPageConsultedInfos {
         url_full: "https://example.com/page".to_string(),
@@ -38,8 +40,15 @@ async fn devrait_retourner_succes_et_enregistrer_donnees_pour_lpc(pool: MySqlPoo
     // WHEN
     let result = lpc_controller::lpc(
         State(pool.clone()),
-        authenticated_user,
-        Query(params.clone()),
+        session,
+        Query(LastPageConsultedQuery {
+            url_full: Some(params.url_full.clone()),
+            queries_quantity: Some(params.queries_quantity),
+            carbon_footprint: Some(params.carbon_footprint),
+            data_transferred: Some(params.data_transferred),
+            loading_time: Some(params.loading_time),
+            country: Some(params.country.clone()),
+        }),
     ).await;
 
     // THEN
@@ -63,4 +72,23 @@ async fn devrait_retourner_succes_et_enregistrer_donnees_pour_lpc(pool: MySqlPoo
         .await
         .unwrap_or(0);
     assert_eq!(count, 1, "Devrait avoir inséré un enregistrement dans monitored_websites");
+}
+
+#[sqlx::test]
+async fn ne_doit_pas_retourner_400_quand_la_query_est_absente(pool: MySqlPool) {
+    // GIVEN
+    let session = Session::new(None, Arc::new(MemoryStore::default()), None);
+    session.insert("user_full", create_dummy_user_full(1)).await.unwrap();
+
+    // WHEN
+    let result = lpc_controller::lpc(
+        State(pool),
+        session,
+        Query(LastPageConsultedQuery::default()),
+    ).await;
+
+    // THEN
+    assert!(result.is_ok(), "Le contrôleur devrait accepter une query absente");
+    let response = result.unwrap().0;
+    assert!(response.success, "La réponse devrait indiquer un succès");
 }
