@@ -1,8 +1,18 @@
 import type { PageServerLoad } from './$types';
 import { BACKEND_URL, ELECTRICITY_MAP_API_KEY } from "$lib/config.ts";
 
+const emptyPagePayload = {
+    pageData: null,
+    adviceUser: '',
+    adviceDev: '',
+    letterGreenScore: '',
+    envNomination: '',
+    equivalents: []
+};
+
 export const load: PageServerLoad = async ({ fetch, request, url }) => {
     try {
+
         let backendUrl = `${BACKEND_URL}/derniere-page-consultee`;
 
         if (url.searchParams.toString()) {
@@ -17,17 +27,22 @@ export const load: PageServerLoad = async ({ fetch, request, url }) => {
             },
             credentials: 'include'
         });
-        const result = await response.json();
 
+        let result;
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Réponse backend non-OK:', response.status, errorText);
+            return emptyPagePayload;
+        }
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            const errorText = await response.text();
+            console.error('Réponse backend non JSON:', jsonError, errorText);
+            return emptyPagePayload;
+        }
         if (!result.success) {
-            return {
-                pageData: null,
-                adviceUser: '',
-                adviceDev: '',
-                letterGreenScore: '',
-                envNomination: '',
-                equivalents: []
-            };
+            return emptyPagePayload;
         }
 
         // Récupérer le code ISO et le drapeau
@@ -70,7 +85,7 @@ export const load: PageServerLoad = async ({ fetch, request, url }) => {
 
         return {
             pageData: {
-                link: result.lpc_infos?.link || null,
+                link: result.lpc_infos?.url_full || null,
                 letterGreenScore: 'A',
                 country: country || 'Inconnu',
                 carbonFootprint: result.lpc_infos?.carbon_footprint || 0,
@@ -88,13 +103,6 @@ export const load: PageServerLoad = async ({ fetch, request, url }) => {
         };
     } catch (error) {
         console.error('Erreur lors de la récupération des données :', error);
-        return {
-            pageData: null,
-            adviceUser: '',
-            adviceDev: '',
-            letterGreenScore: '',
-            envNomination: '',
-            equivalents: []
-        };
+        return emptyPagePayload;
     }
 }
