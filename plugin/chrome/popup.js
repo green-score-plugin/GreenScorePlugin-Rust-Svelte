@@ -100,7 +100,7 @@ async function updateEquivalents() {
           const card = cards[index];
           const img = card.querySelector("img");
           const valueElement = card.querySelector("p.text-xl");
-          const description = card.querySelector("p.text-xs");
+          const description = card.querySelector("p.text-sm");
 
           img.src = equivalent.image || "../assets/images/default.svg";
           valueElement.textContent = equivalent.value;
