@@ -37,7 +37,7 @@
 
     <div class="flex flex-col gap-1">
         <h2 class="text-2xl font-bold font-outfit text-gray-900">{$t('account.service.title')}</h2>
-        <p class="text-sm text-gray-500">Ajoutez les services de votre organisation pour suivre leur empreinte carbone.</p>
+        <p class="text-sm text-gray-500">{$t('account.service.description')}</p>
     </div>
 
     {#if successMessage}

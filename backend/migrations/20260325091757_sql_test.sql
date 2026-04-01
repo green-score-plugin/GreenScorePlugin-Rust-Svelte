@@ -250,14 +250,23 @@ INSERT INTO `service` (`id`, `nom`, `id_organisation`) VALUES
 
 INSERT INTO `user` (`id`, `organisation_id`, `service_id`, `email`, `password`, `first_name`, `last_name`, `est_admin`, `total_carbon_footprint`) VALUES
 (1, 1, 1, 'test@example.com', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Test', 'User', 0, 100.0),
-(2, NULL, NULL, 'test_default@example.com', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Default', 'User', 0, 0.0);
+(2, NULL, NULL, 'test_default@example.com', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Default', 'User', 0, 0.0),
+(3, 1, 1, 'test_org_agg@example.com', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Agg', 'User', 0, 0.0),
+(4, NULL, NULL, 'test_global_avg_seed@example.com', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'Global', 'Seed', 0, 0.0);
 
 INSERT INTO `organisation_user` (`user_id`, `organisation_id`, `est_admin`) VALUES
-(1, 1, 0);
+(1, 1, 0),
+(3, 1, 0);
 
 INSERT INTO `user_equivalent` (`user_id`, `equivalent_id`) VALUES
 (1, 1),
-(1, 3);
+(1, 3),
+(3, 2);
+
+INSERT INTO `monitored_website` (`user_id`, `url_domain`, `carbon_footprint`, `creation_date`) VALUES
+(3, NULL, 4000.0, DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
+(4, NULL, -3970.0, DATE_SUB(CURDATE(), INTERVAL 1 DAY)),
+(4, NULL, -15.0, CURDATE());
 
 --
 -- Contraintes pour les tables déchargées

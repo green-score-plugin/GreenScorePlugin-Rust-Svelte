@@ -122,6 +122,7 @@
       "firstname_required": "First name required.",
       "lastname_required": "Last name required.",
       "org_name": "Organization Name",
+      "org_name_placeholder": "My organization",
       "org_name_required": "Name required.",
       "siret": "SIRET Number (optional)",
       "confirm_password": "Confirmation",
@@ -151,6 +152,7 @@
     },
     "service": {
       "title": "Service Management",
+      "description": "Add your organization's services to track their carbon footprint.",
       "no_service": "You are not attached to any service.",
       "name_label": "Service Name",
       "leave_button": "Leave Service",
@@ -207,11 +209,14 @@
     "organization": {
       "title": "Organization",
       "name_label": "Organization Name",
+      "name_placeholder": "Organization name",
+      "siret_placeholder": "Your SIRET",
       "code_label": "Organization Code",
       "code_unknown": "Unknown",
       "leave_button": "Leave",
       "change_button": "Change Organization",
       "join_button": "Join",
+      "join_create_option": "+ Join / Create",
       "join_loading": "Loading...",
       "code_placeholder": "Enter organization code",
       "code_help": "Please enter the 8-character code sent by your organization",
@@ -220,6 +225,20 @@
       "finish_button": "Finish",
       "or": "or",
       "create_button": "Create my organization"
+    },
+    "members": {
+      "title": "Members",
+      "search_placeholder": "Search for a member",
+      "admin_badge": "Admin",
+      "unassign_title": "Click to remove from service",
+      "unassign_aria": "Remove from service",
+      "delete_aria": "Delete member",
+      "empty_state": "You have not added any members yet..."
+    },
+    "delete_org": {
+      "title": "Delete organization",
+      "confirmation": "Are you sure you want to delete the organization {orgName}?",
+      "warning": "This action is irreversible and will delete all associated data."
     },
     "modals": {
       "leave_org_confirm_title": "Confirmation",
@@ -489,7 +508,7 @@
       "no_data_period": "No data available for this period"
     },
     "top_polluting_sites": {
-        "title": "Top 5 most polluting sites",
+        "title": "Top 5 most visited high-carbon-footprint websites",
         "chart_label": "Carbon footprint (gCO2e)"
     },
     "equivalent": {

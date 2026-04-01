@@ -101,14 +101,14 @@
 </script>
 
 <div class="flex flex-col gap-4">
-    <h1 class="font-outfit text-2xl font-semibold">Membres</h1>
+    <h1 class="font-outfit text-2xl font-semibold">{$t('account.members.title')}</h1>
 
     {#if members.length > 0}
         <div class="w-full font-outfit">
             <div class="mb-4">
                 <input
                         type="search"
-                        placeholder="Rechercher un membre"
+                        placeholder={$t('account.members.search_placeholder')}
                         bind:value={query}
                         class="w-full px-3 py-2 border border-grey-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gs-green-950"
                 >
@@ -128,8 +128,8 @@
                                         <button
                                             type="button"
                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200 cursor-pointer hover:bg-red-100 hover:text-red-800"
-                                            title="Cliquer pour retirer du service"
-                                            aria-label="Retirer du service"
+                                            title={$t('account.members.unassign_title')}
+                                            aria-label={$t('account.members.unassign_aria')}
                                             onclick={() => {
                                                 showUnassignModal = true;
                                                 unassignMemberId = member.id;
@@ -144,17 +144,17 @@
                                     {:else}
                                         <span
                                             class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200"
-                                            title="admin"
+                                            title={$t('account.members.admin_badge')}
                                         >
-                                            Admin
+                                            {$t('account.members.admin_badge')}
                                         </span>
                                     {/if}
                                 {:else if user.id === member.id}
                                     <span
                                         class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 transition-colors duration-200"
-                                        title="admin"
+                                        title={$t('account.members.admin_badge')}
                                     >
-                                        Admin
+                                        {$t('account.members.admin_badge')}
                                     </span>
                                 {/if}
                             </p>
@@ -163,7 +163,7 @@
                         {#if user.id !== member.id}
                             <button
                                     class="hover:scale-110 transition-transform duration-200 text-red-600 p-1 cursor-pointer"
-                                    aria-label="Delete"
+                                    aria-label={$t('account.members.delete_aria')}
                                     onclick={() => { showDeleteModal = true; deletingMemberId = member.id; }}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="1.5em" height="1.5em" viewBox="0 0 24 24">
@@ -183,7 +183,7 @@
         </div>
     {:else}
         <div class="flex flex-col gap-4">
-            <p class="text-sm text-gray-500">Vous n'avez pas encore ajouté de membres...</p>
+            <p class="text-sm text-gray-500">{$t('account.members.empty_state')}</p>
             <CodeClipboard code={organisation.code} />
         </div>
     {/if}

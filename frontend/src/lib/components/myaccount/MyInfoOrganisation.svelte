@@ -89,7 +89,7 @@
                     type="text"
                     bind:value={organisation.nom}
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none"
-                    placeholder="Nom de l'organisation"
+                    placeholder={$t('account.organization.name_placeholder')}
             />
         </div>
     </div>
@@ -104,7 +104,7 @@
                     name="siret"
                     type="text"
                     class="px-4 py-2 border border-grey-200 rounded-lg w-full focus:outline-none {submitted && errors.siret ? 'border-red-700 bg-red-50' : 'border-grey-200'}"
-                    placeholder="Votre SIRET"
+                    placeholder={$t('account.organization.siret_placeholder')}
             />
             {#if submitted && errors.siret} <span class="text-red-500 text-xs mt-0.5 block">{$t('errors.validation_siret_format')}</span> {/if}
         </div>
