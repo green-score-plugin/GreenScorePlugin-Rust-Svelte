@@ -33,7 +33,8 @@ jobs:
           set -euo pipefail
           npm ci
           npm run build
-          tar -czf ../frontend_deploy.tar.gz build/ package.json package-lock.json
+          npm prune --omit=dev
+          tar -czf ../frontend_deploy.tar.gz build/ node_modules/ package.json package-lock.json
 
       # --- DÉPLOIEMENT ---
       - name: Prepare artifacts for deployment
@@ -66,12 +67,11 @@ jobs:
             APP_DIR="/home/greenscore/www/app"
             
             # 1. Gestion du FRONTEND
-            # Remove old build files
-            rm -rf "$APP_DIR/frontend/build"
+            # Remove previous frontend runtime files before extracting the new artifact
+            rm -rf "$APP_DIR/frontend/build" "$APP_DIR/frontend/node_modules"
             
             cd "$APP_DIR/frontend/"
             tar -xzf frontend_deploy.tar.gz
-            npm ci --omit=dev
             rm frontend_deploy.tar.gz
             
             # 2. Gestion du BACKEND
