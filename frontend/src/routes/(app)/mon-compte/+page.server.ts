@@ -204,10 +204,11 @@ export const actions: Actions = {
                     'Content-Type': 'application/json',
                     'Cookie': request.headers.get('cookie') || ''
                 },
-                body: JSON.stringify({ userId: serviceId, organisationId })
+                body: JSON.stringify({ serviceId, organisationId })
             });
 
             const result = await response.json();
+
 
             if (result.success) {
                 return { success: true, message: 'success.service_deleted', actionType: 'delete_service' };
