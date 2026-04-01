@@ -25,7 +25,10 @@ impl OrganisationService {
         let average_daily_carbon_footprint: f64 = MonitoredWebsiteService::average_daily_carbon_footprint_for_organization(pool, orga_id, service_id).await;
         let total_consumption: f64 = MonitoredWebsiteService::total_organization_consumption(pool, orga_id, service_id).await.unwrap_or(None).unwrap_or(0.0);
 
-        let equivalent = EquivalentService::equivalent(pool, Some(user_id), 1, total_consumption).await.ok().and_then(|mut v| v.pop());
+        let equivalent = EquivalentService::equivalent(pool, Some(user_id), 1, average_daily_carbon_footprint)
+            .await
+            .ok()
+            .and_then(|mut v| v.pop());
 
         Ok(MyOrganizationInfos {
             name,

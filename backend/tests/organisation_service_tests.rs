@@ -31,6 +31,25 @@ mod tests {
         assert!(infos.total_consumption >= 0.0);
     }
 
+    #[sqlx::test]
+    async fn equivalent_mo_infos_doit_etre_base_sur_moyenne_journaliere(pool: MySqlPool) {
+        // GIVEN
+        let org_id = 1;
+        let user_id = 3;
+
+        // WHEN
+        let infos = OrganisationService::organization_informations(&pool, org_id, user_id, None).await.unwrap();
+        let equivalent = infos.equivalent.expect("Un equivalent doit etre present");
+
+        // THEN
+        assert_eq!(infos.average_daily_carbon_footprint, 2000.0);
+        assert_eq!(infos.total_consumption, 4000.0);
+        assert_eq!(equivalent.name, "data.equivalent.paris_londres");
+        assert_eq!(equivalent.icon, "train-paris-londres.png");
+        assert_eq!(equivalent.value, 1.46);
+        assert_ne!(equivalent.value, 2.92);
+    }
+
     #[tokio::test]
     async fn devrait_generer_code_organisation() {
         // WHEN
