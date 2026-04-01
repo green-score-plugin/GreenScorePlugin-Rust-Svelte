@@ -508,7 +508,7 @@
       "no_data_period": "No data available for this period"
     },
     "top_polluting_sites": {
-        "title": "Top 5 most polluting sites",
+        "title": "Top 5 most visited high-carbon-footprint websites",
         "chart_label": "Carbon footprint (gCO2e)"
     },
     "equivalent": {

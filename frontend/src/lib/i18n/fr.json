@@ -519,7 +519,7 @@
       "no_data_period": "Aucune donnée disponible pour cette période"
     },
     "top_polluting_sites": {
-        "title": "Top 5 des sites les plus polluants",
+        "title": "Top 5 des sites visités ayant la plus forte empreinte carbone",
         "chart_label": "Empreinte carbone (gCO2e)"
     },
     "equivalent": {
