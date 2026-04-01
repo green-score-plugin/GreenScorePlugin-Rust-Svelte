@@ -88,7 +88,7 @@
                                         {org.nom} {org.est_admin ? '(Admin)' : ''}
                                     </option>
                                 {/each}
-                                <option value="new" selected={isCreatingOrg}>+ Rejoindre / Créer</option>
+                                <option value="new" selected={isCreatingOrg}>{$t('account.organization.join_create_option')}</option>
                             </select>
 
                              {#if selectedOrganisation && selectedOrganisation.est_admin}

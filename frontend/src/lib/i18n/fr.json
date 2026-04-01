@@ -122,6 +122,7 @@
       "firstname_required": "Prénom requis.",
       "lastname_required": "Nom requis.",
       "org_name": "Nom de l'organisation",
+      "org_name_placeholder": "Mon organisation",
       "org_name_required": "Nom requis.",
       "siret": "Numéro SIRET (optionnel)",
       "confirm_password": "Confirmation",
@@ -151,6 +152,7 @@
     },
     "service": {
       "title": "Gestion des services",
+      "description": "Ajoutez les services de votre organisation pour suivre leur empreinte carbone.",
       "no_service": "Vous n'êtes rattaché à aucun service.",
       "name_label": "Nom du service",
       "leave_button": "Quitter le service",
@@ -205,11 +207,14 @@
     "organization": {
       "title": "Organisation",
       "name_label": "Nom de l'organisation",
+      "name_placeholder": "Nom de l'organisation",
+      "siret_placeholder": "Votre SIRET",
       "code_label": "Code Organisation",
       "code_unknown": "Inconnu",
       "leave_button": "Quitter",
       "change_button": "Changer d'organisation",
       "join_button": "Rejoindre",
+      "join_create_option": "+ Rejoindre / Créer",
       "join_loading": "Chargement...",
       "code_placeholder": "Entrez le code organisation",
       "code_help": "Merci d'entrer le code à 8 caractères envoyé par votre organisation",
@@ -218,6 +223,20 @@
       "finish_button": "Terminer",
       "or": "ou",
       "create_button": "Créer mon organisation"
+    },
+    "members": {
+      "title": "Membres",
+      "search_placeholder": "Rechercher un membre",
+      "admin_badge": "Admin",
+      "unassign_title": "Cliquer pour retirer du service",
+      "unassign_aria": "Retirer du service",
+      "delete_aria": "Supprimer le membre",
+      "empty_state": "Vous n'avez pas encore ajouté de membres..."
+    },
+    "delete_org": {
+      "title": "Supprimer l'organisation",
+      "confirmation": "Êtes-vous sûr de vouloir supprimer l'organisation {orgName} ?",
+      "warning": "Cette action est irréversible et supprimera toutes les données associées."
     },
     "modals": {
       "leave_org_confirm_title": "Confirmation",
