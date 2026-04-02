@@ -104,7 +104,7 @@
                 <button
                         type="submit"
                         disabled={submitted}
-                        class="w-full sm:w-auto h-[46px] px-6 rounded-lg bg-gs-green-950 text-white font-medium
+                        class="hover:cursor-pointer hover:bg-gs-green-800 w-full sm:w-auto h-[46px] px-6 rounded-lg bg-gs-green-950 text-white font-medium
                         shadow-sm hover:shadow hover:bg-gs-green-900
                         focus:ring-2 focus:ring-offset-2 focus:ring-gs-green-950
                         disabled:opacity-70 disabled:cursor-not-allowed

@@ -24,14 +24,14 @@
             <div class="flex justify-end gap-4">
                 <button
                         onclick={onClose}
-                        class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors font-medium border border-gray-200"
+                        class="hover:cursor-pointer px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors font-medium border border-gray-200"
                 >
                     {$t('common.cancel', { default: 'Annuler' })}
                 </button>
 
                 <button
                         onclick={onConfirm}
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm"
+                        class="hover:cursor-pointer px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm"
                 >
                     {$t('account.modals.delete')}
                 </button>
