@@ -40,7 +40,7 @@
                 </picture>
             </div>
             {/if}
-            <p class="text-center mt-2 text-lg font-medium"><span class="animate-counter">{equivalentAverage.value}</span> {$t(equivalentAverage.name)}</p>
+            <p class="text-center mt-2 text-lg font-medium"><span class="animate-counter">{equivalentAverage.value.toFixed(1)}</span> {$t(equivalentAverage.name)}</p>
         </div>
         {:else}
         <p class="text-center text-gray-500 flex items-center justify-center h-full">{$t('widgets.common.no_data')}</p>

@@ -94,7 +94,7 @@
                              {#if selectedOrganisation && selectedOrganisation.est_admin}
                                  <button
                                          onclick={() => showDeleteModal = true}
-                                         class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                         class="p-2 text-gray-400 hover:text-red-600 hover:cursor-pointer hover:bg-red-50 rounded-lg transition-colors"
                                          title={$t('account.delete_org.button_title', { default: 'Supprimer l\'organisation' })}
                                  >
                                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
