@@ -104,9 +104,10 @@ pub async fn my_data(
     let user_footprint = my_average_daily_carbon_footprint.unwrap_or(0.0);
 
     let (letter_green_score, env_nomination) = calculate_green_score(&pool, user_footprint, "my_data".to_string()).await;
-    let equivalents: Vec<Equivalent> = EquivalentService::equivalent(&pool, Some(user_id), 2, user_footprint).await.unwrap_or_default();
 
     let total_consumption = get_total_consumption(&pool, user_id).await;
+
+    let equivalents: Vec<Equivalent> = EquivalentService::equivalent(&pool, Some(user_id), 2, total_consumption.unwrap_or(0.0)).await.unwrap_or_default();
 
     let daily_consumption = get_daily_consumption(&pool, user_id).await.map_err(AppError::from)?;
     let weekly_consumption = get_weekly_consumption(&pool, user_id).await.map_err(AppError::from)?;
