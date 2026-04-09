@@ -61,7 +61,7 @@ export async function setSessionCookie(cookies: Cookies, source: Response | stri
             path: '/',
             httpOnly: true,
             sameSite: 'lax',
-            maxAge: 60 * 60 // 1 heure
+            maxAge: 60 * 60 * 24 * 30 // 30 jours
         });
         return;
     }
