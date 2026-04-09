@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "GreenScore",
-    "version": "1.6.2",
+    "version": "1.6.3",
     "description": "GreenScore est un plugin et une plateforme web qui mesure l'empreinte carbone d'un site par utilisateur et organisation. Il offre des tableaux de bord personnels et d'organisation, des analyses ponctuelles, et un classement des sites les plus énergivores pour sensibiliser et encourager des pratiques numériques durables.",
     "browser_specific_settings": {
         "gecko": {
@@ -31,6 +31,11 @@
     },
     "browser_action": {
         "default_popup": "src/popup.html",
-        "default_title": "Analyser la page"
+        "default_title": "Analyser la page",
+        "default_icon": {
+            "16": "assets/images/icons/icon16.png",
+            "32": "assets/images/icons/icon32.png",
+            "48": "assets/images/icons/icon48.png"
+        }
     }
 }
