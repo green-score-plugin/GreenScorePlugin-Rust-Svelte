@@ -76,7 +76,7 @@ export async function setSessionCookie(cookies: Cookies, source: Response | stri
                     path: '/',
                     httpOnly: true,
                     sameSite: 'lax',
-                    maxAge: 60 * 60
+                    maxAge: 60 * 60 * 24 * 30 // 30 jours
                 });
                 return;
             }
@@ -92,7 +92,7 @@ export async function setSessionCookie(cookies: Cookies, source: Response | stri
                     path: '/',
                     httpOnly: true,
                     sameSite: 'lax',
-                    maxAge: 60 * 60
+                    maxAge: 60 * 60 * 24 * 30 // 30 jours
                 });
                 return;
             }
