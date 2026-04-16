@@ -233,7 +233,7 @@
                 </p>
                 {#if !isLoggedIn}
                     <div class="hidden lg:block">
-                        <a href="/login" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular py-3 px-5 rounded-full mx-auto shadow-md shadow-black">
+                        <a href="/inscription" class="inline-flex items-center bg-white text-gs-green-950 font-outfit font-regular py-3 px-5 rounded-full mx-auto shadow-md shadow-black">
                             <span class="mr-4">{$t('home.video.register')}</span>
                             <span class="bg-gray-200 px-3 py-1.5 rounded-full flex items-center justify-center">
                 <i class="fa-solid fa-arrow-right"></i>
