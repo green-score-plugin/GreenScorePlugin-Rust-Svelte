@@ -108,14 +108,13 @@ pub async fn calculate_green_score(pool: &MySqlPool, carbon_footprint: f64, page
 }
 
 pub async fn organizations_global_average_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
-    let rows = sqlx::query_as::<_, (f64, i64)>(
-        "SELECT AVG(total_carbon_footprint) AS averageConsumption,
-        organisation_id AS organisationId
-        FROM `user`
-        WHERE total_carbon_footprint IS NOT NULL
-        AND organisation_id IS NOT NULL
-        AND total_carbon_footprint > 0
-        GROUP BY organisation_id;",
+    let rows = sqlx::query_as::<_, (f64,)>(
+        "SELECT AVG(u.total_carbon_footprint) AS averageConsumption
+        FROM `user` u
+        WHERE u.total_carbon_footprint IS NOT NULL
+        AND u.total_carbon_footprint > 0
+        AND u.organisation_id IS NOT NULL
+        GROUP BY u.organisation_id;",
     )
         .fetch_all(pool)
         .await?;
@@ -131,18 +130,17 @@ pub async fn organizations_global_average_carbon_footprint(pool: &MySqlPool) -> 
 }
 
 pub async fn organizations_least_carbon_footprint(pool: &MySqlPool) -> Result<f64, sqlx::Error> {
-    let row = sqlx::query_as::<_, (f64, i64)>(
-        "SELECT SUM(total_carbon_footprint) AS totalConsumption,
-        organisation_id AS organisationId
-        FROM `user`
-        WHERE total_carbon_footprint IS NOT NULL
-        AND total_carbon_footprint > 0
-        AND organisation_id IS NOT NULL
-        GROUP BY organisation_id
+    let row = sqlx::query_as::<_, (f64,)>(
+        "SELECT SUM(u.total_carbon_footprint) AS totalConsumption
+        FROM `user` u
+        WHERE u.total_carbon_footprint IS NOT NULL
+        AND u.total_carbon_footprint > 0
+        AND u.organisation_id IS NOT NULL
+        GROUP BY u.organisation_id
         ORDER BY totalConsumption ASC
         LIMIT 1;",
     )
-        .fetch_optional(pool) // Changed to fetch_optional
+        .fetch_optional(pool)
         .await?;
 
     Ok(row.map(|r| r.0).unwrap_or(0.0))

@@ -75,8 +75,8 @@ impl MonitoredWebsiteService {
         };
 
         let advices: Vec<String> = vec![
-            AdviceService::get_one_random_advice(pool, false).await?,
-            AdviceService::get_one_random_advice(pool, true).await?,
+            AdviceService::get_one_random_advice(pool, false).await.unwrap_or_default(),
+            AdviceService::get_one_random_advice(pool, true).await.unwrap_or_default(),
         ];
 
         let (letter, env_nomination, equivalents) = if let Some(ref infos) = last_search_info {

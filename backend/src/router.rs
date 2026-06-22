@@ -32,8 +32,7 @@ pub fn create_router(pool: MySqlPool) -> Router {
         .route("/organization/services/unassign", post(account_controller::unassign_user_from_service))
         .route("/organization/update", patch(account_controller::update_organisation))
         // Equivalents
-        .route("/equivalents", get(account_controller::get_account_all_equivalents))
-        .route("/equivalents", patch(account_controller::update_account_equivalents));
+        .route("/equivalents", get(account_controller::get_account_all_equivalents).patch(account_controller::update_account_equivalents));
 
     let pages_routes = Router::new()
         .route("/derniere-page-consultee", get(lpc_controller::lpc))
